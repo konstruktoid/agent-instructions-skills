@@ -12,6 +12,16 @@ lint/test loop, and reported clearly. It works across different repos' test setu
 ansible-test, tox, pytest-ansible, etc.) by discovering what is actually there rather than assuming
 one project's layout.
 
+## Reference
+- [YAML 1.2.2 Specification](https://yaml.org/spec/1.2.2/) — authoritative reference for scalar
+  resolution, quoting, and tag semantics. Use it to explain *why* a value needs quoting, e.g. the
+  "Norway problem" (unquoted `no`/`yes`/`on`/`off`/`y`/`n` resolving to booleans) or numbers with
+  leading zeros/colons resolving to octal/sexagesimal. Ansible's YAML loader and `ansible-lint`'s
+  default `yaml`/`truthy` rule already reject unquoted truthy values other than `true`/`false`, so
+  this reinforces existing lint behavior — never use the spec to justify removing existing
+  quoting, the `---` document-start marker, or any other convention `ansible-lint`/`yamllint`
+  already enforces in the target repo.
+
 ## When to use this
 - Reviewing or modifying any Ansible role, collection, playbook, or task.
 - You need to ensure changes are consistent with existing conventions and actually verified before
