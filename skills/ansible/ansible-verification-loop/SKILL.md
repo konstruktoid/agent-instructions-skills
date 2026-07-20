@@ -1,6 +1,6 @@
 ---
 name: ansible-verification-loop
-description: Use this skill when reviewing or modifying an Ansible role or collection (playbooks, roles, tasks). Verifies changes through an actual lint/test loop rather than declaring success from the edit alone.
+description: Reviews and modifies Ansible roles, collections, playbooks, and tasks, verified through the target repository's own lint/test loop rather than declaring success from the edit alone. Use when reviewing or modifying any Ansible role, collection, playbook, or task.
 ---
 
 # ansible-verification-loop
@@ -79,8 +79,10 @@ one project's layout.
   verifies in containers/VMs across the platforms the role/collection claims to support, including
   an idempotence check.
 - If invoking `molecule test` / `ansible-test` directly instead of through the repo's wrapper, do
-  first what the wrapper would have done for you (install `requirements.yml`, run the linter).
-  Direct invocation skips those steps.
+  first what the wrapper would have done for you: install `requirements.yml`, and always run
+  `ansible-lint` as its own separate step. Molecule's own `lint` subcommand was removed in Molecule
+  6.x and has not returned, so no version of a direct `molecule test`/`molecule converge` invocation
+  lints for you; skipping the separate `ansible-lint` run silently drops the primary quality gate.
 - While iterating on a single role, use `molecule converge` / `molecule verify` (or the equivalent
   faster subcommands for whatever framework is in use) instead of the full test cycle to save
   time, but always finish with a full test run before declaring the change verified.
