@@ -52,7 +52,7 @@ Current skills:
 | Skill | Path | Covers |
 |-------|------|--------|
 | `ansible-verification-loop` | `skills/ansible/ansible-verification-loop/SKILL.md` | Reviewing or modifying Ansible roles and collections, verified through the repository's own lint/test loop. |
-| `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices (input handling, deserialization, secrets, subprocess/SQL/crypto usage, dependency hygiene). |
+| `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
 
 ## Adding new material
 
@@ -62,5 +62,13 @@ Current skills:
 - Add a new skill to `skills/<category>/<name>/SKILL.md` when the goal is a repeatable procedure
   with a verification step. Follow the existing skills' structure, and write the `description`
   field so it states precisely which tasks should trigger the skill.
+- Write `description` in third person: lead with what the skill does, close with when to use it
+  (see Anthropic's [skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)).
+  Avoid first/second person ("I can help you...", "Use this to..."), keep it under 1,024
+  characters, and keep the SKILL.md body under 500 lines, moving longer material into files it
+  links to directly.
+- For any skill with a verify-then-fix cycle, bound the retries explicitly (this repo uses 3
+  attempts, see `ansible-verification-loop` and `python-secure-coding`) and require reporting
+  unresolved issues to the user instead of looping silently or declaring success unverified.
 - When a skill extends or depends on an instructions document, cross-reference it by path in both
   directions, as done between `python_coding_instructions.md` and `python-secure-coding`.
