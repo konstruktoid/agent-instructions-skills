@@ -71,6 +71,8 @@ Every sentence must contribute meaningful information.
 | In today's world... | Begin with the actual subject. |
 | Needless to say... | Omit. |
 | As mentioned previously... | Refer only when necessary. |
+| Delve into / dive into... | Name the specific action: investigate, examine, review. |
+| In conclusion... / In summary... | Omit the label and state the concluding point directly. |
 
 ## Word Choice
 
@@ -87,6 +89,14 @@ Every sentence must contribute meaningful information.
 - Clichés.
 - Buzzwords without technical meaning.
 - Ambiguous pronouns when the reference is unclear.
+- Inflated, abstract verbs and adjectives common in generated text, such as *delve*, *leverage*,
+  *utilize*, *harness*, *streamline*, *underscore*, *foster*, *robust*, *seamless*, *pivotal*,
+  *cutting-edge*, and *multifaceted*. Use the plain, specific word the sentence needs instead
+  (*use* rather than *utilize*, *rely on* rather than *leverage*).
+- Filler nouns such as *landscape*, *realm*, *tapestry*, *synergy*, and *underpinnings*.
+- Formulaic transitions repeated across consecutive paragraphs, such as opening successive
+  paragraphs with *Moreover*, *Furthermore*, *Additionally*, or *Notably*. Vary transitions, or
+  omit them when the logical connection is already clear from the content.
 
 ## Formatting
 
@@ -121,6 +131,9 @@ Before producing the final output, verify that:
 - No em dashes (`—`) are present.
 - No arrow symbols (`→`) are present.
 - No conversational fillers remain.
+- No inflated generated-text markers (*delve*, *leverage*, *utilize*, *underscore*, *robust*,
+  *seamless*, and similar) or formulaic transitions (*Moreover*, *Furthermore*) repeated across
+  paragraphs.
 - Every sentence adds meaningful information.
 - Redundant words and repeated ideas have been removed.
 - Grammar and punctuation are correct.
