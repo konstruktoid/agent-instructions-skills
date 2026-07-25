@@ -144,8 +144,8 @@ def check_tools(tools: object, errors: list[str]) -> None:
     """
     if tools is None:
         errors.append(
-            "frontmatter is missing 'tools'; a template ships an explicit allowlist, so "
-            "that copying it grants no broad tool access"
+            "frontmatter is missing 'tools'; without an explicit allowlist a copied "
+            "template grants every tool the main conversation has"
         )
         return
 
