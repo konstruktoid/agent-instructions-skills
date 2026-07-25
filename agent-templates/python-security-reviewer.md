@@ -1,10 +1,10 @@
 ---
 name: python-security-reviewer
 description: Reviews and modifies Python source against security practices that static analysis does not fully cover, layered on the ruff and ty quality gate, in a separate context. Use when a Python change touches user input, deserialization, subprocess or shell calls, query construction, templating, cryptography, secrets, or access control.
-# Set before use. `inherit` uses the main conversation's model and commits the
-# copy to no cost profile. Security review benefits from a stronger model: pin
-# `opus`, or a full model ID such as `claude-opus-5`, once that cost is
-# acceptable here.
+# Set before use. `inherit` pins no model of its own and runs the copy on
+# whatever the main conversation uses. Security review benefits from a stronger
+# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
+# is acceptable here.
 model: inherit
 # Set before use. Bash is required: the verify loop runs ruff and ty through the
 # repository's package manager. Drop Edit for a review-only agent. Add WebFetch

@@ -1,10 +1,10 @@
 ---
 name: ansible-reviewer
 description: Reviews and modifies Ansible roles, collections, playbooks, and tasks in a separate context, and verifies the change through the target repository's own lint and test loop. Use when an Ansible change is large enough that its lint and test output would crowd the main conversation.
-# Set before use. `inherit` uses the main conversation's model and commits the
-# copy to no cost profile. Review work benefits from a stronger model: pin
-# `opus`, or a full model ID such as `claude-opus-5`, once that cost is
-# acceptable here.
+# Set before use. `inherit` pins no model of its own and runs the copy on
+# whatever the main conversation uses. Review work benefits from a stronger
+# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
+# is acceptable here.
 model: inherit
 # Set before use. Bash is required: the verify loop runs ansible-lint and the
 # repository's own test entry point. Drop Edit for a review-only agent. Add

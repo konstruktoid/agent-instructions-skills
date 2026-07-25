@@ -77,9 +77,9 @@ the rule for `instructions/` and `skills/`.
 
 Two frontmatter fields must be set by whoever copies a template:
 
-- `model:`. Every template ships `model: inherit`, so a fresh copy uses the main conversation's
-  model and commits the project to no cost profile. Pin a stronger model for review-heavy agents,
-  or a cheaper one for agents that apply a fixed checklist.
+- `model:`. Every template ships `model: inherit`, so a fresh copy pins no model of its own and
+  runs on whatever the main conversation uses. Pin a stronger model for review-heavy agents, or a
+  cheaper one for agents that apply a fixed checklist.
 - `tools:`. Every template ships the smallest allowlist its work needs. Widen or narrow it against
   what the project trusts the agent to do. Frontmatter comments in each template state what to
   consider changing and why.
@@ -276,7 +276,7 @@ the outcome the mechanisms above exist to avoid.
   it by path rather than restating it. What belongs in the agent file is routing and policy:
   scope, and what the agent reports back to the main conversation.
 - Ship agent templates with neutral defaults, `model: inherit` and the smallest `tools:` allowlist
-  the work needs, so copying one opts the consumer into no-cost profile and no broad tool access.
+  the work needs, so copying one pins no model on the consumer and grants no broad tool access.
   State in frontmatter comments what to consider changing and why, for example pinning a stronger
   model for a review-heavy agent, or adding `Bash` only because the verify loop needs it.
 - A template aimed at a cheaper model needs its verification spelled out rather than assumed. Keep

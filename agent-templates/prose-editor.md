@@ -1,10 +1,10 @@
 ---
 name: prose-editor
 description: Edits prose to a formal, concise, and precise standard, removing conversational filler, em dashes, and inflated generated-text wording, in a separate context. Use when documentation, a README, a commit message, or any other prose output needs editing to the written language standard.
-# Set before use. `inherit` uses the main conversation's model and commits the
-# copy to no cost profile. This agent applies a fixed checklist to text and is a
-# reasonable candidate for a cheaper model: pin `haiku` when the cost of the
-# main conversation's model is not warranted.
+# Set before use. `inherit` pins no model of its own and runs the copy on
+# whatever the main conversation uses. This agent applies a fixed checklist to
+# text and is a reasonable candidate for a cheaper model: pin `haiku` when the
+# cost of the main conversation's model is not warranted.
 model: inherit
 # Set before use. Deliberately narrow: this agent reads and rewrites text and
 # needs nothing else. Add Grep and Glob when it must find the files itself. Add
