@@ -2,7 +2,8 @@
 
 ## Objective
 
-Produce text that is formal, professional, precise, and concise. Prioritize clarity, accuracy, and readability over stylistic variation.
+Produce text that is formal, professional, precise, and concise. Prioritize clarity, accuracy,
+and readability over stylistic variation.
 
 ## Tone
 
@@ -33,8 +34,15 @@ Produce text that is formal, professional, precise, and concise. Prioritize clar
 
 ### Do Not Use
 
-- Em dashes (`—`).
-- Arrow symbols (`→`).
+Em dashes, arrow symbols, and conversational filler are among the most common
+markers of machine-generated text, so avoiding them keeps the output from reading as
+generated.
+
+- Em dashes (`—`). Use a colon, a comma, or a separate sentence instead.
+- Arrow symbols (`→`) in prose. Write the relation out, for example "maps to" or
+  "results in". This restriction applies to prose only: arrows remain acceptable in
+  diagrams, mapping tables, code, and command output, where they carry meaning that
+  prose would not convey as clearly.
 - Decorative punctuation or symbols.
 - Emojis.
 - Excessive exclamation marks.
@@ -129,7 +137,8 @@ Before producing the final output, verify that:
 - The tone is formal and professional.
 - The language is objective and precise.
 - No em dashes (`—`) are present.
-- No arrow symbols (`→`) are present.
+- No arrow symbols (`→`) are present in prose. Arrows inside diagrams, mapping tables,
+  code, or command output are acceptable.
 - No conversational fillers remain.
 - No inflated generated-text markers (*delve*, *leverage*, *utilize*, *underscore*, *robust*,
   *seamless*, and similar) or formulaic transitions (*Moreover*, *Furthermore*) repeated across

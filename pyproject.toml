@@ -1,0 +1,30 @@
+[project]
+name = "agent-instructions-skills"
+version = "0.1.0"
+description = "Checks that enforce this repository's own authoring rules"
+requires-python = ">=3.9"
+# Constrained rather than bare: Dependabot skips version upgrades in uv.lock for a
+# dependency that carries no constraint here (dependabot-core#12273).
+dependencies = ["pyyaml>=6.0.3"]
+
+[dependency-groups]
+# Pinned so CI and a local run check with the same versions. `ty` is still a preview
+# tool, so it is pinned to an exact version rather than a range.
+dev = ["ruff>=0.16.0", "ty==0.0.63", "types-pyyaml>=6.0.12"]
+
+[tool.ruff]
+# Prose and code in this repository wrap at 100 columns.
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+# instructions/python_coding_instructions.md: a full rule set is the default for a new
+# project. Each ignore below carries its reason.
+select = ["ALL"]
+ignore = [
+  "COM812", # conflicts with the formatter's trailing-comma handling
+  "CPY001", # the repository is licensed at the root, not per file
+  "D203",   # incompatible with D211, which is the convention used here
+  "D213",   # incompatible with D212, which is the convention used here
+  "T201",   # scripts/ are command-line checks; print is their output channel
+]

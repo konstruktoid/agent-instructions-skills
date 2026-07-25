@@ -1,0 +1,38 @@
+{
+  "name": "konstruktoid",
+  "description": "Reusable authoring standards for AI coding agents: skills with a bounded verify-fix loop, plus the instructions documents they build on.",
+  "owner": {
+    "name": "konstruktoid",
+    "url": "https://github.com/konstruktoid/agent-instructions-skills"
+  },
+  "plugins": [
+    {
+      "name": "python-standards",
+      "source": "./",
+      "strict": false,
+      "description": "Python authoring standards: the ruff/ty quality gate, security practices aligned to the OWASP Top 10:2025, and pytest coverage that matches the target repository's existing test layout. Each skill runs a bounded verify-fix loop and reports unresolved findings rather than declaring success unverified.",
+      "skills": [
+        "./skills/python/python-secure-coding",
+        "./skills/python/python-testing"
+      ]
+    },
+    {
+      "name": "ansible-standards",
+      "source": "./",
+      "strict": false,
+      "description": "Ansible authoring standards: review and modify roles, collections, playbooks, and tasks, verified through the target repository's own lint and test loop rather than declaring success from the edit alone.",
+      "skills": [
+        "./skills/ansible/ansible-verification-loop"
+      ]
+    },
+    {
+      "name": "github-standards",
+      "source": "./",
+      "strict": false,
+      "description": "GitHub Actions authoring standards: workflows and actions built on least-privilege GITHUB_TOKEN permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, and structures that scale across repositories, verified with actionlint and zizmor in a bounded verify-fix loop.",
+      "skills": [
+        "./skills/github/github-actions-security"
+      ]
+    }
+  ]
+}

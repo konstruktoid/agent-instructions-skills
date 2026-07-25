@@ -3,7 +3,8 @@
 ## Objective
 
 Create a high-level overview that explains the purpose, scope, and structure of the repository.
-The overview should provide readers with sufficient context to understand what the repository contains, why it exists, and how its major components relate to one another.
+The overview should provide readers with sufficient context to understand what the repository
+contains, why it exists, and how its major components relate to one another.
 
 ## Audience
 
@@ -54,7 +55,8 @@ For each major component, explain:
 - Its responsibilities.
 - How it relates to the other components.
 
-Avoid implementation details such as file names, classes, or individual functions unless they are essential for understanding the architecture.
+Avoid implementation details such as file names, classes, or individual functions unless they are
+essential for understanding the architecture.
 
 ### Scope
 
@@ -101,9 +103,12 @@ The overview should answer the following questions:
 
 ## Writing Style
 
+Follow `instructions/written_language_instructions.md` for prose style: tone, conciseness,
+word choice, and punctuation. The rules below are the additions specific to an overview
+document, and are not repeated from that file.
+
 ### Required
 
-- Write in a formal and professional tone.
 - Use clear, descriptive headings.
 - Explain concepts before details.
 - Present information logically from general to specific.
@@ -118,7 +123,6 @@ The overview should answer the following questions:
 - Implementation details.
 - Internal development notes.
 - Historical change logs.
-- Marketing language.
 
 ## Level of Detail
 
@@ -143,7 +147,9 @@ Avoid:
 
 Before finalizing the overview, verify that:
 
-- The document is between 800 and 1,500 words.
+- The word count has been measured mechanically, not estimated. Run
+  `wc -w <file>` on the finished document and confirm the total is between 800 and
+  1,500 words. If it falls outside that range, revise and count again.
 - The repository's purpose is clearly explained.
 - The motivation for the repository is evident.
 - The major components are described conceptually.
