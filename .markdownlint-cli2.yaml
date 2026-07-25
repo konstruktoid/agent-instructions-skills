@@ -1,6 +1,6 @@
 ---
 # Markdown rules for every .md file in the repository, enforced by
-# .github/workflows/lint.yml. Run `npx markdownlint-cli2 --fix "**/*.md"` to correct
+# .github/workflows/lint.yml. Run `npx markdownlint-cli2@0.23.1 --fix "**/*.md"` to correct
 # spacing violations in place.
 config:
   # Prose in this repository wraps at 100 columns. Tables and code blocks hold

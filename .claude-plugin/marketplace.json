@@ -24,6 +24,15 @@
       "skills": [
         "./skills/ansible/ansible-verification-loop"
       ]
+    },
+    {
+      "name": "github-standards",
+      "source": "./",
+      "strict": false,
+      "description": "GitHub Actions authoring standards: workflows and actions built on least-privilege GITHUB_TOKEN permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, and structures that scale across repositories, verified with actionlint and zizmor in a bounded verify-fix loop.",
+      "skills": [
+        "./skills/github/github-actions-security"
+      ]
     }
   ]
 }

@@ -56,6 +56,7 @@ Current skills:
 | Skill | Path | Covers |
 |-------|------|--------|
 | `ansible-verification-loop` | `skills/ansible/ansible-verification-loop/SKILL.md` | Reviewing or modifying Ansible roles and collections, verified through the repository's own lint/test loop. |
+| `github-actions-security` | `skills/github/github-actions-security/SKILL.md` | Authoring and reviewing GitHub Actions workflows and actions: least-privilege `GITHUB_TOKEN` permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe triggers and runners, and structures that scale across repositories, run through a bounded verify-fix loop with `actionlint` and `zizmor`. |
 | `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
 | `python-testing` | `skills/python/python-testing/SKILL.md` | Adding or updating pytest coverage for a Python change: discovering and matching the repository's existing test layout, deciding when a test is required, and running the suite through a bounded verify-fix loop. |
 
@@ -66,13 +67,14 @@ mechanisms below, each of which keeps a single upstream copy that can be updated
 
 ### Skills, as a Claude Code plugin
 
-This repository is its own plugin marketplace. The skills are grouped into two plugins so a
+This repository is its own plugin marketplace. The skills are grouped into three plugins so a
 project installs only what it needs:
 
 | Plugin | Skills |
 |--------|--------|
 | `python-standards` | `python-secure-coding`, `python-testing` |
 | `ansible-standards` | `ansible-verification-loop` |
+| `github-standards` | `github-actions-security` |
 
 From inside Claude Code, in the consuming project:
 
@@ -209,7 +211,7 @@ uv run --frozen python scripts/check_skills.py   # authoring rules for every SKI
 uv run --frozen ruff check .                     # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
-npx --yes markdownlint-cli2 "**/*.md"            # add --fix to correct spacing in place
+npx --yes markdownlint-cli2@0.23.1 "**/*.md"     # add --fix to correct spacing in place
 ```
 
 `scripts/check_skills.py` verifies, for each `skills/*/*/SKILL.md`, that the frontmatter parses as

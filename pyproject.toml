@@ -3,7 +3,9 @@ name = "agent-instructions-skills"
 version = "0.1.0"
 description = "Checks that enforce this repository's own authoring rules"
 requires-python = ">=3.9"
-dependencies = ["pyyaml"]
+# Constrained rather than bare: Dependabot skips version upgrades in uv.lock for a
+# dependency that carries no constraint here (dependabot-core#12273).
+dependencies = ["pyyaml>=6.0.3"]
 
 [dependency-groups]
 # Pinned so CI and a local run check with the same versions. `ty` is still a preview
