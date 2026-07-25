@@ -1,0 +1,17 @@
+---
+# Markdown rules for every .md file in the repository, enforced by
+# .github/workflows/lint.yml. Run `npx markdownlint-cli2 --fix "**/*.md"` to correct
+# spacing violations in place.
+config:
+  # Prose in this repository wraps at 100 columns. Tables and code blocks hold
+  # reference material that cannot be wrapped without breaking it.
+  MD013:
+    line_length: 100
+    tables: false
+    code_blocks: false
+  # The instructions documents repeat "Required" and "Avoid" under different
+  # parent sections by design.
+  MD024:
+    siblings_only: true
+  # Table pipe alignment is cosmetic and churns on every content edit.
+  MD060: false

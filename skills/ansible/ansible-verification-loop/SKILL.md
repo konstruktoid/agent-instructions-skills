@@ -6,31 +6,25 @@ description: Reviews and modifies Ansible roles, collections, playbooks, and tas
 # ansible-verification-loop
 
 ## Purpose
+
 Provide a structured approach for reviewing and modifying Ansible roles and collections. Ensures
 changes are made consistently with the target repo's own conventions, verified through a real
 lint/test loop, and reported clearly. It works across different repos' test setups (molecule,
 ansible-test, tox, pytest-ansible, etc.) by discovering what is actually there rather than assuming
 one project's layout.
 
-## Reference
-- [YAML 1.2.2 Specification](https://yaml.org/spec/1.2.2/) — authoritative reference for scalar
-  resolution, quoting, and tag semantics. Use it to explain *why* a value needs quoting, e.g. the
-  "Norway problem" (unquoted `no`/`yes`/`on`/`off`/`y`/`n` resolving to booleans) or numbers with
-  leading zeros/colons resolving to octal/sexagesimal. Ansible's YAML loader and `ansible-lint`'s
-  default `yaml`/`truthy` rule already reject unquoted truthy values other than `true`/`false`, so
-  this reinforces existing lint behavior — never use the spec to justify removing existing
-  quoting, the `---` document-start marker, or any other convention `ansible-lint`/`yamllint`
-  already enforces in the target repo.
-
 ## When to use this
+
 - Reviewing or modifying any Ansible role, collection, playbook, or task.
 - You need to ensure changes are consistent with existing conventions and actually verified before
   being reported done.
 
 ## When NOT to use this
+
 - Changes that do not involve Ansible roles, collections, playbooks, or tasks.
 
 ## Steps
+
 1. Orient in the target role/collection before changing anything:
    - Read the relevant role's `defaults/main.yml`, `tasks/main.yml`, `meta/main.yml`, and any
      `handlers/`, `vars/`, `templates/` it touches.
@@ -61,14 +55,22 @@ one project's layout.
      assuming what `tox -e <name>` runs.
    Match whatever pattern the repo already uses; do not introduce a new test framework alongside an
    existing one.
-7. Verify the change (see checklist below). If issues are found, fix them and re-verify. Repeat
-   until all issues are resolved or verification has been attempted 3 times, whichever comes
-   first. If issues remain unresolved after 3 attempts, stop and report to the user instead of
-   proceeding or silently giving up.
+7. Verify the change (see checklist below) in a bounded loop. One **attempt** is one full
+   fix-and-rerun cycle: apply fixes for the findings from the previous run, then rerun the
+   verification commands to completion. Reading output or re-reading a file without changing
+   anything is not an attempt.
+   - Baseline the loop at 3 attempts.
+   - Continue past 3 only while making measurable progress, meaning each cycle ends with strictly
+     fewer findings than the one before it.
+   - Stop early, before 3 attempts, if the loop is oscillating: the same findings recur, the count
+     stops dropping, or a fix for one finding reintroduces another.
+   - When stopping for either reason, report to the user instead of proceeding or silently giving
+     up. Name the failing check, include its output, and state what was tried.
 8. Report any issues found during verification, with detailed reproduction steps and relevant
    logs/output.
 
 ## Verify
+
 - Run `ansible-lint` (or the repo's configured linter/config, e.g. a non-default `.ansible-lint`
   path) and confirm a clean exit / expected output. This is the primary quality gate. Do not add
   suppressions to silence findings from new changes just to get a clean run.
@@ -88,7 +90,11 @@ one project's layout.
   time, but always finish with a full test run before declaring the change verified.
 
 ## Verification checklist
+
 Never declare this done based on the edit alone. Confirm each of the following:
+
+- [ ] Verify loop run to a clean result, or stopped under the rules in step 7 with unresolved
+      issues reported, naming the failing check and its output
 - [ ] Lint passes
 - [ ] Full test suite passes
 - [ ] Idempotence holds (no changes reported on a second converge/apply)
@@ -97,3 +103,9 @@ Never declare this done based on the edit alone. Confirm each of the following:
 - [ ] Platform/version support declarations (`meta/main.yml`, `galaxy.yml`) still match any
       OS-conditional logic
 - [ ] No unrelated files changed
+
+## References
+
+- [references/yaml-quoting.md](references/yaml-quoting.md): YAML 1.2.2 scalar resolution and
+  quoting, including the "Norway problem". Read it when a change touches quoting in a YAML file,
+  or when justifying why a value must stay quoted.

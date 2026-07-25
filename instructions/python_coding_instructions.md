@@ -7,11 +7,19 @@ cleanly, plus the judgment calls those tools cannot make for you. These
 instructions apply whenever an agent authors or modifies Python source in a
 repository that adopts them.
 
-For changes that touch input handling, deserialization, subprocess/OS calls,
-SQL, templating, cryptography, secrets, or access control, also apply the
-`python-secure-coding` skill (`skills/python/python-secure-coding/SKILL.md`),
-which builds on this document's tooling baseline with Python-specific
-security best practices that `ruff`/`ty` do not fully verify.
+Two skills build on this document and are worth applying alongside it:
+
+- For changes that touch input handling, deserialization, subprocess/OS
+  calls, SQL, templating, cryptography, secrets, or access control, apply
+  the `python-secure-coding` skill
+  (`skills/python/python-secure-coding/SKILL.md`), which extends this
+  document's tooling baseline with Python-specific security practices that
+  `ruff`/`ty` do not fully verify.
+- For adding or updating test coverage, apply the `python-testing` skill
+  (`skills/python/python-testing/SKILL.md`), which covers discovering the
+  repository's existing test layout, deciding when a test is required, and
+  running the suite in a bounded verify loop. Test files are source, so the
+  tooling baseline below applies to them as well.
 
 ## Tooling
 
@@ -20,11 +28,13 @@ security best practices that `ruff`/`ty` do not fully verify.
 - Run commands through the repository's package manager (for example
   `uv run ruff check`, `uv run ty check`) rather than invoking `ruff`/`ty`
   directly, unless the repo has no such manager.
-- Enable ruff's full rule set (`select = ["ALL"]` under `[tool.ruff.lint]`
-  in `pyproject.toml`) rather than hand-picking a subset. Ignore individual
-  rules only where they conflict with another enabled rule (for example
-  `D203`/`D211`) or the project's formatter (`COM812`, `ISC001`), and record
-  each ignore with a one-line reason next to it.
+- If the repository already has a ruff or other lint configuration, follow
+  it and do not modify it. Propose `select = ["ALL"]` under
+  `[tool.ruff.lint]` in `pyproject.toml` only for a new project, or when the
+  user asks for stricter linting. Where a full rule set is in use, ignore
+  individual rules only if they conflict with another enabled rule (for
+  example `D203`/`D211`) or the project's formatter (`COM812`, `ISC001`),
+  and record each ignore with a one-line reason next to it.
 - Set `target-version` (ruff) and the repo's Python floor (`ty`,
   `.python-version`, `requires-python`) so pyupgrade (`UP`) rules enforce
   syntax appropriate to that floor automatically. Do not hand-enforce syntax
@@ -44,7 +54,7 @@ security best practices that `ruff`/`ty` do not fully verify.
 
 ## Beyond What the Tools Check
 
-`ruff --select ALL` and `ty` catch syntax, style, import hygiene, unused
+A broad `ruff` rule set and `ty` catch syntax, style, import hygiene, unused
 code, annotation presence, common bug patterns, and a wide swath of security
 and correctness lint (`S`, `BLE`, `TRY`, `B`, `ASYNC`, `PERF`, and so on).
 The following still require human judgment because no static check can
@@ -85,3 +95,8 @@ Before considering a Python change complete, verify that:
 - The judgment items above (docstring/comment accuracy, secret flow,
   security rationale, boundary-only validation, batching) have been
   considered, since the tools cannot check them.
+- Test coverage was added or updated if the change adds behavior, fixes a
+  bug, or changes a public interface, following the `python-testing` skill.
+  If no test was added, the reason was stated rather than left implicit.
+- The checks above were run, not merely described, and their output was
+  seen. A change is not complete because the edit looks right.
