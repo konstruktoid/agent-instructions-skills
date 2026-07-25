@@ -50,8 +50,8 @@ AGENT_TEMPLATE_GLOB = "agent-templates/*.md"
 # opposite of the copy-and-adapt rule they exist under.
 PLUGIN_AGENT_DIR = Path("agents")
 
-# A template must commit the consumer to no cost profile, so it ships the model that
-# follows the main conversation and leaves the choice to whoever copies it.
+# A template pins no model of its own: it ships the model that follows the main
+# conversation and leaves the choice to whoever copies it.
 NEUTRAL_MODEL = "inherit"
 
 # Openings that describe the skill from the reader's side rather than stating what the
@@ -80,7 +80,7 @@ FRONTMATTER_DELIMITER = "---"
 
 
 def split_frontmatter(text: str, errors: list[str]) -> tuple[str | None, list[str]]:
-    """Split a SKILL.md into its raw frontmatter block and its body lines.
+    """Split a Markdown file into its raw frontmatter block and its body lines.
 
     Returns (None, []) and appends to `errors` when no delimited block is present.
     """
@@ -97,8 +97,12 @@ def split_frontmatter(text: str, errors: list[str]) -> tuple[str | None, list[st
     return None, []
 
 
-def check_description(description: object, errors: list[str]) -> None:
-    """Validate the description field: present, non-empty, bounded, third person."""
+def check_description(description: object, errors: list[str], subject: str) -> None:
+    """Validate the description field: present, non-empty, bounded, third person.
+
+    `subject` names what the file defines, "skill" or "agent", so the wording of a
+    violation matches the file it is reported against.
+    """
     if description is None:
         errors.append("frontmatter is missing 'description'")
         return
@@ -118,15 +122,45 @@ def check_description(description: object, errors: list[str]) -> None:
     lowered = stripped.lower()
     for opening in BANNED_OPENINGS:
         if lowered.startswith(opening):
-            errors.append(f"'description' opens with {opening!r}; lead with what the skill does")
+            errors.append(
+                f"'description' opens with {opening!r}; lead with what the {subject} does"
+            )
             break
 
     found = sorted({match.group().lower() for match in FIRST_OR_SECOND_PERSON.finditer(stripped)})
     if found:
         errors.append(
             f"'description' uses first- or second-person wording ({', '.join(found)}); "
-            "write it in third person, stating what the skill does"
+            f"write it in third person, stating what the {subject} does"
         )
+
+
+def check_tools(tools: object, errors: list[str]) -> None:
+    """Validate the tools field: an explicit, non-empty allowlist of tool names.
+
+    Claude Code reads the field as either a comma-separated string or a YAML list, so
+    both forms pass here. A missing field is the case that matters: it grants the agent
+    every tool the main conversation has, which is what a template must not ship.
+    """
+    if tools is None:
+        errors.append(
+            "frontmatter is missing 'tools'; a template ships an explicit allowlist, so "
+            "that copying it grants no broad tool access"
+        )
+        return
+
+    if isinstance(tools, str):
+        entries: list[object] = [entry.strip() for entry in tools.split(",")]
+    elif isinstance(tools, list):
+        entries = tools
+    else:
+        errors.append(
+            f"'tools' must be a comma-separated string or a YAML list, got {type(tools).__name__}"
+        )
+        return
+
+    if not entries or any(not isinstance(entry, str) or not entry.strip() for entry in entries):
+        errors.append("'tools' must list at least one tool name, with no empty entries")
 
 
 def check_skill(skill_path: Path) -> list[str]:
@@ -155,7 +189,7 @@ def check_skill(skill_path: Path) -> list[str]:
     elif name != expected_name:
         errors.append(f"'name' is {name!r}, must match the directory name {expected_name!r}")
 
-    check_description(frontmatter.get("description"), errors)
+    check_description(frontmatter.get("description"), errors, "skill")
 
     if len(body) >= MAX_BODY_LINES:
         errors.append(f"body is {len(body)} lines, must be under {MAX_BODY_LINES}")
@@ -189,21 +223,16 @@ def check_agent_template(template_path: Path) -> list[str]:
     elif name != expected_name:
         errors.append(f"'name' is {name!r}, must match the file name {expected_name!r}")
 
-    check_description(frontmatter.get("description"), errors)
+    check_description(frontmatter.get("description"), errors, "agent")
 
     model = frontmatter.get("model")
     if model != NEUTRAL_MODEL:
         errors.append(
-            f"'model' is {model!r}, must be {NEUTRAL_MODEL!r} so copying the template "
-            "opts the consumer into no cost profile"
+            f"'model' is {model!r}, must be {NEUTRAL_MODEL!r} so a copied template pins "
+            "no model on the consumer"
         )
 
-    tools = frontmatter.get("tools")
-    if not isinstance(tools, str) or not tools.strip():
-        errors.append(
-            "frontmatter must set 'tools' to a non-empty allowlist, so copying the "
-            "template opts the consumer into no broad tool access"
-        )
+    check_tools(frontmatter.get("tools"), errors)
 
     return errors
 
