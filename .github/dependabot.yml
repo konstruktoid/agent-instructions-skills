@@ -8,7 +8,10 @@
 #
 #   cooldown  Most malicious releases are found and yanked within days, so a delay
 #             before adopting one absorbs a large share of the supply chain risk at
-#             little cost. Majors wait longer, because they change behaviour.
+#             little cost. Under uv, majors wait longer still, because they change
+#             behaviour; Dependabot only accepts the semver-aware cooldown keys for
+#             ecosystems whose versions it parses as semver, which excludes
+#             github-actions.
 #   groups    Minor and patch bumps arrive as one pull request rather than one each.
 #             Majors stay ungrouped, so each gets its own pull request and its own
 #             read of the upstream release notes.
@@ -21,7 +24,6 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 7
-      semver-major-days: 14
     groups:
       actions-minor-patch:
         patterns:
