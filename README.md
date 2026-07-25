@@ -1,15 +1,17 @@
 # Agent Instructions and Skills
 
-This repository is a library of reusable guidance for AI coding agents. It contains two kinds of
+This repository is a library of reusable guidance for AI coding agents. It contains three kinds of
 material: instructions documents that describe how output in a given domain should be produced,
-and Claude Code skills that describe a repeatable procedure an agent should follow, including
-when to follow it and how to verify the result.
+Claude Code skills that describe a repeatable procedure an agent should follow, including when to
+follow it and how to verify the result, and agent templates that describe who runs the work, with
+which model and which tools.
 
 ## Repository structure
 
 ```text
 instructions/     Domain-specific writing and coding standards (plain Markdown, no frontmatter)
 skills/           Claude Code skills, one directory per skill: skills/<category>/<name>/SKILL.md
+agent-templates/  Copy-and-adapt Claude Code subagent definitions, one flat file per agent
 scripts/          Checks that enforce this repository's own authoring rules
 .claude-plugin/   Marketplace manifest, so other projects can install the skills as plugins
 ```
@@ -60,10 +62,54 @@ Current skills:
 | `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
 | `python-testing` | `skills/python/python-testing/SKILL.md` | Adding or updating pytest coverage for a Python change: discovering and matching the repository's existing test layout, deciding when a test is required, and running the suite through a bounded verify-fix loop. |
 
+### agent-templates/
+
+An agent template is a Claude Code subagent definition: a Markdown file with YAML frontmatter that
+gives the agent its own context window, system prompt, `model:`, and `tools:` allowlist. Claude
+Code loads subagents from a project's `.claude/agents/` directory or from `~/.claude/agents/`,
+never from this library's directory.
+
+These files are templates, not installable agents. An agent definition encodes per-repository
+policy: what a model costs there, which tools are trusted there, which commands its verify loop
+runs there. Copy one into the consuming project's `.claude/agents/` and edit it. Do not symlink
+it. Divergence between the copy and this library is the intended outcome, which is the opposite of
+the rule for `instructions/` and `skills/`.
+
+Two frontmatter fields must be set by whoever copies a template:
+
+- `model:`. Every template ships `model: inherit`, so a fresh copy pins no model of its own and
+  runs on whatever the main conversation uses. Pin a stronger model for review-heavy agents, or a
+  cheaper one for agents that apply a fixed checklist.
+- `tools:`. Every template ships the smallest allowlist its work needs. Widen or narrow it against
+  what the project trusts the agent to do. Frontmatter comments in each template state what to
+  consider changing and why.
+
+Each template is a thin wrapper. Its system prompt names the instructions document or skill that
+holds the substance and points at it by path, rather than restating it. What the agent file adds
+is routing and policy: which model, which tools, which scope, and what to report back.
+
+Current templates:
+
+| Template | Wraps | Notes |
+|----------|-------|-------|
+| `ansible-reviewer.md` | `skills/ansible/ansible-verification-loop` | Needs `Bash` for `ansible-lint` and the target repository's test entry point. Consider pinning a strong model. |
+| `python-security-reviewer.md` | `skills/python/python-secure-coding` | Needs `Bash` for `ruff` and `ty`. Consider pinning a strong model. |
+| `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
+
+The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
+auto-discovers an `agents/` directory at a plugin's root, and all three plugins here are sourced
+from the repository root, so templates placed in `agents/` would install into every consuming
+project as live subagents, adding their descriptions to every session. That inverts the
+copy-and-adapt rule, so the name that triggers discovery is avoided. Neither omitting the `agents`
+field from a marketplace entry nor setting it to an empty list suppresses the discovery.
+`scripts/check_skills.py` fails if an `agents/` directory reappears at the repository root.
+
 ## Using this library from another project
 
-A consuming project should not copy these files or write its own version of them. Use one of the
-mechanisms below, each of which keeps a single upstream copy that can be updated in place.
+Agent templates are the exception to everything in this section: copy them, as described in
+[agent-templates/](#agent-templates). For `instructions/` and `skills/`, a consuming project
+should not copy the files or write its own version of them. Use one of the mechanisms below, each
+of which keeps a single upstream copy that can be updated in place.
 
 ### Skills, as a Claude Code plugin
 
@@ -158,12 +204,35 @@ ln -s ../../.agent-standards/skills/python/python-secure-coding .claude/skills/p
 Do not reference `${CLAUDE_PLUGIN_ROOT}` from a project's own `CLAUDE.md`. That variable is
 substituted in plugin content, such as a skill body, and does not resolve in project files.
 
+### Agent templates, by copying
+
+Agent templates are copied by design, whichever of the mechanisms above the project already uses:
+
+```sh
+mkdir -p .claude/agents
+cp .agent-standards/agent-templates/prose-editor.md .claude/agents/prose-editor.md
+```
+
+Then edit the copy: set `model:` and `tools:`, remove the frontmatter comments once the choices
+are made, and resolve the reference the system prompt points at. A template that wraps a skill
+offers one row per install mechanism, plugin or submodule, and expects the row that does not apply
+to be deleted.
+
+A copied template is project content, not plugin content, so `${CLAUDE_PLUGIN_ROOT}` does not
+substitute in it. Under a plugin install a template reaches a skill by invoking it under its
+namespaced name, such as `ansible-standards:ansible-verification-loop`, and the `skills:`
+frontmatter field can preload that skill at startup instead. A template that references an
+instructions document directly has no such name to use, so it needs the submodule.
+
+Claude Code reloads `.claude/agents/` within a few seconds of a file changing. Creating the
+directory for the first time during a session is the exception and needs a restart.
+
 ### Copying, as a last resort
 
-Copy a file only when the consuming environment can use neither a plugin nor a submodule, such as
-an air-gapped checkout. Record the upstream commit the copy came from, so the drift is visible
-later. A copy stops receiving fixes the moment it is made, which is the outcome the mechanisms
-above exist to avoid.
+For `instructions/` and `skills/`, copy a file only when the consuming environment can use neither
+a plugin nor a submodule, such as an air-gapped checkout. Record the upstream commit the copy came
+from, so the drift is visible later. A copy stops receiving fixes the moment it is made, which is
+the outcome the mechanisms above exist to avoid.
 
 ## Adding new material
 
@@ -200,6 +269,22 @@ above exist to avoid.
   directions, as done between `python_coding_instructions.md` and `python-secure-coding`. Do not
   copy the shared material into both files. The instructions document is the single source of
   truth; the skill carries a short summary and a pointer to it.
+- Add a new agent template to `agent-templates/<name>.md` when the goal is to give a kind of work
+  its own context window, model, and tool allowlist. One flat file per agent: nothing
+  auto-discovers these from the library, so a directory per agent buys nothing. Keep the file a
+  thin wrapper, naming the instructions document or skill that holds the substance and pointing at
+  it by path rather than restating it. What belongs in the agent file is routing and policy:
+  scope, and what the agent reports back to the main conversation.
+- Ship agent templates with neutral defaults, `model: inherit` and the smallest `tools:` allowlist
+  the work needs, so copying one pins no model on the consumer and grants no broad tool access.
+  State in frontmatter comments what to consider changing and why, for example pinning a stronger
+  model for a review-heavy agent, or adding `Bash` only because the verify loop needs it.
+- A template aimed at a cheaper model needs its verification spelled out rather than assumed. Keep
+  what it must follow short and checklist-like, and reuse this repository's bounded verify-fix
+  wording, adapted to whatever one attempt means for that agent.
+- Never place agent templates in a directory named `agents/` at the repository root. Claude Code
+  auto-discovers that name at a plugin root, which would install every template into every
+  consuming project as a live subagent.
 
 ## Checks
 
@@ -216,10 +301,14 @@ npx --yes markdownlint-cli2@0.23.1 "**/*.md"     # add --fix to correct spacing 
 
 `scripts/check_skills.py` verifies, for each `skills/*/*/SKILL.md`, that the frontmatter parses as
 YAML, `name` matches the parent directory, `description` is non-empty, under 1,024 characters, and
-not written in first or second person, and that the body is under 500 lines. It then checks
-`.claude-plugin/marketplace.json`: it must parse, every listed path must hold a `SKILL.md`, and
-every skill in the repository must be listed by exactly one plugin. It needs only `pyyaml`, so
-`python3 scripts/check_skills.py` also works outside uv.
+not written in first or second person, and that the body is under 500 lines. It applies the same
+frontmatter rules to each `agent-templates/*.md`, with `name` matching the file name, and adds the
+neutral defaults a template must ship with: `model` is `inherit` and `tools` is a non-empty
+allowlist. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must
+hold a `SKILL.md`, and every skill in the repository must be listed by exactly one plugin. Last, it
+fails if an `agents/` directory has appeared at the repository root, which would ship the agent
+templates as installable subagents. It needs only `pyyaml`, so `python3 scripts/check_skills.py`
+also works outside uv.
 
 `claude plugin validate .` checks the marketplace manifest against Claude Code's own schema. It
 needs the Claude Code CLI, so it is a local step rather than a CI one.
