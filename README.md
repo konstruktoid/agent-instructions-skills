@@ -276,7 +276,7 @@ the outcome the mechanisms above exist to avoid.
   it by path rather than restating it. What belongs in the agent file is routing and policy:
   scope, and what the agent reports back to the main conversation.
 - Ship agent templates with neutral defaults, `model: inherit` and the smallest `tools:` allowlist
-  the work needs, so copying one opts the consumer into no cost profile and no broad tool access.
+  the work needs, so copying one opts the consumer into no-cost profile and no broad tool access.
   State in frontmatter comments what to consider changing and why, for example pinning a stronger
   model for a review-heavy agent, or adding `Bash` only because the verify loop needs it.
 - A template aimed at a cheaper model needs its verification spelled out rather than assumed. Keep

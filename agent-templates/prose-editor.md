@@ -63,7 +63,8 @@ anything is not an attempt.
 
 - [ ] Verify loop run to a clean result, or stopped under the rules above with unresolved items
       reported, naming the failing item and the text it applies to
-- [ ] Every item in the Quality Checklist of `written_language_instructions.md` passes
+- [ ] Every item in the Quality Checklist of `written_language_instructions.md` passes, apart from
+      items left unresolved under the stop rules above and reported as such
 - [ ] No em dashes, and no arrow symbols in prose
 - [ ] No technical claim changed, added, or dropped
 - [ ] Code, command output, configuration, and quoted material unchanged
