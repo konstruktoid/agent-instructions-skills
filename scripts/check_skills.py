@@ -21,6 +21,7 @@ Exits 0 when everything passes, 1 otherwise.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -31,16 +32,26 @@ MAX_BODY_LINES = 500
 
 MARKETPLACE_PATH = Path(".claude-plugin/marketplace.json")
 
-# Openings that signal a first- or second-person description. The README requires the
-# description to lead with what the skill does, in third person.
+# Openings that describe the skill from the reader's side rather than stating what the
+# skill does. The README requires the description to lead with what the skill does.
 BANNED_OPENINGS = (
-    "i can",
-    "i will",
-    "i help",
     "use this to",
     "use this skill",
-    "you can",
-    "you should",
+)
+
+# First- and second-person wording, matched anywhere in the description rather than only
+# at its start: "Reviews Terraform, and I will report what I changed" is as much a rule
+# violation as opening with it. Contractions need no pattern of their own, since an
+# apostrophe is a word boundary and "I'll" is matched by the bare pronoun. That pronoun
+# excludes the "I" in "I/O", which is not first person.
+FIRST_OR_SECOND_PERSON = re.compile(
+    r"""
+      \bI\b(?!/)
+    | \b(?:me|my|mine|myself)\b
+    | \b(?:we|us|our|ours|ourselves)\b
+    | \b(?:you|your|yours|yourself|yourselves)\b
+    """,
+    re.IGNORECASE | re.VERBOSE,
 )
 
 FRONTMATTER_DELIMITER = "---"
@@ -85,11 +96,15 @@ def check_description(description: object, errors: list[str]) -> None:
     lowered = stripped.lower()
     for opening in BANNED_OPENINGS:
         if lowered.startswith(opening):
-            errors.append(
-                f"'description' opens with {opening!r}; write it in third person, "
-                "leading with what the skill does"
-            )
+            errors.append(f"'description' opens with {opening!r}; lead with what the skill does")
             break
+
+    found = sorted({match.group().lower() for match in FIRST_OR_SECOND_PERSON.finditer(stripped)})
+    if found:
+        errors.append(
+            f"'description' uses first- or second-person wording ({', '.join(found)}); "
+            "write it in third person, stating what the skill does"
+        )
 
 
 def check_skill(skill_path: Path) -> list[str]:

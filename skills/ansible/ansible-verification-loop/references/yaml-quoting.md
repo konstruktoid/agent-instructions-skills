@@ -10,18 +10,26 @@ reference for scalar resolution, quoting, and tag semantics.
 
 ## Why values need quoting
 
-Use the specification to explain *why* a value needs quoting, for example:
+Use the specification to explain *why* a value needs quoting, and be precise about which
+YAML version resolves what. The difference is the whole reason quoting is needed: a value
+whose type depends on the loader is a value that must be quoted.
 
-- The "Norway problem": unquoted `no`, `yes`, `on`, `off`, `y`, and `n` resolve to
-  booleans rather than the strings they appear to be.
-- Numbers with leading zeros or embedded colons resolve to octal or sexagesimal values
-  rather than the literal string.
+- YAML 1.2.2's core schema resolves only `true` and `false`, in any capitalization, as
+  booleans. The rest of the "Norway problem" family, unquoted `yes`, `no`, `on`, `off`,
+  `y`, and `n`, is YAML 1.1 behavior that many loaders still implement.
+- Ansible reads YAML through PyYAML, which follows YAML 1.1, so those spellings do become
+  booleans in a playbook even though YAML 1.2.2 leaves them as strings. Quote them
+  wherever the string is what is wanted.
+- Numbers with leading zeros resolve to octal, and values with embedded colons to
+  sexagesimal integers, under YAML 1.1. YAML 1.2.2 drops both: `012` is the integer 12 and
+  `12:30` is a string. Quote them so the value does not change meaning with the loader.
 
 ## Relationship to the repository's linters
 
-Ansible's YAML loader and `ansible-lint`'s default `yaml`/`truthy` rule already reject
-unquoted truthy values other than `true`/`false`, so the specification reinforces
-existing lint behavior rather than replacing it.
+Ansible's YAML loader accepts unquoted `yes`, `no`, `on`, and `off` rather than rejecting
+them, which is exactly why the lint rule exists: `ansible-lint`'s default `yaml`/`truthy`
+rule requires `true`/`false` and flags the other spellings. The specification explains why
+that rule is there; it does not replace it.
 
 Never use the specification to justify removing existing quoting, the `---`
 document-start marker, or any other convention that `ansible-lint` or `yamllint`

@@ -25,7 +25,9 @@ This maps to OWASP's Software Supply Chain Failures category (A03:2025).
   `uv audit`, Snyk, or similar). Do not add a second scanner alongside one that is
   already configured.
 - `uv audit` (uv 0.10.12 and later) is a fast, uv-native alternative to `pip-audit`, but
-  it is still a preview feature with an unstable interface. Do not introduce it into a
+  it is still gated behind uv's `audit-command` preview feature, so its interface can
+  change. The related automatic malware check is a separate preview feature
+  (`malware-check`, configured by `audit.malware-check`). Do not introduce either into a
   repository that already relies on `pip-audit` or another scanner without asking first.
 - If no scanner is configured, report what a one-off scan found rather than silently
   adding a scanner to the project's configuration.

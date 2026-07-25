@@ -46,9 +46,12 @@ job that executes code from a pull request on `contents: read`.
 - `attestations: write` publishes build provenance and needs `id-token: write` with it.
 - `packages: write` on a public repository package is effectively a publish credential.
 
-`GITHUB_TOKEN` cannot trigger another workflow run. Workflows that must trigger a downstream
-workflow need a GitHub App installation token, which is preferable to a personal access token
-because it is short-lived and scoped to the repositories the app is installed on.
+Events caused by `GITHUB_TOKEN` do not start another workflow run, with two exceptions:
+`workflow_dispatch` and `repository_dispatch` do fire when dispatched with it. This is a loop
+guard, not a security boundary, and it is also why a push made by `GITHUB_TOKEN` never runs the
+`push` workflows. Reach for a credential other than `GITHUB_TOKEN` only when the downstream event
+is one it cannot raise, and prefer a GitHub App installation token to a personal access token: it
+is short-lived and scoped to the repositories the app is installed on.
 
 ## Secrets
 

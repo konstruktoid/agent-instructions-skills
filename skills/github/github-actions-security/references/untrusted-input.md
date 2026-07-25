@@ -64,10 +64,17 @@ Do not use either to build a path, a tag, or a command.
 | Trigger | Runs in | Token and secrets | Notes |
 |---|---|---|---|
 | `pull_request` | Fork's merge ref | Read-only token, no secrets for fork PRs | The safe default for validating contributions |
-| `pull_request_target` | Base repository | Full permissions and secrets | Never check out fork code here |
-| `workflow_run` | Base repository | Full permissions and secrets | Artifacts from the triggering run are untrusted |
-| `issue_comment`, `issues` | Base repository | Full permissions and secrets | Body is attacker-controlled; author may be anyone |
-| `push`, `schedule`, `workflow_dispatch` | Base repository | Full permissions and secrets | `workflow_dispatch` inputs are still user data |
+| `pull_request_target` | Base repository | The workflow's configured `permissions`; secrets reachable | Never check out fork code here |
+| `workflow_run` | Base repository | The workflow's configured `permissions`; secrets reachable | Artifacts from the triggering run are untrusted |
+| `issue_comment`, `issues` | Base repository | The workflow's configured `permissions`; secrets reachable | Body is attacker-controlled; author may be anyone |
+| `push`, `schedule`, `workflow_dispatch` | Base repository | The workflow's configured `permissions`; secrets reachable | `workflow_dispatch` inputs are still user data |
+
+"Secrets reachable" means the job can read any secret it names in `secrets.*`, not that every
+secret is injected: only the ones the workflow references reach the environment. The token's scopes
+are whatever `permissions` resolved to for that job, which is why the read-only default and a
+per-job `permissions` block do real work here. What separates these rows from a fork
+`pull_request` is that the job runs in a privileged context at all, while still reading data an
+outsider controls.
 
 ### `pull_request_target`
 
@@ -120,7 +127,8 @@ are artifacts and metadata produced by a run that may have been untrusted.
 ### Comment-driven triggers
 
 `issue_comment` fires on any comment from anyone, including on a pull request from a fork, and runs
-with full permissions from the default branch.
+the workflow file from the default branch with that workflow's configured `permissions` and with
+the repository's secrets reachable.
 
 - Check the commenter's association explicitly before doing anything:
   `github.event.comment.author_association` in `OWNER`, `MEMBER`, or `COLLABORATOR`. Do not rely on

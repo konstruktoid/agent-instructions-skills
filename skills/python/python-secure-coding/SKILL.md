@@ -87,11 +87,12 @@ still apply.
 
 ## Verify
 
-Never declare a change done from the edit alone. Run, in the repository's package manager:
+Never declare a change done from the edit alone. Run every check through the repository's package
+manager rather than as a bare binary, so it uses the pinned versions:
 
-- `ruff check .`, with no new ignores.
-- `ruff format --check .`.
-- `ty check`, with no new suppressions.
+- `uv run ruff check .`, with no new ignores.
+- `uv run ruff format --check .`.
+- `uv run ty check`, with no new suppressions.
 - The repository's dependency vulnerability scanner, if one is configured, when dependencies
   changed.
 
@@ -113,9 +114,9 @@ changing anything, is not an attempt.
 
 - [ ] Verify loop run to a clean result, or stopped under the rules above with unresolved issues
       reported, naming the failing check and its output
-- [ ] `ruff check .` clean
-- [ ] `ruff format --check .` clean
-- [ ] `ty check` clean
+- [ ] `uv run ruff check .` clean
+- [ ] `uv run ruff format --check .` clean
+- [ ] `uv run ty check` clean
 - [ ] No new or weakened lint or type-check suppressions without a one-line justification, and no
       repository-wide `S`-rule disabling
 - [ ] Untrusted input (user input, network/API responses, files) is validated/sanitized at the
