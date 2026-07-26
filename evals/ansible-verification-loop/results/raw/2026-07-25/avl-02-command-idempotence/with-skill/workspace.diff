@@ -1,0 +1,59 @@
+diff --git a/.ansible/roles/platform.certbot_renewal b/.ansible/roles/platform.certbot_renewal
+new file mode 120000
+index 0000000..afd0181
+--- /dev/null
++++ b/.ansible/roles/platform.certbot_renewal
+@@ -0,0 +1 @@
++/repo/evals/ansible-verification-loop/results/raw/2026-07-25/avl-02-command-idempotence/with-skill/workspace
+\ No newline at end of file
+diff --git a/README.md b/README.md
+index 26d5bf2..9b24f0f 100644
+--- a/README.md
++++ b/README.md
+@@ -9,3 +9,4 @@ Requests and renews Let's Encrypt certificates.
+ | `certbot_domains` | `[]` | Domains to request certificates for. |
+ | `certbot_email` | `admin@example.com` | Registration contact address. |
+ | `certbot_renew_hour` | `3` | Hour the renewal timer fires. |
++| `certbot_staging` | `false` | Pass `--staging` to request against the Let's Encrypt staging endpoint for a dry run. |
+diff --git a/defaults/main.yml b/defaults/main.yml
+index 2f00997..c4dca26 100644
+--- a/defaults/main.yml
++++ b/defaults/main.yml
+@@ -2,3 +2,4 @@
+ certbot_domains: []
+ certbot_email: admin@example.com
+ certbot_renew_hour: 3
++certbot_staging: false
+diff --git a/tasks/main.yml b/tasks/main.yml
+index aa2ea2c..cdd2750 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -4,12 +4,21 @@
+     name: certbot
+     state: present
+ 
+-- shell: certbot certificates | grep -c "VALID"
++- name: Count valid certificates
++  ansible.builtin.shell:
++    cmd: set -o pipefail && certbot certificates | grep -c "VALID"
++    executable: /bin/bash
+   register: certbot_valid_count
++  changed_when: false
+ 
+ - name: Request a certificate for each domain
+-  ansible.builtin.command: certbot certonly --standalone -d {{ item }} -m {{ certbot_email }} --agree-tos -n
++  ansible.builtin.command:
++    cmd: >-
++      certbot certonly --standalone -d {{ item }} -m {{ certbot_email }} --agree-tos -n
++      {{ '--staging' if certbot_staging | bool else '' }}
+   loop: "{{ certbot_domains }}"
++  when: certbot_valid_count.stdout | int == 0
++  changed_when: true
+   notify: Reload nginx
+ 
+ - name: Write the renewal timer
+@@ -20,3 +29,4 @@
+       [Timer]
+       OnCalendar=*-*-* {{ certbot_renew_hour }}:00:00
+     dest: /etc/systemd/system/certbot-renew.timer
++    mode: "0644"

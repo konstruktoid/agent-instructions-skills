@@ -1,0 +1,73 @@
+diff --git a/.github/workflows/triage.yml b/.github/workflows/triage.yml
+new file mode 100644
+index 0000000..799e08f
+--- /dev/null
++++ b/.github/workflows/triage.yml
+@@ -0,0 +1,38 @@
++---
++name: triage
++
++on:
++  pull_request_target:
++    types: [opened]
++
++permissions: {}
++
++jobs:
++  triage:
++    name: Welcome and label new pull request
++    runs-on: ubuntu-latest
++    timeout-minutes: 5
++    permissions:
++      pull-requests: write
++    steps:
++      # No checkout step: this job only reads data from the pull_request_target
++      # event payload, so fork-submitted code is never fetched or executed.
++      - name: Welcome contributor and apply needs-triage label
++        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
++        with:
++          script: |
++            const pr = context.payload.pull_request;
++
++            await github.rest.issues.createComment({
++              owner: context.repo.owner,
++              repo: context.repo.repo,
++              issue_number: pr.number,
++              body: `Welcome, @${pr.user.login}! Thanks for opening "${pr.title}". This pull request has been marked for triage.`,
++            });
++
++            await github.rest.issues.addLabels({
++              owner: context.repo.owner,
++              repo: context.repo.repo,
++              issue_number: pr.number,
++              labels: ["needs-triage"],
++            });
+diff --git a/README.md b/README.md
+index 31b0fae..fe4e335 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,24 @@ A repository that runs its tests on every pull request.
+ ## Contributing
+ 
+ Open a pull request. Contributions arrive from forks.
++
++## Workflows
++
++### CI (`.github/workflows/ci.yml`)
++
++Runs the test suite (`make test`) on every pull request.
++
++### Triage (`.github/workflows/triage.yml`)
++
++Runs when a pull request is opened, including pull requests opened from a fork. It:
++
++- Posts a comment welcoming the contributor by their username and summarizing
++  the pull request by repeating its title.
++- Applies the `needs-triage` label.
++
++Fork-submitted pull requests only ever get a read-only `GITHUB_TOKEN` under the
++`pull_request` event, so this workflow uses `pull_request_target` instead,
++which runs with the base repository's permissions and lets it comment and
++label fork PRs. It never checks out or executes the pull request's code — it
++only reads the title and author from the event payload — so it isn't exposed
++to untrusted code from the fork.

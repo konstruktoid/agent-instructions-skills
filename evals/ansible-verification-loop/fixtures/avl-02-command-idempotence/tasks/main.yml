@@ -1,0 +1,22 @@
+---
+- name: Install certbot
+  ansible.builtin.package:
+    name: certbot
+    state: present
+
+- shell: certbot certificates | grep -c "VALID"
+  register: certbot_valid_count
+
+- name: Request a certificate for each domain
+  ansible.builtin.command: certbot certonly --standalone -d {{ item }} -m {{ certbot_email }} --agree-tos -n
+  loop: "{{ certbot_domains }}"
+  notify: Reload nginx
+
+- name: Write the renewal timer
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Renew certificates
+      [Timer]
+      OnCalendar=*-*-* {{ certbot_renew_hour }}:00:00
+    dest: /etc/systemd/system/certbot-renew.timer

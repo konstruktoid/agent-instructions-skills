@@ -1,0 +1,5 @@
+---
+banner_path: /etc/issue.net
+banner_owner: root
+banner_mode: "0644"
+banner_show_hostname: true

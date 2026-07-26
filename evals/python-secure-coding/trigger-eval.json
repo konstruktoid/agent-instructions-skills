@@ -1,0 +1,60 @@
+{
+  "skill": "python-secure-coding",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "psc-t01",
+      "expect": "trigger",
+      "prompt": "Add an endpoint that accepts an uploaded CSV and writes each row into our Postgres table."
+    },
+    {
+      "id": "psc-t02",
+      "expect": "trigger",
+      "prompt": "This helper builds a shell command from a user-supplied path. Refactor it so the caller can pass extra arguments."
+    },
+    {
+      "id": "psc-t03",
+      "expect": "trigger",
+      "prompt": "Implement password reset tokens for the accounts module, including issuing and verifying them."
+    },
+    {
+      "id": "psc-t04",
+      "expect": "trigger",
+      "prompt": "Add a config loader that reads a YAML file from a path the operator supplies on the command line."
+    },
+    {
+      "id": "psc-t05",
+      "expect": "trigger",
+      "prompt": "Write a function that fetches a URL supplied by the client and caches the response body."
+    },
+    {
+      "id": "psc-t06",
+      "expect": "no-trigger",
+      "prompt": "Review this Go service's HTTP handler and tell me whether the query building is injection-safe."
+    },
+    {
+      "id": "psc-t07",
+      "expect": "no-trigger",
+      "prompt": "Update the README to document the new CLI flags we added last week."
+    },
+    {
+      "id": "psc-t08",
+      "expect": "no-trigger",
+      "prompt": "Our pytest suite has a flaky test in test_scheduler.py. Work out why it fails intermittently."
+    },
+    {
+      "id": "psc-t09",
+      "expect": "no-trigger",
+      "prompt": "Explain how Python's GIL affects the threading code in our worker pool."
+    },
+    {
+      "id": "psc-t10",
+      "expect": "no-trigger",
+      "prompt": "Format this JSON config file and sort its keys alphabetically."
+    }
+  ]
+}

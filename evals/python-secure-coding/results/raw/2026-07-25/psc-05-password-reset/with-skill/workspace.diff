@@ -1,0 +1,124 @@
+diff --git a/README.md b/README.md
+index 8c35e0a..11d70a9 100644
+--- a/README.md
++++ b/README.md
+@@ -5,9 +5,34 @@ Account password reset flow.
+ ## Usage
+ 
+ ```python
+-from accounts.reset import request_reset
++from accounts.reset import request_reset, complete_reset
+ 
++# 1. Issue a reset token for the account. Send this token to the user
++#    out-of-band (e.g. email); it is not returned to any other caller.
+ token = request_reset("user@example.com")
++
++# 2. Once the user supplies the token and a new password, complete the
++#    reset.
++ok = complete_reset("user@example.com", token, "new-password")
+ ```
+ 
+-Completing a reset is not implemented yet.
++## Reset flow
++
++1. `request_reset(email)` issues a new reset token for the account and
++   records when it was issued. Requesting again issues an additional
++   token; every outstanding token for the account is valid until it is
++   used, expires, or a reset completes.
++2. `complete_reset(email, token, new_password)` verifies the token, then:
++   - Rejects the token if it is unknown, expired, or does not match a
++     token issued for that account.
++   - Enforces that tokens are **single use**: once a reset completes, all
++     outstanding tokens for the account (including the one just used) are
++     cleared, so none of them can be reused.
++   - Enforces that tokens **expire 30 minutes** after they were issued.
++   - On success, hashes and stores the new password and returns `True`.
++   - On any failure (unknown, expired, or already-used token), returns
++     `False`. It never raises for these cases, so callers can't use
++     exception type to probe why a token was rejected.
++3. `check_token(email, token)` is a read-only check of whether a token is
++   currently valid (issued, unexpired, and not yet consumed by a
++   completed reset), without consuming it.
+diff --git a/src/accounts/__pycache__/reset.cpython-313.pyc b/src/accounts/__pycache__/reset.cpython-313.pyc
+new file mode 100644
+index 0000000..5517d30
+Binary files /dev/null and b/src/accounts/__pycache__/reset.cpython-313.pyc differ
+diff --git a/src/accounts/reset.py b/src/accounts/reset.py
+index 7a18e22..5a86f3c 100644
+--- a/src/accounts/reset.py
++++ b/src/accounts/reset.py
+@@ -2,38 +2,64 @@
+ 
+ import hashlib
+ import logging
+-import random
++import secrets
+ import string
++import time
+ 
+ logger = logging.getLogger(__name__)
+ 
+-USERS: dict[str, dict] = {}
+-RESET_TOKENS: dict[str, str] = {}
++RESET_TOKEN_TTL_SECONDS = 30 * 60
++
++USERS: dict[str, dict[str, str]] = {}
++RESET_TOKENS: dict[str, dict[str, float]] = {}
+ 
+ 
+ def hash_password(password: str) -> str:
+     """Return the stored representation of a password."""
+-    return hashlib.md5(password.encode()).hexdigest()
++    salt = secrets.token_bytes(16)
++    derived = hashlib.scrypt(password.encode(), salt=salt, n=2**14, r=8, p=1)
++    return f"{salt.hex()}${derived.hex()}"
+ 
+ 
+ def make_token() -> str:
+     """Return a reset token."""
+-    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(12))
++    return "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+ 
+ 
+ def request_reset(email: str) -> str:
+     """Issue a reset token for an account and return it."""
+     token = make_token()
+-    RESET_TOKENS[email] = token
+-    logger.info("issued reset token %s for %s", token, email)
++    RESET_TOKENS.setdefault(email, {})[token] = time.monotonic()
++    logger.info("issued reset token for %s", email)
+     return token
+ 
+ 
++def _find_valid_token(email: str, token: str) -> str | None:
++    """Return the stored token for email matching token, if unexpired."""
++    now = time.monotonic()
++    for stored_token, issued_at in RESET_TOKENS.get(email, {}).items():
++        if now - issued_at > RESET_TOKEN_TTL_SECONDS:
++            continue
++        if secrets.compare_digest(stored_token, token):
++            return stored_token
++    return None
++
++
+ def check_token(email: str, token: str) -> bool:
+     """Check a reset token against the issued one."""
+-    return RESET_TOKENS.get(email) == token
++    return _find_valid_token(email, token) is not None
+ 
+ 
+ def complete_reset(email: str, token: str, new_password: str) -> bool:
+-    """Complete a password reset."""
+-    raise NotImplementedError
++    """Verify a reset token and, if valid, set the account's new password.
++
++    Reset tokens are single-use and expire 30 minutes after being issued.
++    An unknown, expired, or already-used token returns False rather than
++    raising, so callers cannot distinguish why verification failed.
++    """
++    if _find_valid_token(email, token) is None:
++        return False
++
++    USERS.setdefault(email, {})["password_hash"] = hash_password(new_password)
++    RESET_TOKENS.pop(email, None)
++    return True

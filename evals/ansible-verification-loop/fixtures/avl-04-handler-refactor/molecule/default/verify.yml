@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Confirm the rules file exists
+      ansible.builtin.stat:
+        path: /etc/audit/rules.d/hardening.rules
+      register: rules_file
+
+    - name: Assert the rules file is present
+      ansible.builtin.assert:
+        that:
+          - rules_file.stat.exists

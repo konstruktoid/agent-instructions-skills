@@ -1,0 +1,17 @@
+{
+  "id": "gas-t09",
+  "expect": "no-trigger",
+  "fired": true,
+  "correct": false,
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security",
+    "simplify"
+  ],
+  "cost_usd": 0.2098831,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T23:59:00.182648+00:00",
+    "seconds": 43.2
+  }
+}

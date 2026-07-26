@@ -1,0 +1,878 @@
+[
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "baseline",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:33:21.229106+00:00",
+      "seconds": 92.2
+    },
+    "skills_used": [],
+    "num_turns": 23,
+    "cost_usd": 0.37683089999999997,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "with-skill",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:33:21.219784+00:00",
+      "seconds": 861.7
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 76,
+    "cost_usd": 2.2504224,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "baseline",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:33:21.218382+00:00",
+      "seconds": 35.9
+    },
+    "skills_used": [],
+    "num_turns": 11,
+    "cost_usd": 0.1852649,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 2\nfqcn[action-core]: Use FQCN for builtin module actions (shell).\ntasks/main.yml:7:3 Use `ansible.builtin.shell` or `ansible.legacy.shell` instead.\n\nname[missing]: All tasks should be named.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nrisky-shell-pipe: Shells that use pipes should set the pipefail option.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:10 Task/Handler: Request a certificate for each domain\n\nrisky-file-permissions: File permissions unset or incorrect.\ntasks/main.yml:18 Task/Handler: Write the renewal timer\n\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\nfqcn[action-core]: Use FQCN for builtin module actions (shell).\ntasks/main.yml:7:3 Use `ansible.builtin.shell` or `ansible.legacy.shell` instead.\n\nname[missing]: All tasks should be named.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nrisky-shell-pipe: Shells that use pipes should set the pipefail option.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:10 Task/Handler: Request a certificate for each domain\n\nrisky-file-permissions: File permissions unset or incorrect.\ntasks/main.yml:18 Task/Handler: Write the renewal timer\n\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "with-skill",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:33:21.224547+00:00",
+      "seconds": 138.3
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 26,
+    "cost_usd": 0.5868099999999999,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "baseline",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:33:21.226400+00:00",
+      "seconds": 22.9
+    },
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.14786249999999998,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'quot'"
+      }
+    ],
+    "passed": 8,
+    "total": 9
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "with-skill",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:33:50.576102+00:00",
+      "seconds": 94.0
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 24,
+    "cost_usd": 0.3902357,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'quot'"
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "avl-04-handler-refactor",
+    "condition": "baseline",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:34:03.807554+00:00",
+      "seconds": 38.3
+    },
+    "skills_used": [],
+    "num_turns": 16,
+    "cost_usd": 0.2107117,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "handler-added",
+        "kind": "workspace_command",
+        "source": "task prompt: refactor the restarts into a handler",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "tasks-notify-handler",
+        "kind": "workspace_command",
+        "source": "task prompt: the configuration and rules tasks notify the handler",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-inline-restart",
+        "kind": "workspace_command",
+        "source": "task prompt: auditd restarts at most once and only when something changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-num-logs-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: auditd_num_logs is documented but never applied",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "idempotence-considered",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": true,
+        "evidence": "match: 'handler'"
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "avl-04-handler-refactor",
+    "condition": "with-skill",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:34:49.006080+00:00",
+      "seconds": 306.0
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 44,
+    "cost_usd": 0.9575397000000001,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "handler-added",
+        "kind": "workspace_command",
+        "source": "task prompt: refactor the restarts into a handler",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "tasks-notify-handler",
+        "kind": "workspace_command",
+        "source": "task prompt: the configuration and rules tasks notify the handler",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-inline-restart",
+        "kind": "workspace_command",
+        "source": "task prompt: auditd restarts at most once and only when something changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-num-logs-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: auditd_num_logs is documented but never applied",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "idempotence-considered",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": true,
+        "evidence": "match: 'handler'"
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "baseline",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:35:00.592254+00:00",
+      "seconds": 919.5
+    },
+    "skills_used": [],
+    "num_turns": 80,
+    "cost_usd": 2.4442730499999996,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": true,
+        "evidence": "match: 'molecule'"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": true,
+        "evidence": "match: 'molecule'"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": true,
+        "evidence": "match: 'missing'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "with-skill",
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-25T22:35:31.149816+00:00",
+      "seconds": 1474.4
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 76,
+    "cost_usd": 3.14028385,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 2\ngalaxy[no-repository]: galaxy.yaml should have a repository key for publication to Galaxy. See https://docs.ansible.com/projects/ansible/latest/dev_guide/collections_galaxy_meta.html\ngalaxy.yml:1\n\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\ngalaxy[no-repository]: galaxy.yaml should have a repository key for publication to Galaxy. See https://docs.ansible.com/projects/ansible/latest/dev_guide/collections_galaxy_meta.html\ngalaxy.yml:1\n\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": true,
+        "evidence": "match: 'molecule'"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": true,
+        "evidence": "match: 'molecule'"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 11
+  }
+]

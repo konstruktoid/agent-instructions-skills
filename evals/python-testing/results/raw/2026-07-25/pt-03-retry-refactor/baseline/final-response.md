@@ -1,0 +1,1 @@
+Refactor done: `get` and `head` now delegate to a shared `_with_retries(method, path)` helper, preserving the exact retry loop, attempt counting, and last-error-raised behavior. All 4 tests pass; the ruff and `ty` findings I saw are pre-existing (confirmed identical on `main` before my change).

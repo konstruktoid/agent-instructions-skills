@@ -1,0 +1,3 @@
+The only Ansible content in this repo is `roles/nginx/tasks/main.yml`, and it already uses fully-qualified names (`ansible.builtin.package`, `ansible.builtin.template`) — there are no short module names left to convert. The `k8s/deployment.yml` hit is a Kubernetes manifest, not Ansible.
+
+There's no separate "playbook" file in this repo (no `site.yml`/`playbook.yml`) — this repo is a deliberately mixed sandbox (per its README) with just the one nginx role. If you have a specific playbook file in mind, could you point me to its path? Otherwise, the nginx role's tasks are already FQCN-compliant and there's nothing to change.

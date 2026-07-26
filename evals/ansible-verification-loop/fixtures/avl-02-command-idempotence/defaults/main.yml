@@ -1,0 +1,4 @@
+---
+certbot_domains: []
+certbot_email: admin@example.com
+certbot_renew_hour: 3

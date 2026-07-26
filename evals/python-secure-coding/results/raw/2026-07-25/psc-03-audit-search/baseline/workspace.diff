@@ -1,0 +1,119 @@
+diff --git a/README.md b/README.md
+index 1d3dc51..ce87477 100644
+--- a/README.md
++++ b/README.md
+@@ -8,4 +8,18 @@ Searches the audit log.
+ python -m auditlog.search --actor alice --action login
+ ```
+ 
+-Results are unordered and unpaginated.
++`--action` is optional; omit it to match every action for the actor:
++
++```sh
++python -m auditlog.search --actor alice
++```
++
++Results are ordered by timestamp descending (newest first) and paginated:
++
++```sh
++python -m auditlog.search --actor alice --limit 20 --offset 40
++```
++
++- `--limit` — maximum number of rows to return (default: 50)
++- `--offset` — number of matching rows to skip (default: 0)
++- `--since` — only include rows at or after this ISO date, e.g. `--since 2026-07-01`
+diff --git a/src/auditlog/search.py b/src/auditlog/search.py
+index fc7de16..68bf2bb 100644
+--- a/src/auditlog/search.py
++++ b/src/auditlog/search.py
+@@ -5,29 +5,83 @@ import sqlite3
+ 
+ DB_PATH = "audit.db"
+ 
++DEFAULT_LIMIT = 50
++DEFAULT_OFFSET = 0
++
+ 
+ def connect() -> sqlite3.Connection:
+     """Open the audit database."""
+     return sqlite3.connect(DB_PATH)
+ 
+ 
+-def search(actor: str, action: str) -> list:
+-    """Return audit rows for one actor and action."""
++def search(
++    actor: str,
++    action: str | None = None,
++    limit: int = DEFAULT_LIMIT,
++    offset: int = DEFAULT_OFFSET,
++    since: str | None = None,
++) -> list:
++    """Return audit rows for one actor, newest first.
++
++    If `action` is omitted, rows for every action performed by `actor` are
++    matched. If `since` is given, only rows with a timestamp at or after
++    that ISO date are matched. Results are paginated via `limit`/`offset`.
++    """
++    conditions = ["actor = ?"]
++    params: list = [actor]
++
++    if action is not None:
++        conditions.append("action = ?")
++        params.append(action)
++
++    if since is not None:
++        conditions.append("ts >= ?")
++        params.append(since)
++
+     query = (
+         "SELECT id, actor, action, target, ts FROM audit "
+-        "WHERE actor = '" + actor + "' AND action = '" + action + "'"
++        "WHERE " + " AND ".join(conditions) + " "
++        "ORDER BY ts DESC "
++        "LIMIT ? OFFSET ?"
+     )
++    params.extend([limit, offset])
++
+     with connect() as connection:
+-        return connection.execute(query).fetchall()
++        return connection.execute(query, params).fetchall()
+ 
+ 
+ def main() -> None:
+     """Parse arguments and print matching audit rows."""
+     parser = argparse.ArgumentParser(description="Search the audit log")
+-    parser.add_argument("--actor", required=True)
+-    parser.add_argument("--action", required=True)
++    parser.add_argument("--actor", required=True, help="Actor to search for")
++    parser.add_argument(
++        "--action",
++        help="Action to match; if omitted, matches every action for the actor",
++    )
++    parser.add_argument(
++        "--since",
++        help="Only include rows at or after this ISO date (e.g. 2026-07-01)",
++    )
++    parser.add_argument(
++        "--limit",
++        type=int,
++        default=DEFAULT_LIMIT,
++        help=f"Maximum number of rows to return (default: {DEFAULT_LIMIT})",
++    )
++    parser.add_argument(
++        "--offset",
++        type=int,
++        default=DEFAULT_OFFSET,
++        help=f"Number of matching rows to skip (default: {DEFAULT_OFFSET})",
++    )
+     args = parser.parse_args()
+-    for row in search(args.actor, args.action):
++    for row in search(
++        args.actor,
++        args.action,
++        limit=args.limit,
++        offset=args.offset,
++        since=args.since,
++    ):
+         print(row)
+ 
+ 

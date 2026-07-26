@@ -12,6 +12,7 @@ which model and which tools.
 instructions/     Domain-specific writing and coding standards (plain Markdown, no frontmatter)
 skills/           Claude Code skills, one directory per skill: skills/<category>/<name>/SKILL.md
 agent-templates/  Copy-and-adapt Claude Code subagent definitions, one flat file per agent
+evals/            Measurements of whether each skill changes agent output, and what it triggers on
 scripts/          Checks that enforce this repository's own authoring rules
 .claude-plugin/   Marketplace manifest, so other projects can install the skills as plugins
 ```
@@ -285,6 +286,39 @@ the outcome the mechanisms above exist to avoid.
 - Never place agent templates in a directory named `agents/` at the repository root. Claude Code
   auto-discovers that name at a plugin root, which would install every template into every
   consuming project as a live subagent.
+
+## Evals
+
+`evals/` measures what the skills actually do. The authoring rules in
+[Checks](#checks) confirm a skill is well formed; they cannot confirm it changes an agent's
+output, or that its `description` routes the right tasks to it. Two measurements cover that:
+
+- **Task evals.** Each skill has 4 to 6 multi-step task prompts in `tasks.json`, each with a
+  fixture repository and a set of objective checks in `assertions.json` derived from that
+  skill's own Verify and Verification checklist sections. Every task runs twice against an
+  identical fixture copy, once with the skill available and once without. The only difference
+  between the two runs is a single-skill plugin passed with `--plugin-dir`, so a delta is
+  attributable to the skill.
+- **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
+  five adjacent but out of scope, which measure the `description` field rather than the body.
+
+```sh
+python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
+python3 evals/run_eval.py triggers --skill <name> --model sonnet --parallel 5
+python3 evals/run_eval.py report   --skill <name>
+```
+
+Results land in `evals/<skill>/results/<date>.md`, rendered by `report` rather than written by
+hand, with transcripts, workspaces, and per-run grades kept under `results/raw/<date>/`. A
+delta of zero is reported as a delta of zero: where a skill produces no measurable
+improvement, the results file says so. See [evals/README.md](evals/README.md) for how the two
+conditions are isolated, what an assertion may and may not be, and the limitations that apply
+to every number in there.
+
+Eval fixtures are deliberately flawed inputs, so `pyproject.toml` and
+`.markdownlint-cli2.yaml` exclude `evals/*/fixtures` and `evals/*/results` from this
+repository's own lint. Each fixture carries its own tool configuration, which is what the
+eval measures against.
 
 ## Checks
 

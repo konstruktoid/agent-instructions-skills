@@ -1,0 +1,36 @@
+diff --git a/src/fetcher/__pycache__/client.cpython-313.pyc b/src/fetcher/__pycache__/client.cpython-313.pyc
+index 2ac8d39..5698eef 100644
+Binary files a/src/fetcher/__pycache__/client.cpython-313.pyc and b/src/fetcher/__pycache__/client.cpython-313.pyc differ
+diff --git a/src/fetcher/client.py b/src/fetcher/client.py
+index 31af732..c9d85ba 100644
+--- a/src/fetcher/client.py
++++ b/src/fetcher/client.py
+@@ -17,22 +17,19 @@ class Client:
+ 
+     def get(self, path: str) -> str:
+         """Fetch a path, retrying on transport failure."""
+-        last_error = None
+-        for _ in range(MAX_ATTEMPTS):
+-            self.attempts += 1
+-            try:
+-                return self.transport("GET", path)
+-            except TransportError as error:
+-                last_error = error
+-        raise last_error
++        return self._with_retries("GET", path)
+ 
+     def head(self, path: str) -> str:
+         """Issue a HEAD for a path, retrying on transport failure."""
++        return self._with_retries("HEAD", path)
++
++    def _with_retries(self, method: str, path: str) -> str:
++        """Call the transport, retrying a fixed number of times."""
+         last_error = None
+         for _ in range(MAX_ATTEMPTS):
+             self.attempts += 1
+             try:
+-                return self.transport("HEAD", path)
++                return self.transport(method, path)
+             except TransportError as error:
+                 last_error = error
+         raise last_error

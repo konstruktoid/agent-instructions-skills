@@ -1,0 +1,3 @@
+The bug was `end = min(start + per_page, len(items) - 1)` in `src/paging/slicing.py:10` — since Python slicing (`items[start:end]`) is already exclusive of `end`, subtracting 1 chopped off the last item and made out-of-range pages compute a negative `end`, causing wraparound instead of an empty result. Changed it to `min(start + per_page, len(items))`.
+
+All checks pass: 8 pytest tests, ruff, and ty (the ty error was from an unrelated file outside the project being picked up when run without a scope; running `ty check src` confirms this project is clean). Also fixed a pre-existing unsorted-import lint issue in `tests/test_slicing.py` via `ruff check --fix`.

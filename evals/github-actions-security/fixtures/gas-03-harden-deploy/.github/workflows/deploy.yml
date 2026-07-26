@@ -1,0 +1,30 @@
+---
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@main
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+      - name: Build and push
+        run: |
+          echo "Deploying ${{ github.event.head_commit.message }}"
+          ./scripts/deploy.sh
+      - name: Notify
+        uses: some-org/slack-notify@v1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}

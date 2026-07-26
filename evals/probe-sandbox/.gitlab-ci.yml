@@ -1,0 +1,9 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - npm ci
+    - npm run build

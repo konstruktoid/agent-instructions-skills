@@ -1,0 +1,45 @@
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 2c2293c..48fcddd 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -5,9 +5,13 @@ on:
+   push:
+     branches:
+       - main
++    tags:
++      - 'v*'
+   workflow_dispatch:
+ 
+-permissions: write-all
++permissions:
++  id-token: write
++  contents: read
+ 
+ jobs:
+   deploy:
+@@ -17,8 +21,7 @@ jobs:
+       - name: Configure AWS
+         uses: aws-actions/configure-aws-credentials@v4
+         with:
+-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
++          role-to-assume: arn:aws:iam::123456789012:role/deploy-widget
+           aws-region: eu-north-1
+       - name: Build and push
+         run: |
+diff --git a/README.md b/README.md
+index 8347b4a..108ea8f 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,10 @@
+ # deploy-demo
+ 
+-Deploys the service to AWS on every push to `main`.
++Deploys the service to AWS on every push to `main` and on any pushed tag
++matching `v*` (e.g. `v1.2.0`).
++
++Deployment authenticates to AWS via OIDC role assumption
++(`arn:aws:iam::123456789012:role/deploy-widget` in `eu-north-1`) — no
++long-lived AWS access keys are stored in this repository.
+ 
+ This repository is public.

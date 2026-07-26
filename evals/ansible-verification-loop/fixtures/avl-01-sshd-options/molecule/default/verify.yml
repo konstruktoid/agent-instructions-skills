@@ -1,0 +1,13 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Read the sshd configuration
+      ansible.builtin.slurp:
+        src: /etc/ssh/sshd_config
+      register: sshd_config
+
+    - name: Confirm root login is disabled
+      ansible.builtin.assert:
+        that:
+          - "'PermitRootLogin no' in (sshd_config.content | b64decode)"

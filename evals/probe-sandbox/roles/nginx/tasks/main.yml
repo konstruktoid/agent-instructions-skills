@@ -1,0 +1,11 @@
+---
+- name: Install nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: Render the site configuration
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: /etc/nginx/conf.d/site.conf
+    mode: "0644"

@@ -1,0 +1,60 @@
+{
+  "skill": "python-testing",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "pt-t01",
+      "expect": "trigger",
+      "prompt": "I fixed an off-by-one in the pagination helper. Add coverage so it cannot regress."
+    },
+    {
+      "id": "pt-t02",
+      "expect": "trigger",
+      "prompt": "We added a new public function parse_manifest and it has no tests at all."
+    },
+    {
+      "id": "pt-t03",
+      "expect": "trigger",
+      "prompt": "Add tests for the rejection paths of our upload validator, including the oversized and bad-extension cases."
+    },
+    {
+      "id": "pt-t04",
+      "expect": "trigger",
+      "prompt": "Where should a test for src/ledger/balance.py live in this repository, and what should it be called?"
+    },
+    {
+      "id": "pt-t05",
+      "expect": "trigger",
+      "prompt": "Our bug fix in client.py needs a regression test that fails against the unfixed code."
+    },
+    {
+      "id": "pt-t06",
+      "expect": "no-trigger",
+      "prompt": "The CI job that runs pytest times out after ten minutes. Raise the timeout in the workflow file."
+    },
+    {
+      "id": "pt-t07",
+      "expect": "no-trigger",
+      "prompt": "Write a k6 load test for the checkout endpoint that ramps to 200 virtual users."
+    },
+    {
+      "id": "pt-t08",
+      "expect": "no-trigger",
+      "prompt": "Explain the difference between a mock, a stub, and a fake."
+    },
+    {
+      "id": "pt-t09",
+      "expect": "no-trigger",
+      "prompt": "Our Go package needs table-driven tests for the parser."
+    },
+    {
+      "id": "pt-t10",
+      "expect": "no-trigger",
+      "prompt": "Add a docstring to the balance function describing what it returns."
+    }
+  ]
+}

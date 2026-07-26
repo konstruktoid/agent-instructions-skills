@@ -1,0 +1,83 @@
+{
+  "task": "avl-03-banner-quoting",
+  "condition": "with-skill",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:33:50.576102+00:00",
+    "seconds": 94.0
+  },
+  "skills_used": [
+    "eval-ansible-verification-loop:ansible-verification-loop"
+  ],
+  "num_turns": 24,
+  "cost_usd": 0.3902357,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "country-code-quoted",
+      "kind": "workspace_command",
+      "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "country-code-not-bare",
+      "kind": "workspace_command",
+      "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gateway-ports-unambiguous",
+      "kind": "workspace_command",
+      "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-rendered-in-template",
+      "kind": "workspace_command",
+      "source": "task prompt: render both in the template",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: document both in the README",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "quoting-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md References: justifying why a value must stay quoted",
+      "passed": true,
+      "evidence": "match: 'quot'"
+    }
+  ],
+  "passed": 9,
+  "total": 9
+}

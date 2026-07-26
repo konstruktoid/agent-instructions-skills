@@ -1,0 +1,59 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index 9c96436..f130398 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -15,3 +15,6 @@ select = ["E", "F", "W", "I"]
+ 
+ [tool.pytest.ini_options]
+ pythonpath = ["src"]
++
++[tool.ty.environment]
++root = ["src"]
+diff --git a/src/paging/__pycache__/slicing.cpython-313.pyc b/src/paging/__pycache__/slicing.cpython-313.pyc
+index f6afa91..69964d8 100644
+Binary files a/src/paging/__pycache__/slicing.cpython-313.pyc and b/src/paging/__pycache__/slicing.cpython-313.pyc differ
+diff --git a/src/paging/slicing.py b/src/paging/slicing.py
+index f395508..3954f50 100644
+--- a/src/paging/slicing.py
++++ b/src/paging/slicing.py
+@@ -7,7 +7,7 @@ def page_slice(items: list, page: int, per_page: int) -> list:
+         message = "page and per_page must be positive"
+         raise ValueError(message)
+     start = (page - 1) * per_page
+-    end = min(start + per_page, len(items) - 1)
++    end = start + per_page
+     return items[start:end]
+ 
+ 
+diff --git a/tests/__pycache__/test_slicing.cpython-313-pytest-9.1.1.pyc b/tests/__pycache__/test_slicing.cpython-313-pytest-9.1.1.pyc
+index 3fa436c..0423ac4 100644
+Binary files a/tests/__pycache__/test_slicing.cpython-313-pytest-9.1.1.pyc and b/tests/__pycache__/test_slicing.cpython-313-pytest-9.1.1.pyc differ
+diff --git a/tests/test_slicing.py b/tests/test_slicing.py
+index 089ab16..a055be9 100644
+--- a/tests/test_slicing.py
++++ b/tests/test_slicing.py
+@@ -1,6 +1,7 @@
+ """Tests for paging.slicing."""
+ 
+ import pytest
++
+ from paging import page_count, page_slice
+ 
+ 
+@@ -17,6 +18,16 @@ def test_page_slice_returns_the_requested_page(letters, page, per_page, expected
+     assert page_slice(letters, page, per_page) == expected
+ 
+ 
++def test_page_slice_includes_the_last_item_on_the_final_page(letters):
++    """The final page holds every remaining item, including the last one."""
++    assert page_slice(letters, 3, 2) == ["e", "f"]
++
++
++def test_page_slice_past_the_end_returns_an_empty_list(letters):
++    """A page number beyond the last page has no items, not an error."""
++    assert page_slice(letters, 4, 2) == []
++
++
+ @pytest.mark.parametrize(
+     ("total", "per_page", "expected"),
+     [(6, 2, 3), (7, 2, 4), (0, 2, 0)],

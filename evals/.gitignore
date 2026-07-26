@@ -1,0 +1,16 @@
+# Tool artifacts created inside eval workspaces during a run. They are scratch
+# state from ansible-lint and uv, not evidence, and .ansible/roles contains a
+# self-referential symlink that no consumer of these results needs.
+**/.ansible/
+**/.venv/
+**/__pycache__/
+
+# The single-skill plugin the harness builds for the with-skill condition is a copy of
+# skills/<category>/<name>/ at the commit under test, which git already records.
+**/plugin-*/
+
+# A finished workspace is its own git repository and carries build artifacts that run to
+# gigabytes. `run_eval.py snapshot` reduces each one to a workspace.diff against the
+# fixture's baseline commit, which is what gets committed. The workspaces stay here so
+# `run_eval.py regrade` can still re-run the graders against them.
+**/workspace/

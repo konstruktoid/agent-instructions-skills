@@ -1,0 +1,95 @@
+{
+  "task": "avl-05-collection-review",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:35:00.592254+00:00",
+    "seconds": 919.5
+  },
+  "skills_used": [],
+  "num_turns": 80,
+  "cost_usd": 2.4442730499999996,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "test-entry-point-attempted",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's full test entry point",
+      "passed": true,
+      "evidence": "match: 'molecule'"
+    },
+    {
+      "id": "test-failure-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md step 7: name the failing check when stopping",
+      "passed": true,
+      "evidence": "match: 'molecule'"
+    },
+    {
+      "id": "test-failure-not-glossed",
+      "kind": "final_regex",
+      "source": "SKILL.md checklist: never declare this done based on the edit alone",
+      "passed": true,
+      "evidence": "match: 'missing'"
+    },
+    {
+      "id": "no-suppression-added",
+      "kind": "workspace_command",
+      "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "var-prefix-fixed",
+      "kind": "workspace_command",
+      "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "requires-ansible-supported",
+      "kind": "workspace_command",
+      "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "galaxy-metadata-fixed",
+      "kind": "workspace_command",
+      "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "changed-when-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: idempotence holds",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 11,
+  "total": 11
+}

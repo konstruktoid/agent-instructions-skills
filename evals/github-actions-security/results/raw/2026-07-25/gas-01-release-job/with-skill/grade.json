@@ -1,0 +1,132 @@
+{
+  "task": "gas-01-release-job",
+  "condition": "with-skill",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-26T00:04:44.855926+00:00",
+    "seconds": 114.7
+  },
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "num_turns": 19,
+  "cost_usd": 0.44782375,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 11\ninfo[use-trusted-publishing]: prefer trusted publishing for authentication\n  --> ./.github/workflows/ci.yml:68:14\n   |\n68 |         run: npm publish\n   |         ---  ^^^^^^^^^^^ this command\n   |         |\n   |         this step\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#use-trusted-publishing\n\n2 findings (1 suppressed): 1 informational, 0 low, 0 medium, 0 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'actionlint'"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": true,
+      "evidence": "match: 'zizmor'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\ninfo[use-trusted-publishing]: prefer trusted publishing for authentication\n  --> ./.github/workflows/ci.yml:68:14\n   |\n68 |         run: npm publish\n   |         ---  ^^^^^^^^^^^ this command\n   |         |\n   |         this step\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#use-trusted-publishing\n\n2 findings (1 suppressed): 1 informational, 0 low, 0 medium, 0 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": true,
+      "evidence": "match: 'gh api'"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-tag-trigger",
+      "kind": "workspace_command",
+      "source": "task prompt: runs when a version tag matching v* is pushed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-release-needs-build",
+      "kind": "workspace_command",
+      "source": "task prompt: the release job should only run after the build job has passed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "release-job-scoped-permissions",
+      "kind": "workspace_command",
+      "source": "SKILL.md minimal permissions: create a release needs contents: write",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README's release section",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 15,
+  "total": 16
+}

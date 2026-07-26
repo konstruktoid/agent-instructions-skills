@@ -1,0 +1,8 @@
+---
+driver:
+  name: docker
+platforms:
+  - name: debian-bookworm
+    image: debian:bookworm
+provisioner:
+  name: ansible

@@ -1,0 +1,3 @@
+I looked at `src/ledger/client.py`, but I don't see evidence of an actual bug fix — there's no diff or commit history in this repo touching that file (git status only shows changes to files outside this workspace, and this directory isn't even git-tracked on its own). The current code is a simple retry loop and doesn't have an obvious bug I can point to.
+
+Could you clarify what the bug was and what change fixed it (a diff, commit hash, or just a description of the wrong behavior)? Without that I'd be guessing at what "unfixed" behavior to reproduce in the test, which risks writing a regression test for the wrong thing.

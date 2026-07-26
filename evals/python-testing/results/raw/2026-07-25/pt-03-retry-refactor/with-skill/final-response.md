@@ -1,0 +1,1 @@
+Refactor complete: `Client.get` and `Client.head` now both delegate to a single private `_with_retries(method, path)` helper, eliminating the duplicated retry loop while preserving attempt counting and the raised exception on exhaustion. Tests (4/4), ruff, and ty all pass clean.

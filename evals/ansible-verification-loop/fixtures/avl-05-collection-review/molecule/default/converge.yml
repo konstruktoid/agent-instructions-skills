@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply the nftables base role
+      ansible.builtin.include_role:
+        name: platform.firewall.nftables_base

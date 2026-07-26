@@ -1,0 +1,43 @@
+diff --git a/.ansible/roles/platform.certbot_renewal b/.ansible/roles/platform.certbot_renewal
+new file mode 120000
+index 0000000..3f1155e
+--- /dev/null
++++ b/.ansible/roles/platform.certbot_renewal
+@@ -0,0 +1 @@
++/repo/evals/ansible-verification-loop/results/raw/2026-07-25/avl-02-command-idempotence/baseline/workspace
+\ No newline at end of file
+diff --git a/README.md b/README.md
+index 26d5bf2..c4c32bd 100644
+--- a/README.md
++++ b/README.md
+@@ -9,3 +9,4 @@ Requests and renews Let's Encrypt certificates.
+ | `certbot_domains` | `[]` | Domains to request certificates for. |
+ | `certbot_email` | `admin@example.com` | Registration contact address. |
+ | `certbot_renew_hour` | `3` | Hour the renewal timer fires. |
++| `certbot_staging` | `false` | Request against the Let's Encrypt staging endpoint instead of production, for dry runs. |
+diff --git a/defaults/main.yml b/defaults/main.yml
+index 2f00997..c4dca26 100644
+--- a/defaults/main.yml
++++ b/defaults/main.yml
+@@ -2,3 +2,4 @@
+ certbot_domains: []
+ certbot_email: admin@example.com
+ certbot_renew_hour: 3
++certbot_staging: false
+diff --git a/tasks/main.yml b/tasks/main.yml
+index aa2ea2c..a9fb10f 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -8,8 +8,11 @@
+   register: certbot_valid_count
+ 
+ - name: Request a certificate for each domain
+-  ansible.builtin.command: certbot certonly --standalone -d {{ item }} -m {{ certbot_email }} --agree-tos -n
++  ansible.builtin.command: >
++    certbot certonly --standalone -d {{ item }} -m {{ certbot_email }} --agree-tos -n
++    {{ '--staging' if certbot_staging else '' }}
+   loop: "{{ certbot_domains }}"
++  when: certbot_valid_count.stdout | int == 0
+   notify: Reload nginx
+ 
+ - name: Write the renewal timer

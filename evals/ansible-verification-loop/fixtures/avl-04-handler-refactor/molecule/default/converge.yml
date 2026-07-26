@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Apply the auditd rules role
+      ansible.builtin.include_role:
+        name: auditd_rules

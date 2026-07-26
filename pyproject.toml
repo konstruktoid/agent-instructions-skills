@@ -16,6 +16,15 @@ dev = ["ruff>=0.16.0", "ty==0.0.63", "types-pyyaml>=6.0.12"]
 # Prose and code in this repository wrap at 100 columns.
 line-length = 100
 target-version = "py39"
+# Eval fixtures are deliberately flawed inputs, not repository source: each one plants
+# the insecure pattern its skill is supposed to catch, and a run rewrites it in place.
+# Linting them here would report the planted flaw as a repository defect. Each fixture
+# carries its own ruff configuration, which is what the eval actually measures against.
+extend-exclude = ["evals/*/fixtures", "evals/*/results", "evals/probe-sandbox"]
+
+[tool.ty.src]
+# Excluded for the same reason as the ruff setting above.
+exclude = ["evals/*/fixtures", "evals/*/results", "evals/probe-sandbox"]
 
 [tool.ruff.lint]
 # instructions/python_coding_instructions.md: a full rule set is the default for a new

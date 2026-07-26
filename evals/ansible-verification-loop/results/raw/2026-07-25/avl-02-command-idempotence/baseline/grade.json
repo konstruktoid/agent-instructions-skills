@@ -1,0 +1,88 @@
+{
+  "task": "avl-02-command-idempotence",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:33:21.218382+00:00",
+    "seconds": 35.9
+  },
+  "skills_used": [],
+  "num_turns": 11,
+  "cost_usd": 0.1852649,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": false,
+      "evidence": "exit 2\nfqcn[action-core]: Use FQCN for builtin module actions (shell).\ntasks/main.yml:7:3 Use `ansible.builtin.shell` or `ansible.legacy.shell` instead.\n\nname[missing]: All tasks should be named.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nrisky-shell-pipe: Shells that use pipes should set the pipefail option.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:10 Task/Handler: Request a certificate for each domain\n\nrisky-file-permissions: File permissions unset or incorrect.\ntasks/main.yml:18 Task/Handler: Write the renewal timer\n\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\nfqcn[action-core]: Use FQCN for builtin module actions (shell).\ntasks/main.yml:7:3 Use `ansible.builtin.shell` or `ansible.legacy.shell` instead.\n\nname[missing]: All tasks should be named.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nrisky-shell-pipe: Shells that use pipes should set the pipefail option.\ntasks/main.yml:7 Task/Handler: shell certbot certificates | grep -c \"VALID\"\n\nno-changed-when: Commands should not change things if nothing needs doing.\ntasks/main.yml:10 Task/Handler: Request a certificate for each domain\n\nrisky-file-permissions: File permissions unset or incorrect.\ntasks/main.yml:18 Task/Handler: Write the renewal timer\n\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "no-suppression-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: do not add suppressions to silence findings",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fqcn-used",
+      "kind": "workspace_command",
+      "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+      "passed": false,
+      "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+    },
+    {
+      "id": "every-task-named",
+      "kind": "workspace_command",
+      "source": "ansible-lint name[missing], a finding present in the fixture",
+      "passed": false,
+      "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+    },
+    {
+      "id": "changed-when-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "feature-staging-flag",
+      "kind": "workspace_command",
+      "source": "task prompt: a certbot_staging variable that passes --staging",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-skip-existing",
+      "kind": "workspace_command",
+      "source": "task prompt: skip the request when a live certificate already exists",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README for the new variable",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 5,
+  "total": 10
+}

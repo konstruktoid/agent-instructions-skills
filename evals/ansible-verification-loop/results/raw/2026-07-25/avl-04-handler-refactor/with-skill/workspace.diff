@@ -1,0 +1,83 @@
+diff --git a/.ansible/roles/platform.auditd_rules b/.ansible/roles/platform.auditd_rules
+new file mode 120000
+index 0000000..713f3f3
+--- /dev/null
++++ b/.ansible/roles/platform.auditd_rules
+@@ -0,0 +1 @@
++/repo/evals/ansible-verification-loop/results/raw/2026-07-25/avl-04-handler-refactor/with-skill/workspace
+\ No newline at end of file
+diff --git a/README.md b/README.md
+index 7d96ac7..7c97794 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,5 @@ Installs auditd and applies a hardening rule set.
+ | `auditd_num_logs` | `5` | Number of rotated audit logs to keep. |
+ | `auditd_rules_path` | `/etc/audit/rules.d/hardening.rules` | Where the rule set is written. |
+ 
+-The role restarts auditd directly after each change.
++The configuration and rules tasks notify a handler, so auditd restarts at most once per run,
++and only when something actually changed.
+diff --git a/handlers/main.yml b/handlers/main.yml
+index fe92594..fdef1ff 100644
+--- a/handlers/main.yml
++++ b/handlers/main.yml
+@@ -1,2 +1,5 @@
+ ---
+-[]
++- name: Restart auditd
++  ansible.builtin.service:
++    name: auditd
++    state: restarted
+diff --git a/molecule/default/verify.yml b/molecule/default/verify.yml
+index 1b182e0..8772b71 100644
+--- a/molecule/default/verify.yml
++++ b/molecule/default/verify.yml
+@@ -11,3 +11,14 @@
+       ansible.builtin.assert:
+         that:
+           - rules_file.stat.exists
++
++    - name: Read the auditd configuration
++      ansible.builtin.slurp:
++        src: /etc/audit/auditd.conf
++      register: auditd_conf
++
++    - name: Assert the log rotation settings are applied
++      ansible.builtin.assert:
++        that:
++          - "'max_log_file = 8' in (auditd_conf.content | b64decode)"
++          - "'num_logs = 5' in (auditd_conf.content | b64decode)"
+diff --git a/tasks/main.yml b/tasks/main.yml
+index d4821b1..eecfd70 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -10,11 +10,15 @@
+     regexp: "^max_log_file ="
+     line: "max_log_file = {{ auditd_max_log_file }}"
+     mode: "0640"
++  notify: Restart auditd
+ 
+-- name: Restart auditd after the configuration change
+-  ansible.builtin.service:
+-    name: auditd
+-    state: restarted
++- name: Configure the number of rotated logs to keep
++  ansible.builtin.lineinfile:
++    path: /etc/audit/auditd.conf
++    regexp: "^num_logs ="
++    line: "num_logs = {{ auditd_num_logs }}"
++    mode: "0640"
++  notify: Restart auditd
+ 
+ - name: Install the hardening rules
+   ansible.builtin.copy:
+@@ -23,8 +27,4 @@
+       -w /etc/shadow -p wa -k identity
+     dest: "{{ auditd_rules_path }}"
+     mode: "0640"
+-
+-- name: Restart auditd after the rule change
+-  ansible.builtin.service:
+-    name: auditd
+-    state: restarted
++  notify: Restart auditd

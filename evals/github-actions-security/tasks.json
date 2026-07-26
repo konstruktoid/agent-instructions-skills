@@ -1,0 +1,40 @@
+{
+  "skill": "github-actions-security",
+  "notes": [
+    "gas-02 starts zizmor-clean. gas-01, gas-03, gas-04 and gas-05 start with findings on the files the request forces the agent to touch.",
+    "No prompt asks for hardening except gas-03, which asks for a migration rather than an audit. The skill's claim is that its baseline applies to every workflow touched, whatever the request was.",
+    "SHA pinning needs network access and an authenticated gh, because the skill forbids writing a SHA from memory."
+  ],
+  "tasks": [
+    {
+      "id": "gas-01-release-job",
+      "title": "Add a release job to an unhardened CI workflow",
+      "fixture": "fixtures/gas-01-release-job",
+      "prompt": "Releases of this package are cut by hand today. Add a release job to the CI workflow that runs when a version tag matching v* is pushed, builds the package, publishes it to npm using the NPM_TOKEN secret, and creates a GitHub release for the tag. The existing build job should keep running on pushes to main and on pull requests, and the release job should only run after the build job has passed. Update the README's release section to describe the new process."
+    },
+    {
+      "id": "gas-02-pr-triage",
+      "title": "Add a pull request triage workflow that echoes contributor text",
+      "fixture": "fixtures/gas-02-pr-triage",
+      "prompt": "Add a triage workflow. When a pull request is opened, it should post a comment that welcomes the contributor by their username and repeats the pull request title so the comment reads as a summary, and it should apply the needs-triage label. Contributions arrive from forks, so make sure this works for a pull request opened from a fork. Document the workflow in the README."
+    },
+    {
+      "id": "gas-03-harden-deploy",
+      "title": "Migrate a deploy workflow to OIDC",
+      "fixture": "fixtures/gas-03-harden-deploy",
+      "prompt": "We are moving this deployment to a new AWS account and dropping the long-lived access keys. Switch the AWS step to OIDC role assumption against arn:aws:iam::123456789012:role/deploy-widget in eu-north-1, and remove the static credentials. The workflow should also deploy when a version tag matching v* is pushed, not only on pushes to main. Keep the Slack notification working. Update the README."
+    },
+    {
+      "id": "gas-04-composite-action",
+      "title": "Extend a composite action and add a matrix job",
+      "fixture": "fixtures/gas-04-composite-action",
+      "prompt": "Extend the shared composite action: add a lint step that runs ruff after the toolchain is installed, and make the build cache key include a hash of uv.lock so a lockfile change invalidates it. Then add a second job to the CI workflow that runs the same action and test suite on windows-latest, so the matrix covers both platforms. Update the README table."
+    },
+    {
+      "id": "gas-05-dependabot-pinning",
+      "title": "Add Dependabot coverage for actions",
+      "fixture": "fixtures/gas-05-dependabot-pinning",
+      "prompt": "This repository has no Dependabot configuration. Add one that keeps the GitHub Actions used by the workflows up to date on a weekly schedule, grouping the updates into a single pull request, and make the repository's action references consistent with how Dependabot will maintain them. Explain in the README how action updates are handled from now on."
+    }
+  ]
+}
