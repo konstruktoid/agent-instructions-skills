@@ -1,0 +1,12 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: checkout
+          image: ghcr.io/example/checkout:1.2.0

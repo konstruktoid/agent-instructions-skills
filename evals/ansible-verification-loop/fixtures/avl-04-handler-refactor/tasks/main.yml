@@ -1,0 +1,30 @@
+---
+- name: Install auditd
+  ansible.builtin.package:
+    name: auditd
+    state: present
+
+- name: Configure log rotation limits
+  ansible.builtin.lineinfile:
+    path: /etc/audit/auditd.conf
+    regexp: "^max_log_file ="
+    line: "max_log_file = {{ auditd_max_log_file }}"
+    mode: "0640"
+
+- name: Restart auditd after the configuration change
+  ansible.builtin.service:
+    name: auditd
+    state: restarted
+
+- name: Install the hardening rules
+  ansible.builtin.copy:
+    content: |
+      -w /etc/passwd -p wa -k identity
+      -w /etc/shadow -p wa -k identity
+    dest: "{{ auditd_rules_path }}"
+    mode: "0640"
+
+- name: Restart auditd after the rule change
+  ansible.builtin.service:
+    name: auditd
+    state: restarted

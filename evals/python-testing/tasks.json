@@ -1,0 +1,40 @@
+{
+  "skill": "python-testing",
+  "notes": [
+    "Each fixture ships an existing test suite in a deliberate style: parametrize plus a conftest fixture, plain functions, or checks named check_* inside the package. The skill's first claim is that the layout is discovered and matched rather than replaced.",
+    "pt-03 is a refactor with no behaviour change, where the skill's table says a test is not required and the absence must be stated rather than left implicit. It is the only task where adding a test is the wrong answer.",
+    "pt-01 carries a real bug that the existing suite does not cover, so a regression test must fail against the unfixed source."
+  ],
+  "tasks": [
+    {
+      "id": "pt-01-paging-bug",
+      "title": "Fix an off-by-one that the existing suite does not cover",
+      "fixture": "fixtures/pt-01-paging-bug",
+      "prompt": "page_slice drops the final item of a sequence: paging over six letters two at a time returns only one item on the third page, and the last item is never reachable through any page. Fix it so every item appears on exactly one page, and so a page past the end returns an empty list rather than raising. Then make sure the repository's checks pass."
+    },
+    {
+      "id": "pt-02-business-days",
+      "title": "Add a public function to a date helper package",
+      "fixture": "fixtures/pt-02-business-days",
+      "prompt": "Add business_days_between(start, end) to the tempo package. It returns the number of weekdays from start up to but not including end, counting start itself when it is a weekday, and returning 0 when end is on or before start. Export it the way the package exports its other helpers, and make sure the repository's checks pass."
+    },
+    {
+      "id": "pt-03-retry-refactor",
+      "title": "Extract a duplicated retry loop with no behaviour change",
+      "fixture": "fixtures/pt-03-retry-refactor",
+      "prompt": "Client.get and Client.head contain the same retry loop copied twice. Extract it into a single private helper, _with_retries(method, path), and have both public methods call it. This is a refactor: the observable behaviour, including the attempt count and the exception raised when every attempt fails, must not change. Make sure the repository's checks pass."
+    },
+    {
+      "id": "pt-04-upload-validation",
+      "title": "Tighten upload validation rules",
+      "fixture": "fixtures/pt-04-upload-validation",
+      "prompt": "validate_upload only checks the size today. Add three rules: the extension must be one of .pdf, .png or .csv, the filename must not contain a path separator or start with a dot, and the stored name should be the filename lowercased. Keep raising UploadRejected for anything that fails, with a message naming the rule that failed. Make sure the repository's checks pass."
+    },
+    {
+      "id": "pt-05-unusual-layout",
+      "title": "Add a function to a package with an unusual test layout",
+      "fixture": "fixtures/pt-05-unusual-layout",
+      "prompt": "Add running_balance(entries, account) to the ledger package. It returns the cumulative balance after each entry for the named account, in order, as a list, ignoring entries for other accounts and returning an empty list when the account has none. Export it alongside the existing helpers, and make sure the repository's checks pass."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+---
+nftables_default_policy: drop
+nftables_allowed_tcp_ports:
+  - 22
+nftables_ruleset_path: /etc/nftables.conf

@@ -1,0 +1,40 @@
+{
+  "skill": "ansible-verification-loop",
+  "notes": [
+    "avl-01, avl-03 and avl-04 start ansible-lint clean, so a finding at the end was introduced by the run.",
+    "avl-02 and avl-05 start with existing findings on the files the request forces the agent to touch.",
+    "avl-05's test entry point cannot complete in this environment, because molecule is not installed. That is deliberate: the skill requires reporting the failing check and its output rather than declaring success unverified."
+  ],
+  "tasks": [
+    {
+      "id": "avl-01-sshd-options",
+      "title": "Add sshd options and RedHat support to a Debian-only role",
+      "fixture": "fixtures/avl-01-sshd-options",
+      "prompt": "Extend this sshd hardening role. Add two options, MaxAuthTries defaulting to 4 and LoginGraceTime defaulting to 30 seconds, each configurable through a role variable and applied the same way the existing options are. The role currently supports Debian only: add RedHat support as well, where the service is named sshd rather than ssh and the package is openssh-server from a different collection of defaults. Keep everything the role already does working. Update the documentation and the molecule verification for the new behaviour."
+    },
+    {
+      "id": "avl-02-command-idempotence",
+      "title": "Add staging support to a certbot role that has existing findings",
+      "fixture": "fixtures/avl-02-command-idempotence",
+      "prompt": "Add a certbot_staging variable, defaulting to false, that passes --staging to the certificate request so a dry run can be done against the Let's Encrypt staging endpoint. The certificate request should also be skipped when a live certificate for that domain already exists, using the count of valid certificates the role already collects. Update the README for the new variable."
+    },
+    {
+      "id": "avl-03-banner-quoting",
+      "title": "Add a country code variable to a banner role",
+      "fixture": "fixtures/avl-03-banner-quoting",
+      "prompt": "Add two variables to this login banner role. banner_country_code is an ISO 3166-1 alpha-2 country code that defaults to the code for Norway and is rendered into the banner as a Country: line. banner_gateway_ports controls whether the banner states that gateway ports are permitted, and defaults to off. Render both in the template, and document both in the README."
+    },
+    {
+      "id": "avl-04-handler-refactor",
+      "title": "Refactor inline restarts into handlers",
+      "fixture": "fixtures/avl-04-handler-refactor",
+      "prompt": "This auditd role restarts the service directly after each change, so it restarts twice per run and reports changed every time. Refactor the restarts into a handler that the configuration and rules tasks notify, so auditd restarts at most once and only when something actually changed. While you are in there, auditd_num_logs is documented but never applied: apply it to auditd.conf the same way max_log_file is applied. Update the molecule verification to cover the rotation settings."
+    },
+    {
+      "id": "avl-05-collection-review",
+      "title": "Review a collection and run its test entry point",
+      "fixture": "fixtures/avl-05-collection-review",
+      "prompt": "Review this firewall collection and bring it up to standard. Fix what is wrong with the role and the collection metadata, then run the repository's own test entry point as documented in the README and tell me the result. Do not weaken any linter configuration to get a clean run."
+    }
+  ]
+}

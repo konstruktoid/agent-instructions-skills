@@ -1,0 +1,12 @@
+---
+namespace: platform
+name: firewall
+version: 1.2.0
+readme: README.md
+authors:
+  - platform team
+description: Firewall roles for Debian and RedHat hosts.
+license:
+  - MIT
+build_ignore:
+  - .git

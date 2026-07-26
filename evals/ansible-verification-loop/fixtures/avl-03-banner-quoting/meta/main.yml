@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: login_banner
+  author: platform
+  description: Renders the pre-authentication login banner.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - banner
+dependencies: []

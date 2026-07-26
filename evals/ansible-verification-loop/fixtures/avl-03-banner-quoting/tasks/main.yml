@@ -1,0 +1,8 @@
+---
+- name: Render the login banner
+  ansible.builtin.template:
+    src: issue.net.j2
+    dest: "{{ banner_path }}"
+    owner: "{{ banner_owner }}"
+    group: "{{ banner_owner }}"
+    mode: "{{ banner_mode }}"

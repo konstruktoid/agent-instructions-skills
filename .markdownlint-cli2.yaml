@@ -15,3 +15,7 @@ config:
     siblings_only: true
   # Table pipe alignment is cosmetic and churns on every content edit.
   MD060: false
+# Raw eval artifacts are transcripts and workspaces produced by a graded run. They are
+# evidence of what an agent wrote, so they are kept verbatim rather than reformatted.
+ignores:
+  - "evals/*/results/raw/**"

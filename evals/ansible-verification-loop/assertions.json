@@ -1,0 +1,314 @@
+{
+  "skill": "ansible-verification-loop",
+  "notes": [
+    "`lint-clean-or-reported` encodes the skill's step 7 rule directly: the loop either reaches a clean result, or it stops and the failing check is named with its output. It reads ../final-response.md, which is the run's final message to the user.",
+    "`lint-clean` is graded separately from `lint-clean-or-reported`, so a run that stopped and reported honestly is distinguishable from one that reached clean.",
+    "`no-suppression-added` covers the skill's rule against silencing findings instead of fixing them."
+  ],
+  "tasks": {
+    "avl-01-sshd-options": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint tasks/ defaults/ handlers/ meta/",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^\\s*-?\\s*(lineinfile|package|service|template|copy|command|shell):' tasks/ handlers/",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "command": "grep -qiE 'redhat|rocky|almalinux|^ *- *name: *EL' meta/main.yml",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'ansible_os_family|ansible_facts' handlers/ tasks/ defaults/ vars/ 2>/dev/null",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "command": "grep -qiE 'max_auth_tries|maxauthtries' defaults/main.yml && grep -qiE 'login_grace|logingrace' defaults/main.yml",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- molecule/ | grep -q molecule",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change"
+      }
+    ],
+    "avl-02-command-idempotence": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint tasks/ defaults/ handlers/ meta/",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^\\s*-?\\s*(lineinfile|package|service|template|copy|command|shell):' tasks/ handlers/",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture"
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "command": "! grep -nE '^- (ansible|shell|command|copy)' tasks/main.yml",
+        "source": "ansible-lint name[missing], a finding present in the fixture"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "command": "grep -q 'changed_when' tasks/main.yml",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "command": "grep -q 'certbot_staging' defaults/main.yml && grep -q -- '--staging' tasks/main.yml",
+        "source": "task prompt: a certbot_staging variable that passes --staging"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "command": "grep -qE 'when:' tasks/main.yml",
+        "source": "task prompt: skip the request when a live certificate already exists"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README for the new variable"
+      }
+    ],
+    "avl-03-banner-quoting": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "command": "grep -qE \"banner_country_code: *['\\\"]NO['\\\"]\" defaults/main.yml",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "command": "grep -q banner_country_code defaults/main.yml && ! grep -qE 'banner_country_code: *(NO|no|No)\\s*$' defaults/main.yml",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "command": "grep -q banner_gateway_ports defaults/main.yml && ! grep -qE \"banner_gateway_ports: *(off|Off|OFF|on|On|ON|yes|Yes|no|No)\\s*$\" defaults/main.yml",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "command": "grep -q 'banner_country_code' templates/issue.net.j2 && grep -q 'banner_gateway_ports' templates/issue.net.j2",
+        "source": "task prompt: render both in the template"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: document both in the README"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "pattern": "Norway|YAML 1\\.1|quot|boolean",
+        "source": "SKILL.md References: justifying why a value must stay quoted"
+      }
+    ],
+    "avl-04-handler-refactor": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint"
+      },
+      {
+        "id": "handler-added",
+        "kind": "workspace_command",
+        "command": "grep -qiE 'name: *restart auditd' handlers/main.yml",
+        "source": "task prompt: refactor the restarts into a handler"
+      },
+      {
+        "id": "tasks-notify-handler",
+        "kind": "workspace_command",
+        "command": "grep -q 'notify:' tasks/main.yml",
+        "source": "task prompt: the configuration and rules tasks notify the handler"
+      },
+      {
+        "id": "no-inline-restart",
+        "kind": "workspace_command",
+        "command": "! grep -q 'state: restarted' tasks/main.yml",
+        "source": "task prompt: auditd restarts at most once and only when something changed"
+      },
+      {
+        "id": "feature-num-logs-applied",
+        "kind": "workspace_command",
+        "command": "grep -q 'auditd_num_logs' tasks/main.yml",
+        "source": "task prompt: auditd_num_logs is documented but never applied"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- molecule/ | grep -q molecule",
+        "source": "SKILL.md checklist: test fixtures updated if behavior changed"
+      },
+      {
+        "id": "idempotence-considered",
+        "kind": "final_regex",
+        "pattern": "idempot|changed_when|only when|handler",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge"
+      }
+    ],
+    "avl-05-collection-review": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "pattern": "make test|molecule",
+        "source": "SKILL.md Verify: run the repository's full test entry point"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "pattern": "molecule",
+        "source": "SKILL.md step 7: name the failing check when stopping"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "pattern": "not installed|not found|unavailable|could not|cannot|unable|missing|failed|did not run",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint roles/ meta/",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "command": "grep -q 'nftables_base_' roles/nftables_base/defaults/main.yml",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "command": "grep -qE 'requires_ansible: *\">=2\\.(1[5-9]|[2-9][0-9])\\.[0-9]' meta/runtime.yml",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "command": "grep -q 'repository:' galaxy.yml && grep -qE '^ *(tags|- (security|infrastructure|linux|networking|tools))' galaxy.yml",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "command": "grep -q 'changed_when' roles/nftables_base/tasks/main.yml",
+        "source": "SKILL.md checklist: idempotence holds"
+      }
+    ]
+  }
+}

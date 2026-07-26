@@ -1,0 +1,23 @@
+---
+- name: Install nftables
+  ansible.builtin.package:
+    name: nftables
+    state: present
+
+- name: Write the ruleset
+  ansible.builtin.copy:
+    content: |
+      table inet filter {
+        chain input {
+          type filter hook input priority 0; policy {{ nftables_default_policy }};
+        }
+      }
+    dest: "{{ nftables_ruleset_path }}"
+  notify: Reload nftables
+
+- name: Load the ruleset now
+  ansible.builtin.command: nft -f {{ nftables_ruleset_path }}
+
+- name: Check the active ruleset
+  ansible.builtin.shell: nft list ruleset | wc -l
+  register: nftables_rule_lines

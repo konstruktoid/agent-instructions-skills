@@ -1,0 +1,4 @@
+---
+auditd_max_log_file: 8
+auditd_num_logs: 5
+auditd_rules_path: /etc/audit/rules.d/hardening.rules

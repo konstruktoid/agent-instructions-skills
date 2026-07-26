@@ -1,0 +1,60 @@
+{
+  "skill": "ansible-verification-loop",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "avl-t01",
+      "expect": "trigger",
+      "prompt": "Add a handler to the nginx role so the service reloads when its config template changes, and make sure the config task notifies it."
+    },
+    {
+      "id": "avl-t02",
+      "expect": "trigger",
+      "prompt": "Review roles/postgres/tasks/main.yml and tell me whether the package pinning and the service restart logic are right."
+    },
+    {
+      "id": "avl-t03",
+      "expect": "trigger",
+      "prompt": "Our collection's molecule scenario fails on the idempotence step. Find out which task reports changed on the second run and fix it."
+    },
+    {
+      "id": "avl-t04",
+      "expect": "trigger",
+      "prompt": "Convert the short module names in this playbook to FQCN and make sure it still passes the repo's checks."
+    },
+    {
+      "id": "avl-t05",
+      "expect": "trigger",
+      "prompt": "This role only supports Debian. Add RedHat support, including the different service and package names."
+    },
+    {
+      "id": "avl-t06",
+      "expect": "no-trigger",
+      "prompt": "Review this Terraform module: the security group allows 0.0.0.0/0 on port 22 and I want that tightened."
+    },
+    {
+      "id": "avl-t07",
+      "expect": "no-trigger",
+      "prompt": "Lint this docker-compose.yml and fix the indentation so it parses cleanly."
+    },
+    {
+      "id": "avl-t08",
+      "expect": "no-trigger",
+      "prompt": "Write a Python script that parses our static inventory file and prints the hosts grouped by their group name."
+    },
+    {
+      "id": "avl-t09",
+      "expect": "no-trigger",
+      "prompt": "Our Kubernetes deployment manifest is missing CPU and memory resource limits. Add sensible ones."
+    },
+    {
+      "id": "avl-t10",
+      "expect": "no-trigger",
+      "prompt": "Explain the practical differences between Puppet and Chef for configuration management."
+    }
+  ]
+}

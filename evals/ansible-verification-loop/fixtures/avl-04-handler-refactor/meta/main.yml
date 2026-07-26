@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: auditd_rules
+  author: platform
+  description: Installs auditd and applies a hardening rule set.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - audit
+dependencies: []

@@ -1,0 +1,60 @@
+{
+  "skill": "github-actions-security",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "gas-t01",
+      "expect": "trigger",
+      "prompt": "Add a release workflow that publishes the package to npm when a version tag is pushed."
+    },
+    {
+      "id": "gas-t02",
+      "expect": "trigger",
+      "prompt": "Review the permissions block in .github/workflows/deploy.yml and tell me if it grants too much."
+    },
+    {
+      "id": "gas-t03",
+      "expect": "trigger",
+      "prompt": "Pin every action we use to a commit SHA instead of a version tag."
+    },
+    {
+      "id": "gas-t04",
+      "expect": "trigger",
+      "prompt": "Add a dependabot configuration that keeps our GitHub Actions up to date weekly."
+    },
+    {
+      "id": "gas-t05",
+      "expect": "trigger",
+      "prompt": "One of our workflows echoes the pull request title inside a run block. Is that safe, and fix it if not."
+    },
+    {
+      "id": "gas-t06",
+      "expect": "no-trigger",
+      "prompt": "Our GitLab CI pipeline needs a caching stage so the dependency install stops repeating."
+    },
+    {
+      "id": "gas-t07",
+      "expect": "no-trigger",
+      "prompt": "Add a Jenkinsfile stage that runs the integration tests against a staging database."
+    },
+    {
+      "id": "gas-t08",
+      "expect": "no-trigger",
+      "prompt": "The Dockerfile in this repo runs the application as root. Fix that."
+    },
+    {
+      "id": "gas-t09",
+      "expect": "no-trigger",
+      "prompt": "Write a bash script that tags a release, signs the tag, and pushes it to the remote."
+    },
+    {
+      "id": "gas-t10",
+      "expect": "no-trigger",
+      "prompt": "Explain what OIDC is and why it is preferred over long-lived cloud credentials."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+---
+profile: moderate
+exclude_paths:
+  - .git/

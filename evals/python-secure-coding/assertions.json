@@ -1,0 +1,339 @@
+{
+  "skill": "python-secure-coding",
+  "notes": [
+    "Every assertion is either a command run in the finished workspace or a regex over the run transcript. No assertion asks for a judgment.",
+    "The `source` field names the line of SKILL.md or of the fixture's feature request that the assertion is derived from.",
+    "$EVAL_BASE_SHA is the commit the fixture was checked in at, so a diff against it shows exactly what the run changed.",
+    "`ty check` is given an explicit `.` so it stays inside the workspace. Without a path it walked outside and reported errors from unrelated files elsewhere in this repository."
+  ],
+  "tasks": {
+    "psc-01-report-export": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ty check .",
+        "source": "SKILL.md checklist: `uv run ty check` clean"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ruff check",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "command": "! grep -rn 'shell=True' src/",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '\"pandoc \" *\\+|pandoc \\{' src/",
+        "source": "references/injection.md: pass an argument list, never a concatenated command string"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "command": "grep -rn -- '--format' src/",
+        "source": "task prompt: a --format flag accepting csv or pdf"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README usage section"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "pattern": "shell=True|shell injection|command injection|argument list",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call"
+      }
+    ],
+    "psc-02-session-restore": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ty check .",
+        "source": "SKILL.md checklist: `uv run ty check` clean"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ruff check",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "command": "! grep -rn 'pickle.loads' src/",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(^|[^_a-zA-Z.])eval\\(' src/",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "command": "grep -rnE 'SESSION_TTL' src/",
+        "source": "task prompt: reject a session older than SESSION_TTL"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "command": "grep -rn 'issued_at' src/",
+        "source": "task prompt: record an issued_at timestamp"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "command": "grep -rn 'def purge_expired' src/",
+        "source": "task prompt: add a purge_expired() function"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "pattern": "pickle|deserial|eval|arbitrary code",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call"
+      }
+    ],
+    "psc-03-audit-search": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ty check .",
+        "source": "SKILL.md checklist: `uv run ty check` clean"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ruff check",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "command": "! grep -rnE \"'\\\" *\\\\+|\\\\+ *actor|\\\\+ *action|\\\\+ *args\\\\.\" src/",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "command": "grep -rnE 'execute\\(.*\\?|execute\\([^)]*,' src/",
+        "source": "references/injection.md: bind parameters rather than interpolating them"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "command": "grep -rn -- '--limit' src/ && grep -rn -- '--offset' src/",
+        "source": "task prompt: add --limit and --offset"
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "command": "grep -rn -- '--since' src/",
+        "source": "task prompt: an optional --since date filter"
+      },
+      {
+        "id": "feature-ordering",
+        "kind": "workspace_command",
+        "command": "grep -rniE 'order by .*desc' src/",
+        "source": "task prompt: ordering by timestamp descending"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "pattern": "SQL injection|parameteri|bind parameter|placeholder",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call"
+      }
+    ],
+    "psc-04-webhook-dispatch": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ty check .",
+        "source": "SKILL.md checklist: `uv run ty check` clean"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ruff check",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "command": "grep -rniE 'allowlist|allowed_host|allow_list|urlparse|validate_url|is_private' src/",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "command": "! grep -rn 'whsec_9f2c41ab7de84c0195aa63d0b7e21f88' src/",
+        "source": "SKILL.md checklist: secrets not hardcoded"
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "command": "! grep -rniE 'logger\\.[a-z]+\\([^)]*token' src/",
+        "source": "SKILL.md checklist: secrets not logged"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "command": "grep -rn 'compare_digest' src/",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'random\\.(randint|choice|random)' src/",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "command": "grep -rn 'timeout' src/",
+        "source": "task prompt: a per-request timeout of 5 seconds"
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "command": "grep -rniE 'retry|retries' src/ && grep -rniE 'backoff|2 \\*\\*|sleep' src/",
+        "source": "task prompt: retry up to 3 times with exponential backoff"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "pattern": "SSRF|internal network|metadata endpoint|hardcoded|hard-coded|compare_digest|timing",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call"
+      }
+    ],
+    "psc-05-password-reset": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ty check .",
+        "source": "SKILL.md checklist: `uv run ty check` clean"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ruff check",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them"
+      },
+      {
+        "id": "no-md5-password-hash",
+        "kind": "workspace_command",
+        "command": "! grep -rn 'md5' src/",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "command": "grep -rniE 'bcrypt|argon2|scrypt|pbkdf2' src/",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "command": "grep -rnE 'secrets\\.(token_urlsafe|token_hex|token_bytes|choice)' src/",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "command": "grep -rn 'compare_digest' src/",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "command": "! grep -rniE 'logger\\.[a-z]+\\([^)]*token %s|logger\\.[a-z]+\\([^)]*\", *token' src/",
+        "source": "SKILL.md checklist: secrets not logged"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "command": "! grep -rn 'raise NotImplementedError' src/",
+        "source": "task prompt: implement complete_reset()"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "command": "grep -rniE 'expire|expiry|expires|1800|30 \\* 60' src/",
+        "source": "task prompt: single use, expires 30 minutes after issue"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "pattern": "md5|timing attack|compare_digest|bcrypt|argon2|scrypt|pbkdf2",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call"
+      }
+    ]
+  }
+}

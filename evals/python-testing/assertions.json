@@ -1,0 +1,386 @@
+{
+  "skill": "python-testing",
+  "notes": [
+    "`test-fails-without-the-fix` copies the finished workspace, restores src/ to the fixture commit, and requires the suite to fail. That is the only mechanical way to check the skill's rule that a regression test must fail against the unfixed code.",
+    "`existing-tests-unchanged` is the pass condition for the refactor task, where adding a test is the wrong answer.",
+    "`no-parallel-test-tree` catches a run that invents tests/ or test/ next to an existing layout."
+  ],
+  "tasks": {
+    "pt-01-paging-bug": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "pytest",
+        "source": "SKILL.md Verify: run the repository's own entry point"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q || { grep -qi 'pytest' ../final-response.md && grep -qiE 'fail|error' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: ruff check clean on the test files too"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'xfail|mark\\.skip|pytest\\.skip' tests/",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^import unittest|^from unittest|^import mock|^from mock' tests/",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "command": "! test -d test && ! test -d src/tests && ! test -d testing",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- tests/ | grep -q tests/",
+        "source": "SKILL.md table: a bug fix requires a test"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "command": "d=$(mktemp -d) && cp -a . \"$d/w\" && cd \"$d/w\" && git checkout -q \"$EVAL_BASE_SHA\" -- src/ && ! uv run --quiet pytest -q",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "command": "grep -q 'parametrize' tests/test_slicing.py",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from paging import page_slice; l=list('abcdef'); assert page_slice(l,3,2)==['e','f'], page_slice(l,3,2); assert page_slice(l,9,2)==[]\"",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty"
+      }
+    ],
+    "pt-02-business-days": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "pytest",
+        "source": "SKILL.md Verify: run the repository's own entry point"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q || { grep -qi 'pytest' ../final-response.md && grep -qiE 'fail|error' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: ruff check clean on the test files too"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'xfail|mark\\.skip|pytest\\.skip' tests/",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^import unittest|^from unittest|^import mock|^from mock' tests/",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "command": "! test -d test && ! test -d src/tests && ! test -d testing",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "command": "grep -rq 'business_days_between' tests/",
+        "source": "SKILL.md table: a new public interface requires a test"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "command": "grep -q 'def business_days_between' src/tempo/calendar.py",
+        "source": "task prompt: add business_days_between to the tempo package"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "command": "grep -q 'business_days_between' src/tempo/__init__.py",
+        "source": "task prompt: export it the way the package exports its other helpers"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys,datetime; sys.path.insert(0,'src'); from tempo import business_days_between as b; assert b(datetime.date(2026,7,20),datetime.date(2026,7,27))==5; assert b(datetime.date(2026,7,27),datetime.date(2026,7,20))==0\"",
+        "source": "task prompt: weekdays from start up to but not including end, 0 when end precedes start"
+      }
+    ],
+    "pt-03-retry-refactor": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "pytest",
+        "source": "SKILL.md Verify: run the repository's own entry point"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q || { grep -qi 'pytest' ../final-response.md && grep -qiE 'fail|error' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: ruff check clean on the test files too"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'xfail|mark\\.skip|pytest\\.skip' tests/",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^import unittest|^from unittest|^import mock|^from mock' tests/",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "command": "! test -d test && ! test -d src/tests && ! test -d testing",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "command": "grep -q '_with_retries' src/fetcher/client.py",
+        "source": "task prompt: extract the loop into _with_retries"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git diff --name-only \"$EVAL_BASE_SHA\" -- tests/)\"",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "pattern": "no new test|not required|existing test|behaviou?r is unchanged|did not add a test|no test was added|refactor",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from fetcher import Client; from fetcher.client import TransportError; c=Client(lambda m,p:(_ for _ in ()).throw(TransportError(p)));\nimport pytest\" 2>/dev/null || uv run --quiet pytest -q",
+        "source": "task prompt: observable behaviour must not change"
+      }
+    ],
+    "pt-04-upload-validation": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "pytest",
+        "source": "SKILL.md Verify: run the repository's own entry point"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q || { grep -qi 'pytest' ../final-response.md && grep -qiE 'fail|error' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: ruff check clean on the test files too"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'xfail|mark\\.skip|pytest\\.skip' tests/",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^import unittest|^from unittest|^import mock|^from mock' tests/",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "command": "! test -d test && ! test -d src/tests && ! test -d testing",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "command": "test \"$(grep -c 'pytest.raises' tests/test_validation.py)\" -ge 4",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "command": "grep -qE '\\.pdf' src/uploads/validation.py",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from uploads import validate_upload, UploadRejected;\nfor name in ('../etc/passwd.pdf', '.hidden.pdf', 'a/b.pdf'):\n    try:\n        validate_upload(name, 10)\n    except UploadRejected:\n        continue\n    raise SystemExit('accepted ' + name)\"",
+        "source": "task prompt: reject a path separator or a leading dot"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from uploads import validate_upload; assert validate_upload('Report.PDF', 10)=='report.pdf'\"",
+        "source": "task prompt: the stored name should be the filename lowercased"
+      }
+    ],
+    "pt-05-unusual-layout": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "pytest",
+        "source": "SKILL.md Verify: run the repository's own entry point"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "uv run --quiet pytest -q || { grep -qi 'pytest' ../final-response.md && grep -qiE 'fail|error' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff check .",
+        "source": "SKILL.md checklist: ruff check clean on the test files too"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "command": "uv run --quiet ruff format --check .",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'xfail|mark\\.skip|pytest\\.skip' src/ledger/_tests/",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^import unittest|^from unittest|^import mock|^from mock' src/ledger/_tests/",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "command": "! test -d test && ! test -d src/tests && ! test -d testing",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- src/ledger/_tests/ | grep -q check_",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "command": "grep -rq 'def check_' src/ledger/_tests/ && ! grep -rq 'def test_' src/ledger/_tests/",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml"
+      },
+      {
+        "id": "no-conventional-tests-dir-created",
+        "kind": "workspace_command",
+        "command": "! test -d tests",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "command": "grep -q 'def running_balance' src/ledger/balance.py",
+        "source": "task prompt: add running_balance to the ledger package"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\"",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none"
+      }
+    ]
+  }
+}

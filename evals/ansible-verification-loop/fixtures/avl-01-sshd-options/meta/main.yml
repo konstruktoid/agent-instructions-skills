@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  role_name: sshd_hardening
+  author: platform
+  description: Applies a hardened sshd configuration.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - security
+    - ssh
+dependencies: []

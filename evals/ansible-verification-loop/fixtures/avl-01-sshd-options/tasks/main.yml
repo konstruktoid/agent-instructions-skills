@@ -1,0 +1,32 @@
+---
+- name: Install the openssh server package
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
+
+- name: Set the sshd port
+  ansible.builtin.lineinfile:
+    path: "{{ sshd_config_path }}"
+    regexp: "^#?Port"
+    line: "Port {{ sshd_port }}"
+    validate: /usr/sbin/sshd -T -f %s
+    mode: "0600"
+  notify: Restart sshd
+
+- name: Set root login policy
+  ansible.builtin.lineinfile:
+    path: "{{ sshd_config_path }}"
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin {{ sshd_permit_root_login }}"
+    validate: /usr/sbin/sshd -T -f %s
+    mode: "0600"
+  notify: Restart sshd
+
+- name: Set password authentication policy
+  ansible.builtin.lineinfile:
+    path: "{{ sshd_config_path }}"
+    regexp: "^#?PasswordAuthentication"
+    line: "PasswordAuthentication {{ sshd_password_authentication }}"
+    validate: /usr/sbin/sshd -T -f %s
+    mode: "0600"
+  notify: Restart sshd

@@ -1,0 +1,537 @@
+{
+  "skill": "github-actions-security",
+  "notes": [
+    "The shared assertions are the skill's own baseline, which it claims applies to every workflow touched regardless of what the request was.",
+    "`sha-resolved-not-recalled` is graded over the run's Bash commands, because the skill forbids writing a SHA from memory and a resolved SHA leaves a gh api call behind.",
+    "`pins-carry-version-comment` passes when no pinned reference is missing its trailing version comment.",
+    "`actions-pinned-by-sha` extracts every `uses:` reference and requires each to end in 40 hex characters. An earlier form matched a leading hex digit as a version number and reported correctly pinned SHAs as unpinned."
+  ],
+  "tasks": {
+    "gas-01-release-job": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
+        "id": "feature-tag-trigger",
+        "kind": "workspace_command",
+        "command": "grep -rqE \"tags:\" .github/workflows/ && grep -rqE \"v\\\\*\" .github/workflows/",
+        "source": "task prompt: runs when a version tag matching v* is pushed"
+      },
+      {
+        "id": "feature-release-needs-build",
+        "kind": "workspace_command",
+        "command": "grep -rq 'needs:' .github/workflows/",
+        "source": "task prompt: the release job should only run after the build job has passed"
+      },
+      {
+        "id": "release-job-scoped-permissions",
+        "kind": "workspace_command",
+        "command": "grep -rq 'contents: write' .github/workflows/",
+        "source": "SKILL.md minimal permissions: create a release needs contents: write"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README's release section"
+      }
+    ],
+    "gas-02-pr-triage": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
+        "id": "no-fork-code-checkout-on-privileged-trigger",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'ref: *\\$\\{\\{ *github\\.event\\.pull_request\\.head' .github/workflows/",
+        "source": "SKILL.md checklist: no pull_request_target or workflow_run job checks out fork-controlled code"
+      },
+      {
+        "id": "untrusted-text-passed-through-env",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'pull_request.title' .github/workflows/ || grep -rqE '^\\s+[A-Z_]+: *\\$\\{\\{ *github\\.event\\.pull_request\\.title' .github/workflows/",
+        "source": "SKILL.md baseline: pass the value through env and reference the environment variable, quoted"
+      },
+      {
+        "id": "feature-comment-and-label",
+        "kind": "workspace_command",
+        "command": "grep -rqiE 'needs-triage' .github/workflows/",
+        "source": "task prompt: apply the needs-triage label"
+      },
+      {
+        "id": "feature-write-scope-present",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'pull-requests: write|issues: write' .github/workflows/",
+        "source": "SKILL.md minimal permissions: comment on or label a pull request needs pull-requests: write"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: document the workflow in the README"
+      }
+    ],
+    "gas-03-harden-deploy": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
+        "id": "static-aws-credentials-removed",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'AWS_SECRET_ACCESS_KEY' .github/workflows/",
+        "source": "task prompt: remove the static credentials"
+      },
+      {
+        "id": "oidc-id-token-permission",
+        "kind": "workspace_command",
+        "command": "grep -rq 'id-token: write' .github/workflows/",
+        "source": "SKILL.md minimal permissions: request an OIDC token needs id-token: write"
+      },
+      {
+        "id": "role-assumption-configured",
+        "kind": "workspace_command",
+        "command": "grep -rq 'role-to-assume' .github/workflows/",
+        "source": "task prompt: OIDC role assumption against the named role ARN"
+      },
+      {
+        "id": "no-write-all-permissions",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'write-all' .github/workflows/",
+        "source": "SKILL.md baseline: deny by default, grant permissions per job"
+      },
+      {
+        "id": "self-hosted-runner-removed",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'runs-on: self-hosted' .github/workflows/",
+        "source": "SKILL.md baseline: do not use self-hosted runners in a public repository"
+      },
+      {
+        "id": "feature-tag-trigger",
+        "kind": "workspace_command",
+        "command": "grep -rq 'tags:' .github/workflows/",
+        "source": "task prompt: also deploy when a version tag matching v* is pushed"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README"
+      }
+    ],
+    "gas-04-composite-action": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
+        "id": "feature-lint-step",
+        "kind": "workspace_command",
+        "command": "grep -q 'ruff' actions/setup-toolchain/action.yml",
+        "source": "task prompt: add a lint step that runs ruff"
+      },
+      {
+        "id": "feature-lockfile-cache-key",
+        "kind": "workspace_command",
+        "command": "grep -qE 'hashFiles' actions/setup-toolchain/action.yml",
+        "source": "task prompt: make the cache key include a hash of uv.lock"
+      },
+      {
+        "id": "feature-windows-job",
+        "kind": "workspace_command",
+        "command": "grep -q 'windows-latest' .github/workflows/ci.yml",
+        "source": "task prompt: add a job that runs on windows-latest"
+      },
+      {
+        "id": "composite-action-pinned",
+        "kind": "workspace_command",
+        "command": "! grep -hoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' actions/setup-toolchain/action.yml | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: this includes actions used inside composite actions"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README table"
+      }
+    ],
+    "gas-05-dependabot-pinning": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
+        "id": "dependabot-config-created",
+        "kind": "workspace_command",
+        "command": "test -f .github/dependabot.yml || test -f .github/dependabot.yaml",
+        "source": "task prompt: add a Dependabot configuration"
+      },
+      {
+        "id": "dependabot-covers-actions",
+        "kind": "workspace_command",
+        "command": "grep -qE 'github-actions' .github/dependabot.y*ml",
+        "source": "task prompt: keeps the GitHub Actions used by the workflows up to date"
+      },
+      {
+        "id": "dependabot-weekly",
+        "kind": "workspace_command",
+        "command": "grep -q 'weekly' .github/dependabot.y*ml",
+        "source": "task prompt: on a weekly schedule"
+      },
+      {
+        "id": "dependabot-grouped",
+        "kind": "workspace_command",
+        "command": "grep -q 'groups:' .github/dependabot.y*ml",
+        "source": "task prompt: grouping the updates into a single pull request"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: explain in the README how action updates are handled"
+      }
+    ]
+  }
+}
