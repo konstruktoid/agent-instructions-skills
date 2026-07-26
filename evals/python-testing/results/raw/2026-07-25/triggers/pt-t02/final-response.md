@@ -1,0 +1,1 @@
+I searched the whole workspace and there's no `parse_manifest` function anywhere in the codebase (only `src/ledger/balance.py`, `src/ledger/client.py`, and `tests/test_balance.py` exist). Could you point me to the file where it was added, or is it possibly uncommitted/in a different branch?

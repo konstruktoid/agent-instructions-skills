@@ -1,0 +1,17 @@
+{
+  "id": "pt-t10",
+  "expect": "no-trigger",
+  "fired": true,
+  "correct": false,
+  "skills_used": [
+    "eval-python-testing:python-testing",
+    "python-testing"
+  ],
+  "cost_usd": 0.1438379,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T23:54:06.958747+00:00",
+    "seconds": 27.0
+  }
+}

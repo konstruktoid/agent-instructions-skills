@@ -1,0 +1,1 @@
+I don't see any threading or worker pool code in this repo — the only Python files are `src/ledger/balance.py`, `src/ledger/client.py`, and their test, and none of them use `threading`, thread pools, or anything GIL-related. Could you point me to the specific file/repo containing the worker pool, or did you mean to ask this in a different working directory?

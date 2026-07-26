@@ -1,0 +1,1 @@
+The security group in `infra/main.tf:4-9` allows SSH from anywhere. I'd rather not guess at what IP range is appropriate — what CIDR(s) should be allowed to reach port 22 (e.g., your office/VPN range, a specific admin IP)? I can wire it up as a variable so it's configurable rather than hardcoded.

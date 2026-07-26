@@ -1,0 +1,16 @@
+{
+  "id": "pt-t09",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [
+    "run"
+  ],
+  "cost_usd": 0.17546310000000004,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T23:54:03.963755+00:00",
+    "seconds": 47.0
+  }
+}
