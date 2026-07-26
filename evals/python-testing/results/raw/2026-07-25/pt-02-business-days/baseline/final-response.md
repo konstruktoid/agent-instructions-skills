@@ -1,0 +1,3 @@
+Added `business_days_between(start, end)` to `src/tempo/calendar.py:18` and exported it from `tempo/__init__.py`, matching the existing pattern. Added tests covering the weekday count, start-inclusive/end-exclusive behavior, weekend-skipping, and the zero-result cases.
+
+Checks: `pytest` (10 passed) and `ruff check` (clean, after auto-fixing an import-order issue) both pass. `ty check` reports an `unresolved-import` for `tempo` — I verified via `git stash` that this failure pre-exists on `main` before my change (it's a missing `src` root config for `ty`, unrelated to this task), so it isn't something introduced by this work.

@@ -1,0 +1,90 @@
+diff --git a/src/tempo/__init__.py b/src/tempo/__init__.py
+index b262439..86a6b69 100644
+--- a/src/tempo/__init__.py
++++ b/src/tempo/__init__.py
+@@ -1,5 +1,5 @@
+ """Date helpers."""
+ 
+-from tempo.calendar import is_weekend, next_weekday
++from tempo.calendar import business_days_between, is_weekend, next_weekday
+ 
+-__all__ = ["is_weekend", "next_weekday"]
++__all__ = ["business_days_between", "is_weekend", "next_weekday"]
+diff --git a/src/tempo/__pycache__/__init__.cpython-313.pyc b/src/tempo/__pycache__/__init__.cpython-313.pyc
+index 7745440..0debda6 100644
+Binary files a/src/tempo/__pycache__/__init__.cpython-313.pyc and b/src/tempo/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/src/tempo/__pycache__/calendar.cpython-313.pyc b/src/tempo/__pycache__/calendar.cpython-313.pyc
+index 3269bf5..ba034c8 100644
+Binary files a/src/tempo/__pycache__/calendar.cpython-313.pyc and b/src/tempo/__pycache__/calendar.cpython-313.pyc differ
+diff --git a/src/tempo/calendar.py b/src/tempo/calendar.py
+index 48f406c..df3a698 100644
+--- a/src/tempo/calendar.py
++++ b/src/tempo/calendar.py
+@@ -15,3 +15,16 @@ def next_weekday(day: datetime.date) -> datetime.date:
+     while is_weekend(day):
+         day += datetime.timedelta(days=1)
+     return day
++
++
++def business_days_between(start: datetime.date, end: datetime.date) -> int:
++    """Return the number of weekdays from start up to but not including end."""
++    if end <= start:
++        return 0
++    count = 0
++    day = start
++    while day < end:
++        if not is_weekend(day):
++            count += 1
++        day += datetime.timedelta(days=1)
++    return count
+diff --git a/tests/__pycache__/test_calendar.cpython-313-pytest-9.1.1.pyc b/tests/__pycache__/test_calendar.cpython-313-pytest-9.1.1.pyc
+index 41e1598..71d7a30 100644
+Binary files a/tests/__pycache__/test_calendar.cpython-313-pytest-9.1.1.pyc and b/tests/__pycache__/test_calendar.cpython-313-pytest-9.1.1.pyc differ
+diff --git a/tests/test_calendar.py b/tests/test_calendar.py
+index 7a2868a..b85815d 100644
+--- a/tests/test_calendar.py
++++ b/tests/test_calendar.py
+@@ -3,11 +3,14 @@
+ import datetime
+ 
+ import pytest
+-from tempo import is_weekend, next_weekday
++
++from tempo import business_days_between, is_weekend, next_weekday
+ 
+ MONDAY = datetime.date(2026, 7, 20)
++TUESDAY = datetime.date(2026, 7, 21)
+ SATURDAY = datetime.date(2026, 7, 25)
+ SUNDAY = datetime.date(2026, 7, 26)
++NEXT_MONDAY = datetime.date(2026, 7, 27)
+ 
+ 
+ @pytest.mark.parametrize(
+@@ -27,3 +30,27 @@ def test_next_weekday_skips_the_weekend():
+ def test_next_weekday_leaves_a_weekday_alone():
+     """A weekday is already the next weekday."""
+     assert next_weekday(MONDAY) == MONDAY
++
++
++@pytest.mark.parametrize(
++    ("start", "end", "expected"),
++    [
++        (MONDAY, TUESDAY, 1),
++        (MONDAY, SATURDAY, 5),
++        (MONDAY, NEXT_MONDAY, 5),
++        (SATURDAY, NEXT_MONDAY, 0),
++    ],
++)
++def test_business_days_between_counts_weekdays(start, end, expected):
++    """Weekdays in [start, end) are counted, weekends are not."""
++    assert business_days_between(start, end) == expected
++
++
++def test_business_days_between_is_zero_when_end_equals_start():
++    """An empty range has no business days."""
++    assert business_days_between(MONDAY, MONDAY) == 0
++
++
++def test_business_days_between_is_zero_when_end_precedes_start():
++    """A range that runs backwards has no business days."""
++    assert business_days_between(NEXT_MONDAY, MONDAY) == 0

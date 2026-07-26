@@ -1,0 +1,81 @@
+{
+  "task": "psc-01-report-export",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:25:52.485907+00:00",
+    "seconds": 44.7
+  },
+  "skills_used": [],
+  "num_turns": 12,
+  "cost_usd": 0.22867679999999999,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-shell-true",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-string-built-command",
+      "kind": "workspace_command",
+      "source": "references/injection.md: pass an argument list, never a concatenated command string",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-format-flag",
+      "kind": "workspace_command",
+      "source": "task prompt: a --format flag accepting csv or pdf",
+      "passed": true,
+      "evidence": "exit 0\nsrc/reportkit/export.py:39:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")\ngrep: src/reportkit/__pycache__/export.cpython-313.pyc: binary file matches"
+    },
+    {
+      "id": "feature-readme-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README usage section",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'shell=True'"
+    }
+  ],
+  "passed": 9,
+  "total": 9
+}

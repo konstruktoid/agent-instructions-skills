@@ -1,0 +1,139 @@
+diff --git a/README.md b/README.md
+index 14b4f4f..efd4f5a 100644
+--- a/README.md
++++ b/README.md
+@@ -5,9 +5,19 @@ Delivers webhook payloads to subscriber endpoints.
+ ## Usage
+ 
+ ```python
+-from webhooks.dispatch import deliver
++from webhooks.dispatch import DeliveryError, deliver
+ 
+-deliver(subscriber_url, {"event": "created"})
++result = deliver(subscriber_url, {"event": "created"})
++print(result.status, len(result.attempts))
+ ```
+ 
+-A failed delivery is not retried.
++Each request uses a 5 second timeout. A failed delivery is retried up to 3
++times (4 attempts total) with exponential backoff (1s, 2s, 4s between
++attempts). 5xx responses and connection/timeout errors are treated as
++retryable; 4xx responses are treated as final and are not retried.
++
++On success, `deliver` returns a `DeliveryResult` with the final `status` and
++an `attempts` list recording every attempt made (its number, status code, and
++error, if any). If delivery never succeeds, `deliver` raises `DeliveryError`,
++which carries the same `attempts` list so a caller can see how many attempts
++were made and why each one failed.
+diff --git a/src/webhooks/dispatch.py b/src/webhooks/dispatch.py
+index 4562635..071f458 100644
+--- a/src/webhooks/dispatch.py
++++ b/src/webhooks/dispatch.py
+@@ -3,12 +3,44 @@
+ import json
+ import logging
+ import random
++import time
++import urllib.error
+ import urllib.request
++from dataclasses import dataclass
+ 
+ logger = logging.getLogger(__name__)
+ 
+ SIGNING_TOKEN = "whsec_9f2c41ab7de84c0195aa63d0b7e21f88"
+ 
++REQUEST_TIMEOUT_SECONDS = 5
++MAX_ATTEMPTS = 4
++BACKOFF_BASE_SECONDS = 1.0
++
++
++@dataclass
++class DeliveryAttempt:
++    """Outcome of a single delivery attempt."""
++
++    number: int
++    status: int | None
++    error: str | None
++
++
++@dataclass
++class DeliveryResult:
++    """Outcome of a completed delivery, including every attempt made."""
++
++    status: int
++    attempts: list[DeliveryAttempt]
++
++
++class DeliveryError(Exception):
++    """Raised when a webhook could not be delivered after all attempts."""
++
++    def __init__(self, message: str, attempts: list[DeliveryAttempt]) -> None:
++        super().__init__(message)
++        self.attempts = attempts
++
+ 
+ def new_delivery_id() -> str:
+     """Return an identifier for one delivery attempt."""
+@@ -25,11 +57,55 @@ def verify(payload: str, provided: str) -> bool:
+     return provided == sign(payload)
+ 
+ 
+-def deliver(url: str, payload: dict) -> int:
+-    """POST a payload to a subscriber endpoint and return the status code."""
+-    body = json.dumps(payload).encode()
++def _send_once(
++    url: str, body: bytes, signature: str, attempt_number: int, attempts: list[DeliveryAttempt]
++) -> DeliveryResult | None:
++    """Make one delivery attempt, recording its outcome.
++
++    Returns the result on success, or None if the failure is retryable.
++    Raises DeliveryError immediately on a non-retryable (4xx) response.
++    """
+     request = urllib.request.Request(url, data=body, method="POST")
+-    request.add_header("X-Signature", sign(json.dumps(payload)))
+-    logger.info("delivering %s to %s with token %s", new_delivery_id(), url, SIGNING_TOKEN)
+-    with urllib.request.urlopen(request) as response:
+-        return response.status
++    request.add_header("X-Signature", signature)
++    delivery_id = new_delivery_id()
++    logger.info(
++        "delivering %s to %s (attempt %d/%d)", delivery_id, url, attempt_number, MAX_ATTEMPTS
++    )
++
++    try:
++        with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
++            attempts.append(
++                DeliveryAttempt(number=attempt_number, status=response.status, error=None)
++            )
++            return DeliveryResult(status=response.status, attempts=attempts)
++    except urllib.error.HTTPError as exc:
++        attempts.append(DeliveryAttempt(number=attempt_number, status=exc.code, error=str(exc)))
++        if exc.code < 500:
++            raise DeliveryError(
++                f"delivery to {url} failed with status {exc.code}", attempts
++            ) from exc
++        return None
++    except urllib.error.URLError as exc:
++        attempts.append(DeliveryAttempt(number=attempt_number, status=None, error=str(exc.reason)))
++        return None
++
++
++def deliver(url: str, payload: dict) -> DeliveryResult:
++    """POST a payload to a subscriber endpoint, retrying transient failures.
++
++    Each attempt uses a 5 second timeout. Connection errors and 5xx responses
++    are retried up to MAX_ATTEMPTS times with exponential backoff; 4xx
++    responses are treated as final and are not retried.
++    """
++    body = json.dumps(payload).encode()
++    signature = sign(json.dumps(payload))
++    attempts: list[DeliveryAttempt] = []
++
++    for attempt_number in range(1, MAX_ATTEMPTS + 1):
++        result = _send_once(url, body, signature, attempt_number, attempts)
++        if result is not None:
++            return result
++        if attempt_number < MAX_ATTEMPTS:
++            time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1)))
++
++    raise DeliveryError(f"delivery to {url} failed after {MAX_ATTEMPTS} attempts", attempts)

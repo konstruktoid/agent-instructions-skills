@@ -1,0 +1,90 @@
+{
+  "task": "avl-02-command-idempotence",
+  "condition": "with-skill",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:33:21.224547+00:00",
+    "seconds": 138.3
+  },
+  "skills_used": [
+    "eval-ansible-verification-loop:ansible-verification-loop"
+  ],
+  "num_turns": 26,
+  "cost_usd": 0.5868099999999999,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "no-suppression-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: do not add suppressions to silence findings",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fqcn-used",
+      "kind": "workspace_command",
+      "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-task-named",
+      "kind": "workspace_command",
+      "source": "ansible-lint name[missing], a finding present in the fixture",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "changed-when-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-staging-flag",
+      "kind": "workspace_command",
+      "source": "task prompt: a certbot_staging variable that passes --staging",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-skip-existing",
+      "kind": "workspace_command",
+      "source": "task prompt: skip the request when a live certificate already exists",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README for the new variable",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 10,
+  "total": 10
+}

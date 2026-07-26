@@ -1,0 +1,88 @@
+{
+  "task": "psc-03-audit-search",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:25:52.482743+00:00",
+    "seconds": 52.0
+  },
+  "skills_used": [],
+  "num_turns": 13,
+  "cost_usd": 0.2467661,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-sql-concatenation",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "parameterized-query",
+      "kind": "workspace_command",
+      "source": "references/injection.md: bind parameters rather than interpolating them",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:50:        return connection.execute(query, params).fetchall()"
+    },
+    {
+      "id": "feature-pagination",
+      "kind": "workspace_command",
+      "source": "task prompt: add --limit and --offset",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:66:        \"--limit\",\nsrc/auditlog/search.py:72:        \"--offset\","
+    },
+    {
+      "id": "feature-since-filter",
+      "kind": "workspace_command",
+      "source": "task prompt: an optional --since date filter",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:62:        \"--since\","
+    },
+    {
+      "id": "feature-ordering",
+      "kind": "workspace_command",
+      "source": "task prompt: ordering by timestamp descending",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:44:        \"ORDER BY ts DESC \""
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'parameteri'"
+    }
+  ],
+  "passed": 10,
+  "total": 10
+}

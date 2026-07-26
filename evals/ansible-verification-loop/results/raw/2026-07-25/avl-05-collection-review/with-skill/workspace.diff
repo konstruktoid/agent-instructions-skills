@@ -1,0 +1,606 @@
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/.ansible-lint b/.ansible/collections/ansible_collections/platform/firewall/.ansible-lint
+new file mode 100644
+index 0000000..bd94806
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/.ansible-lint
+@@ -0,0 +1,4 @@
++---
++profile: production
++exclude_paths:
++  - .git/
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/.ansible/.lock b/.ansible/collections/ansible_collections/platform/firewall/.ansible/.lock
+new file mode 100644
+index 0000000..e69de29
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/CHANGELOG.md b/.ansible/collections/ansible_collections/platform/firewall/CHANGELOG.md
+new file mode 100644
+index 0000000..864b574
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/CHANGELOG.md
+@@ -0,0 +1,22 @@
++# Changelog
++
++## 2.0.0
++
++### Breaking changes
++
++- `nftables_base` role variables now use the `nftables_base_` prefix:
++  - `nftables_default_policy` -> `nftables_base_default_policy`
++  - `nftables_allowed_tcp_ports` -> `nftables_base_allowed_tcp_ports`
++  - `nftables_ruleset_path` -> `nftables_base_ruleset_path`
++
++### Bug fixes
++
++- `nftables_base_allowed_tcp_ports` is now actually applied to the generated
++  ruleset. Previously the variable was defined but never used, so the
++  default-drop policy silently blocked all traffic, including SSH.
++
++### Documentation
++
++- Corrected collection/role description: only Debian is declared and tested
++  (`meta/main.yml` platforms and the molecule scenario cover Debian bookworm
++  only); RedHat was never supported.
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/FILES.json b/.ansible/collections/ansible_collections/platform/firewall/FILES.json
+new file mode 100644
+index 0000000..eee74fc
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/FILES.json
+@@ -0,0 +1,208 @@
++{
++ "files": [
++  {
++   "name": ".",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "meta",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "meta/runtime.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "cec2a5e51d50837a928483bad0c0c5491f5210d331a0f097a42ac1807aabe724",
++   "format": 1
++  },
++  {
++   "name": ".ansible",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": ".ansible/collections",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": ".ansible/collections/ansible_collections",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": ".ansible/collections/ansible_collections/platform",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": ".ansible/roles",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": ".ansible/modules",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": ".ansible/.lock",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++   "format": 1
++  },
++  {
++   "name": "molecule",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "molecule/default",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "molecule/default/molecule.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "376ccdac2b3fa02c65f023abb44fe8178d073db124abbd911244238f3f348d96",
++   "format": 1
++  },
++  {
++   "name": "molecule/default/Dockerfile.j2",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "c584e02f949a3d4af26b0078fa8f78b0bc93122dc7a33ce96f6c08083aa7c85f",
++   "format": 1
++  },
++  {
++   "name": "molecule/default/converge.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "41ada97e0225d4a648ed545b31c955503a6a38bf607063db9aa41d8250fe7fe0",
++   "format": 1
++  },
++  {
++   "name": ".ansible-lint",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "1a7a0b0d06091f2d30e1ef70a817d25d6974e874773800fafa810ca0d3091633",
++   "format": 1
++  },
++  {
++   "name": "roles",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/meta",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/meta/main.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "c43b25bedd12bed969424a2e12f3de98836f104b64016077cff9be2e73b607e3",
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/tasks",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/tasks/main.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "018e183897435a73b5edf12cef571b3f9d75dda699baea5072d257d44f1d20b0",
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/defaults",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/defaults/main.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "710c6d31a1632ff728429b2c5398844eac694689cda9c1457cb66aa3f8fc92f8",
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/handlers",
++   "ftype": "dir",
++   "chksum_type": null,
++   "chksum_sha256": null,
++   "format": 1
++  },
++  {
++   "name": "roles/nftables_base/handlers/main.yml",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "17fe5fdfe55076c836c9e64a8ce5d1107f046e17a24493a0fbbdddc46b875bdd",
++   "format": 1
++  },
++  {
++   "name": "CHANGELOG.md",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "847a84761bc1aea977417bdf8fbf26d9223e59e087ce0de9a0196cd04345ab9a",
++   "format": 1
++  },
++  {
++   "name": "README.md",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "c3e9aea4ace3f1f109ae367ec2f782a9d463b2304d48863fab849ad6be1b99b5",
++   "format": 1
++  },
++  {
++   "name": "Makefile",
++   "ftype": "file",
++   "chksum_type": "sha256",
++   "chksum_sha256": "412f75f9cda47610ab27a62ae2955ec31fd9ba9bed5c267b1d9b3f907bc06bd4",
++   "format": 1
++  }
++ ],
++ "format": 1
++}
+\ No newline at end of file
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/MANIFEST.json b/.ansible/collections/ansible_collections/platform/firewall/MANIFEST.json
+new file mode 100644
+index 0000000..cf3e76d
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/MANIFEST.json
+@@ -0,0 +1,33 @@
++{
++ "collection_info": {
++  "namespace": "platform",
++  "name": "firewall",
++  "version": "2.0.0",
++  "authors": [
++   "platform team"
++  ],
++  "readme": "README.md",
++  "tags": [
++   "security",
++   "networking"
++  ],
++  "description": "Firewall role for Debian hosts.",
++  "license": [
++   "MIT"
++  ],
++  "license_file": null,
++  "dependencies": {},
++  "repository": null,
++  "documentation": null,
++  "homepage": null,
++  "issues": null
++ },
++ "file_manifest_file": {
++  "name": "FILES.json",
++  "ftype": "file",
++  "chksum_type": "sha256",
++  "chksum_sha256": "91eb85586a5822ea3df979213c950a6c1b204d00f90367526f21451382ae088d",
++  "format": 1
++ },
++ "format": 1
++}
+\ No newline at end of file
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/Makefile b/.ansible/collections/ansible_collections/platform/firewall/Makefile
+new file mode 100644
+index 0000000..7b5003a
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/Makefile
+@@ -0,0 +1,7 @@
++.PHONY: lint test
++
++lint:
++	ansible-lint .
++
++test: lint
++	molecule test -s default
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/README.md b/.ansible/collections/ansible_collections/platform/firewall/README.md
+new file mode 100644
+index 0000000..b8d0d71
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/README.md
+@@ -0,0 +1,17 @@
++# platform.firewall
++
++Firewall role for Debian hosts.
++
++## Roles
++
++| Role | Purpose |
++|------|---------|
++| `nftables_base` | Applies a base nftables ruleset. |
++
++## Testing
++
++```sh
++make test
++```
++
++`make test` runs `ansible-lint` and then the molecule scenario.
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/meta/runtime.yml b/.ansible/collections/ansible_collections/platform/firewall/meta/runtime.yml
+new file mode 100644
+index 0000000..1e85b01
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/meta/runtime.yml
+@@ -0,0 +1,2 @@
++---
++requires_ansible: ">=2.15.0"
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/molecule/default/Dockerfile.j2 b/.ansible/collections/ansible_collections/platform/firewall/molecule/default/Dockerfile.j2
+new file mode 100644
+index 0000000..48921d6
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/molecule/default/Dockerfile.j2
+@@ -0,0 +1,8 @@
++# Molecule managed
++
++FROM {{ item.image }}
++
++RUN if [ $(command -v apt-get) ]; then export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y python3 sudo bash ca-certificates iproute2 python3-apt aptitude rsync systemd systemd-sysv && apt-get clean && rm -rf /var/lib/apt/lists/*; fi
++
++STOPSIGNAL SIGRTMIN+3
++CMD ["/lib/systemd/systemd"]
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/molecule/default/converge.yml b/.ansible/collections/ansible_collections/platform/firewall/molecule/default/converge.yml
+new file mode 100644
+index 0000000..b692faf
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/molecule/default/converge.yml
+@@ -0,0 +1,7 @@
++---
++- name: Converge
++  hosts: all
++  tasks:
++    - name: Apply the nftables base role
++      ansible.builtin.include_role:
++        name: platform.firewall.nftables_base
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/molecule/default/molecule.yml b/.ansible/collections/ansible_collections/platform/firewall/molecule/default/molecule.yml
+new file mode 100644
+index 0000000..f59422a
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/molecule/default/molecule.yml
+@@ -0,0 +1,13 @@
++---
++driver:
++  name: docker
++platforms:
++  - name: debian-bookworm
++    image: debian:bookworm
++    command: /lib/systemd/systemd
++    privileged: true
++    cgroupns_mode: host
++    volumes:
++      - /sys/fs/cgroup:/sys/fs/cgroup:rw
++provisioner:
++  name: ansible
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/defaults/main.yml b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/defaults/main.yml
+new file mode 100644
+index 0000000..7d17297
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/defaults/main.yml
+@@ -0,0 +1,5 @@
++---
++nftables_base_default_policy: drop
++nftables_base_allowed_tcp_ports:
++  - 22
++nftables_base_ruleset_path: /etc/nftables.conf
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/handlers/main.yml b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/handlers/main.yml
+new file mode 100644
+index 0000000..ce59c69
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/handlers/main.yml
+@@ -0,0 +1,5 @@
++---
++- name: Reload nftables
++  ansible.builtin.service:
++    name: nftables
++    state: reloaded
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/meta/main.yml b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/meta/main.yml
+new file mode 100644
+index 0000000..5221262
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/meta/main.yml
+@@ -0,0 +1,14 @@
++---
++galaxy_info:
++  role_name: nftables_base
++  author: platform
++  description: Applies a base nftables ruleset.
++  license: MIT
++  min_ansible_version: "2.15"
++  platforms:
++    - name: Debian
++      versions:
++        - bookworm
++  galaxy_tags:
++    - firewall
++dependencies: []
+diff --git a/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/tasks/main.yml b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/tasks/main.yml
+new file mode 100644
+index 0000000..3e35f75
+--- /dev/null
++++ b/.ansible/collections/ansible_collections/platform/firewall/roles/nftables_base/tasks/main.yml
+@@ -0,0 +1,25 @@
++---
++- name: Install nftables
++  ansible.builtin.package:
++    name: nftables
++    state: present
++    update_cache: true
++
++- name: Write the ruleset
++  ansible.builtin.copy:
++    content: |
++      table inet filter {
++        chain input {
++          type filter hook input priority 0; policy {{ nftables_base_default_policy }};
++      {% for port in nftables_base_allowed_tcp_ports %}
++          tcp dport {{ port }} accept
++      {% endfor %}
++        }
++      }
++    dest: "{{ nftables_base_ruleset_path }}"
++    mode: "0644"
++  notify: Reload nftables
++
++- name: Load the ruleset now
++  ansible.builtin.command: nft -f {{ nftables_base_ruleset_path }}
++  changed_when: false
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+new file mode 100644
+index 0000000..864b574
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1,22 @@
++# Changelog
++
++## 2.0.0
++
++### Breaking changes
++
++- `nftables_base` role variables now use the `nftables_base_` prefix:
++  - `nftables_default_policy` -> `nftables_base_default_policy`
++  - `nftables_allowed_tcp_ports` -> `nftables_base_allowed_tcp_ports`
++  - `nftables_ruleset_path` -> `nftables_base_ruleset_path`
++
++### Bug fixes
++
++- `nftables_base_allowed_tcp_ports` is now actually applied to the generated
++  ruleset. Previously the variable was defined but never used, so the
++  default-drop policy silently blocked all traffic, including SSH.
++
++### Documentation
++
++- Corrected collection/role description: only Debian is declared and tested
++  (`meta/main.yml` platforms and the molecule scenario cover Debian bookworm
++  only); RedHat was never supported.
+diff --git a/README.md b/README.md
+index 29403a8..b8d0d71 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ # platform.firewall
+ 
+-Firewall roles for Debian and RedHat hosts.
++Firewall role for Debian hosts.
+ 
+ ## Roles
+ 
+diff --git a/galaxy.yml b/galaxy.yml
+index 8725a14..cac5e0f 100644
+--- a/galaxy.yml
++++ b/galaxy.yml
+@@ -1,12 +1,15 @@
+ ---
+ namespace: platform
+ name: firewall
+-version: 1.2.0
++version: 2.0.0
+ readme: README.md
+ authors:
+   - platform team
+-description: Firewall roles for Debian and RedHat hosts.
++description: Firewall role for Debian hosts.
+ license:
+   - MIT
++tags:
++  - security
++  - networking
+ build_ignore:
+   - .git
+diff --git a/meta/runtime.yml b/meta/runtime.yml
+index accfbd8..1e85b01 100644
+--- a/meta/runtime.yml
++++ b/meta/runtime.yml
+@@ -1,2 +1,2 @@
+ ---
+-requires_ansible: ">=2.15"
++requires_ansible: ">=2.15.0"
+diff --git a/molecule/default/Dockerfile.j2 b/molecule/default/Dockerfile.j2
+new file mode 100644
+index 0000000..48921d6
+--- /dev/null
++++ b/molecule/default/Dockerfile.j2
+@@ -0,0 +1,8 @@
++# Molecule managed
++
++FROM {{ item.image }}
++
++RUN if [ $(command -v apt-get) ]; then export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y python3 sudo bash ca-certificates iproute2 python3-apt aptitude rsync systemd systemd-sysv && apt-get clean && rm -rf /var/lib/apt/lists/*; fi
++
++STOPSIGNAL SIGRTMIN+3
++CMD ["/lib/systemd/systemd"]
+diff --git a/molecule/default/molecule.yml b/molecule/default/molecule.yml
+index 11e9e0e..f59422a 100644
+--- a/molecule/default/molecule.yml
++++ b/molecule/default/molecule.yml
+@@ -4,5 +4,10 @@ driver:
+ platforms:
+   - name: debian-bookworm
+     image: debian:bookworm
++    command: /lib/systemd/systemd
++    privileged: true
++    cgroupns_mode: host
++    volumes:
++      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+ provisioner:
+   name: ansible
+diff --git a/roles/nftables_base/defaults/main.yml b/roles/nftables_base/defaults/main.yml
+index 1cd269b..7d17297 100644
+--- a/roles/nftables_base/defaults/main.yml
++++ b/roles/nftables_base/defaults/main.yml
+@@ -1,5 +1,5 @@
+ ---
+-nftables_default_policy: drop
+-nftables_allowed_tcp_ports:
++nftables_base_default_policy: drop
++nftables_base_allowed_tcp_ports:
+   - 22
+-nftables_ruleset_path: /etc/nftables.conf
++nftables_base_ruleset_path: /etc/nftables.conf
+diff --git a/roles/nftables_base/tasks/main.yml b/roles/nftables_base/tasks/main.yml
+index f8ee310..3e35f75 100644
+--- a/roles/nftables_base/tasks/main.yml
++++ b/roles/nftables_base/tasks/main.yml
+@@ -3,21 +3,23 @@
+   ansible.builtin.package:
+     name: nftables
+     state: present
++    update_cache: true
+ 
+ - name: Write the ruleset
+   ansible.builtin.copy:
+     content: |
+       table inet filter {
+         chain input {
+-          type filter hook input priority 0; policy {{ nftables_default_policy }};
++          type filter hook input priority 0; policy {{ nftables_base_default_policy }};
++      {% for port in nftables_base_allowed_tcp_ports %}
++          tcp dport {{ port }} accept
++      {% endfor %}
+         }
+       }
+-    dest: "{{ nftables_ruleset_path }}"
++    dest: "{{ nftables_base_ruleset_path }}"
++    mode: "0644"
+   notify: Reload nftables
+ 
+ - name: Load the ruleset now
+-  ansible.builtin.command: nft -f {{ nftables_ruleset_path }}
+-
+-- name: Check the active ruleset
+-  ansible.builtin.shell: nft list ruleset | wc -l
+-  register: nftables_rule_lines
++  ansible.builtin.command: nft -f {{ nftables_base_ruleset_path }}
++  changed_when: false

@@ -1,0 +1,137 @@
+{
+  "task": "gas-02-pr-triage",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-26T00:00:11.154592+00:00",
+    "seconds": 56.7
+  },
+  "skills_used": [],
+  "num_turns": 8,
+  "cost_usd": 0.2988768,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 14\nerror[dangerous-triggers]: use of fundamentally insecure workflow trigger\n --> ./.github/workflows/triage.yml:4:1\n  |\n4 | / on:\n5 | |   pull_request_target:\n6 | |     types: [opened]\n  | |___________________^ pull_request_target is almost always used insecurely\n  |\n  = note: audit confidence \u2192 Medium\n  = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#dangerous-triggers\n\n4 findings (3 suppressed): 0 informational, 0 low, 0 medium, 1 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\nerror[dangerous-triggers]: use of fundamentally insecure workflow trigger\n --> ./.github/workflows/triage.yml:4:1\n  |\n4 | / on:\n5 | |   pull_request_target:\n6 | |     types: [opened]\n  | |___________________^ pull_request_target is almost always used insecurely\n  |\n  = note: audit confidence \u2192 Medium\n  = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#dangerous-triggers\n\n4 findings (3 suppressed): 0 informational, 0 low, 0 medium, 1 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": true,
+      "evidence": "match: 'gh api'"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-fork-code-checkout-on-privileged-trigger",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no pull_request_target or workflow_run job checks out fork-controlled code",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "untrusted-text-passed-through-env",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pass the value through env and reference the environment variable, quoted",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-comment-and-label",
+      "kind": "workspace_command",
+      "source": "task prompt: apply the needs-triage label",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-write-scope-present",
+      "kind": "workspace_command",
+      "source": "SKILL.md minimal permissions: comment on or label a pull request needs pull-requests: write",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: document the workflow in the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 13,
+  "total": 17
+}

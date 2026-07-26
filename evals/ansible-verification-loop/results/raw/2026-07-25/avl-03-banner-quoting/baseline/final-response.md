@@ -1,0 +1,1 @@
+Added `banner_country_code` (defaults to `"NO"`, quoted since unquoted `NO` parses as boolean false in YAML) and `banner_gateway_ports` (defaults to `false`) to `defaults/main.yml`, rendered both in `templates/issue.net.j2` as a `Country:` line and a gateway-ports permission statement, and documented both in the README variable table.

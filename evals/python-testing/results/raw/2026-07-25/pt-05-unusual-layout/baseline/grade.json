@@ -1,0 +1,109 @@
+{
+  "task": "pt-05-unusual-layout",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T23:51:41.688763+00:00",
+    "seconds": 33.1
+  },
+  "skills_used": [],
+  "num_turns": 13,
+  "cost_usd": 0.1982266,
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+      "passed": true,
+      "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's own entry point",
+      "passed": true,
+      "evidence": "match: 'pytest'"
+    },
+    {
+      "id": "suite-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+      "passed": true,
+      "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\n4 files already formatted"
+    },
+    {
+      "id": "no-test-weakened",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-parallel-test-tree",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "check-added-in-existing-location",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-naming-convention-matched",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-conventional-tests-dir-created",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: add running_balance to the ledger package",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "behaviour-correct",
+      "kind": "workspace_command",
+      "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 13,
+  "total": 13
+}

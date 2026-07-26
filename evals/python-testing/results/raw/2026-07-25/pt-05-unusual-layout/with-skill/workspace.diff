@@ -1,0 +1,66 @@
+diff --git a/src/ledger/__init__.py b/src/ledger/__init__.py
+index d50e6f1..1fb270f 100644
+--- a/src/ledger/__init__.py
++++ b/src/ledger/__init__.py
+@@ -1,5 +1,5 @@
+ """Double-entry ledger helpers."""
+ 
+-from ledger.balance import Entry, balance
++from ledger.balance import Entry, balance, running_balance
+ 
+-__all__ = ["Entry", "balance"]
++__all__ = ["Entry", "balance", "running_balance"]
+diff --git a/src/ledger/__pycache__/__init__.cpython-313.pyc b/src/ledger/__pycache__/__init__.cpython-313.pyc
+index 08a31e7..3353f53 100644
+Binary files a/src/ledger/__pycache__/__init__.cpython-313.pyc and b/src/ledger/__pycache__/__init__.cpython-313.pyc differ
+diff --git a/src/ledger/__pycache__/balance.cpython-313.pyc b/src/ledger/__pycache__/balance.cpython-313.pyc
+index c32b7fd..679ec87 100644
+Binary files a/src/ledger/__pycache__/balance.cpython-313.pyc and b/src/ledger/__pycache__/balance.cpython-313.pyc differ
+diff --git a/src/ledger/_tests/__pycache__/check_balance.cpython-313-pytest-9.1.1.pyc b/src/ledger/_tests/__pycache__/check_balance.cpython-313-pytest-9.1.1.pyc
+index c90ec3c..de76a32 100644
+Binary files a/src/ledger/_tests/__pycache__/check_balance.cpython-313-pytest-9.1.1.pyc and b/src/ledger/_tests/__pycache__/check_balance.cpython-313-pytest-9.1.1.pyc differ
+diff --git a/src/ledger/_tests/check_balance.py b/src/ledger/_tests/check_balance.py
+index afa862e..92c984c 100644
+--- a/src/ledger/_tests/check_balance.py
++++ b/src/ledger/_tests/check_balance.py
+@@ -1,6 +1,6 @@
+ """Checks for ledger.balance."""
+ 
+-from ledger import Entry, balance
++from ledger import Entry, balance, running_balance
+ 
+ ENTRIES = [
+     Entry("cash", 100),
+@@ -17,3 +17,13 @@ def check_balance_sums_one_account():
+ def check_balance_of_an_unknown_account_is_zero():
+     """An account with no entries has a zero balance."""
+     assert balance(ENTRIES, "equity") == 0
++
++
++def check_running_balance_accumulates_one_account():
++    """Entries for other accounts are ignored, in order."""
++    assert running_balance(ENTRIES, "cash") == [100, 70]
++
++
++def check_running_balance_of_an_unknown_account_is_empty():
++    """An account with no entries has an empty running balance."""
++    assert running_balance(ENTRIES, "equity") == []
+diff --git a/src/ledger/balance.py b/src/ledger/balance.py
+index ba78ad0..9c4f8dd 100644
+--- a/src/ledger/balance.py
++++ b/src/ledger/balance.py
+@@ -14,3 +14,14 @@ class Entry:
+ def balance(entries: list, account: str) -> int:
+     """Return the net balance for one account."""
+     return sum(entry.amount for entry in entries if entry.account == account)
++
++
++def running_balance(entries: list, account: str) -> list:
++    """Return the cumulative balance after each entry for one account, in order."""
++    result = []
++    total = 0
++    for entry in entries:
++        if entry.account == account:
++            total += entry.amount
++            result.append(total)
++    return result

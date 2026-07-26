@@ -1,0 +1,88 @@
+{
+  "task": "avl-01-sshd-options",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-25T22:33:21.229106+00:00",
+    "seconds": 92.2
+  },
+  "skills_used": [],
+  "num_turns": 23,
+  "cost_usd": 0.37683089999999997,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin, /tmp/claude-uid/-repo/afc79b94-1531-4ca5-ae00-bc28af93a791/scratchpad/uvtools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "no-suppression-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fqcn-used",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "platform-support-updated",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "os-conditional-service-name",
+      "kind": "workspace_command",
+      "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-new-options",
+      "kind": "workspace_command",
+      "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "test-fixtures-updated",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 10,
+  "total": 10
+}

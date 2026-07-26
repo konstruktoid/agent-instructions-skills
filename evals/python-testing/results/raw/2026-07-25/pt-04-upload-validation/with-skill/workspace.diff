@@ -1,0 +1,90 @@
+diff --git a/src/uploads/__pycache__/validation.cpython-313.pyc b/src/uploads/__pycache__/validation.cpython-313.pyc
+index acc0630..e808884 100644
+Binary files a/src/uploads/__pycache__/validation.cpython-313.pyc and b/src/uploads/__pycache__/validation.cpython-313.pyc differ
+diff --git a/src/uploads/validation.py b/src/uploads/validation.py
+index 0689b49..585073e 100644
+--- a/src/uploads/validation.py
++++ b/src/uploads/validation.py
+@@ -1,6 +1,9 @@
+ """Validate an uploaded file before it is stored."""
+ 
++import os
++
+ MAX_BYTES = 5 * 1024 * 1024
++ALLOWED_EXTENSIONS = {".pdf", ".png", ".csv"}
+ 
+ 
+ class UploadRejected(Exception):
+@@ -9,7 +12,17 @@ class UploadRejected(Exception):
+ 
+ def validate_upload(filename: str, size: int) -> str:
+     """Check an upload and return the name it should be stored under."""
++    if "/" in filename or "\\" in filename:
++        message = "filename must not contain a path separator"
++        raise UploadRejected(message)
++    if filename.startswith("."):
++        message = "filename must not start with a dot"
++        raise UploadRejected(message)
++    _, extension = os.path.splitext(filename)
++    if extension.lower() not in ALLOWED_EXTENSIONS:
++        message = "filename extension must be one of .pdf, .png, .csv"
++        raise UploadRejected(message)
+     if size > MAX_BYTES:
+         message = "upload is too large"
+         raise UploadRejected(message)
+-    return filename
++    return filename.lower()
+diff --git a/tests/__pycache__/test_validation.cpython-313-pytest-9.1.1.pyc b/tests/__pycache__/test_validation.cpython-313-pytest-9.1.1.pyc
+index 4b86642..31055fb 100644
+Binary files a/tests/__pycache__/test_validation.cpython-313-pytest-9.1.1.pyc and b/tests/__pycache__/test_validation.cpython-313-pytest-9.1.1.pyc differ
+diff --git a/tests/test_validation.py b/tests/test_validation.py
+index c4fbff9..fdec31e 100644
+--- a/tests/test_validation.py
++++ b/tests/test_validation.py
+@@ -1,6 +1,7 @@
+ """Tests for uploads.validation."""
+ 
+ import pytest
++
+ from uploads import UploadRejected, validate_upload
+ 
+ 
+@@ -13,3 +14,38 @@ def test_an_oversized_upload_is_rejected():
+     """An upload over the size limit is refused."""
+     with pytest.raises(UploadRejected, match="too large"):
+         validate_upload("report.pdf", 50 * 1024 * 1024)
++
++
++def test_an_allowed_extension_is_accepted():
++    """Uploads with .pdf, .png, or .csv extensions are accepted."""
++    assert validate_upload("photo.png", 1024) == "photo.png"
++    assert validate_upload("data.csv", 1024) == "data.csv"
++
++
++def test_a_disallowed_extension_is_rejected():
++    """An upload whose extension is not on the allow list is refused."""
++    with pytest.raises(UploadRejected, match="extension"):
++        validate_upload("script.exe", 1024)
++
++
++def test_a_filename_with_a_path_separator_is_rejected():
++    """An upload whose filename contains a path separator is refused."""
++    with pytest.raises(UploadRejected, match="path separator"):
++        validate_upload("../report.pdf", 1024)
++
++
++def test_a_filename_with_a_backslash_is_rejected():
++    """An upload whose filename contains a backslash is refused."""
++    with pytest.raises(UploadRejected, match="path separator"):
++        validate_upload("folder\\report.pdf", 1024)
++
++
++def test_a_filename_starting_with_a_dot_is_rejected():
++    """An upload whose filename starts with a dot is refused."""
++    with pytest.raises(UploadRejected, match="dot"):
++        validate_upload(".hidden.pdf", 1024)
++
++
++def test_the_stored_name_is_lowercased():
++    """The name returned for storage is the filename in lowercase."""
++    assert validate_upload("Report.PDF", 1024) == "report.pdf"

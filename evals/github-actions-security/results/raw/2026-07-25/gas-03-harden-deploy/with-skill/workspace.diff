@@ -1,0 +1,93 @@
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 2c2293c..9ca16c1 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -5,26 +5,48 @@ on:
+   push:
+     branches:
+       - main
++    tags:
++      - 'v*'
+   workflow_dispatch:
+ 
+-permissions: write-all
++permissions: {}
++
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: false
+ 
+ jobs:
+   deploy:
+-    runs-on: self-hosted
++    name: Deploy
++    runs-on: ubuntu-latest
++    timeout-minutes: 15
++    permissions:
++      contents: read
++      id-token: write # required to request the OIDC token for AWS role assumption
+     steps:
+-      - uses: actions/checkout@main
+-      - name: Configure AWS
+-        uses: aws-actions/configure-aws-credentials@v4
++      - name: Checkout repository
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
++        with:
++          persist-credentials: false
++
++      - name: Configure AWS credentials
++        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+         with:
+-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
++          role-to-assume: arn:aws:iam::123456789012:role/deploy-widget
+           aws-region: eu-north-1
++
+       - name: Build and push
++        env:
++          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+         run: |
+-          echo "Deploying ${{ github.event.head_commit.message }}"
++          printf 'Deploying %s\n' "$COMMIT_MESSAGE"
+           ./scripts/deploy.sh
++
+       - name: Notify
++        # some-org/slack-notify is not a real published action (repository not found via the
++        # GitHub API); kept as the repository's existing placeholder and could not be pinned
++        # to a commit SHA. Replace with the organization's actual Slack notification action,
++        # pinned to a commit SHA, before this is used against a real Slack webhook.
+         uses: some-org/slack-notify@v1
+         with:
+           webhook: ${{ secrets.SLACK_WEBHOOK }}
+diff --git a/README.md b/README.md
+index 8347b4a..650fcbc 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,11 @@
+ # deploy-demo
+ 
+-Deploys the service to AWS on every push to `main`.
++Deploys the service to AWS on every push to `main` and on every version tag matching `v*`
++(for example `v1.2.3`), or manually via `workflow_dispatch`.
+ 
+-This repository is public.
++Deployment authenticates to AWS via OIDC role assumption
++(`arn:aws:iam::123456789012:role/deploy-widget` in `eu-north-1`) — no long-lived AWS access
++keys are stored in this repository.
++
++This repository is public. The deploy workflow runs on GitHub-hosted runners rather than a
++self-hosted runner, since a self-hosted runner is not safe to expose to a public repository.
+diff --git a/zizmor.yml b/zizmor.yml
+new file mode 100644
+index 0000000..d0d77d9
+--- /dev/null
++++ b/zizmor.yml
+@@ -0,0 +1,8 @@
++rules:
++  unpinned-uses:
++    ignore:
++      # some-org/slack-notify is the repository's existing Slack notification step.
++      # It does not resolve to a real GitHub repository (404 from the GitHub API as
++      # of 2026-07-26), so no commit SHA can be resolved for it. Replace with the
++      # organization's real Slack action, pinned to a SHA, when one is identified.
++      - deploy.yml

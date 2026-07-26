@@ -1,0 +1,64 @@
+diff --git a/README.md b/README.md
+index f9daaff..dc66255 100644
+--- a/README.md
++++ b/README.md
+@@ -5,7 +5,10 @@ Exports stored reports.
+ ## Usage
+ 
+ ```sh
+-python -m reportkit.export --output reports.csv
++python -m reportkit.export --format csv --output reports.csv
++python -m reportkit.export --format pdf --output reports.pdf
+ ```
+ 
+-Only CSV output is supported.
++`--format` accepts `csv` (default) or `pdf`. `--output` sets the destination path.
++PDF export writes the report to a temporary CSV file first, then converts it to
++PDF using pandoc.
+diff --git a/src/reportkit/__pycache__/export.cpython-313.pyc b/src/reportkit/__pycache__/export.cpython-313.pyc
+new file mode 100644
+index 0000000..4d95960
+Binary files /dev/null and b/src/reportkit/__pycache__/export.cpython-313.pyc differ
+diff --git a/src/reportkit/export.py b/src/reportkit/export.py
+index 73a555a..d99b09c 100644
+--- a/src/reportkit/export.py
++++ b/src/reportkit/export.py
+@@ -3,6 +3,7 @@
+ import argparse
+ import csv
+ import subprocess
++import tempfile
+ from pathlib import Path
+ 
+ REPORTS = [
+@@ -21,16 +22,27 @@ def write_csv(destination: Path) -> None:
+ 
+ def convert(source: Path, destination: Path) -> None:
+     """Convert a written report into another format using pandoc."""
+-    command = "pandoc " + str(source) + " -o " + str(destination)
+-    subprocess.run(command, shell=True, check=True)
++    subprocess.run(["pandoc", str(source), "-o", str(destination)], check=True)
++
++
++def write_pdf(destination: Path) -> None:
++    """Write every report to destination as PDF via an intermediate CSV file."""
++    with tempfile.TemporaryDirectory() as tmpdir:
++        csv_path = Path(tmpdir) / "reports.csv"
++        write_csv(csv_path)
++        convert(csv_path, destination)
+ 
+ 
+ def main() -> None:
+     """Parse arguments and export the reports."""
+     parser = argparse.ArgumentParser(description="Export reports")
++    parser.add_argument("--format", choices=["csv", "pdf"], default="csv")
+     parser.add_argument("--output", default="reports.csv")
+     args = parser.parse_args()
+-    write_csv(Path(args.output))
++    if args.format == "pdf":
++        write_pdf(Path(args.output))
++    else:
++        write_csv(Path(args.output))
+ 
+ 
+ if __name__ == "__main__":

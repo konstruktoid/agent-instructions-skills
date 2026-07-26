@@ -1,0 +1,151 @@
+{
+  "task": "gas-03-harden-deploy",
+  "condition": "baseline",
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-26T00:02:27.095887+00:00",
+    "seconds": 32.6
+  },
+  "skills_used": [],
+  "num_turns": 8,
+  "cost_usd": 0.16482809999999998,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": false,
+      "evidence": "exit 1\n.github/workflows/deploy.yml:27:34: \"github.event.head_commit.message\" is potentially untrusted. avoid using it directly in inline scripts. instead, pass it through an environment variable. see https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks for more details [expression]"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 14\nwarning[artipacked]: credential persistence through GitHub Actions artifacts\n  --> ./.github/workflows/deploy.yml:20:9\n   |\n20 |       - uses: actions/checkout@main\n   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false\n   |\n   = note: audit confidence \u2192 Low\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#artipacked\n\nerror[template-injection]: code injection via template expansion\n  --> ./.github/workflows/deploy.yml:28:31\n   |\n27 |         run: |\n   |         --- this run block\n28 |           echo \"Deploying ${{ github.event.head_commit.message }}\"\n   |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#template-injection\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/deploy.yml:20:15\n   |\n20 |       - uses: actions/checkout@main\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/deploy.yml:22:15\n   |\n22 |         uses: aws-actions/configure-aws-credentials@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/deploy.yml:31:15\n   |\n31 |         uses: some-org/slack-notify@v1\n   |               ^^^^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\n11 findings (6 suppressed, 1 unsafe fixes): 0 informational, 0 low, 1 medium, 4 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\n.github/workflows/deploy.yml:27:34: \"github.event.head_commit.message\" is potentially untrusted. avoid using it directly in inline scripts. instead, pass it through an environment variable. see https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks for more details [expression]"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "static-aws-credentials-removed",
+      "kind": "workspace_command",
+      "source": "task prompt: remove the static credentials",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "oidc-id-token-permission",
+      "kind": "workspace_command",
+      "source": "SKILL.md minimal permissions: request an OIDC token needs id-token: write",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "role-assumption-configured",
+      "kind": "workspace_command",
+      "source": "task prompt: OIDC role assumption against the named role ARN",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-write-all-permissions",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: deny by default, grant permissions per job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "self-hosted-runner-removed",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: do not use self-hosted runners in a public repository",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "feature-tag-trigger",
+      "kind": "workspace_command",
+      "source": "task prompt: also deploy when a version tag matching v* is pushed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 8,
+  "total": 19
+}
