@@ -150,8 +150,20 @@
       {
         "id": "behaviour-correct",
         "kind": "workspace_command",
-        "command": "uv run --quiet python -c \"import sys,datetime; sys.path.insert(0,'src'); from tempo import business_days_between as b; assert b(datetime.date(2026,7,20),datetime.date(2026,7,27))==5; assert b(datetime.date(2026,7,27),datetime.date(2026,7,20))==0\"",
-        "source": "task prompt: weekdays from start up to but not including end, 0 when end precedes start"
+        "command": "uv run --quiet python -c \"import sys,datetime; sys.path.insert(0,'src'); from tempo import business_days_between as b; assert b(datetime.date(2026,7,20),datetime.date(2026,7,27))==4, b(datetime.date(2026,7,20),datetime.date(2026,7,27)); assert b(datetime.date(2026,7,20),datetime.date(2026,7,21))==1; assert b(datetime.date(2026,7,27),datetime.date(2026,7,20))==0\"",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys,datetime; sys.path.insert(0,'src'); from tempo.calendar import is_holiday; assert is_holiday(datetime.date(2026,7,22)) is True; assert is_holiday(datetime.date(2026,7,23)) is False\"",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "command": "grep -rqi 'holiday' tests/",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour"
       }
     ],
     "pt-03-retry-refactor": [
@@ -280,7 +292,7 @@
       {
         "id": "rejection-paths-tested",
         "kind": "workspace_command",
-        "command": "test \"$(grep -c 'pytest.raises' tests/test_validation.py)\" -ge 4",
+        "command": "test \"$(grep -c 'pytest.raises' tests/test_validation.py)\" -ge 5",
         "source": "SKILL.md table: input validation requires tests including the rejection and failure paths"
       },
       {
@@ -292,14 +304,20 @@
       {
         "id": "traversal-rejected",
         "kind": "workspace_command",
-        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from uploads import validate_upload, UploadRejected;\nfor name in ('../etc/passwd.pdf', '.hidden.pdf', 'a/b.pdf'):\n    try:\n        validate_upload(name, 10)\n    except UploadRejected:\n        continue\n    raise SystemExit('accepted ' + name)\"",
-        "source": "task prompt: reject a path separator or a leading dot"
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from uploads import validate_upload, UploadRejected;\nfor name in ('../etc/passwd.pdf', '.hidden.pdf', 'a/b.pdf', 'a\\\\\\\\b.pdf', 'report.exe', 'report'):\n    try:\n        validate_upload(name, 10)\n    except UploadRejected:\n        continue\n    raise SystemExit('accepted ' + name)\"",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist"
       },
       {
         "id": "lowercasing-applied",
         "kind": "workspace_command",
         "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from uploads import validate_upload; assert validate_upload('Report.PDF', 10)=='report.pdf'\"",
         "source": "task prompt: the stored name should be the filename lowercased"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from uploads import validate_upload, UploadRejected;\nseen = set()\nfor name, size in (('big.pdf', 50*1024*1024), ('note.exe', 10), ('a/b.pdf', 10), ('.hidden.pdf', 10)):\n    try:\n        validate_upload(name, size)\n    except UploadRejected as exc:\n        seen.add(str(exc))\nassert len(seen) == 4, seen\"",
+        "source": "task prompt: a distinct message naming the rule that failed"
       }
     ],
     "pt-05-unusual-layout": [
@@ -364,10 +382,10 @@
         "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml"
       },
       {
-        "id": "no-conventional-tests-dir-created",
+        "id": "no-checks-added-to-the-stale-directory",
         "kind": "workspace_command",
-        "command": "! test -d tests",
-        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one"
+        "command": "! ls tests/*.py >/dev/null 2>&1",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it"
       },
       {
         "id": "feature-implemented",
@@ -380,6 +398,12 @@
         "kind": "workspace_command",
         "command": "uv run --quiet python -c \"import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\"",
         "source": "task prompt: cumulative balance after each entry, empty list when the account has none"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "command": "d=$(mktemp -d) && cp -a . \"$d/w\" && cd \"$d/w\" && printf '\\n\\ndef running_balance(entries, account):\\n    return []\\n' >> src/ledger/balance.py && ! uv run --quiet pytest -q",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising"
       }
     ]
   }

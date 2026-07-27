@@ -3,7 +3,8 @@
 import datetime
 
 import pytest
-from tempo import is_weekend, next_weekday
+
+from tempo import days_between, is_weekend, next_weekday
 
 MONDAY = datetime.date(2026, 7, 20)
 SATURDAY = datetime.date(2026, 7, 25)
@@ -27,3 +28,8 @@ def test_next_weekday_skips_the_weekend():
 def test_next_weekday_leaves_a_weekday_alone():
     """A weekday is already the next weekday."""
     assert next_weekday(MONDAY) == MONDAY
+
+
+def test_days_between_counts_both_ends():
+    """Monday to the following Saturday is six days inclusive."""
+    assert days_between(MONDAY, SATURDAY) == 6
