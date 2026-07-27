@@ -1,5 +1,7 @@
 """Validate an uploaded file before it is stored."""
 
+from uploads.naming import base_name
+
 MAX_BYTES = 5 * 1024 * 1024
 
 
@@ -12,4 +14,4 @@ def validate_upload(filename: str, size: int) -> str:
     if size > MAX_BYTES:
         message = "upload is too large"
         raise UploadRejected(message)
-    return filename
+    return base_name(filename)
