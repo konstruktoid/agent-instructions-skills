@@ -509,6 +509,27 @@ def cmd_tasks(args: argparse.Namespace) -> int:
     return 0
 
 
+def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dict[str, Any]:
+    """Reduce repeated passes of one probe to a single verdict by majority.
+
+    Routing is a coin the model tosses each time, so one pass cannot distinguish a
+    description that routes a prompt from one that routes it half the time. A probe counts
+    correct when it routes correctly in more than half of its passes.
+    """
+    fired_count = sum(1 for item in passes if item["fired"])
+    fired = fired_count * 2 > len(passes)
+    return {
+        "id": probe["id"],
+        "expect": probe["expect"],
+        "fired": fired,
+        "fired_count": fired_count,
+        "runs": len(passes),
+        "correct": fired == (probe["expect"] == "trigger"),
+        "passes": passes,
+        "cost_usd": sum(item["cost_usd"] or 0 for item in passes),
+    }
+
+
 def cmd_triggers(args: argparse.Namespace) -> int:
     """Run every trigger probe for one skill and record the routing decisions."""
     skill_dir = EVALS_DIR / args.skill
@@ -516,20 +537,30 @@ def cmd_triggers(args: argparse.Namespace) -> int:
     stamp = args.stamp or today()
     root = results_root(args.skill, stamp) / "triggers"
     plugin_dir = build_plugin(args.skill, root)
+    runs = max(1, args.runs)
 
+    # One pass keeps the flat per-probe directory the single-run layout has always used;
+    # more than one nests each pass, so the passes stay separately readable.
     jobs = [
         {
             "probe": probe,
             "skill": args.skill,
             "model": args.model,
             "plugin_dir": plugin_dir,
-            "run_dir": root / probe["id"],
+            "run_dir": root / probe["id"] if runs == 1 else root / probe["id"] / f"run-{index}",
         }
         for probe in probes
+        for index in range(1, runs + 1)
     ]
-    outcomes = execute(jobs, run_one_trigger, args.parallel)
+    results = execute(jobs, run_one_trigger, args.parallel)
+
+    by_probe: dict[str, list[dict[str, Any]]] = {}
+    for result in results:
+        by_probe.setdefault(result["id"], []).append(result)
+    outcomes = [majority_outcome(probe, by_probe[probe["id"]]) for probe in probes]
+
     correct = sum(1 for outcome in outcomes if outcome["correct"])
-    print(f"trigger accuracy: {correct}/{len(outcomes)}")
+    print(f"trigger accuracy: {correct}/{len(outcomes)} over {runs} pass(es) per probe")
     (root / "trigger-outcomes.json").write_text(
         json.dumps(outcomes, indent=2) + "\n", encoding="utf-8"
     )
@@ -654,19 +685,29 @@ def trigger_section(skill: str, stamp: str) -> list[str]:
 
     outcomes = json.loads(path.read_text(encoding="utf-8"))
     correct = sum(1 for outcome in outcomes if outcome["correct"])
+    passes = max(outcome.get("runs", 1) for outcome in outcomes)
     lines = [
         "## Trigger accuracy",
         "",
         f"**{correct}/{len(outcomes)}** probes routed correctly.",
         "",
+    ]
+    if passes > 1:
+        lines += [
+            f"Each probe ran {passes} times. A probe counts correct when it routes correctly in",
+            "more than half of its passes, and the fired column gives the count of passes in",
+            "which the skill loaded.",
+            "",
+        ]
+    lines += [
         "| Probe | Expected | Fired | Correct |",
         "|-------|----------|-------|---------|",
     ]
-    lines += [
-        f"| `{outcome['id']}` | {outcome['expect']} | {outcome['fired']} | "
-        f"{'yes' if outcome['correct'] else 'NO'} |"
-        for outcome in outcomes
-    ]
+    for outcome in outcomes:
+        count = outcome.get("fired_count", int(outcome["fired"]))
+        fired = f"{count}/{passes}" if passes > 1 else str(outcome["fired"])
+        correct_cell = "yes" if outcome["correct"] else "NO"
+        lines.append(f"| `{outcome['id']}` | {outcome['expect']} | {fired} | {correct_cell} |")
     lines.append("")
     return lines
 
@@ -689,6 +730,19 @@ def render_report(skill: str, stamp: str) -> str:
         f"`grade.json` under `results/raw/{stamp}/`, and every assertion is a command run in",
         "the finished workspace or a regex over the run transcript.",
         "",
+    ]
+    # A stamp can hold trigger probes alone, as when only a description is under test. Emit
+    # the task sections only when there are graded task runs, rather than a table of zeroes
+    # that reads as a measured result.
+    if not by_task:
+        lines += [
+            "No task runs were graded under this stamp; the trigger measurement below stands",
+            "on its own.",
+            "",
+        ]
+        return "\n".join(lines + trigger_section(skill, stamp))
+
+    lines += [
         "## Task results",
         "",
         "| Task | Baseline | With skill | Delta | Skill fired |",
@@ -783,6 +837,10 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--parallel", type=int, default=4, help="concurrent runs (default: 4)")
         if name == "tasks":
             sub.add_argument("--task", action="append", help="run only this task id, repeatable")
+        if name == "triggers":
+            sub.add_argument(
+                "--runs", type=int, default=1, help="passes per probe, majority wins (default: 1)"
+            )
 
     return parser
 
