@@ -2,8 +2,9 @@
 
 import argparse
 import csv
-import subprocess
 from pathlib import Path
+
+from reportkit.shellutils import quote_for_shell, run_tool, temp_output_path
 
 REPORTS = [
     {"id": "1", "title": "Q1 revenue", "owner": "finance"},
@@ -21,8 +22,15 @@ def write_csv(destination: Path) -> None:
 
 def convert(source: Path, destination: Path) -> None:
     """Convert a written report into another format using pandoc."""
-    command = "pandoc " + str(source) + " -o " + str(destination)
-    subprocess.run(command, shell=True, check=True)
+    command = "pandoc " + quote_for_shell(str(source)) + " -o " + quote_for_shell(str(destination))
+    run_tool(command)
+
+
+def write_html(destination: Path) -> None:
+    """Write the reports as HTML, via an intermediate CSV file pandoc reads."""
+    intermediate = Path(temp_output_path(".csv"))
+    write_csv(intermediate)
+    convert(intermediate, destination)
 
 
 def main() -> None:

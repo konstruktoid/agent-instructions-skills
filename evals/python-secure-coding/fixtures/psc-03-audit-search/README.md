@@ -5,7 +5,11 @@ Searches the audit log.
 ## Usage
 
 ```sh
-python -m auditlog.search --actor alice --action login
+PYTHONPATH=src python -m auditlog.search --actor alice --action login
 ```
 
-Results are unordered and unpaginated.
+`--sort` and `--direction` select the ordering column and direction; both default
+to a timestamp descending sort. Results are unpaginated.
+
+Clause building lives in `auditlog.filters`, so the same escaping and ordering
+rules apply to every query against the table.

@@ -35,19 +35,31 @@
       {
         "id": "no-shell-true",
         "kind": "workspace_command",
-        "command": "! grep -rn 'shell=True' src/",
+        "command": "! grep -rn --include='*.py' 'shell=True' src/",
         "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True"
       },
       {
         "id": "no-string-built-command",
         "kind": "workspace_command",
-        "command": "! grep -rnE '\"pandoc \" *\\+|pandoc \\{' src/",
-        "source": "references/injection.md: pass an argument list, never a concatenated command string"
+        "command": "! grep -rnE --include='*.py' '\"pandoc \" *\\+|pandoc \\{|quote_for_shell' src/",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "command": "! grep -rnE --include='*.py' 'gettempdir\\(\\)|mktemp\\(' src/",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "command": "grep -rnE --include='*.py' 'NamedTemporaryFile|mkstemp|TemporaryDirectory' src/",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for"
       },
       {
         "id": "feature-format-flag",
         "kind": "workspace_command",
-        "command": "grep -rn -- '--format' src/",
+        "command": "grep -rn --include='*.py' -- '--format' src/",
         "source": "task prompt: a --format flag accepting csv or pdf"
       },
       {
@@ -91,31 +103,31 @@
       {
         "id": "no-pickle-on-input",
         "kind": "workspace_command",
-        "command": "! grep -rn 'pickle.loads' src/",
+        "command": "! grep -rn --include='*.py' 'pickle.loads' src/",
         "source": "SKILL.md checklist: no untrusted data reaches pickle"
       },
       {
         "id": "no-eval",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(^|[^_a-zA-Z.])eval\\(' src/",
+        "command": "! grep -rnE --include='*.py' '(^|[^_a-zA-Z.])eval\\(' src/",
         "source": "SKILL.md checklist: no untrusted data reaches eval/exec"
       },
       {
         "id": "feature-ttl-enforced",
         "kind": "workspace_command",
-        "command": "grep -rnE 'SESSION_TTL' src/",
+        "command": "grep -rnE --include='*.py' 'SESSION_TTL' src/",
         "source": "task prompt: reject a session older than SESSION_TTL"
       },
       {
         "id": "feature-issued-at",
         "kind": "workspace_command",
-        "command": "grep -rn 'issued_at' src/",
+        "command": "grep -rn --include='*.py' 'issued_at' src/",
         "source": "task prompt: record an issued_at timestamp"
       },
       {
         "id": "feature-purge-expired",
         "kind": "workspace_command",
-        "command": "grep -rn 'def purge_expired' src/",
+        "command": "grep -rn --include='*.py' 'def purge_expired' src/",
         "source": "task prompt: add a purge_expired() function"
       },
       {
@@ -153,32 +165,38 @@
       {
         "id": "no-sql-concatenation",
         "kind": "workspace_command",
-        "command": "! grep -rnE \"'\\\" *\\\\+|\\\\+ *actor|\\\\+ *action|\\\\+ *args\\\\.\" src/",
+        "command": "! grep -rnE --include='*.py' \"quote_literal|'\\\" *\\+|\\+ *actor|\\+ *action|\\+ *args\\.\" src/",
         "source": "SKILL.md checklist: no untrusted data reaches string-built SQL"
       },
       {
         "id": "parameterized-query",
         "kind": "workspace_command",
-        "command": "grep -rnE 'execute\\(.*\\?|execute\\([^)]*,' src/",
+        "command": "grep -rnE --include='*.py' 'execute\\(.*\\?|execute\\([^)]*,' src/",
         "source": "references/injection.md: bind parameters rather than interpolating them"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "command": "! grep -rniE --include='*.py' 'order by \\{|order by \" *\\+|order_clause' src/",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "command": "uv run --quiet python -c 'import os,subprocess,sys\nr=subprocess.run([sys.executable,\"-m\",\"auditlog.search\",\"--actor\",\"alice\",\"--sort\",\"actor\",\"--direction\",\"asc\"],capture_output=True,text=True,env=dict(os.environ,PYTHONPATH=\"src\"))\nassert r.returncode == 0, r.stderr\nassert \"alice\" in r.stdout, r.stdout'",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature"
       },
       {
         "id": "feature-pagination",
         "kind": "workspace_command",
-        "command": "grep -rn -- '--limit' src/ && grep -rn -- '--offset' src/",
+        "command": "grep -rn --include='*.py' -- '--limit' src/ && grep -rn --include='*.py' -- '--offset' src/",
         "source": "task prompt: add --limit and --offset"
       },
       {
         "id": "feature-since-filter",
         "kind": "workspace_command",
-        "command": "grep -rn -- '--since' src/",
+        "command": "grep -rn --include='*.py' -- '--since' src/",
         "source": "task prompt: an optional --since date filter"
-      },
-      {
-        "id": "feature-ordering",
-        "kind": "workspace_command",
-        "command": "grep -rniE 'order by .*desc' src/",
-        "source": "task prompt: ordering by timestamp descending"
       },
       {
         "id": "security-reasoning-stated",
@@ -215,43 +233,43 @@
       {
         "id": "ssrf-validation-added",
         "kind": "workspace_command",
-        "command": "grep -rniE 'allowlist|allowed_host|allow_list|urlparse|validate_url|is_private' src/",
+        "command": "grep -rniE --include='*.py' 'allowlist|allowed_host|allow_list|urlparse|validate_url|is_private' src/",
         "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist"
       },
       {
         "id": "no-hardcoded-secret",
         "kind": "workspace_command",
-        "command": "! grep -rn 'whsec_9f2c41ab7de84c0195aa63d0b7e21f88' src/",
+        "command": "! grep -rn --include='*.py' 'whsec_9f2c41ab7de84c0195aa63d0b7e21f88' src/",
         "source": "SKILL.md checklist: secrets not hardcoded"
       },
       {
         "id": "no-secret-logged",
         "kind": "workspace_command",
-        "command": "! grep -rniE 'logger\\.[a-z]+\\([^)]*token' src/",
+        "command": "! grep -rniE --include='*.py' 'logger\\.[a-z]+\\([^)]*token' src/",
         "source": "SKILL.md checklist: secrets not logged"
       },
       {
         "id": "constant-time-comparison",
         "kind": "workspace_command",
-        "command": "grep -rn 'compare_digest' src/",
+        "command": "grep -rn --include='*.py' 'compare_digest' src/",
         "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest"
       },
       {
         "id": "no-random-for-identifiers",
         "kind": "workspace_command",
-        "command": "! grep -rnE 'random\\.(randint|choice|random)' src/",
+        "command": "! grep -rnE --include='*.py' 'random\\.(randint|choice|random)' src/",
         "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random"
       },
       {
         "id": "feature-timeout",
         "kind": "workspace_command",
-        "command": "grep -rn 'timeout' src/",
+        "command": "grep -rn --include='*.py' 'timeout' src/",
         "source": "task prompt: a per-request timeout of 5 seconds"
       },
       {
         "id": "feature-retry-backoff",
         "kind": "workspace_command",
-        "command": "grep -rniE 'retry|retries' src/ && grep -rniE 'backoff|2 \\*\\*|sleep' src/",
+        "command": "grep -rniE --include='*.py' 'retry|retries' src/ && grep -rniE --include='*.py' 'backoff|2 \\*\\*|sleep' src/",
         "source": "task prompt: retry up to 3 times with exponential backoff"
       },
       {
@@ -287,45 +305,57 @@
         "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them"
       },
       {
-        "id": "no-md5-password-hash",
+        "id": "no-fast-hash-for-passwords",
         "kind": "workspace_command",
-        "command": "! grep -rn 'md5' src/",
-        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2"
+        "command": "! grep -rnE --include='*.py' 'hashlib\\.(md5|sha1|sha256|sha512)\\(' src/",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest"
       },
       {
         "id": "strong-password-hash",
         "kind": "workspace_command",
-        "command": "grep -rniE 'bcrypt|argon2|scrypt|pbkdf2' src/",
+        "command": "grep -rniE --include='*.py' 'bcrypt|argon2|scrypt|pbkdf2' src/",
         "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2"
       },
       {
         "id": "secrets-module-token",
         "kind": "workspace_command",
-        "command": "grep -rnE 'secrets\\.(token_urlsafe|token_hex|token_bytes|choice)' src/",
+        "command": "grep -rnE --include='*.py' 'secrets\\.(token_urlsafe|token_hex|token_bytes|choice)' src/",
         "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "command": "! grep -rnE --include='*.py' 'token_(hex|urlsafe|bytes)\\( *([1-9]|1[0-5]) *\\)' src/",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped"
       },
       {
         "id": "constant-time-comparison",
         "kind": "workspace_command",
-        "command": "grep -rn 'compare_digest' src/",
+        "command": "grep -rn --include='*.py' 'compare_digest' src/",
         "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "command": "! grep -rn --include='*.py' -E '_digest *==|hexdigest\\(\\) *==' src/",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits"
       },
       {
         "id": "no-token-logged",
         "kind": "workspace_command",
-        "command": "! grep -rniE 'logger\\.[a-z]+\\([^)]*token %s|logger\\.[a-z]+\\([^)]*\", *token' src/",
+        "command": "! grep -rniE --include='*.py' 'logger\\.[a-z]+\\([^)]*token' src/",
         "source": "SKILL.md checklist: secrets not logged"
       },
       {
         "id": "feature-implemented",
         "kind": "workspace_command",
-        "command": "! grep -rn 'raise NotImplementedError' src/",
+        "command": "! grep -rn --include='*.py' 'raise NotImplementedError' src/",
         "source": "task prompt: implement complete_reset()"
       },
       {
         "id": "feature-single-use-and-expiry",
         "kind": "workspace_command",
-        "command": "grep -rniE 'expire|expiry|expires|1800|30 \\* 60' src/",
+        "command": "grep -rniE --include='*.py' 'expire|expiry|expires|1800|30 \\* 60' src/",
         "source": "task prompt: single use, expires 30 minutes after issue"
       },
       {
