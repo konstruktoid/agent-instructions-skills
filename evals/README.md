@@ -52,6 +52,27 @@ python3 evals/run_eval.py report   --skill python-secure-coding
 `report` regenerates `results/<date>.md` from the graded runs, so the checked-in results file
 is never written by hand.
 
+### Repeating a measurement
+
+Both measuring subcommands take `--runs N`. A single run cannot separate a skill's effect from
+the variance of the model, so anything meant to be read as a difference should be repeated.
+
+```sh
+python3 evals/run_eval.py tasks    --skill python-secure-coding --runs 3 --parallel 6
+python3 evals/run_eval.py triggers --skill python-secure-coding --runs 3 --parallel 6
+```
+
+Each run gets its own directory, `results/raw/<date>/<task>/<condition>/run-<n>/` for tasks and
+`results/raw/<date>/triggers/<probe>/run-<n>/` for probes, its own copy of the fixture, and its
+own grading. Nothing is shared between them. With `--runs 1` the layout is the flat one it has
+always been, so an existing stamp regrades and reports unchanged.
+
+The report then gives each condition as a median with the observed range behind it, and the
+delta between the two medians. A delta whose two ranges overlap is marked *no reliable
+difference*: at least one pairing of runs shows no difference at all, so the medians are not
+separated by the runs that were done. A probe counts correct when it routes correctly in more
+than half of its passes.
+
 ## Reading the results
 
 The task table gives each run's passed-assertion count in both conditions and the delta
@@ -64,8 +85,12 @@ the command that was run and the output it produced.
 
 ## Limitations that apply to every result here
 
-- One run per condition. Single-run variance is uncontrolled, so a delta of one assertion is
-  not a reliable signal; only larger differences are.
+- Everything under `results/2026-07-25.md` is one run per condition. Single-run variance is
+  uncontrolled there, so a delta of one assertion is not a reliable signal; only larger
+  differences are. `--runs N` exists to remove this limitation from later measurements, and the
+  3-pass trigger re-run in `github-actions-security/results/2026-07-27.md` shows what it
+  catches: a probe recorded as the one routing defect turned out to fire one pass in three,
+  while a probe recorded as correct fired every time.
 - Task runs used Sonnet, chosen because it leaves room to observe a difference. A stronger
   baseline model does more of the right thing unprompted and compresses the measurement.
 - Trigger probes used Sonnet for cost reasons. Routing is model-dependent, so these numbers
