@@ -11,12 +11,16 @@ Two measurements, one per subcommand:
   available and records whether the agent invoked it, which measures the
   `description` field rather than the skill body.
 
+Both take `--runs N`, which repeats each run and reports the spread rather than
+one draw: tasks report the median with the observed range and flag overlapping
+ranges as no reliable difference, and probes take the majority verdict.
+
 `report` renders the graded runs as the Markdown table checked in under
 `evals/<skill>/results/`.
 
 Run from the repository root:
 
-    python3 evals/run_eval.py tasks --skill python-secure-coding
+    python3 evals/run_eval.py tasks --skill python-secure-coding --runs 3
     python3 evals/run_eval.py triggers --skill python-secure-coding --model opus
     python3 evals/run_eval.py report --skill python-secure-coding
 
@@ -63,6 +67,9 @@ TASK_BUDGET_USD = 2.0
 PROBE_SANDBOX = EVALS_DIR / "probe-sandbox"
 
 CONDITIONS = ("baseline", "with-skill")
+
+# Written as an escape rather than the literal character, which ruff flags as ambiguous.
+RANGE_DASH = "\u2013"
 
 # Resolved once, so the fixture's git calls do not depend on a partial path.
 GIT = shutil.which("git") or "git"
@@ -402,6 +409,7 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
     outcome = {
         "task": task["id"],
         "condition": condition,
+        "run_index": job.get("run_index", 1),
         "model": job["model"],
         "run": record,
         "skills_used": facts["skills_used"],
@@ -480,6 +488,11 @@ def cmd_tasks(args: argparse.Namespace) -> int:
     root = results_root(args.skill, stamp)
     plugin_dir = build_plugin(args.skill, root)
 
+    runs = max(1, args.runs)
+
+    # One run keeps the flat <task>/<condition>/ directory the single-run layout has always
+    # used, so an existing stamp regrades and reports unchanged. More than one nests each run,
+    # and each is graded on its own workspace with no state shared between them.
     jobs = [
         {
             "task": task,
@@ -488,10 +501,16 @@ def cmd_tasks(args: argparse.Namespace) -> int:
             "plugin_dir": plugin_dir,
             "fixture": skill_dir / task["fixture"],
             "assertions": assertions[task["id"]],
-            "run_dir": root / task["id"] / condition,
+            "run_dir": (
+                root / task["id"] / condition
+                if runs == 1
+                else root / task["id"] / condition / f"run-{index}"
+            ),
+            "run_index": index,
         }
         for task in tasks
         for condition in CONDITIONS
+        for index in range(1, runs + 1)
     ]
     outcomes = execute(jobs, run_one_task, args.parallel)
 
@@ -504,9 +523,32 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         outcomes += [
             outcome for outcome in previous if (outcome["task"], outcome["condition"]) not in fresh
         ]
-    outcomes.sort(key=lambda outcome: (outcome["task"], outcome["condition"]))
+    outcomes.sort(
+        key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
+    )
     outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
     return 0
+
+
+def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dict[str, Any]:
+    """Reduce repeated passes of one probe to a single verdict by majority.
+
+    Routing is a coin the model tosses each time, so one pass cannot distinguish a
+    description that routes a prompt from one that routes it half the time. A probe counts
+    correct when it routes correctly in more than half of its passes.
+    """
+    fired_count = sum(1 for item in passes if item["fired"])
+    fired = fired_count * 2 > len(passes)
+    return {
+        "id": probe["id"],
+        "expect": probe["expect"],
+        "fired": fired,
+        "fired_count": fired_count,
+        "runs": len(passes),
+        "correct": fired == (probe["expect"] == "trigger"),
+        "passes": passes,
+        "cost_usd": sum(item["cost_usd"] or 0 for item in passes),
+    }
 
 
 def cmd_triggers(args: argparse.Namespace) -> int:
@@ -516,20 +558,30 @@ def cmd_triggers(args: argparse.Namespace) -> int:
     stamp = args.stamp or today()
     root = results_root(args.skill, stamp) / "triggers"
     plugin_dir = build_plugin(args.skill, root)
+    runs = max(1, args.runs)
 
+    # One pass keeps the flat per-probe directory the single-run layout has always used;
+    # more than one nests each pass, so the passes stay separately readable.
     jobs = [
         {
             "probe": probe,
             "skill": args.skill,
             "model": args.model,
             "plugin_dir": plugin_dir,
-            "run_dir": root / probe["id"],
+            "run_dir": root / probe["id"] if runs == 1 else root / probe["id"] / f"run-{index}",
         }
         for probe in probes
+        for index in range(1, runs + 1)
     ]
-    outcomes = execute(jobs, run_one_trigger, args.parallel)
+    results = execute(jobs, run_one_trigger, args.parallel)
+
+    by_probe: dict[str, list[dict[str, Any]]] = {}
+    for result in results:
+        by_probe.setdefault(result["id"], []).append(result)
+    outcomes = [majority_outcome(probe, by_probe[probe["id"]]) for probe in probes]
+
     correct = sum(1 for outcome in outcomes if outcome["correct"])
-    print(f"trigger accuracy: {correct}/{len(outcomes)}")
+    print(f"trigger accuracy: {correct}/{len(outcomes)} over {runs} pass(es) per probe")
     (root / "trigger-outcomes.json").write_text(
         json.dumps(outcomes, indent=2) + "\n", encoding="utf-8"
     )
@@ -598,33 +650,14 @@ def cmd_regrade(args: argparse.Namespace) -> int:
     outcomes: list[dict[str, Any]] = []
     for task_dir in sorted(path for path in root.iterdir() if path.name in assertions):
         for condition in CONDITIONS:
-            run_dir = task_dir / condition
-            workspace = run_dir / "workspace"
-            if not (run_dir / "grade.json").is_file() or not workspace.is_dir():
-                continue
-            revision = subprocess.run(  # noqa: S603
-                [GIT, "rev-list", "--max-parents=0", "HEAD"],
-                cwd=workspace,
-                env=run_environment(),
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            base_sha = revision.stdout.split()[0]
-            facts = transcript_facts(run_dir / "run.jsonl")
-            graded = [
-                grade_assertion(assertion, workspace, facts, base_sha)
-                for assertion in assertions[task_dir.name]
-            ]
-            outcome = json.loads((run_dir / "grade.json").read_text(encoding="utf-8"))
-            outcome["assertions"] = graded
-            outcome["passed"] = sum(1 for item in graded if item["passed"])
-            outcome["total"] = len(graded)
-            (run_dir / "grade.json").write_text(
-                json.dumps(outcome, indent=2) + "\n", encoding="utf-8"
-            )
-            outcomes.append(outcome)
-            print(f"{task_dir.name} [{condition}] {outcome['passed']}/{outcome['total']}")
+            # A single-run stamp keeps the workspace directly under the condition; a
+            # multi-run one nests it under run-<n>. Regrade whichever layout is on disk.
+            condition_dir = task_dir / condition
+            run_dirs = sorted(condition_dir.glob("run-*")) or [condition_dir]
+            for run_dir in run_dirs:
+                outcome = regrade_one(run_dir, task_dir.name, assertions[task_dir.name])
+                if outcome is not None:
+                    outcomes.append(outcome)
 
     (root / "task-outcomes.json").write_text(
         json.dumps(outcomes, indent=2) + "\n", encoding="utf-8"
@@ -632,18 +665,116 @@ def cmd_regrade(args: argparse.Namespace) -> int:
     return 0
 
 
-def verdict(outcome: dict[str, Any] | None) -> str:
-    """Render one run's assertion tally for the results table."""
-    if outcome is None:
+def regrade_one(
+    run_dir: Path, task_id: str, assertions: list[dict[str, Any]]
+) -> dict[str, Any] | None:
+    """Regrade one stored run in place and return its outcome, or None when it is absent."""
+    workspace = run_dir / "workspace"
+    if not (run_dir / "grade.json").is_file() or not workspace.is_dir():
+        return None
+    revision = subprocess.run(  # noqa: S603
+        [GIT, "rev-list", "--max-parents=0", "HEAD"],
+        cwd=workspace,
+        env=run_environment(),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    base_sha = revision.stdout.split()[0]
+    facts = transcript_facts(run_dir / "run.jsonl")
+    graded = [grade_assertion(assertion, workspace, facts, base_sha) for assertion in assertions]
+    outcome = json.loads((run_dir / "grade.json").read_text(encoding="utf-8"))
+    outcome["assertions"] = graded
+    outcome["passed"] = sum(1 for item in graded if item["passed"])
+    outcome["total"] = len(graded)
+    (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
+    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}")
+    return outcome
+
+
+def median(values: list[int]) -> float:
+    """Return the median of a non-empty list, averaging the middle pair when even."""
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return float(ordered[middle])
+    return (ordered[middle - 1] + ordered[middle]) / 2
+
+
+def count(number: float) -> str:
+    """Render an assertion count, dropping the decimal when the median is a whole number."""
+    return f"{number:g}"
+
+
+def verdict(runs: list[dict[str, Any]]) -> str:
+    """Render one condition's assertion tally for the results table.
+
+    One run reads as it always has. Several read as the median with the observed
+    range behind it, because the median is what the delta is computed from and the
+    range is what says whether the delta means anything.
+    """
+    if not runs:
         return "not run"
-    return f"{outcome['passed']}/{outcome['total']}"
+    total = runs[0]["total"]
+    passed = [run["passed"] for run in runs]
+    if len(runs) == 1:
+        return f"{passed[0]}/{total}"
+    return f"{count(median(passed))}/{total} ({min(passed)}{RANGE_DASH}{max(passed)})"
 
 
-def failed_ids(outcome: dict[str, Any] | None) -> list[str]:
-    """Return the ids of the assertions one run failed."""
-    if outcome is None:
-        return []
-    return [item["id"] for item in outcome["assertions"] if not item["passed"]]
+def ranges_overlap(left: list[int], right: list[int]) -> bool:
+    """Return True when two observed ranges intersect.
+
+    Overlapping ranges mean at least one pairing of runs shows no difference at all,
+    so the difference between the medians is not one the runs support.
+    """
+    return min(left) <= max(right) and min(right) <= max(left)
+
+
+def failed_ids(runs: list[dict[str, Any]]) -> list[str]:
+    """Return the assertion ids failed by any run of one condition, in assertion order."""
+    seen: list[str] = []
+    for run in runs:
+        for item in run["assertions"]:
+            if not item["passed"] and item["id"] not in seen:
+                seen.append(item["id"])
+    return seen
+
+
+def cost_section(
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], net_delta: float
+) -> list[str]:
+    """Render what the measured gain cost, per skill.
+
+    A skill that improves nothing has no cost per assertion to report, and dividing by
+    zero or by a negative net would manufacture a number that reads as one.
+    """
+    totals = {
+        condition: sum(
+            run["cost_usd"] or 0
+            for conditions in by_task.values()
+            for run in conditions.get(condition, [])
+        )
+        for condition in CONDITIONS
+    }
+    baseline, with_skill = totals["baseline"], totals["with-skill"]
+    multiplier = f"{with_skill / baseline:.1f}x" if baseline else "n/a"
+    if net_delta > 0:
+        per_assertion = f"${(with_skill - baseline) / net_delta:.2f}"
+    else:
+        per_assertion = "n/a — no gain"
+    return [
+        "## Cost of the measured gain",
+        "",
+        "| Measure | Value |",
+        "|---|---|",
+        f"| Total baseline cost | ${baseline:.2f} |",
+        f"| Total with-skill cost | ${with_skill:.2f} |",
+        f"| Multiplier | {multiplier} |",
+        f"| Net assertions gained | {net_delta:+g} |",
+        f"| Cost per net assertion gained | {per_assertion} |",
+        "",
+    ]
 
 
 def trigger_section(skill: str, stamp: str) -> list[str]:
@@ -654,70 +785,87 @@ def trigger_section(skill: str, stamp: str) -> list[str]:
 
     outcomes = json.loads(path.read_text(encoding="utf-8"))
     correct = sum(1 for outcome in outcomes if outcome["correct"])
+    passes = max(outcome.get("runs", 1) for outcome in outcomes)
     lines = [
         "## Trigger accuracy",
         "",
         f"**{correct}/{len(outcomes)}** probes routed correctly.",
         "",
+    ]
+    if passes > 1:
+        lines += [
+            f"Each probe ran {passes} times. A probe counts correct when it routes correctly in",
+            "more than half of its passes, and the fired column gives the count of passes in",
+            "which the skill loaded.",
+            "",
+        ]
+    lines += [
         "| Probe | Expected | Fired | Correct |",
         "|-------|----------|-------|---------|",
     ]
-    lines += [
-        f"| `{outcome['id']}` | {outcome['expect']} | {outcome['fired']} | "
-        f"{'yes' if outcome['correct'] else 'NO'} |"
-        for outcome in outcomes
-    ]
+    for outcome in outcomes:
+        count = outcome.get("fired_count", int(outcome["fired"]))
+        fired = f"{count}/{passes}" if passes > 1 else str(outcome["fired"])
+        correct_cell = "yes" if outcome["correct"] else "NO"
+        lines.append(f"| `{outcome['id']}` | {outcome['expect']} | {fired} | {correct_cell} |")
     lines.append("")
     return lines
 
 
-def render_report(skill: str, stamp: str) -> str:
-    """Render the Markdown results file for one dated run of one skill."""
-    root = results_root(skill, stamp)
-    outcomes_path = root / "task-outcomes.json"
-    outcomes = (
-        json.loads(outcomes_path.read_text(encoding="utf-8")) if outcomes_path.is_file() else []
-    )
-    by_task: dict[str, dict[str, dict[str, Any]]] = {}
-    for outcome in outcomes:
-        by_task.setdefault(outcome["task"], {})[outcome["condition"]] = outcome
-
-    lines = [
-        f"# {skill} eval results, {stamp}",
-        "",
-        "Generated by `evals/run_eval.py report`. Every number below is read from a",
-        f"`grade.json` under `results/raw/{stamp}/`, and every assertion is a command run in",
-        "the finished workspace or a regex over the run transcript.",
-        "",
-        "## Task results",
-        "",
+def task_table(
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int
+) -> tuple[list[str], float]:
+    """Render the task-results table and return it with the net delta it summed."""
+    lines = ["## Task results", ""]
+    if runs_per_condition > 1:
+        lines += [
+            f"Each task ran {runs_per_condition} times per condition, each against its own",
+            "copy of the fixture and graded on its own. A cell gives the median with the",
+            "observed range behind it, and the delta is between the two medians. A delta",
+            "marked *no reliable difference* has the two ranges overlapping, so at least one",
+            "pairing of runs shows no difference and the medians are not separated by these",
+            "runs.",
+            "",
+        ]
+    lines += [
         "| Task | Baseline | With skill | Delta | Skill fired |",
         "|------|----------|------------|-------|-------------|",
     ]
-    total_delta = 0
+    total_delta: float = 0
     for task_id, conditions in by_task.items():
-        baseline, with_skill = conditions.get("baseline"), conditions.get("with-skill")
+        baseline = conditions.get("baseline", [])
+        with_skill = conditions.get("with-skill", [])
         delta = ""
         if baseline and with_skill:
-            difference = with_skill["passed"] - baseline["passed"]
+            baseline_passed = [run["passed"] for run in baseline]
+            with_skill_passed = [run["passed"] for run in with_skill]
+            difference = median(with_skill_passed) - median(baseline_passed)
             total_delta += difference
-            delta = f"{difference:+d}"
-        fired = "yes" if with_skill and with_skill["skills_used"] else "no"
+            delta = f"{difference:+g}"
+            if len(baseline) > 1 and ranges_overlap(baseline_passed, with_skill_passed):
+                delta = f"{delta} (no reliable difference)"
+        fired = "yes" if any(run["skills_used"] for run in with_skill) else "no"
         lines.append(
             f"| `{task_id}` | {verdict(baseline)} | {verdict(with_skill)} | {delta} | {fired} |"
         )
+    lines += ["", f"Net delta across {len(by_task)} tasks: **{total_delta:+g}** assertions.", ""]
+    return lines, total_delta
 
-    lines += ["", f"Net delta across {len(by_task)} tasks: **{total_delta:+d}** assertions.", ""]
-    if total_delta == 0 and by_task:
+
+def failure_section(
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int
+) -> list[str]:
+    """Render the per-run list of failed assertion ids."""
+    lines = ["## Assertions failed, by run", ""]
+    if runs_per_condition > 1:
         lines += [
-            "The skill produced no net measurable improvement on these tasks.",
+            "An assertion is listed when any run of that condition failed it, so this is the",
+            "union across runs rather than one run's result.",
             "",
         ]
-
-    lines += ["## Assertions failed, by run", ""]
     for task_id, conditions in by_task.items():
         for condition in CONDITIONS:
-            failures = failed_ids(conditions.get(condition))
+            failures = failed_ids(conditions.get(condition, []))
             rendered = ", ".join(f"`{name}`" for name in failures) if failures else "none"
             # Wrapped to the repository's 100-column Markdown rule, which applies to this
             # generated file as much as to a hand-written one.
@@ -730,6 +878,51 @@ def render_report(skill: str, stamp: str) -> str:
                 )
             )
     lines.append("")
+    return lines
+
+
+def render_report(skill: str, stamp: str) -> str:
+    """Render the Markdown results file for one dated run of one skill."""
+    root = results_root(skill, stamp)
+    outcomes_path = root / "task-outcomes.json"
+    outcomes = (
+        json.loads(outcomes_path.read_text(encoding="utf-8")) if outcomes_path.is_file() else []
+    )
+    by_task: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    for outcome in outcomes:
+        by_task.setdefault(outcome["task"], {}).setdefault(outcome["condition"], []).append(outcome)
+    runs_per_condition = max(
+        (len(runs) for conditions in by_task.values() for runs in conditions.values()), default=1
+    )
+
+    lines = [
+        f"# {skill} eval results, {stamp}",
+        "",
+        "Generated by `evals/run_eval.py report`. Every number below is read from a",
+        f"`grade.json` under `results/raw/{stamp}/`, and every assertion is a command run in",
+        "the finished workspace or a regex over the run transcript.",
+        "",
+    ]
+    # A stamp can hold trigger probes alone, as when only a description is under test. Emit
+    # the task sections only when there are graded task runs, rather than a table of zeroes
+    # that reads as a measured result.
+    if not by_task:
+        lines += [
+            "No task runs were graded under this stamp; the trigger measurement below stands",
+            "on its own.",
+            "",
+        ]
+        return "\n".join(lines + trigger_section(skill, stamp))
+
+    table, total_delta = task_table(by_task, runs_per_condition)
+    lines += table
+    if total_delta == 0 and by_task:
+        lines += [
+            "The skill produced no net measurable improvement on these tasks.",
+            "",
+        ]
+
+    lines += failure_section(by_task, runs_per_condition)
 
     lines += [
         "## Run cost and length",
@@ -739,13 +932,15 @@ def render_report(skill: str, stamp: str) -> str:
     ]
     for task_id, conditions in by_task.items():
         for condition in CONDITIONS:
-            outcome = conditions.get(condition)
-            if outcome is None:
-                continue
-            cost = outcome["cost_usd"] or 0
-            lines.append(f"| `{task_id}` | {condition} | {outcome['num_turns']} | {cost:.2f} |")
+            for outcome in conditions.get(condition, []):
+                label = condition
+                if runs_per_condition > 1:
+                    label = f"{condition} run {outcome.get('run_index', 1)}"
+                cost = outcome["cost_usd"] or 0
+                lines.append(f"| `{task_id}` | {label} | {outcome['num_turns']} | {cost:.2f} |")
     lines.append("")
 
+    lines += cost_section(by_task, total_delta)
     lines += trigger_section(skill, stamp)
     return "\n".join(lines)
 
@@ -783,6 +978,16 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--parallel", type=int, default=4, help="concurrent runs (default: 4)")
         if name == "tasks":
             sub.add_argument("--task", action="append", help="run only this task id, repeatable")
+            sub.add_argument(
+                "--runs",
+                type=int,
+                default=1,
+                help="runs per condition, reported as median and range (default: 1)",
+            )
+        if name == "triggers":
+            sub.add_argument(
+                "--runs", type=int, default=1, help="passes per probe, majority wins (default: 1)"
+            )
 
     return parser
 
