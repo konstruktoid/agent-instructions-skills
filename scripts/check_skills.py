@@ -9,7 +9,9 @@ For every skills/<category>/<name>/SKILL.md, the rules stated in README.md are:
 - The body (everything after the frontmatter) is under 500 lines.
 
 It also checks the plugin marketplace manifest, since a skill that is not listed there
-never reaches a project that installs this library as a plugin.
+never reaches a project that installs this library as a plugin, and the cross-references
+between skills and instructions/, which README.md requires to run in both directions and
+which nothing else would catch drifting.
 
 For every agent-templates/<name>.md, the rules are the same frontmatter rules with
 `name` matching the file stem, plus the neutral defaults a template must ship with:
@@ -43,6 +45,18 @@ MAX_BODY_LINES = 500
 MARKETPLACE_PATH = Path(".claude-plugin/marketplace.json")
 
 AGENT_TEMPLATE_GLOB = "agent-templates/*.md"
+
+INSTRUCTIONS_DIR = Path("instructions")
+
+# `instructions/<name>.md` as this library's own path, anchored so it does not also match a
+# path that merely ends in that directory name. `.github/instructions/*.instructions.md`,
+# which ansible-verification-loop names as a repository convention file, is not a reference
+# to this library and must not be checked as one.
+INSTRUCTIONS_REFERENCE = re.compile(r"(?<![\w./-])instructions/([A-Za-z0-9_-]+\.md)")
+
+# `skills/<category>/<name>/SKILL.md`, the form the instructions documents use when they
+# point back at a skill.
+SKILL_REFERENCE = re.compile(r"(?<![\w./-])skills/([A-Za-z0-9_-]+)/([A-Za-z0-9_-]+)/SKILL\.md")
 
 # Claude Code auto-discovers subagents from an `agents/` directory at a plugin root, and
 # every plugin in the marketplace manifest is sourced from the repository root. Templates
@@ -299,6 +313,55 @@ def check_marketplace(repo_root: Path, skills: list[Path]) -> list[str]:
     return errors
 
 
+def check_cross_references(repo_root: Path, skills: list[Path]) -> list[str]:
+    """Check that skill and instructions cross-references resolve, and point both ways.
+
+    README.md requires a skill that extends an instructions document to cross-reference it
+    by path in both directions. That rule is prose in two files and drifts silently, so it
+    is checked here rather than trusted. Three failures are reported:
+
+    1. A SKILL.md names an `instructions/*.md` file that does not exist.
+    2. An `instructions/*.md` names a `skills/*/*/SKILL.md` that does not exist.
+    3. A skill names an instructions document that does not name that skill back.
+    """
+    errors: list[str] = []
+    instructions = sorted((repo_root / INSTRUCTIONS_DIR).glob("*.md"))
+    documents = {path.name: path.read_text(encoding="utf-8") for path in instructions}
+
+    # Skill -> instructions, collected first so the reverse check can consult it.
+    named_by: dict[str, list[Path]] = {}
+    for skill_path in skills:
+        relative = skill_path.relative_to(repo_root)
+        text = skill_path.read_text(encoding="utf-8")
+        for name in sorted(set(INSTRUCTIONS_REFERENCE.findall(text))):
+            if name not in documents:
+                errors.append(f"{relative}: references instructions/{name}, which does not exist")
+                continue
+            named_by.setdefault(name, []).append(skill_path)
+
+    for path in instructions:
+        relative = path.relative_to(repo_root)
+        for category, name in sorted(set(SKILL_REFERENCE.findall(documents[path.name]))):
+            target = repo_root / "skills" / category / name / "SKILL.md"
+            if not target.is_file():
+                errors.append(
+                    f"{relative}: references skills/{category}/{name}/SKILL.md, "
+                    "which does not exist"
+                )
+
+    for name, referring in sorted(named_by.items()):
+        document = documents[name]
+        for skill_path in referring:
+            expected = str(skill_path.relative_to(repo_root))
+            if expected not in document:
+                errors.append(
+                    f"instructions/{name}: is named by {expected} but does not name it back; "
+                    "README.md requires the cross-reference in both directions"
+                )
+
+    return errors
+
+
 def report(repo_root: Path, paths: list[Path], check: Callable[[Path], list[str]]) -> int:
     """Run `check` over every path, print one line per file, and return the failure count."""
     failed = 0
@@ -336,11 +399,18 @@ def main() -> int:
     if not manifest_errors:
         print(f"{MARKETPLACE_PATH}: ok")
 
-    if failed or template_failed or manifest_errors:
+    reference_errors = check_cross_references(repo_root, skills)
+    for error in reference_errors:
+        print(error, file=sys.stderr)
+    if not reference_errors:
+        print(f"{INSTRUCTIONS_DIR}/: cross-references ok")
+
+    if failed or template_failed or manifest_errors or reference_errors:
         print(
             f"\n{failed} of {len(skills)} skill(s) failed, "
             f"{template_failed} of {len(templates)} agent template(s) failed, "
-            f"{len(manifest_errors)} packaging problem(s)",
+            f"{len(manifest_errors)} packaging problem(s), "
+            f"{len(reference_errors)} cross-reference problem(s)",
             file=sys.stderr,
         )
         return 1

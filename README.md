@@ -339,10 +339,13 @@ not written in first or second person, and that the body is under 500 lines. It 
 frontmatter rules to each `agent-templates/*.md`, with `name` matching the file name, and adds the
 neutral defaults a template must ship with: `model` is `inherit` and `tools` is a non-empty
 allowlist. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must
-hold a `SKILL.md`, and every skill in the repository must be listed by exactly one plugin. Last, it
-fails if an `agents/` directory has appeared at the repository root, which would ship the agent
-templates as installable subagents. It needs only `pyyaml`, so `python3 scripts/check_skills.py`
-also works outside uv.
+hold a `SKILL.md`, and every skill in the repository must be listed by exactly one plugin. It fails
+if an `agents/` directory has appeared at the repository root, which would ship the agent templates
+as installable subagents. Last, it verifies the cross-references this library maintains by hand: a
+`SKILL.md` may not name an `instructions/*.md` that does not exist, an `instructions/*.md` may not
+name a `skills/*/*/SKILL.md` that does not exist, and a skill that names an instructions document
+must be named back by it, which is the bidirectional rule stated above. It needs only `pyyaml`, so
+`python3 scripts/check_skills.py` also works outside uv.
 
 `claude plugin validate .` checks the marketplace manifest against Claude Code's own schema. It
 needs the Claude Code CLI, so it is a local step rather than a CI one.
