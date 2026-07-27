@@ -1,6 +1,7 @@
 """Checks for ledger.balance."""
 
 from ledger import Entry, balance
+from ledger._tests import _helpers
 
 ENTRIES = [
     Entry("cash", 100),
@@ -16,4 +17,4 @@ def check_balance_sums_one_account():
 
 def check_balance_of_an_unknown_account_is_zero():
     """An account with no entries has a zero balance."""
-    assert balance(ENTRIES, "equity") == 0
+    _helpers.check_values(balance(ENTRIES, "equity"), 0)

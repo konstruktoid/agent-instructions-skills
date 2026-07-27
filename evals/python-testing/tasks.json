@@ -16,7 +16,7 @@
       "id": "pt-02-business-days",
       "title": "Add a public function to a date helper package",
       "fixture": "fixtures/pt-02-business-days",
-      "prompt": "Add business_days_between(start, end) to the tempo package. It returns the number of weekdays from start up to but not including end, counting start itself when it is a weekday, and returning 0 when end is on or before start. Export it the way the package exports its other helpers, and make sure the repository's checks pass."
+      "prompt": "Add business_days_between(start, end) to the tempo package. It returns the number of working days from start up to but not including end, where a working day is a weekday that is not a company holiday, counting start itself when it qualifies, and returning 0 when end is on or before start. Use the package's existing calendar helpers. Export it the way the package exports its other helpers, and make sure the repository's checks pass."
     },
     {
       "id": "pt-03-retry-refactor",
@@ -28,7 +28,7 @@
       "id": "pt-04-upload-validation",
       "title": "Tighten upload validation rules",
       "fixture": "fixtures/pt-04-upload-validation",
-      "prompt": "validate_upload only checks the size today. Add three rules: the extension must be one of .pdf, .png or .csv, the filename must not contain a path separator or start with a dot, and the stored name should be the filename lowercased. Keep raising UploadRejected for anything that fails, with a message naming the rule that failed. Make sure the repository's checks pass."
+      "prompt": "validate_upload only checks the size today. Add three rules: the extension must be one of .pdf, .png or .csv whatever case it arrives in, the filename must be rejected rather than repaired when it contains a path separator of either kind or starts with a dot, and the stored name should be the filename lowercased. Keep raising UploadRejected for anything that fails, with a distinct message naming the rule that failed. Make sure the repository's checks pass."
     },
     {
       "id": "pt-05-unusual-layout",
