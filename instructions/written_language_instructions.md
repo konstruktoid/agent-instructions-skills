@@ -5,6 +5,11 @@
 Produce text that is formal, professional, precise, and concise. Prioritize clarity, accuracy,
 and readability over stylistic variation.
 
+One skill builds on this document and is worth applying alongside it: the
+`github-actions-security` skill (`skills/github/github-actions-security/SKILL.md`) applies these
+rules to the prose it writes, namely workflow comments and pull request descriptions explaining
+a deliberate exception.
+
 ## Tone
 
 ### Required
