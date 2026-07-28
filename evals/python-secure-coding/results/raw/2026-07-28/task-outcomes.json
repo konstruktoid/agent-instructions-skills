@@ -1,0 +1,3128 @@
+[
+  {
+    "task": "psc-01-report-export",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:38:17.578229+00:00",
+      "seconds": 212.9
+    },
+    "skills_used": [],
+    "num_turns": 39,
+    "cost_usd": 0.9447322999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths",
+        "passed": false,
+        "evidence": "exit 1\nsrc/reportkit/shellutils.py:27:    return str(Path(tempfile.gettempdir()) / f\"reportkit-{os.getpid()}{suffix}\")"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a --format flag accepting csv or pdf",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/export.py:48:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README usage section",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'shell=True'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-01-report-export",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:38:17.559390+00:00",
+      "seconds": 114.4
+    },
+    "skills_used": [],
+    "num_turns": 18,
+    "cost_usd": 0.45388680000000003,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths",
+        "passed": false,
+        "evidence": "exit 1\nsrc/reportkit/shellutils.py:27:    return str(Path(tempfile.gettempdir()) / f\"reportkit-{os.getpid()}{suffix}\")"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a --format flag accepting csv or pdf",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/export.py:45:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README usage section",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'shell=True'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-01-report-export",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:38:17.580540+00:00",
+      "seconds": 130.4
+    },
+    "skills_used": [],
+    "num_turns": 23,
+    "cost_usd": 0.5280936,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/shellutils.py:24:    Uses mkstemp so the file is created atomically under a unique, private\nsrc/reportkit/shellutils.py:28:    fd, path = tempfile.mkstemp(prefix=\"reportkit-\", suffix=suffix)"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a --format flag accepting csv or pdf",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/export.py:45:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README usage section",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'shell=True'"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "psc-01-report-export",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:38:17.581638+00:00",
+      "seconds": 163.9
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 28,
+    "cost_usd": 0.6767982000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/shellutils.py:23:    Uses mkstemp so the file is created atomically by the OS, avoiding the\nsrc/reportkit/shellutils.py:27:    fd, path = tempfile.mkstemp(prefix=\"reportkit-\", suffix=suffix)"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a --format flag accepting csv or pdf",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/export.py:45:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README usage section",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'argument list'"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "psc-01-report-export",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:38:17.581376+00:00",
+      "seconds": 217.9
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 35,
+    "cost_usd": 1.0060272,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/shellutils.py:24:    Uses tempfile.mkstemp instead of a name guessed from the process id, so\nsrc/reportkit/shellutils.py:28:    fd, path = tempfile.mkstemp(suffix=suffix, prefix=\"reportkit-\")"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a --format flag accepting csv or pdf",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/export.py:51:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README usage section",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'argument list'"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "psc-01-report-export",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:38:17.565433+00:00",
+      "seconds": 201.2
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 29,
+    "cost_usd": 0.7737963000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-shell-true",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches subprocess with shell=True",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-string-built-command",
+        "kind": "workspace_command",
+        "source": "references/injection.md: pass an argument list, never a shell string built by the caller",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-path",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: TOCTOU races on temp file creation, and predictable temp paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-file-created-atomically",
+        "kind": "workspace_command",
+        "source": "references/access-control.md: create the temp file itself rather than a name another process can win the race for",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/shellutils.py:23:    Uses tempfile.mkstemp so the file is created atomically with\nsrc/reportkit/shellutils.py:27:    fd, path = tempfile.mkstemp(prefix=\"reportkit-\", suffix=suffix)"
+      },
+      {
+        "id": "feature-format-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a --format flag accepting csv or pdf",
+        "passed": true,
+        "evidence": "exit 0\nsrc/reportkit/export.py:51:    parser.add_argument(\"--format\", choices=[\"csv\", \"pdf\"], default=\"csv\")"
+      },
+      {
+        "id": "feature-readme-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README usage section",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'shell=True'"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "psc-02-session-restore",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:42:07.497470+00:00",
+      "seconds": 124.5
+    },
+    "skills_used": [],
+    "num_turns": 20,
+    "cost_usd": 0.47518400000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:20:    record = pickle.loads(raw)\nsrc/sessionsvc/store.py:49:        record = pickle.loads(path.read_bytes())"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:28:    return eval(text)"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "source": "task prompt: reject a session older than SESSION_TTL",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:9:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:13:    \"\"\"Raised when a restored session is older than SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:21:    if time.time() - record[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:50:        if now - record[\"issued_at\"] > SESSION_TTL:"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "source": "task prompt: record an issued_at timestamp",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:21:    if time.time() - record[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:39:    record = {\"issued_at\": time.time(), \"session\": session}\nsrc/sessionsvc/store.py:50:        if now - record[\"issued_at\"] > SESSION_TTL:"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "source": "task prompt: add a purge_expired() function",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:43:def purge_expired() -> None:"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'pickle'"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "psc-02-session-restore",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:42:07.495224+00:00",
+      "seconds": 67.6
+    },
+    "skills_used": [],
+    "num_turns": 11,
+    "cost_usd": 0.25750019999999996,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:17:    envelope = pickle.loads(raw)\nsrc/sessionsvc/store.py:47:            envelope = pickle.loads(path.read_bytes())"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:25:    return eval(text)"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "source": "task prompt: reject a session older than SESSION_TTL",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:10:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:18:    if time.time() - envelope[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:52:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "source": "task prompt: record an issued_at timestamp",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:18:    if time.time() - envelope[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:36:    envelope = {\"issued_at\": time.time(), \"session\": session}\nsrc/sessionsvc/store.py:48:            issued_at = envelope[\"issued_at\"]\nsrc/sessionsvc/store.py:52:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "source": "task prompt: add a purge_expired() function",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:40:def purge_expired() -> None:"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'pickle'"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "psc-02-session-restore",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:42:07.502691+00:00",
+      "seconds": 67.5
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.2651292,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:18:    envelope = pickle.loads(raw)\nsrc/sessionsvc/store.py:48:            envelope = pickle.loads(path.read_bytes())"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:26:    return eval(text)"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "source": "task prompt: reject a session older than SESSION_TTL",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:11:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:19:    if time.time() - envelope[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:53:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "source": "task prompt: record an issued_at timestamp",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:19:    if time.time() - envelope[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:37:    envelope = {\"issued_at\": time.time(), \"session\": session}\nsrc/sessionsvc/store.py:49:            issued_at = envelope[\"issued_at\"]\nsrc/sessionsvc/store.py:53:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "source": "task prompt: add a purge_expired() function",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:41:def purge_expired() -> None:"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'pickle'"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "psc-02-session-restore",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:42:07.491721+00:00",
+      "seconds": 154.9
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 19,
+    "cost_usd": 0.5406105999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:34:    return eval(text)"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "source": "task prompt: reject a session older than SESSION_TTL",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:11:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:15:    \"\"\"Raised when a resume blob or cache entry is older than SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:21:    Rejects the blob if it was issued more than SESSION_TTL seconds ago, and\nsrc/sessionsvc/store.py:27:    if time.time() - envelope[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:50:    \"\"\"Remove cache entries older than SESSION_TTL from the on-disk cache.\"\"\"\nsrc/sessionsvc/store.py:61:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "source": "task prompt: record an issued_at timestamp",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:27:    if time.time() - envelope[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:45:    envelope = {\"issued_at\": time.time(), \"session\": session}\nsrc/sessionsvc/store.py:57:            issued_at = envelope[\"issued_at\"]\nsrc/sessionsvc/store.py:61:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "source": "task prompt: add a purge_expired() function",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:49:def purge_expired() -> None:"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'pickle'"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "psc-02-session-restore",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:42:07.482415+00:00",
+      "seconds": 195.1
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 26,
+    "cost_usd": 0.6955302,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:26:    return eval(text)"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "source": "task prompt: reject a session older than SESSION_TTL",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:9:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:19:    if time.time() - record[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:52:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "source": "task prompt: record an issued_at timestamp",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:19:    if time.time() - record[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:37:    record = {\"issued_at\": time.time(), \"session\": session}\nsrc/sessionsvc/store.py:49:            issued_at = record[\"issued_at\"]\nsrc/sessionsvc/store.py:52:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "source": "task prompt: add a purge_expired() function",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:41:def purge_expired() -> None:"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'pickle'"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "psc-02-session-restore",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:42:07.487764+00:00",
+      "seconds": 147.3
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 20,
+    "cost_usd": 0.5408203,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-pickle-on-input",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches pickle",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+        "passed": false,
+        "evidence": "exit 1\nsrc/sessionsvc/store.py:24:    return eval(text)"
+      },
+      {
+        "id": "feature-ttl-enforced",
+        "kind": "workspace_command",
+        "source": "task prompt: reject a session older than SESSION_TTL",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:9:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:17:    if time.time() - record[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:50:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-issued-at",
+        "kind": "workspace_command",
+        "source": "task prompt: record an issued_at timestamp",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:17:    if time.time() - record[\"issued_at\"] > SESSION_TTL:\nsrc/sessionsvc/store.py:35:    record = {\"issued_at\": time.time(), \"session\": session}\nsrc/sessionsvc/store.py:47:            issued_at = record[\"issued_at\"]\nsrc/sessionsvc/store.py:50:        if now - issued_at > SESSION_TTL:"
+      },
+      {
+        "id": "feature-purge-expired",
+        "kind": "workspace_command",
+        "source": "task prompt: add a purge_expired() function",
+        "passed": true,
+        "evidence": "exit 0\nsrc/sessionsvc/store.py:39:def purge_expired() -> None:"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'pickle'"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "psc-03-audit-search",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:45:28.013766+00:00",
+      "seconds": 148.2
+    },
+    "skills_used": [],
+    "num_turns": 20,
+    "cost_usd": 0.5583218,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "source": "references/injection.md: bind parameters rather than interpolating them",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:54:        return connection.execute(query, params).fetchall()"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+        "passed": false,
+        "evidence": "exit 1\nsrc/auditlog/filters.py:13:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:20:    return f\" ORDER BY {sort} {normalized_direction}\"\nsrc/auditlog/search.py:6:from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause\nsrc/auditlog/search.py:49:    query += order_clause(sort, direction)"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "source": "task prompt: add --limit and --offset",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:74:        \"--limit\",\nsrc/auditlog/search.py:80:        \"--offset\","
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "source": "task prompt: an optional --since date filter",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:86:        \"--since\", help=\"Only include rows with a timestamp at or after this ISO date\""
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'parameteri'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-03-audit-search",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:45:28.017458+00:00",
+      "seconds": 117.2
+    },
+    "skills_used": [],
+    "num_turns": 15,
+    "cost_usd": 0.45347990000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "source": "references/injection.md: bind parameters rather than interpolating them",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:58:        return connection.execute(query, params).fetchall()"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+        "passed": false,
+        "evidence": "exit 1\nsrc/auditlog/filters.py:10:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:23:    return f\" ORDER BY {sort} {normalized_direction}\"\nsrc/auditlog/search.py:7:from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause\nsrc/auditlog/search.py:53:    query += order_clause(sort, direction)"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "source": "task prompt: add --limit and --offset",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:76:        \"--limit\",\nsrc/auditlog/search.py:82:        \"--offset\","
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "source": "task prompt: an optional --since date filter",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:66:    parser.add_argument(\"--since\", help=\"Match rows at or after this ISO date (YYYY-MM-DD)\")"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'parameteri'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-03-audit-search",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:45:28.012918+00:00",
+      "seconds": 112.9
+    },
+    "skills_used": [],
+    "num_turns": 21,
+    "cost_usd": 0.4945526,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "source": "references/injection.md: bind parameters rather than interpolating them",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:59:        return connection.execute(query, params).fetchall()"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+        "passed": false,
+        "evidence": "exit 1\nsrc/auditlog/filters.py:14:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:26:    return f\" ORDER BY {sort} {normalized_direction}\"\nsrc/auditlog/search.py:11:    order_clause,\nsrc/auditlog/search.py:54:    query += order_clause(sort, direction)"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "source": "task prompt: add --limit and --offset",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:85:        \"--limit\",\nsrc/auditlog/search.py:99:        parser.error(\"--limit must not be negative\")\nsrc/auditlog/search.py:91:        \"--offset\",\nsrc/auditlog/search.py:101:        parser.error(\"--offset must not be negative\")"
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "source": "task prompt: an optional --since date filter",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:81:        \"--since\","
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'parameteri'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-03-audit-search",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:45:28.020099+00:00",
+      "seconds": 136.8
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.6340132999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "source": "references/injection.md: bind parameters rather than interpolating them",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:64:        return connection.execute(query, params).fetchall()"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+        "passed": false,
+        "evidence": "exit 1\nsrc/auditlog/filters.py:14:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:25:    return f\" ORDER BY {sort} {direction}\"\nsrc/auditlog/search.py:12:    order_clause,\nsrc/auditlog/search.py:59:    query += order_clause(sort, direction)"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "source": "task prompt: add --limit and --offset",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:86:        \"--limit\",\nsrc/auditlog/search.py:92:        \"--offset\","
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "source": "task prompt: an optional --since date filter",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:81:        \"--since\","
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'parameteri'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-03-audit-search",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:45:28.013501+00:00",
+      "seconds": 159.6
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 30,
+    "cost_usd": 0.7496708,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "source": "references/injection.md: bind parameters rather than interpolating them",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:60:        return connection.execute(query, params).fetchall()"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+        "passed": false,
+        "evidence": "exit 1\nsrc/auditlog/filters.py:14:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:27:    return f\" ORDER BY {sort_key} {direction_key}\"\nsrc/auditlog/search.py:11:    order_clause,\nsrc/auditlog/search.py:55:    query += order_clause(sort, direction)"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "source": "task prompt: add --limit and --offset",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:88:        \"--limit\",\nsrc/auditlog/search.py:102:        parser.error(f\"--limit must be between 0 and {MAX_LIMIT}\")\nsrc/auditlog/search.py:94:        \"--offset\",\nsrc/auditlog/search.py:104:        parser.error(\"--offset must be non-negative\")"
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "source": "task prompt: an optional --since date filter",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:73:        \"--since\","
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'parameteri'"
+      }
+    ],
+    "passed": 9,
+    "total": 11
+  },
+  {
+    "task": "psc-03-audit-search",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:45:28.016818+00:00",
+      "seconds": 198.8
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 34,
+    "cost_usd": 0.8892388999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": false,
+        "evidence": "exit 1\nerror[unresolved-import]: Cannot resolve imported module `auditlog`\n  --> tests/test_search.py:10:6\n   |\n10 | from auditlog import search  # noqa: E402\n   |      ^^^^^^^^\n   |\ninfo: Searched in the following paths during module resolution:\ninfo:   1. /repo (first-party code)\ninfo:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)\ninfo:   3. /repo/evals/python-secure-coding/results/raw/2026-07-28/psc-03-audit-search/with-skill/run-3/workspace/.venv/lib/python3.13/site-packages (site-packages)\ninfo:   4. /repo/evals/python-secure-coding/results/raw/2026-07-28/psc-03-audit-search/with-skill/run-3/workspace/.venv/lib64/python3.13/site-packages (site-packages)\ninfo: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment\n\nFound 1 diagnostic"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-sql-concatenation",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "parameterized-query",
+        "kind": "workspace_command",
+        "source": "references/injection.md: bind parameters rather than interpolating them",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:64:        return connection.execute(query, params).fetchall()"
+      },
+      {
+        "id": "no-interpolated-order-by",
+        "kind": "workspace_command",
+        "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+        "passed": false,
+        "evidence": "exit 1\nsrc/auditlog/filters.py:14:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:25:    return f\" ORDER BY {sort} {normalized_direction}\"\nsrc/auditlog/search.py:11:    order_clause,\nsrc/auditlog/search.py:59:    query += order_clause(sort, direction)"
+      },
+      {
+        "id": "sort-still-works",
+        "kind": "workspace_command",
+        "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "feature-pagination",
+        "kind": "workspace_command",
+        "source": "task prompt: add --limit and --offset",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:90:        \"--limit\",\nsrc/auditlog/search.py:96:        \"--offset\","
+      },
+      {
+        "id": "feature-since-filter",
+        "kind": "workspace_command",
+        "source": "task prompt: an optional --since date filter",
+        "passed": true,
+        "evidence": "exit 0\nsrc/auditlog/search.py:86:        \"--since\","
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'parameteri'"
+      }
+    ],
+    "passed": 8,
+    "total": 11
+  },
+  {
+    "task": "psc-04-webhook-dispatch",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:48:52.559784+00:00",
+      "seconds": 169.6
+    },
+    "skills_used": [],
+    "num_turns": 21,
+    "cost_usd": 0.637284,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not hardcoded",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "source": "task prompt: a per-request timeout of 5 seconds",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:58:    # Any other URLError (DNS failure, connection refused, timeout, ...) or\nsrc/webhooks/dispatch.py:59:    # bare timeout/connection error is treated as a transient failure.\nsrc/webhooks/dispatch.py:67:    connection error (timeout, refused connection, DNS failure, ...) is\nsrc/webhooks/dispatch.py:82:            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:"
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "source": "task prompt: retry up to 3 times with exponential backoff",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:16:MAX_RETRIES = 3\nsrc/webhooks/dispatch.py:55:def _is_retryable(exc: Exception) -> bool:\nsrc/webhooks/dispatch.py:68:    retried up to MAX_RETRIES times with exponential backoff; a 4xx response\nsrc/webhooks/dispatch.py:76:    for attempt_number in range(1, MAX_RETRIES + 2):\nsrc/webhooks/dispatch.py:87:            if not _is_retryable(exc):\nsrc/webhooks/dispatch.py:92:        if attempt_number <= MAX_RETRIES:\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1.0\nsrc/webhooks/dispatch.py:68:    retried up to MAX_RETRIES times with exponential backoff; a 4xx response\nsrc/webhooks/dispatch.py:93:            backoff = BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1))\nsrc/webhooks/dispatch.py:94:            time.sleep(backoff)"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 12
+  },
+  {
+    "task": "psc-04-webhook-dispatch",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:48:52.568533+00:00",
+      "seconds": 148.5
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.3907341,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": false,
+        "evidence": "exit 1\nunformatted: File would be reformatted\n  --> README.md:1:1\n   |\n10 | result = deliver(subscriber_url, {\"event\": \"created\"})\n   - result.delivered     # True if the endpoint accepted the delivery\n   - result.status_code   # status code of the last attempt (None if every attempt errored out)\n   - result.attempts       # list of DeliveryAttempt, one per attempt made\n11 + result.delivered  # True if the endpoint accepted the delivery\n12 + result.status_code  # status code of the last attempt (None if every attempt errored out)\n13 + result.attempts  # list of DeliveryAttempt, one per attempt made\n14 | ```\n   |\n\n1 file would be reformatted, 1 file already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not hardcoded",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "source": "task prompt: a per-request timeout of 5 seconds",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:77:            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:\nsrc/webhooks/dispatch.py:86:            # Connection errors and timeouts (URLError, TimeoutError, etc.) are retryable."
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "source": "task prompt: retry up to 3 times with exponential backoff",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:16:MAX_RETRIES = 3\nsrc/webhooks/dispatch.py:56:    Each request is bounded by REQUEST_TIMEOUT_SECONDS. A retryable failure\nsrc/webhooks/dispatch.py:57:    (a 5xx response or a connection error) is retried up to MAX_RETRIES times\nsrc/webhooks/dispatch.py:64:    max_attempts = MAX_RETRIES + 1\nsrc/webhooks/dispatch.py:86:            # Connection errors and timeouts (URLError, TimeoutError, etc.) are retryable.\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1.0\nsrc/webhooks/dispatch.py:58:    with exponential backoff between attempts. A 4xx response is treated as\nsrc/webhooks/dispatch.py:90:            time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1)))"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'timing'"
+      }
+    ],
+    "passed": 7,
+    "total": 12
+  },
+  {
+    "task": "psc-04-webhook-dispatch",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:48:52.561522+00:00",
+      "seconds": 96.7
+    },
+    "skills_used": [],
+    "num_turns": 14,
+    "cost_usd": 0.33137399999999995,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": false,
+        "evidence": "exit 1\nunformatted: File would be reformatted\n  --> README.md:1:1\n   |\n10 | result = deliver(subscriber_url, {\"event\": \"created\"})\n   - result.status      # final HTTP status code\n   - result.attempts     # list of Attempt(status, error) for every attempt made\n11 + result.status  # final HTTP status code\n12 + result.attempts  # list of Attempt(status, error) for every attempt made\n13 | ```\n   |\n\n1 file would be reformatted, 1 file already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not hardcoded",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "source": "task prompt: a per-request timeout of 5 seconds",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:61:    with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:\nsrc/webhooks/dispatch.py:68:    Each request is bound by a 5 second timeout. A failed delivery is retried\nsrc/webhooks/dispatch.py:70:    responses and connection/timeout errors are treated as retryable; 4xx"
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "source": "task prompt: retry up to 3 times with exponential backoff",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:66:    \"\"\"POST a payload to a subscriber endpoint, retrying transient failures.\nsrc/webhooks/dispatch.py:70:    responses and connection/timeout errors are treated as retryable; 4xx\nsrc/webhooks/dispatch.py:90:                    f\"delivery {delivery_id} failed with non-retryable status {exc.code}\", attempts\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1\nsrc/webhooks/dispatch.py:69:    up to MAX_ATTEMPTS times with exponential backoff between attempts. 5xx\nsrc/webhooks/dispatch.py:99:            time.sleep(BACKOFF_BASE_SECONDS * 2 ** (attempt_number - 1))"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 6,
+    "total": 12
+  },
+  {
+    "task": "psc-04-webhook-dispatch",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:48:52.576743+00:00",
+      "seconds": 179.1
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 27,
+    "cost_usd": 0.7056519,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n2 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not hardcoded",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "source": "task prompt: a per-request timeout of 5 seconds",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:64:    responses and connection/timeout errors. A 4xx response is treated as\nsrc/webhooks/dispatch.py:79:            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:\nsrc/webhooks/dispatch.py:87:            # Covers urllib.error.URLError, socket timeouts, and connection errors,"
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "source": "task prompt: retry up to 3 times with exponential backoff",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:60:    \"\"\"POST a payload to a subscriber endpoint, retrying transient failures.\nsrc/webhooks/dispatch.py:88:            # all of which are OSError subclasses and are treated as retryable.\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1.0\nsrc/webhooks/dispatch.py:63:    attempts are made, with exponential backoff between them, for 5xx\nsrc/webhooks/dispatch.py:93:        time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1)))"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 12
+  },
+  {
+    "task": "psc-04-webhook-dispatch",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:48:52.560600+00:00",
+      "seconds": 228.1
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 27,
+    "cost_usd": 0.8754674999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": false,
+        "evidence": "exit 1\nerror[unresolved-import]: Cannot resolve imported module `webhooks`\n --> tests/test_dispatch.py:7:6\n  |\n7 | from webhooks import dispatch\n  |      ^^^^^^^^\n  |\ninfo: Searched in the following paths during module resolution:\ninfo:   1. /repo (first-party code)\ninfo:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)\ninfo:   3. /repo/evals/python-secure-coding/results/raw/2026-07-28/psc-04-webhook-dispatch/with-skill/run-2/workspace/.venv/lib/python3.14/site-packages (site-packages)\ninfo:   4. /repo/evals/python-secure-coding/results/raw/2026-07-28/psc-04-webhook-dispatch/with-skill/run-2/workspace/.venv/lib64/python3.14/site-packages (site-packages)\ninfo: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment\n\nerror[invalid-argument-type]: Argument to `HTTPError.__init__` is incorrect\n  --> tests/test_dispatch.py:37:83\n   |\n37 |         server_error = urllib.error.HTTPError(\"http://example.test\", 503, \"busy\", None, None)\n   |                                                                                   ^^^^ Expected `Message[str, str]`, found `None`\n   |\ninfo: Method defined here\n  --> stdlib/urllib/error.pyi:42:9\n   |\n42 |     def __init__(self, url: str, code: int, msg: str, hdrs: Message, fp: IO[bytes] | None) -> None: ...\n   |         ^^^^^^^^                                      ------------- Parameter declared here\n   |\n\nerror[invalid-argument-type]: Argument to `HTTPError.__init__` is incorrect\n  --> tests/test_dispatch.py:48:82\n   |\n48 |         client_error = urllib.error.HTTPError(\"http://example.test\", 400, \"bad\", None, None)\n   |                                                                                  ^^^^ Expected `Message[str, str]`, found `None`\n   |\ninfo: Method defined here\n  --> stdlib/urllib/error.pyi:42:9\n   |\n42 |     def __init__(self, url: str, code: int, msg: str, hdrs: Message, fp: IO[bytes] | None) -> None: ...\n   |         ^^^^^^^^                                      ------------- Parameter declared here\n   |\n\nFound 3 diagnostics"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not hardcoded",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "source": "task prompt: a per-request timeout of 5 seconds",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:55:    Each request is bounded by a ``TIMEOUT_SECONDS`` timeout. A response with a 5xx\nsrc/webhooks/dispatch.py:56:    status, or a connection error (timeout, DNS failure, refused connection), is\nsrc/webhooks/dispatch.py:79:            with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:"
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "source": "task prompt: retry up to 3 times with exponential backoff",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:16:MAX_RETRIES = 3\nsrc/webhooks/dispatch.py:45:    \"\"\"Raised when a webhook delivery fails with no retries left, or a non-retryable response.\"\"\"\nsrc/webhooks/dispatch.py:53:    \"\"\"POST a payload to a subscriber endpoint, retrying retryable failures.\nsrc/webhooks/dispatch.py:57:    retried up to ``MAX_RETRIES`` times with exponential backoff between attempts. A\nsrc/webhooks/dispatch.py:68:    for attempt_number in range(1, MAX_RETRIES + 2):\nsrc/webhooks/dispatch.py:76:            MAX_RETRIES + 1,\nsrc/webhooks/dispatch.py:88:                    f\"delivery {delivery_id} to {url} failed with non-retryable status {exc.code}\",\nsrc/webhooks/dispatch.py:92:                \"delivery %s to %s got retryable status %d (attempt %d of %d)\",\nsrc/webhooks/dispatch.py:97:                MAX_RETRIES + 1,\nsrc/webhooks/dispatch.py:106:                MAX_RETRIES + 1,\nsrc/webhooks/dispatch.py:110:        if attempt_number <= MAX_RETRIES:\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1\nsrc/webhooks/dispatch.py:57:    retried up to ``MAX_RETRIES`` times with exponential backoff between attempts. A\nsrc/webhooks/dispatch.py:111:            time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1)))"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'timing'"
+      }
+    ],
+    "passed": 7,
+    "total": 12
+  },
+  {
+    "task": "psc-04-webhook-dispatch",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:48:52.568084+00:00",
+      "seconds": 343.7
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 47,
+    "cost_usd": 1.4935201000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "ssrf-validation-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hardcoded-secret",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not hardcoded",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+      },
+      {
+        "id": "no-secret-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-identifiers",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": false,
+        "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+      },
+      {
+        "id": "feature-timeout",
+        "kind": "workspace_command",
+        "source": "task prompt: a per-request timeout of 5 seconds",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:55:        with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:\nsrc/webhooks/dispatch.py:67:    are made in total: a 5xx response or a connection/timeout error is retried with"
+      },
+      {
+        "id": "feature-retry-backoff",
+        "kind": "workspace_command",
+        "source": "task prompt: retry up to 3 times with exponential backoff",
+        "passed": true,
+        "evidence": "exit 0\nsrc/webhooks/dispatch.py:48:def _is_retryable(attempt: DeliveryAttempt) -> bool:\nsrc/webhooks/dispatch.py:49:    \"\"\"5xx responses and connection errors (no status code) are retryable; 4xx is final.\"\"\"\nsrc/webhooks/dispatch.py:64:    \"\"\"POST a payload to a subscriber endpoint, retrying retryable failures.\nsrc/webhooks/dispatch.py:86:        if attempt.ok or not _is_retryable(attempt):\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1.0\nsrc/webhooks/dispatch.py:68:    exponential backoff, while a 4xx response is treated as final and not retried.\nsrc/webhooks/dispatch.py:89:            time.sleep(BACKOFF_BASE_SECONDS * 2 ** (attempt_number - 1))"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'timing'"
+      }
+    ],
+    "passed": 8,
+    "total": 12
+  },
+  {
+    "task": "psc-05-password-reset",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:54:43.831245+00:00",
+      "seconds": 125.6
+    },
+    "skills_used": [],
+    "num_turns": 22,
+    "cost_usd": 0.4803786,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-fast-hash-for-passwords",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:12:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:21:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:22:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:25:    return secrets.token_hex(8)\nsrc/accounts/reset.py:36:    return secrets.token_urlsafe(TOKEN_BYTES)"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:25:    return secrets.token_hex(8)"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:23:    return left_digest == right_digest"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:43:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: implement complete_reset()",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "source": "task prompt: single use, expires 30 minutes after issue",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:48:    \"\"\"Check a reset token against the unexpired ones issued for an account.\"\"\""
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 14
+  },
+  {
+    "task": "psc-05-password-reset",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:54:43.835741+00:00",
+      "seconds": 85.3
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.29816139999999997,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-fast-hash-for-passwords",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:12:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:21:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:22:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:24:    return secrets.token_hex(8)\nsrc/accounts/reset.py:35:    return secrets.token_urlsafe(TOKEN_BYTES)"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:24:    return secrets.token_hex(8)"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:23:    return left_digest == right_digest"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:43:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: implement complete_reset()",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "source": "task prompt: single use, expires 30 minutes after issue",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:12:# email -> list of outstanding token records: {\"token\", \"expires_at\", \"used\"}\nsrc/accounts/reset.py:19:TOKEN_TTL_SECONDS = 30 * 60\nsrc/accounts/reset.py:41:    record = {\"token\": token, \"expires_at\": time.time() + TOKEN_TTL_SECONDS, \"used\": False}\nsrc/accounts/reset.py:48:    \"\"\"Return the unused, unexpired record matching `token` for `email`, if any.\"\"\"\nsrc/accounts/reset.py:51:        if record[\"used\"] or record[\"expires_at\"] < now:\nsrc/accounts/reset.py:66:    Verifies the token is one issued for this account, unused, and not expired.\nsrc/accounts/reset.py:69:    Returns False rather than raising for an unknown, used, or expired token."
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 14
+  },
+  {
+    "task": "psc-05-password-reset",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:54:43.815050+00:00",
+      "seconds": 114.9
+    },
+    "skills_used": [],
+    "num_turns": 23,
+    "cost_usd": 0.4691817000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-fast-hash-for-passwords",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:12:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:21:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:22:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:25:    return secrets.token_hex(8)\nsrc/accounts/reset.py:36:    return secrets.token_urlsafe(TOKEN_BYTES)"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:25:    return secrets.token_hex(8)"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:23:    return left_digest == right_digest"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:44:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: implement complete_reset()",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "source": "task prompt: single use, expires 30 minutes after issue",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:20:TOKEN_TTL_SECONDS = 30 * 60\nsrc/accounts/reset.py:52:            return not _is_expired(record)\nsrc/accounts/reset.py:56:def _is_expired(record: dict) -> bool:\nsrc/accounts/reset.py:64:    used, and has not expired. On success the new password is stored and every\nsrc/accounts/reset.py:75:    if matched is None or _is_expired(matched):"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 14
+  },
+  {
+    "task": "psc-05-password-reset",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:54:43.820796+00:00",
+      "seconds": 215.6
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 26,
+    "cost_usd": 0.8426688,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": false,
+        "evidence": "exit 1\nerror[unresolved-import]: Module `datetime` has no member `UTC`\n --> src/accounts/reset.py:5:22\n  |\n5 | from datetime import UTC, datetime, timedelta\n  |                      ^^^\n  |\ninfo: The member may be available on other Python versions or platforms\ninfo: Python 3.9 was assumed when resolving imports\n --> /repo/pyproject.toml:5:19\n  |\n5 | requires-python = \">=3.9\"\n  |                   ^^^^^^^ Python version configuration\n  |\n\nFound 1 diagnostic"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-fast-hash-for-passwords",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:12:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:21:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:22:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:26:    return secrets.token_hex(8)\nsrc/accounts/reset.py:37:    return secrets.token_urlsafe(TOKEN_BYTES)"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:26:    return secrets.token_hex(8)"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:23:    return left_digest == right_digest"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:44:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: implement complete_reset()",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "source": "task prompt: single use, expires 30 minutes after issue",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:49:    \"\"\"Return the stored token matching `token` for `email`, if any is unexpired.\nsrc/accounts/reset.py:52:    within `TOKEN_LIFETIME` are considered; expired entries are treated as\nsrc/accounts/reset.py:53:    absent rather than raising, since expiry is a normal outcome here.\nsrc/accounts/reset.py:72:    Verifies that `token` is a live (unused, unexpired) token issued for\nsrc/accounts/reset.py:77:    raising for an unknown, already-used, or expired token, since callers"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 6,
+    "total": 14
+  },
+  {
+    "task": "psc-05-password-reset",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:54:43.836982+00:00",
+      "seconds": 175.5
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.7499870000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-fast-hash-for-passwords",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:13:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:24:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:25:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:27:    return secrets.token_hex(8)\nsrc/accounts/reset.py:38:    return secrets.token_urlsafe(TOKEN_BYTES)"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:27:    return secrets.token_hex(8)"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/crypto.py:21:    compared with `secrets.compare_digest` so a mismatch doesn't leak the length\nsrc/accounts/crypto.py:26:    return secrets.compare_digest(left_digest, right_digest)"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:45:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: implement complete_reset()",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "source": "task prompt: single use, expires 30 minutes after issue",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:14:# once (e.g. a retried request) and all of them must expire and invalidate\nsrc/accounts/reset.py:22:TOKEN_TTL_SECONDS = 30 * 60\nsrc/accounts/reset.py:71:    used, or expired, since callers treat those cases identically. On success"
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'compare_digest'"
+      }
+    ],
+    "passed": 10,
+    "total": 14
+  },
+  {
+    "task": "psc-05-password-reset",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-07-28T13:54:43.836217+00:00",
+      "seconds": 172.5
+    },
+    "skills_used": [
+      "eval-python-secure-coding:python-secure-coding"
+    ],
+    "num_turns": 24,
+    "cost_usd": 0.6460895999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "assertions": [
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff check .` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+        "passed": true,
+        "evidence": "exit 0\n3 files already formatted"
+      },
+      {
+        "id": "ty-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: `uv run ty check` clean",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "checks-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+        "passed": true,
+        "evidence": "match: 'ruff check'"
+      },
+      {
+        "id": "no-fast-hash-for-passwords",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:12:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:21:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:22:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+      },
+      {
+        "id": "strong-password-hash",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secrets-module-token",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:25:    return secrets.token_hex(8)\nsrc/accounts/reset.py:36:    return secrets.token_urlsafe(TOKEN_BYTES)"
+      },
+      {
+        "id": "token-entropy-sufficient",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:25:    return secrets.token_hex(8)"
+      },
+      {
+        "id": "constant-time-comparison",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-digest-equality-shortcut",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/crypto.py:23:    return left_digest == right_digest"
+      },
+      {
+        "id": "no-token-logged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: secrets not logged",
+        "passed": false,
+        "evidence": "exit 1\nsrc/accounts/reset.py:45:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: implement complete_reset()",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-single-use-and-expiry",
+        "kind": "workspace_command",
+        "source": "task prompt: single use, expires 30 minutes after issue",
+        "passed": true,
+        "evidence": "exit 0\nsrc/accounts/reset.py:20:TOKEN_TTL_SECONDS = 30 * 60\nsrc/accounts/reset.py:43:    entries[:] = [e for e in entries if not _expired(e)]\nsrc/accounts/reset.py:49:def _expired(entry: dict) -> bool:\nsrc/accounts/reset.py:55:        if not _expired(entry) and tokens_match(entry[\"token\"], token):\nsrc/accounts/reset.py:61:    \"\"\"Check a reset token against the account's outstanding, unexpired tokens.\"\"\""
+      },
+      {
+        "id": "security-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+        "passed": true,
+        "evidence": "match: 'bcrypt'"
+      }
+    ],
+    "passed": 8,
+    "total": 14
+  }
+]

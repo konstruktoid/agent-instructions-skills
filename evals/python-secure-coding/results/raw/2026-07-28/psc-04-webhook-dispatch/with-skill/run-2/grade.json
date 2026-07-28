@@ -1,0 +1,108 @@
+{
+  "task": "psc-04-webhook-dispatch",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T13:48:52.560600+00:00",
+    "seconds": 228.1
+  },
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 27,
+  "cost_usd": 0.8754674999999998,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n3 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": false,
+      "evidence": "exit 1\nerror[unresolved-import]: Cannot resolve imported module `webhooks`\n --> tests/test_dispatch.py:7:6\n  |\n7 | from webhooks import dispatch\n  |      ^^^^^^^^\n  |\ninfo: Searched in the following paths during module resolution:\ninfo:   1. /repo (first-party code)\ninfo:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)\ninfo:   3. /repo/evals/python-secure-coding/results/raw/2026-07-28/psc-04-webhook-dispatch/with-skill/run-2/workspace/.venv/lib/python3.14/site-packages (site-packages)\ninfo:   4. /repo/evals/python-secure-coding/results/raw/2026-07-28/psc-04-webhook-dispatch/with-skill/run-2/workspace/.venv/lib64/python3.14/site-packages (site-packages)\ninfo: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment\n\nerror[invalid-argument-type]: Argument to `HTTPError.__init__` is incorrect\n  --> tests/test_dispatch.py:37:83\n   |\n37 |         server_error = urllib.error.HTTPError(\"http://example.test\", 503, \"busy\", None, None)\n   |                                                                                   ^^^^ Expected `Message[str, str]`, found `None`\n   |\ninfo: Method defined here\n  --> stdlib/urllib/error.pyi:42:9\n   |\n42 |     def __init__(self, url: str, code: int, msg: str, hdrs: Message, fp: IO[bytes] | None) -> None: ...\n   |         ^^^^^^^^                                      ------------- Parameter declared here\n   |\n\nerror[invalid-argument-type]: Argument to `HTTPError.__init__` is incorrect\n  --> tests/test_dispatch.py:48:82\n   |\n48 |         client_error = urllib.error.HTTPError(\"http://example.test\", 400, \"bad\", None, None)\n   |                                                                                  ^^^^ Expected `Message[str, str]`, found `None`\n   |\ninfo: Method defined here\n  --> stdlib/urllib/error.pyi:42:9\n   |\n42 |     def __init__(self, url: str, code: int, msg: str, hdrs: Message, fp: IO[bytes] | None) -> None: ...\n   |         ^^^^^^^^                                      ------------- Parameter declared here\n   |\n\nFound 3 diagnostics"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "ssrf-validation-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-hardcoded-secret",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not hardcoded",
+      "passed": false,
+      "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+    },
+    {
+      "id": "no-secret-logged",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not logged",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "constant-time-comparison",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-random-for-identifiers",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+      "passed": false,
+      "evidence": "exit 1\nsrc/webhooks/dispatch.py:22:    return str(random.randint(10**11, 10**12))"
+    },
+    {
+      "id": "feature-timeout",
+      "kind": "workspace_command",
+      "source": "task prompt: a per-request timeout of 5 seconds",
+      "passed": true,
+      "evidence": "exit 0\nsrc/webhooks/dispatch.py:55:    Each request is bounded by a ``TIMEOUT_SECONDS`` timeout. A response with a 5xx\nsrc/webhooks/dispatch.py:56:    status, or a connection error (timeout, DNS failure, refused connection), is\nsrc/webhooks/dispatch.py:79:            with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:"
+    },
+    {
+      "id": "feature-retry-backoff",
+      "kind": "workspace_command",
+      "source": "task prompt: retry up to 3 times with exponential backoff",
+      "passed": true,
+      "evidence": "exit 0\nsrc/webhooks/dispatch.py:16:MAX_RETRIES = 3\nsrc/webhooks/dispatch.py:45:    \"\"\"Raised when a webhook delivery fails with no retries left, or a non-retryable response.\"\"\"\nsrc/webhooks/dispatch.py:53:    \"\"\"POST a payload to a subscriber endpoint, retrying retryable failures.\nsrc/webhooks/dispatch.py:57:    retried up to ``MAX_RETRIES`` times with exponential backoff between attempts. A\nsrc/webhooks/dispatch.py:68:    for attempt_number in range(1, MAX_RETRIES + 2):\nsrc/webhooks/dispatch.py:76:            MAX_RETRIES + 1,\nsrc/webhooks/dispatch.py:88:                    f\"delivery {delivery_id} to {url} failed with non-retryable status {exc.code}\",\nsrc/webhooks/dispatch.py:92:                \"delivery %s to %s got retryable status %d (attempt %d of %d)\",\nsrc/webhooks/dispatch.py:97:                MAX_RETRIES + 1,\nsrc/webhooks/dispatch.py:106:                MAX_RETRIES + 1,\nsrc/webhooks/dispatch.py:110:        if attempt_number <= MAX_RETRIES:\nsrc/webhooks/dispatch.py:17:BACKOFF_BASE_SECONDS = 1\nsrc/webhooks/dispatch.py:57:    retried up to ``MAX_RETRIES`` times with exponential backoff between attempts. A\nsrc/webhooks/dispatch.py:111:            time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1)))"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'timing'"
+    }
+  ],
+  "passed": 7,
+  "total": 12
+}

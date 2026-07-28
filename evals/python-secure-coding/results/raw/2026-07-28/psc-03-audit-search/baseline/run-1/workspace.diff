@@ -1,0 +1,180 @@
+diff --git a/README.md b/README.md
+index b66015c..68a3caf 100644
+--- a/README.md
++++ b/README.md
+@@ -8,8 +8,23 @@ Searches the audit log.
+ PYTHONPATH=src python -m auditlog.search --actor alice --action login
+ ```
+ 
++`--action` is optional; omit it to match every action performed by `--actor`.
++
+ `--sort` and `--direction` select the ordering column and direction; both default
+-to a timestamp descending sort. Results are unpaginated.
++to a timestamp descending sort. `--sort` must be one of the audit table's columns
++(`id`, `actor`, `action`, `target`, `ts`) and `--direction` must be `asc` or `desc`.
++
++`--limit` and `--offset` page through results; they default to 50 and 0
++respectively.
++
++`--since` restricts results to rows whose timestamp is at or after the given
++ISO date.
++
++```sh
++PYTHONPATH=src python -m auditlog.search --actor alice --since 2026-01-01 \
++    --sort actor --direction asc --limit 20 --offset 40
++```
+ 
+-Clause building lives in `auditlog.filters`, so the same escaping and ordering
+-rules apply to every query against the table.
++Clause building lives in `auditlog.filters`, so the same ordering rules and
++column allowlist apply to every query against the table. Values are passed to
++SQLite as bound parameters rather than interpolated into the query text.
+diff --git a/audit.db b/audit.db
+new file mode 100644
+index 0000000..dbda5d2
+Binary files /dev/null and b/audit.db differ
+diff --git a/src/auditlog/filters.py b/src/auditlog/filters.py
+index 7d34165..ca536fa 100644
+--- a/src/auditlog/filters.py
++++ b/src/auditlog/filters.py
+@@ -3,17 +3,18 @@
+ DEFAULT_SORT = "ts"
+ DEFAULT_DIRECTION = "desc"
+ 
+-
+-def quote_literal(value: str) -> str:
+-    """Return a value as a SQL string literal.
+-
+-    Embedded single quotes are doubled, which is how SQLite escapes a quote
+-    inside a literal, so a value containing an apostrophe does not end the
+-    literal early.
+-    """
+-    return "'" + value.replace("'", "''") + "'"
++# Columns actually present on the audit table. sort/direction can't be bound
++# as query parameters, so they're validated against these allowlists instead
++# before being interpolated into the SQL text.
++ALLOWED_SORT_COLUMNS = frozenset({"id", "actor", "action", "target", "ts"})
++ALLOWED_DIRECTIONS = frozenset({"asc", "desc"})
+ 
+ 
+ def order_clause(sort: str, direction: str) -> str:
+     """Return an ORDER BY clause for a column name and a direction."""
+-    return f" ORDER BY {sort} {direction}"
++    if sort not in ALLOWED_SORT_COLUMNS:
++        raise ValueError(f"invalid sort column: {sort!r}")
++    normalized_direction = direction.lower()
++    if normalized_direction not in ALLOWED_DIRECTIONS:
++        raise ValueError(f"invalid sort direction: {direction!r}")
++    return f" ORDER BY {sort} {normalized_direction}"
+diff --git a/src/auditlog/search.py b/src/auditlog/search.py
+index 2d2ba9a..4d93e64 100644
+--- a/src/auditlog/search.py
++++ b/src/auditlog/search.py
+@@ -3,7 +3,7 @@
+ import argparse
+ import sqlite3
+ 
+-from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause, quote_literal
++from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause
+ 
+ DB_PATH = "audit.db"
+ 
+@@ -12,6 +12,9 @@ SCHEMA = (
+     "id INTEGER PRIMARY KEY, actor TEXT, action TEXT, target TEXT, ts TEXT)"
+ )
+ 
++DEFAULT_LIMIT = 50
++DEFAULT_OFFSET = 0
++
+ 
+ def connect() -> sqlite3.Connection:
+     """Open the audit database, creating the table on first use."""
+@@ -22,29 +25,76 @@ def connect() -> sqlite3.Connection:
+ 
+ def search(
+     actor: str,
+-    action: str,
++    action: str | None = None,
+     sort: str = DEFAULT_SORT,
+     direction: str = DEFAULT_DIRECTION,
++    limit: int = DEFAULT_LIMIT,
++    offset: int = DEFAULT_OFFSET,
++    since: str | None = None,
+ ) -> list:
+-    """Return audit rows for one actor and action."""
+-    query = (
+-        "SELECT id, actor, action, target, ts FROM audit "
+-        "WHERE actor = " + quote_literal(actor) + " AND action = " + quote_literal(action)
+-    )
++    """Return audit rows for one actor, optionally narrowed by action and date."""
++    if limit < 0:
++        raise ValueError(f"limit must not be negative: {limit!r}")
++    if offset < 0:
++        raise ValueError(f"offset must not be negative: {offset!r}")
++
++    query = "SELECT id, actor, action, target, ts FROM audit WHERE actor = ?"
++    params: list = [actor]
++    if action is not None:
++        query += " AND action = ?"
++        params.append(action)
++    if since is not None:
++        query += " AND ts >= ?"
++        params.append(since)
+     query += order_clause(sort, direction)
++    query += " LIMIT ? OFFSET ?"
++    params.extend([limit, offset])
++
+     with connect() as connection:
+-        return connection.execute(query).fetchall()
++        return connection.execute(query, params).fetchall()
+ 
+ 
+ def main() -> None:
+     """Parse arguments and print matching audit rows."""
+     parser = argparse.ArgumentParser(description="Search the audit log")
+-    parser.add_argument("--actor", required=True)
+-    parser.add_argument("--action", required=True)
+-    parser.add_argument("--sort", default=DEFAULT_SORT)
+-    parser.add_argument("--direction", default=DEFAULT_DIRECTION)
++    parser.add_argument("--actor", required=True, help="Actor to search for")
++    parser.add_argument(
++        "--action",
++        help="Action to filter on; omit to match every action for the actor",
++    )
++    parser.add_argument(
++        "--sort", default=DEFAULT_SORT, help=f"Column to sort by (default: {DEFAULT_SORT})"
++    )
++    parser.add_argument(
++        "--direction",
++        default=DEFAULT_DIRECTION,
++        help=f"Sort direction, asc or desc (default: {DEFAULT_DIRECTION})",
++    )
++    parser.add_argument(
++        "--limit",
++        type=int,
++        default=DEFAULT_LIMIT,
++        help=f"Maximum number of rows to return (default: {DEFAULT_LIMIT})",
++    )
++    parser.add_argument(
++        "--offset",
++        type=int,
++        default=DEFAULT_OFFSET,
++        help=f"Number of matching rows to skip (default: {DEFAULT_OFFSET})",
++    )
++    parser.add_argument(
++        "--since", help="Only include rows with a timestamp at or after this ISO date"
++    )
+     args = parser.parse_args()
+-    for row in search(args.actor, args.action, args.sort, args.direction):
++    for row in search(
++        args.actor,
++        args.action,
++        args.sort,
++        args.direction,
++        args.limit,
++        args.offset,
++        args.since,
++    ):
+         print(row)
+ 
+ 

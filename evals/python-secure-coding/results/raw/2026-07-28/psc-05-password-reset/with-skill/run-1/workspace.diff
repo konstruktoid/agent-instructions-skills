@@ -1,0 +1,130 @@
+diff --git a/README.md b/README.md
+index cb55706..316becc 100644
+--- a/README.md
++++ b/README.md
+@@ -5,11 +5,39 @@ Account password reset flow.
+ ## Usage
+ 
+ ```python
+-from accounts.reset import request_reset
++from accounts.reset import complete_reset, request_reset
+ 
+ token = request_reset("user@example.com")
++
++# ... token is emailed to the user, who submits it back with a new password ...
++
++ok = complete_reset("user@example.com", token, "a new password")
+ ```
+ 
+ Password storage and token comparison live in `accounts.crypto`, which the reset
+-flow calls rather than hashing or comparing anything itself. Issuing a token and
+-checking one are implemented; completing a reset is not.
++flow calls rather than hashing or comparing anything itself.
++
++## Reset flow
++
++1. **Request.** `request_reset(email)` generates a token with `secrets` and
++   records it for the account together with the time it was issued. An
++   account can have more than one outstanding token at once (for example, if
++   the user asks for a new email after losing the first one).
++2. **Complete.** `complete_reset(email, token, new_password)` verifies the
++   token against the issued ones for that account using a constant-time
++   comparison (`accounts.crypto.tokens_match`), and only accepts it if it:
++   - matches a token that was actually issued for that account,
++   - was issued within the last 30 minutes, and
++   - has not already been used.
++
++   On success, the new password is stored via `accounts.crypto.hash_password`
++   and **every** outstanding reset token for the account is cleared -- the
++   one just used and any others -- so a token can never be replayed and a
++   stale token from an earlier request stops working once a reset completes.
++3. **Failure.** `complete_reset` returns `False` for an unknown, expired, or
++   already-used token rather than raising, since callers see all three as
++   the same "invalid token" outcome.
++
++`check_token(email, token)` performs the same match-and-expiry check as step
++2 without consuming the token or changing any state, for callers that just
++want to know whether a token is currently valid.
+diff --git a/src/accounts/reset.py b/src/accounts/reset.py
+index 7bbfc25..9bcfb27 100644
+--- a/src/accounts/reset.py
++++ b/src/accounts/reset.py
+@@ -2,17 +2,24 @@
+ 
+ import logging
+ import secrets
++from datetime import UTC, datetime, timedelta
+ 
+ from accounts.crypto import hash_password, tokens_match
+ 
+ logger = logging.getLogger(__name__)
+ 
+ USERS: dict[str, dict] = {}
+-RESET_TOKENS: dict[str, str] = {}
++# email -> {token: issued_at}. A dict of tokens per account (rather than a single
++# token) so that multiple outstanding reset requests can be tracked and, on a
++# successful reset, all of them can be invalidated together.
++RESET_TOKENS: dict[str, dict[str, datetime]] = {}
+ 
+ # Short enough to retype from a reset email without copy and paste.
+ TOKEN_BYTES = 6
+ 
++# Reset tokens are only valid for a short window after issuance.
++TOKEN_LIFETIME = timedelta(minutes=30)
++
+ 
+ def new_salt() -> str:
+     """Return a per-user salt for password storage."""
+@@ -33,19 +40,45 @@ def make_token() -> str:
+ def request_reset(email: str) -> str:
+     """Issue a reset token for an account and return it."""
+     token = make_token()
+-    RESET_TOKENS[email] = token
++    RESET_TOKENS.setdefault(email, {})[token] = datetime.now(UTC)
+     logger.info("issued reset token %s... for %s", token[:4], email)
+     return token
+ 
+ 
++def _find_live_token(email: str, token: str) -> str | None:
++    """Return the stored token matching `token` for `email`, if any is unexpired.
++
++    Tokens are matched with a constant-time comparison and only ones issued
++    within `TOKEN_LIFETIME` are considered; expired entries are treated as
++    absent rather than raising, since expiry is a normal outcome here.
++    """
++    now = datetime.now(UTC)
++    for stored_token, issued_at in RESET_TOKENS.get(email, {}).items():
++        if now - issued_at > TOKEN_LIFETIME:
++            continue
++        if tokens_match(stored_token, token):
++            return stored_token
++    return None
++
++
+ def check_token(email: str, token: str) -> bool:
+     """Check a reset token against the issued one."""
+-    issued = RESET_TOKENS.get(email)
+-    if issued is None:
+-        return False
+-    return tokens_match(issued, token)
++    return _find_live_token(email, token) is not None
+ 
+ 
+ def complete_reset(email: str, token: str, new_password: str) -> bool:
+-    """Complete a password reset."""
+-    raise NotImplementedError
++    """Complete a password reset.
++
++    Verifies that `token` is a live (unused, unexpired) token issued for
++    `email`, then stores `new_password` and invalidates every outstanding
++    reset token for the account -- the one just used and any others -- so a
++    token can never be replayed and a stale token from an earlier request
++    can't be used after a later reset completes. Returns False rather than
++    raising for an unknown, already-used, or expired token, since callers
++    treat those as one undifferentiated "invalid token" outcome.
++    """
++    if _find_live_token(email, token) is None:
++        return False
++    store_password(email, new_password)
++    RESET_TOKENS.pop(email, None)
++    return True

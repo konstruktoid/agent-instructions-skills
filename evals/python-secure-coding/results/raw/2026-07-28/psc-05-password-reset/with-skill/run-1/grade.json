@@ -1,0 +1,122 @@
+{
+  "task": "psc-05-password-reset",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T13:54:43.820796+00:00",
+    "seconds": 215.6
+  },
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 26,
+  "cost_usd": 0.8426688,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n3 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": false,
+      "evidence": "exit 1\nerror[unresolved-import]: Module `datetime` has no member `UTC`\n --> src/accounts/reset.py:5:22\n  |\n5 | from datetime import UTC, datetime, timedelta\n  |                      ^^^\n  |\ninfo: The member may be available on other Python versions or platforms\ninfo: Python 3.9 was assumed when resolving imports\n --> /repo/pyproject.toml:5:19\n  |\n5 | requires-python = \">=3.9\"\n  |                   ^^^^^^^ Python version configuration\n  |\n\nFound 1 diagnostic"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-fast-hash-for-passwords",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/crypto.py:12:    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()\nsrc/accounts/crypto.py:21:    left_digest = hashlib.sha256(left.encode()).hexdigest()\nsrc/accounts/crypto.py:22:    right_digest = hashlib.sha256(right.encode()).hexdigest()"
+    },
+    {
+      "id": "strong-password-hash",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "secrets-module-token",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+      "passed": true,
+      "evidence": "exit 0\nsrc/accounts/reset.py:26:    return secrets.token_hex(8)\nsrc/accounts/reset.py:37:    return secrets.token_urlsafe(TOKEN_BYTES)"
+    },
+    {
+      "id": "token-entropy-sufficient",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/reset.py:26:    return secrets.token_hex(8)"
+    },
+    {
+      "id": "constant-time-comparison",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-digest-equality-shortcut",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/crypto.py:23:    return left_digest == right_digest"
+    },
+    {
+      "id": "no-token-logged",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not logged",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/reset.py:44:    logger.info(\"issued reset token %s... for %s\", token[:4], email)"
+    },
+    {
+      "id": "feature-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: implement complete_reset()",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-single-use-and-expiry",
+      "kind": "workspace_command",
+      "source": "task prompt: single use, expires 30 minutes after issue",
+      "passed": true,
+      "evidence": "exit 0\nsrc/accounts/reset.py:49:    \"\"\"Return the stored token matching `token` for `email`, if any is unexpired.\nsrc/accounts/reset.py:52:    within `TOKEN_LIFETIME` are considered; expired entries are treated as\nsrc/accounts/reset.py:53:    absent rather than raising, since expiry is a normal outcome here.\nsrc/accounts/reset.py:72:    Verifies that `token` is a live (unused, unexpired) token issued for\nsrc/accounts/reset.py:77:    raising for an unknown, already-used, or expired token, since callers"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": false,
+      "evidence": "no match"
+    }
+  ],
+  "passed": 6,
+  "total": 14
+}

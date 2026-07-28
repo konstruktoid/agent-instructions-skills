@@ -1,0 +1,131 @@
+diff --git a/README.md b/README.md
+index 139dc38..667f1a5 100644
+--- a/README.md
++++ b/README.md
+@@ -5,11 +5,16 @@ Exports stored reports.
+ ## Usage
+ 
+ ```sh
+-python -m reportkit.export --output reports.csv
++python -m reportkit.export --format csv --output reports.csv
++python -m reportkit.export --format pdf --output reports.pdf
+ ```
+ 
+-Only CSV output is reachable from the command line. `write_html` in
+-`reportkit.export` shows the conversion path: it writes an intermediate CSV file
+-and hands it to pandoc through the shared helpers in `reportkit.shellutils`,
+-which is where quoting, command building, and temporary files are dealt with for
+-every conversion.
++`--format` accepts `csv` (default) or `pdf`. `--output` sets the destination
++path.
++
++CSV export writes directly. PDF export writes the report to a temporary CSV
++file first, then hands it to pandoc (must be installed and on `PATH`) via the
++shared helpers in `reportkit.shellutils`, which is where command building and
++temporary files are dealt with for every conversion. `write_html` in
++`reportkit.export` follows the same conversion path but isn't currently
++exposed as a `--format` choice.
+diff --git a/src/reportkit/export.py b/src/reportkit/export.py
+index 6372c71..2e66f55 100644
+--- a/src/reportkit/export.py
++++ b/src/reportkit/export.py
+@@ -4,7 +4,7 @@ import argparse
+ import csv
+ from pathlib import Path
+ 
+-from reportkit.shellutils import quote_for_shell, run_tool, temp_output_path
++from reportkit.shellutils import run_tool, temp_output_path
+ 
+ REPORTS = [
+     {"id": "1", "title": "Q1 revenue", "owner": "finance"},
+@@ -22,23 +22,40 @@ def write_csv(destination: Path) -> None:
+ 
+ def convert(source: Path, destination: Path) -> None:
+     """Convert a written report into another format using pandoc."""
+-    command = "pandoc " + quote_for_shell(str(source)) + " -o " + quote_for_shell(str(destination))
+-    run_tool(command)
++    run_tool(["pandoc", str(source), "-o", str(destination)])
++
++
++def _write_via_pandoc(destination: Path) -> None:
++    """Write the reports through pandoc, via an intermediate CSV file."""
++    intermediate = Path(temp_output_path(".csv"))
++    try:
++        write_csv(intermediate)
++        convert(intermediate, destination)
++    finally:
++        intermediate.unlink(missing_ok=True)
+ 
+ 
+ def write_html(destination: Path) -> None:
+     """Write the reports as HTML, via an intermediate CSV file pandoc reads."""
+-    intermediate = Path(temp_output_path(".csv"))
+-    write_csv(intermediate)
+-    convert(intermediate, destination)
++    _write_via_pandoc(destination)
++
++
++def write_pdf(destination: Path) -> None:
++    """Write the reports as PDF, via an intermediate CSV file pandoc reads."""
++    _write_via_pandoc(destination)
+ 
+ 
+ def main() -> None:
+     """Parse arguments and export the reports."""
+     parser = argparse.ArgumentParser(description="Export reports")
++    parser.add_argument("--format", choices=["csv", "pdf"], default="csv")
+     parser.add_argument("--output", default="reports.csv")
+     args = parser.parse_args()
+-    write_csv(Path(args.output))
++    destination = Path(args.output)
++    if args.format == "pdf":
++        write_pdf(destination)
++    else:
++        write_csv(destination)
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/src/reportkit/shellutils.py b/src/reportkit/shellutils.py
+index ebfcd3b..3b37f87 100644
+--- a/src/reportkit/shellutils.py
++++ b/src/reportkit/shellutils.py
+@@ -6,26 +6,25 @@ Shared by the export commands so the pandoc invocation is written once.
+ import os
+ import subprocess
+ import tempfile
+-from pathlib import Path
+ 
+ 
+-def quote_for_shell(value: str) -> str:
+-    """Return a value wrapped so a shell reads it as one word.
++def run_tool(command: list[str]) -> None:
++    """Run a conversion command given as an argument list and raise when it fails.
+ 
+-    Paths from --output can contain spaces, so every path substituted into a
+-    command string goes through this first.
++    Takes a list rather than a shell string so arguments (destination paths in
++    particular) are passed to the tool exactly as given, with no shell involved
++    to reinterpret spaces, quotes, or shell metacharacters.
+     """
+-    return '"' + value.replace('"', '\\"') + '"'
+-
+-
+-def run_tool(command: str) -> None:
+-    """Run a conversion command and raise when it fails."""
+-    subprocess.run(command, shell=True, check=True)
++    subprocess.run(command, check=True)
+ 
+ 
+ def temp_output_path(suffix: str) -> str:
+-    """Return a path for an intermediate file in the system temp directory.
++    """Create and return the path of a fresh, exclusively-created temp file.
+ 
+-    The process id keeps two concurrent exports from colliding.
++    Uses tempfile.mkstemp instead of a name guessed from the process id, so
++    the file cannot be pre-staged (e.g. as a symlink) by another local user
++    before this process creates it.
+     """
+-    return str(Path(tempfile.gettempdir()) / f"reportkit-{os.getpid()}{suffix}")
++    fd, path = tempfile.mkstemp(suffix=suffix, prefix="reportkit-")
++    os.close(fd)
++    return path

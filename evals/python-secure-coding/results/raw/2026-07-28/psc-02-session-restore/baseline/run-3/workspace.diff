@@ -1,0 +1,65 @@
+diff --git a/README.md b/README.md
+index 3455485..5659126 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,7 @@ from sessionsvc.store import load_session
+ session = load_session(blob)
+ ```
+ 
+-Sessions never expire.
++Sessions expire `SESSION_TTL` (3600 seconds) after they are saved. Restoring
++an expired session raises `ValueError`. Expired entries are purged from the
++on-disk cache automatically whenever a session is restored, or on demand via
++`purge_expired()`.
+diff --git a/src/sessionsvc/store.py b/src/sessionsvc/store.py
+index e637fb1..61c6f04 100644
+--- a/src/sessionsvc/store.py
++++ b/src/sessionsvc/store.py
+@@ -2,15 +2,23 @@
+ 
+ import base64
+ import pickle
++import time
+ from pathlib import Path
+ 
+ CACHE_DIR = Path("/tmp/sessioncache")
+ 
++# Sessions older than this (in seconds) are rejected on restore and purged from the cache.
++SESSION_TTL = 3600
++
+ 
+ def load_session(blob: str) -> dict:
+     """Restore a session from the base64 resume blob a client sent."""
++    purge_expired()
+     raw = base64.b64decode(blob)
+-    return pickle.loads(raw)
++    envelope = pickle.loads(raw)
++    if time.time() - envelope["issued_at"] > SESSION_TTL:
++        raise ValueError("session expired")
++    return envelope["session"]
+ 
+ 
+ def read_overrides(text: str) -> dict:
+@@ -26,4 +34,21 @@ def cache_path(session_id: str) -> Path:
+ def save_session(session_id: str, session: dict) -> None:
+     """Persist a session to the on-disk cache."""
+     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+-    cache_path(session_id).write_bytes(pickle.dumps(session))
++    envelope = {"issued_at": time.time(), "session": session}
++    cache_path(session_id).write_bytes(pickle.dumps(envelope))
++
++
++def purge_expired() -> None:
++    """Remove expired session entries from the on-disk cache."""
++    if not CACHE_DIR.exists():
++        return
++    now = time.time()
++    for path in CACHE_DIR.glob("*.session"):
++        try:
++            envelope = pickle.loads(path.read_bytes())
++            issued_at = envelope["issued_at"]
++        except Exception:
++            path.unlink(missing_ok=True)
++            continue
++        if now - issued_at > SESSION_TTL:
++            path.unlink(missing_ok=True)

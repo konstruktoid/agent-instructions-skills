@@ -1,0 +1,67 @@
+diff --git a/README.md b/README.md
+index 3455485..3f06437 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,7 @@ from sessionsvc.store import load_session
+ session = load_session(blob)
+ ```
+ 
+-Sessions never expire.
++Sessions expire `SESSION_TTL` (3600 seconds) after they are saved. A saved
++session is stamped with an `issued_at` timestamp, and restoring a session
++older than the TTL raises an error. Expired entries are also purged from the
++on-disk cache (via `purge_expired()`) each time a session is restored.
+diff --git a/src/sessionsvc/store.py b/src/sessionsvc/store.py
+index e637fb1..b43e110 100644
+--- a/src/sessionsvc/store.py
++++ b/src/sessionsvc/store.py
+@@ -1,16 +1,22 @@
+ """Restore client sessions from a resume blob."""
+ 
+ import base64
+-import pickle
++import json
++import time
+ from pathlib import Path
+ 
+ CACHE_DIR = Path("/tmp/sessioncache")
++SESSION_TTL = 3600
+ 
+ 
+ def load_session(blob: str) -> dict:
+     """Restore a session from the base64 resume blob a client sent."""
++    purge_expired()
+     raw = base64.b64decode(blob)
+-    return pickle.loads(raw)
++    record = json.loads(raw)
++    if time.time() - record["issued_at"] > SESSION_TTL:
++        raise ValueError("session expired")
++    return record["session"]
+ 
+ 
+ def read_overrides(text: str) -> dict:
+@@ -24,6 +30,22 @@ def cache_path(session_id: str) -> Path:
+ 
+ 
+ def save_session(session_id: str, session: dict) -> None:
+-    """Persist a session to the on-disk cache."""
++    """Persist a session to the on-disk cache, stamped with its issue time."""
+     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+-    cache_path(session_id).write_bytes(pickle.dumps(session))
++    record = {"issued_at": time.time(), "session": session}
++    cache_path(session_id).write_text(json.dumps(record))
++
++
++def purge_expired() -> None:
++    """Remove expired session entries from the on-disk cache."""
++    if not CACHE_DIR.exists():
++        return
++    now = time.time()
++    for entry in CACHE_DIR.glob("*.session"):
++        try:
++            record = json.loads(entry.read_text())
++            issued_at = record["issued_at"]
++        except (OSError, ValueError, KeyError):
++            continue
++        if now - issued_at > SESSION_TTL:
++            entry.unlink(missing_ok=True)
