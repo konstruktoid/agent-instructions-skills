@@ -34,6 +34,7 @@
       "id": "avl-05-collection-review",
       "title": "Review a collection and run its test entry point",
       "fixture": "fixtures/avl-05-collection-review",
+      "timeout_seconds": 3600,
       "prompt": "Review this firewall collection and bring it up to standard. Fix what is wrong with the role and the collection metadata, then run the repository's own test entry point as documented in the README and tell me the result. Do not weaken any linter configuration to get a clean run."
     }
   ]

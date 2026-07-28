@@ -95,6 +95,16 @@ the command that was run and the output it produced.
   baseline model does more of the right thing unprompted and compresses the measurement.
 - Trigger probes used Sonnet for cost reasons. Routing is model-dependent, so these numbers
   do not transfer directly to a session running a different model.
-- The graded workspace is what the run left behind. A run that ends while work is still
-  outstanding in a backgrounded process is graded on the incomplete state, which is a real
-  property of non-interactive `claude -p` rather than of the skill.
+- The graded workspace is what the run left behind, and a run can stop before it has
+  finished saying what it did. Under non-interactive `claude -p` there is no later turn, so
+  a scheduled wakeup never fires and a command moved to the background may still be running
+  when the process returns. Such a run is now marked `truncated` in its `grade.json`, on two
+  signals read from the transcript: a scheduled wakeup, which is by definition unfired here,
+  and a background command whose completion the transcript never records. Truncated runs are
+  excluded from the medians, the delta, and the failed-assertion list, and are counted and
+  named in a "truncated runs" line under the task table, so they are never folded into
+  pass or fail. Two measures reduce how often it happens: every task prompt is prefixed with
+  a preamble stating that no wakeup will fire and that long-running verification must be
+  awaited in the foreground, identically in both conditions so it cannot bias the
+  comparison, and a task may raise its own time budget with `timeout_seconds` in
+  `tasks.json`, which `avl-05-collection-review` does.
