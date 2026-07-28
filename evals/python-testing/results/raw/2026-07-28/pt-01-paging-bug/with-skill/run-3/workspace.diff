@@ -1,0 +1,56 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index 9c96436..29c1fba 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -15,3 +15,6 @@ select = ["E", "F", "W", "I"]
+ 
+ [tool.pytest.ini_options]
+ pythonpath = ["src"]
++
++[tool.ty.environment]
++extra-paths = ["src"]
+diff --git a/src/paging/slicing.py b/src/paging/slicing.py
+index f395508..c274b53 100644
+--- a/src/paging/slicing.py
++++ b/src/paging/slicing.py
+@@ -7,7 +7,7 @@ def page_slice(items: list, page: int, per_page: int) -> list:
+         message = "page and per_page must be positive"
+         raise ValueError(message)
+     start = (page - 1) * per_page
+-    end = min(start + per_page, len(items) - 1)
++    end = min(start + per_page, len(items))
+     return items[start:end]
+ 
+ 
+diff --git a/tests/test_slicing.py b/tests/test_slicing.py
+index 089ab16..a532cf9 100644
+--- a/tests/test_slicing.py
++++ b/tests/test_slicing.py
+@@ -1,6 +1,7 @@
+ """Tests for paging.slicing."""
+ 
+ import pytest
++
+ from paging import page_count, page_slice
+ 
+ 
+@@ -10,6 +11,7 @@ from paging import page_count, page_slice
+         (1, 2, ["a", "b"]),
+         (2, 2, ["c", "d"]),
+         (1, 3, ["a", "b", "c"]),
++        (3, 2, ["e", "f"]),
+     ],
+ )
+ def test_page_slice_returns_the_requested_page(letters, page, per_page, expected):
+@@ -17,6 +19,11 @@ def test_page_slice_returns_the_requested_page(letters, page, per_page, expected
+     assert page_slice(letters, page, per_page) == expected
+ 
+ 
++def test_page_slice_past_the_end_returns_empty_list(letters):
++    """A page beyond the last one has no items, not an error."""
++    assert page_slice(letters, 4, 2) == []
++
++
+ @pytest.mark.parametrize(
+     ("total", "per_page", "expected"),
+     [(6, 2, 3), (7, 2, 4), (0, 2, 0)],

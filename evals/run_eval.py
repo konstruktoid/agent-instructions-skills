@@ -1052,6 +1052,37 @@ def task_table(
     return lines, total_delta
 
 
+def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+    """Name every task where both conditions scored full marks in every finished run.
+
+    Such a task cannot show a skill effect whatever the skill does: there is no headroom
+    above the baseline. evals/README.md's rule is that this measures task difficulty and
+    the fixture should be made harder, so the task is named here rather than left to read
+    as a success.
+    """
+    maxed = []
+    for task_id, conditions in by_task.items():
+        runs = [
+            run for condition in CONDITIONS for run in graded_runs(conditions.get(condition, []))
+        ]
+        both_arms = all(graded_runs(conditions.get(condition, [])) for condition in CONDITIONS)
+        if runs and both_arms and all(run["passed"] == run["total"] for run in runs):
+            maxed.append(task_id)
+    if not maxed:
+        return []
+    named = ", ".join(f"`{task_id}`" for task_id in maxed)
+    return [
+        *textwrap.wrap(
+            f"Failed to discriminate: {named}. Every finished run of both conditions scored "
+            "full marks, so there was no headroom for the skill to show an effect. This "
+            "measures the difficulty of the fixture rather than the skill, and the fixture "
+            "is what should change.",
+            width=100,
+        ),
+        "",
+    ]
+
+
 def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
     """Name every truncated run under the table, or record that there were none."""
     named = [
@@ -1142,6 +1173,7 @@ def render_report(skill: str, stamp: str) -> str:
     table, total_delta = task_table(by_task, runs_per_condition)
     lines += table
     lines += truncated_section(by_task)
+    lines += undiscriminating(by_task)
     if total_delta == 0 and by_task:
         lines += [
             "The skill produced no net measurable improvement on these tasks.",

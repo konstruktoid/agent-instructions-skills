@@ -1,0 +1,120 @@
+{
+  "task": "pt-02-business-days",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T10:15:55.570271+00:00",
+    "seconds": 113.5
+  },
+  "skills_used": [],
+  "num_turns": 26,
+  "cost_usd": 0.515491,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+      "passed": true,
+      "evidence": "exit 0\n..........                                                               [100%]\n10 passed in 0.02s"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's own entry point",
+      "passed": true,
+      "evidence": "match: 'pytest'"
+    },
+    {
+      "id": "suite-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+      "passed": true,
+      "evidence": "exit 0\n..........                                                               [100%]\n10 passed in 0.01s"
+    },
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\n4 files already formatted"
+    },
+    {
+      "id": "no-test-weakened",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-parallel-test-tree",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "test-added-for-new-interface",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: a new public interface requires a test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: add business_days_between to the tempo package",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-exported",
+      "kind": "workspace_command",
+      "source": "task prompt: export it the way the package exports its other helpers",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "behaviour-correct",
+      "kind": "workspace_command",
+      "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-holiday-helper-fixed",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "holiday-behaviour-covered-by-a-test",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 14,
+  "total": 14
+}

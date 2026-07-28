@@ -1,0 +1,81 @@
+diff --git a/src/uploads/naming.py b/src/uploads/naming.py
+index 1f9816b..0ed05f1 100644
+--- a/src/uploads/naming.py
++++ b/src/uploads/naming.py
+@@ -3,11 +3,6 @@
+ ALLOWED_EXTENSIONS = {"pdf", "png", "csv"}
+ 
+ 
+-def base_name(filename: str) -> str:
+-    """Return the filename with any directory component removed."""
+-    return filename.split("/")[-1]
+-
+-
+ def extension_of(filename: str) -> str:
+     """Return the extension of a filename, without the leading dot."""
+     return filename.rsplit(".", 1)[-1]
+diff --git a/src/uploads/validation.py b/src/uploads/validation.py
+index 044b77b..e94f2de 100644
+--- a/src/uploads/validation.py
++++ b/src/uploads/validation.py
+@@ -1,6 +1,6 @@
+ """Validate an uploaded file before it is stored."""
+ 
+-from uploads.naming import base_name
++from uploads.naming import ALLOWED_EXTENSIONS, extension_of
+ 
+ MAX_BYTES = 5 * 1024 * 1024
+ 
+@@ -14,4 +14,13 @@ def validate_upload(filename: str, size: int) -> str:
+     if size > MAX_BYTES:
+         message = "upload is too large"
+         raise UploadRejected(message)
+-    return base_name(filename)
++    if "/" in filename or "\\" in filename:
++        message = "filename must not contain a path separator"
++        raise UploadRejected(message)
++    if filename.startswith("."):
++        message = "filename must not start with a dot"
++        raise UploadRejected(message)
++    if extension_of(filename).lower() not in ALLOWED_EXTENSIONS:
++        message = "filename must end in .pdf, .png or .csv"
++        raise UploadRejected(message)
++    return filename.lower()
+diff --git a/tests/test_validation.py b/tests/test_validation.py
+index b75e3b7..464ab0c 100644
+--- a/tests/test_validation.py
++++ b/tests/test_validation.py
+@@ -14,3 +14,33 @@ def test_an_oversized_upload_is_rejected():
+     """An upload over the size limit is refused."""
+     with pytest.raises(UploadRejected, match="too large"):
+         validate_upload("report.pdf", 50 * 1024 * 1024)
++
++
++def test_the_stored_name_is_lowercased():
++    """The stored name is the filename lowercased."""
++    assert validate_upload("Report.PDF", 1024) == "report.pdf"
++
++
++@pytest.mark.parametrize("extension", ["PDF", "Png", "csv"])
++def test_an_allowed_extension_is_accepted_regardless_of_case(extension):
++    """Extensions are matched case-insensitively."""
++    validate_upload(f"report.{extension}", 1024)
++
++
++def test_a_disallowed_extension_is_rejected():
++    """An upload with an extension outside the allow list is refused."""
++    with pytest.raises(UploadRejected, match="pdf, .png or .csv"):
++        validate_upload("report.docx", 1024)
++
++
++@pytest.mark.parametrize("filename", ["../report.pdf", "sub/report.pdf", r"sub\report.pdf"])
++def test_a_filename_with_a_path_separator_is_rejected(filename):
++    """A filename containing either kind of path separator is refused, not repaired."""
++    with pytest.raises(UploadRejected, match="path separator"):
++        validate_upload(filename, 1024)
++
++
++def test_a_filename_starting_with_a_dot_is_rejected():
++    """A dotfile-style filename is refused."""
++    with pytest.raises(UploadRejected, match="start with a dot"):
++        validate_upload(".report.pdf", 1024)
