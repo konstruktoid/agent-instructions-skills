@@ -755,7 +755,11 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
     """
     root = results_root(args.skill, args.stamp or today())
     written = 0
-    for workspace in sorted(root.glob("*/*/workspace")):
+    # Both layouts: <task>/<condition>/workspace for a single run, and the run-<n> level
+    # a repeated measurement adds. Globbing only the first silently wrote no diffs at all
+    # for a `--runs N` stamp, which is the evidence those runs exist to leave behind.
+    workspaces = set(root.glob("*/*/workspace")) | set(root.glob("*/*/run-*/workspace"))
+    for workspace in sorted(workspaces):
         env = run_environment()
         # Only task workspaces are git repositories; trigger probes copy the sandbox
         # without initialising one. Without this guard git walks up to the enclosing
