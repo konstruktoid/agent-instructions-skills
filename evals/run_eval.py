@@ -74,6 +74,10 @@ RANGE_DASH = "\u2013"
 # Resolved once, so the fixture's git calls do not depend on a partial path.
 GIT = shutil.which("git") or "git"
 
+# Linked into each run's private Claude config directory. Everything else Claude Code
+# keeps there is per-run state that the run is free to create for itself.
+CREDENTIALS_FILE = ".credentials.json"
+
 
 def skill_source(name: str) -> Path:
     """Return the directory holding the named skill's SKILL.md."""
@@ -108,16 +112,85 @@ def build_plugin(name: str, workdir: Path) -> Path:
     return plugin_dir
 
 
-def run_environment() -> dict[str, str]:
+def isolated_environment(home: Path) -> dict[str, str]:
+    """Return the environment overlay confining one run's tool state to `home`.
+
+    Every tool a fixture invokes keeps a cache or an ephemeral directory under `$HOME`,
+    so two runs sharing one `$HOME` can see each other's state. The avl-05 autopsy
+    records the two paths that actually bit: molecule derives its ephemeral directory
+    from the project basename, which is `workspace` in every run and therefore identical
+    across them, and role resolution reached a stale `~/.ansible/collections` cache
+    instead of the workspace under test. Redirecting only those two would leave every
+    other tool sharing state, so each directory the tools consult is redirected here.
+    """
+    cache = home / ".cache"
+    return {
+        "HOME": str(home),
+        "XDG_CACHE_HOME": str(cache),
+        "XDG_CONFIG_HOME": str(home / ".config"),
+        "XDG_DATA_HOME": str(home / ".local" / "share"),
+        "XDG_STATE_HOME": str(home / ".local" / "state"),
+        # The autopsy's stale collection cache. ANSIBLE_HOME moves ~/.ansible wholesale;
+        # the collections path is set as well because a role resolved from a global cache
+        # rather than the workspace is the specific defect that was observed.
+        "ANSIBLE_HOME": str(home / ".ansible"),
+        "ANSIBLE_COLLECTIONS_PATH": str(home / ".ansible" / "collections"),
+        # The autopsy's colliding ephemeral directory. A per-run HOME already separates
+        # molecule's default location; setting it explicitly keeps the separation even if
+        # that default changes.
+        "MOLECULE_EPHEMERAL_DIRECTORY": str(cache / "molecule"),
+        "UV_CACHE_DIR": str(cache / "uv"),
+        "PIP_CACHE_DIR": str(cache / "pip"),
+        "npm_config_cache": str(cache / "npm"),
+        # A run must not read the user's global git config, whose hooks and aliases would
+        # otherwise apply inside the fixture repository.
+        "GIT_CONFIG_GLOBAL": str(home / ".gitconfig"),
+        "TMPDIR": str(home / "tmp"),
+        # Claude Code's own config directory is per-run state too: it writes sessions and
+        # project records on every invocation. Without this, concurrent runs write the
+        # user's real ~/.claude at the same time.
+        "CLAUDE_CONFIG_DIR": str(home / ".claude"),
+    }
+
+
+def prepare_run_home(run_dir: Path) -> Path:
+    """Create the run's private HOME under its run directory and return it.
+
+    The credentials file is symlinked rather than copied, so a run authenticates without
+    a secret being written into the results tree.
+    """
+    home = run_dir / "home"
+    for relative in (
+        ".ansible",
+        ".cache",
+        ".claude",
+        ".config",
+        ".local/share",
+        ".local/state",
+        "tmp",
+    ):
+        (home / relative).mkdir(parents=True, exist_ok=True)
+    source = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / CREDENTIALS_FILE
+    link = home / ".claude" / CREDENTIALS_FILE
+    if source.is_file() and not link.is_symlink():
+        link.symlink_to(source)
+    return home
+
+
+def run_environment(home: Path | None = None) -> dict[str, str]:
     """Return the environment for a run, with any harness tool directory on PATH.
 
     `EVAL_TOOL_BIN` lets the caller provision `ansible-lint`, `zizmor`, or
-    `actionlint` outside the user's own PATH and still have runs find them.
+    `actionlint` outside the user's own PATH and still have runs find them. Passing
+    `home` confines the run's tool state to that directory; omitting it leaves the
+    ambient environment alone, which is what the harness's own git calls want.
     """
     env = dict(os.environ)
     tool_bin = env.get("EVAL_TOOL_BIN")
     if tool_bin:
         env["PATH"] = f"{tool_bin}{os.pathsep}{env['PATH']}"
+    if home is not None:
+        env.update(isolated_environment(home))
     return env
 
 
@@ -158,7 +231,9 @@ def claude_command(
     return command
 
 
-def invoke_claude(command: Sequence[str], cwd: Path, stream_path: Path) -> dict[str, Any]:
+def invoke_claude(
+    command: Sequence[str], cwd: Path, stream_path: Path, home: Path
+) -> dict[str, Any]:
     """Run one `claude -p` subprocess, storing its stream, and return a run record."""
     started = datetime.now(tz=timezone.utc)
     try:
@@ -167,7 +242,7 @@ def invoke_claude(command: Sequence[str], cwd: Path, stream_path: Path) -> dict[
         completed = subprocess.run(  # noqa: S603
             command,
             cwd=cwd,
-            env=run_environment(),
+            env=run_environment(home),
             capture_output=True,
             text=True,
             timeout=RUN_TIMEOUT_SECONDS,
@@ -282,9 +357,13 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
     }
 
 
-def run_grader(command: str, workspace: Path, base_sha: str) -> tuple[int, str]:
-    """Run one assertion command in the finished workspace and return its exit code and output."""
-    env = run_environment()
+def run_grader(command: str, workspace: Path, base_sha: str, home: Path) -> tuple[int, str]:
+    """Run one assertion command in the finished workspace and return its exit code and output.
+
+    Graders run under the same private HOME as the run they grade, so an assertion that
+    invokes ansible-lint or pytest sees the run's own caches rather than the user's.
+    """
+    env = run_environment(home)
     env["EVAL_BASE_SHA"] = base_sha
     # The command comes from a checked-in assertions.json in this repository, and
     # a shell is what an assertion such as `! grep -r ...` is written against.
@@ -302,13 +381,13 @@ def run_grader(command: str, workspace: Path, base_sha: str) -> tuple[int, str]:
 
 
 def grade_assertion(
-    assertion: dict[str, Any], workspace: Path, facts: dict[str, Any], base_sha: str
+    assertion: dict[str, Any], workspace: Path, facts: dict[str, Any], base_sha: str, home: Path
 ) -> dict[str, Any]:
     """Grade one assertion, returning its verdict and the evidence behind it."""
     kind = assertion["kind"]
     evidence = ""
     if kind == "workspace_command":
-        code, output = run_grader(assertion["command"], workspace, base_sha)
+        code, output = run_grader(assertion["command"], workspace, base_sha, home)
         passed = (code == 0) if assertion.get("expect", "exit_zero") == "exit_zero" else code != 0
         evidence = f"exit {code}\n{output}"
     elif kind in {"transcript_regex", "final_regex", "bash_regex", "skill_used"}:
@@ -337,7 +416,7 @@ def grade_assertion(
     }
 
 
-def prepare_workspace(fixture: Path, destination: Path) -> str:
+def prepare_workspace(fixture: Path, destination: Path, home: Path) -> str:
     """Copy a fixture into a fresh git repository and return the baseline commit SHA.
 
     The commit gives assertions a fixed point to diff against, so "no unrelated
@@ -346,7 +425,7 @@ def prepare_workspace(fixture: Path, destination: Path) -> str:
     if destination.exists():
         shutil.rmtree(destination)
     shutil.copytree(fixture, destination)
-    git_env = run_environment()
+    git_env = run_environment(home)
     git_env.update(
         {
             "GIT_AUTHOR_NAME": "eval-harness",
@@ -387,8 +466,9 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
     task, condition = job["task"], job["condition"]
     run_dir: Path = job["run_dir"]
     run_dir.mkdir(parents=True, exist_ok=True)
+    home = prepare_run_home(run_dir)
     workspace = run_dir / "workspace"
-    base_sha = prepare_workspace(job["fixture"], workspace)
+    base_sha = prepare_workspace(job["fixture"], workspace, home)
 
     command = claude_command(
         prompt=task["prompt"],
@@ -397,13 +477,14 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
         tools=None,
         budget=TASK_BUDGET_USD,
     )
-    record = invoke_claude(command, workspace, run_dir / "run.jsonl")
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home)
     facts = transcript_facts(run_dir / "run.jsonl")
     # Written before grading, because an assertion encoding the skill's "clean, or
     # reported" rule reads ../final-response.md from inside the workspace.
     (run_dir / "final-response.md").write_text(facts["final_text"] + "\n", encoding="utf-8")
     graded = [
-        grade_assertion(assertion, workspace, facts, base_sha) for assertion in job["assertions"]
+        grade_assertion(assertion, workspace, facts, base_sha, home)
+        for assertion in job["assertions"]
     ]
 
     outcome = {
@@ -429,6 +510,7 @@ def run_one_trigger(job: dict[str, Any]) -> dict[str, Any]:
     probe = job["probe"]
     run_dir: Path = job["run_dir"]
     run_dir.mkdir(parents=True, exist_ok=True)
+    home = prepare_run_home(run_dir)
     workspace = run_dir / "workspace"
     if workspace.exists():
         shutil.rmtree(workspace)
@@ -440,7 +522,7 @@ def run_one_trigger(job: dict[str, Any]) -> dict[str, Any]:
         tools=TRIGGER_TOOLS,
         budget=TRIGGER_BUDGET_USD,
     )
-    record = invoke_claude(command, workspace, run_dir / "run.jsonl")
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home)
     facts = transcript_facts(run_dir / "run.jsonl")
     fired = any(job["skill"] in used for used in facts["skills_used"])
     outcome = {
@@ -672,17 +754,22 @@ def regrade_one(
     workspace = run_dir / "workspace"
     if not (run_dir / "grade.json").is_file() or not workspace.is_dir():
         return None
+    # Recreated when absent: a stamp graded before per-run isolation existed has no
+    # home/ directory, and regrading it must not fall back to the user's own.
+    home = prepare_run_home(run_dir)
     revision = subprocess.run(  # noqa: S603
         [GIT, "rev-list", "--max-parents=0", "HEAD"],
         cwd=workspace,
-        env=run_environment(),
+        env=run_environment(home),
         check=True,
         capture_output=True,
         text=True,
     )
     base_sha = revision.stdout.split()[0]
     facts = transcript_facts(run_dir / "run.jsonl")
-    graded = [grade_assertion(assertion, workspace, facts, base_sha) for assertion in assertions]
+    graded = [
+        grade_assertion(assertion, workspace, facts, base_sha, home) for assertion in assertions
+    ]
     outcome = json.loads((run_dir / "grade.json").read_text(encoding="utf-8"))
     outcome["assertions"] = graded
     outcome["passed"] = sum(1 for item in graded if item["passed"])
