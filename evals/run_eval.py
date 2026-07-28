@@ -54,6 +54,27 @@ GRADE_TIMEOUT_SECONDS = 600
 DEFAULT_TASK_MODEL = "sonnet"
 DEFAULT_TRIGGER_MODEL = "opus"
 
+# Prepended to every task prompt, in both conditions, so it cannot bias the comparison.
+# It states a property of the harness the agent cannot otherwise discover: there is no
+# interactive turn after this one, so a wakeup scheduled for later never arrives. The
+# avl-05 run of 2026-07-25 backgrounded a molecule scenario, scheduled a wakeup to
+# collect it, and ended on a mid-loop status line that two assertions were then graded
+# against.
+TASK_PREAMBLE = (
+    "This is a single non-interactive run: no scheduled wakeup will fire and there is no "
+    "later turn, so any long-running verification must be awaited in the foreground and "
+    "its result reported before you finish.\n\n"
+)
+
+# A command that outlives its tool timeout is moved to the background and reported with
+# this marker, which is the only handle a finished transcript gives on it.
+BACKGROUND_MARKER = re.compile(r"moved to the background \(ID: ([A-Za-z0-9_-]+)\)")
+
+# A later tool result naming that id alongside one of these words is the run observing
+# that the work finished. Without one, the background task is still outstanding when the
+# transcript ends.
+COMPLETION_MARKER = re.compile(r"\b(completed|exited|finished|exit code)\b", re.IGNORECASE)
+
 # A trigger probe only has to reveal the routing decision, so it gets read-only tools
 # plus Skill, which is the tool whose use is being measured. Omitting Skill here makes
 # every probe report "did not fire" no matter what the description says.
@@ -232,7 +253,11 @@ def claude_command(
 
 
 def invoke_claude(
-    command: Sequence[str], cwd: Path, stream_path: Path, home: Path
+    command: Sequence[str],
+    cwd: Path,
+    stream_path: Path,
+    home: Path,
+    timeout: int = RUN_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Run one `claude -p` subprocess, storing its stream, and return a run record."""
     started = datetime.now(tz=timezone.utc)
@@ -245,7 +270,7 @@ def invoke_claude(
             env=run_environment(home),
             capture_output=True,
             text=True,
-            timeout=RUN_TIMEOUT_SECONDS,
+            timeout=timeout,
             check=False,
         )
         stdout, stderr, returncode, timed_out = (
@@ -321,6 +346,48 @@ def assistant_text(events: Iterable[dict[str, Any]]) -> str:
     return "\n".join(parts)
 
 
+def truncation(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Report whether a run ended with work still outstanding.
+
+    Two states mean the run stopped before it could report: a scheduled wakeup, which
+    never fires under non-interactive `claude -p` and so is always unfired, and a
+    background command whose completion the transcript never records. A run in either
+    state was graded on whatever it had said by then, which for avl-05 on 2026-07-25 was
+    a mid-loop status line. Both are read from the transcript alone, so a stored run can
+    be classified after the fact.
+    """
+    wakeups = 0
+    started: list[str] = []
+    resolved: set[str] = set()
+    for event in events:
+        message = event.get("message")
+        if not isinstance(message, dict):
+            continue
+        for block in message.get("content") or []:
+            if not isinstance(block, dict):
+                continue
+            if block.get("type") == "tool_use":
+                inputs = block.get("input") or {}
+                if block.get("name") == "ScheduleWakeup" or "delaySeconds" in inputs:
+                    wakeups += 1
+                if block.get("name") == "Bash" and inputs.get("run_in_background"):
+                    started.append(f"bash-{len(started)}")
+                continue
+            if block.get("type") != "tool_result":
+                continue
+            text = json.dumps(block.get("content", ""))
+            started += BACKGROUND_MARKER.findall(text)
+            if COMPLETION_MARKER.search(text):
+                resolved.update(identifier for identifier in started if identifier in text)
+
+    outstanding = [identifier for identifier in started if identifier not in resolved]
+    return {
+        "truncated": bool(wakeups or outstanding),
+        "scheduled_wakeups": wakeups,
+        "outstanding_background": outstanding,
+    }
+
+
 def result_event(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Return the terminal result event, or an empty mapping when the run produced none."""
     for event in events:
@@ -354,6 +421,7 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
         "num_turns": result.get("num_turns"),
         "cost_usd": result.get("total_cost_usd"),
         "is_error": result.get("is_error"),
+        **truncation(events),
     }
 
 
@@ -471,13 +539,16 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
     base_sha = prepare_workspace(job["fixture"], workspace, home)
 
     command = claude_command(
-        prompt=task["prompt"],
+        prompt=TASK_PREAMBLE + task["prompt"],
         model=job["model"],
         plugin_dir=job["plugin_dir"] if condition == "with-skill" else None,
         tools=None,
         budget=TASK_BUDGET_USD,
     )
-    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home)
+    # A task may raise its own ceiling. avl-05 boots a systemd container and installs
+    # packages inside it, which is what pushed the 2026-07-25 run past the default.
+    timeout = int(task.get("timeout_seconds", RUN_TIMEOUT_SECONDS))
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home, timeout)
     facts = transcript_facts(run_dir / "run.jsonl")
     # Written before grading, because an assertion encoding the skill's "clean, or
     # reported" rule reads ../final-response.md from inside the workspace.
@@ -496,12 +567,16 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
         "skills_used": facts["skills_used"],
         "num_turns": facts["num_turns"],
         "cost_usd": facts["cost_usd"],
+        "truncated": facts["truncated"],
+        "scheduled_wakeups": facts["scheduled_wakeups"],
+        "outstanding_background": facts["outstanding_background"],
         "assertions": graded,
         "passed": sum(1 for item in graded if item["passed"]),
         "total": len(graded),
     }
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
-    print(f"{task['id']} [{condition}] {outcome['passed']}/{outcome['total']}")
+    state = " TRUNCATED" if outcome["truncated"] else ""
+    print(f"{task['id']} [{condition}] {outcome['passed']}/{outcome['total']}{state}")
     return outcome
 
 
@@ -774,8 +849,14 @@ def regrade_one(
     outcome["assertions"] = graded
     outcome["passed"] = sum(1 for item in graded if item["passed"])
     outcome["total"] = len(graded)
+    # Classified here as well as at run time, so a stamp graded before this policy
+    # existed reports its truncated runs once it is regraded.
+    outcome.update(
+        {key: facts[key] for key in ("truncated", "scheduled_wakeups", "outstanding_background")}
+    )
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
-    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}")
+    state = " TRUNCATED" if outcome["truncated"] else ""
+    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}{state}")
     return outcome
 
 
@@ -793,20 +874,38 @@ def count(number: float) -> str:
     return f"{number:g}"
 
 
+def graded_runs(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the runs of one condition that finished, dropping the truncated ones.
+
+    A truncated run was graded on whatever it had said before it stopped, which is not a
+    measurement of the skill. It is reported separately rather than averaged in.
+    """
+    return [run for run in runs if not run.get("truncated")]
+
+
 def verdict(runs: list[dict[str, Any]]) -> str:
     """Render one condition's assertion tally for the results table.
 
     One run reads as it always has. Several read as the median with the observed
     range behind it, because the median is what the delta is computed from and the
-    range is what says whether the delta means anything.
+    range is what says whether the delta means anything. A condition whose every run
+    was truncated has no tally to give and says so, rather than reporting the counts
+    those runs happened to reach.
     """
     if not runs:
         return "not run"
-    total = runs[0]["total"]
-    passed = [run["passed"] for run in runs]
-    if len(runs) == 1:
-        return f"{passed[0]}/{total}"
-    return f"{count(median(passed))}/{total} ({min(passed)}{RANGE_DASH}{max(passed)})"
+    finished = graded_runs(runs)
+    if not finished:
+        return f"truncated ({len(runs)} of {len(runs)})"
+    total = finished[0]["total"]
+    passed = [run["passed"] for run in finished]
+    tally = (
+        f"{passed[0]}/{total}"
+        if len(finished) == 1
+        else f"{count(median(passed))}/{total} ({min(passed)}{RANGE_DASH}{max(passed)})"
+    )
+    dropped = len(runs) - len(finished)
+    return f"{tally}, {dropped} truncated" if dropped else tally
 
 
 def ranges_overlap(left: list[int], right: list[int]) -> bool:
@@ -920,8 +1019,8 @@ def task_table(
     ]
     total_delta: float = 0
     for task_id, conditions in by_task.items():
-        baseline = conditions.get("baseline", [])
-        with_skill = conditions.get("with-skill", [])
+        baseline = graded_runs(conditions.get("baseline", []))
+        with_skill = graded_runs(conditions.get("with-skill", []))
         delta = ""
         if baseline and with_skill:
             baseline_passed = [run["passed"] for run in baseline]
@@ -931,12 +1030,45 @@ def task_table(
             delta = f"{difference:+g}"
             if len(baseline) > 1 and ranges_overlap(baseline_passed, with_skill_passed):
                 delta = f"{delta} (no reliable difference)"
-        fired = "yes" if any(run["skills_used"] for run in with_skill) else "no"
+        else:
+            # One arm has nothing left to compare, so there is no delta to state. Saying
+            # +0 here would read as "the skill changed nothing", which is not what was
+            # measured.
+            delta = "no comparable runs"
+        # Read from every run, truncated ones included: whether the skill loaded is
+        # observable however the run ended, and is not part of the delta.
+        fired = (
+            "yes" if any(run["skills_used"] for run in conditions.get("with-skill", [])) else "no"
+        )
         lines.append(
-            f"| `{task_id}` | {verdict(baseline)} | {verdict(with_skill)} | {delta} | {fired} |"
+            f"| `{task_id}` | {verdict(conditions.get('baseline', []))} | "
+            f"{verdict(conditions.get('with-skill', []))} | {delta} | {fired} |"
         )
     lines += ["", f"Net delta across {len(by_task)} tasks: **{total_delta:+g}** assertions.", ""]
     return lines, total_delta
+
+
+def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+    """Name every truncated run under the table, or record that there were none."""
+    named = [
+        f"`{task_id}` [{condition}] run {run.get('run_index', 1)}"
+        for task_id, conditions in by_task.items()
+        for condition in CONDITIONS
+        for run in conditions.get(condition, [])
+        if run.get("truncated")
+    ]
+    if not named:
+        return ["Truncated runs: none.", ""]
+    return [
+        *textwrap.wrap(
+            f"Truncated runs: {len(named)} — {', '.join(named)}. Each ended with background "
+            "work outstanding or a scheduled wakeup that cannot fire under non-interactive "
+            "`claude -p`, so it was graded on whatever it had said by then. These are "
+            "excluded from the medians and the delta above.",
+            width=100,
+        ),
+        "",
+    ]
 
 
 def failure_section(
@@ -952,7 +1084,9 @@ def failure_section(
         ]
     for task_id, conditions in by_task.items():
         for condition in CONDITIONS:
-            failures = failed_ids(conditions.get(condition, []))
+            # Truncated runs are left out here too: an assertion they failed reports
+            # where the run stopped, not what the skill did about it.
+            failures = failed_ids(graded_runs(conditions.get(condition, [])))
             rendered = ", ".join(f"`{name}`" for name in failures) if failures else "none"
             # Wrapped to the repository's 100-column Markdown rule, which applies to this
             # generated file as much as to a hand-written one.
@@ -1003,6 +1137,7 @@ def render_report(skill: str, stamp: str) -> str:
 
     table, total_delta = task_table(by_task, runs_per_condition)
     lines += table
+    lines += truncated_section(by_task)
     if total_delta == 0 and by_task:
         lines += [
             "The skill produced no net measurable improvement on these tasks.",
