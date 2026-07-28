@@ -570,6 +570,11 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
         "truncated": facts["truncated"],
         "scheduled_wakeups": facts["scheduled_wakeups"],
         "outstanding_background": facts["outstanding_background"],
+        # A run the process itself reported as failed. The rate limit rejecting a request
+        # mid-run ends `claude -p` with a synthetic message, a non-zero exit and an error
+        # result event, having produced a partial transcript that grades like a real run
+        # and scores badly. That is a measurement of the quota, not of the skill.
+        "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
         "assertions": graded,
         "passed": sum(1 for item in graded if item["passed"]),
         "total": len(graded),
@@ -684,6 +689,17 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
     )
     outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
+    # The documented contract: a failing assertion is a result, but a run that did not
+    # execute is a harness failure and must not be mistaken for a completed measurement.
+    aborted = [outcome for outcome in outcomes if outcome.get("aborted")]
+    if aborted:
+        for outcome in aborted:
+            print(
+                f"ABORTED {outcome['task']} [{outcome['condition']}] "
+                f"run {outcome.get('run_index', 1)}",
+                file=sys.stderr,
+            )
+        return 1
     return 0
 
 
@@ -858,6 +874,7 @@ def regrade_one(
     outcome.update(
         {key: facts[key] for key in ("truncated", "scheduled_wakeups", "outstanding_background")}
     )
+    outcome["aborted"] = bool(outcome.get("run", {}).get("returncode", 0) != 0 or facts["is_error"])
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
     state = " TRUNCATED" if outcome["truncated"] else ""
     print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}{state}")
@@ -879,12 +896,15 @@ def count(number: float) -> str:
 
 
 def graded_runs(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Return the runs of one condition that finished, dropping the truncated ones.
+    """Return the runs of one condition that finished, dropping the ones that did not.
 
-    A truncated run was graded on whatever it had said before it stopped, which is not a
-    measurement of the skill. It is reported separately rather than averaged in.
+    Two states disqualify a run from the medians. A truncated run was graded on whatever
+    it had said before it stopped. An aborted run did not finish at all: the process
+    reported failure, which is what the rate limit rejecting a request looks like from
+    here. Neither is a measurement of the skill, and both are reported separately rather
+    than averaged in.
     """
-    return [run for run in runs if not run.get("truncated")]
+    return [run for run in runs if not run.get("truncated") and not run.get("aborted")]
 
 
 def verdict(runs: list[dict[str, Any]]) -> str:
@@ -900,7 +920,8 @@ def verdict(runs: list[dict[str, Any]]) -> str:
         return "not run"
     finished = graded_runs(runs)
     if not finished:
-        return f"truncated ({len(runs)} of {len(runs)})"
+        state = "aborted" if all(run.get("aborted") for run in runs) else "not measured"
+        return f"{state} ({len(runs)} of {len(runs)})"
     total = finished[0]["total"]
     passed = [run["passed"] for run in finished]
     tally = (
@@ -908,8 +929,12 @@ def verdict(runs: list[dict[str, Any]]) -> str:
         if len(finished) == 1
         else f"{count(median(passed))}/{total} ({min(passed)}{RANGE_DASH}{max(passed)})"
     )
-    dropped = len(runs) - len(finished)
-    return f"{tally}, {dropped} truncated" if dropped else tally
+    notes = [
+        f"{sum(1 for run in runs if run.get('truncated'))} truncated",
+        f"{sum(1 for run in runs if run.get('aborted'))} aborted",
+    ]
+    dropped = [note for note in notes if not note.startswith("0 ")]
+    return f"{tally}, {', '.join(dropped)}" if dropped else tally
 
 
 def ranges_overlap(left: list[int], right: list[int]) -> bool:
@@ -1052,6 +1077,34 @@ def task_table(
     return lines, total_delta
 
 
+def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+    """Name every run the process reported as failed, or say nothing when there are none.
+
+    Unlike a truncated run, an aborted one produced no usable turn at all. The case seen
+    here is the five-hour rate limit rejecting a request mid-run, which ends the process
+    with an error result after a handful of turns.
+    """
+    named = [
+        f"`{task_id}` [{condition}] run {run.get('run_index', 1)}"
+        for task_id, conditions in by_task.items()
+        for condition in CONDITIONS
+        for run in conditions.get(condition, [])
+        if run.get("aborted")
+    ]
+    if not named:
+        return []
+    return [
+        *textwrap.wrap(
+            f"Aborted runs: {len(named)} — {', '.join(named)}. Each ended with a non-zero "
+            "exit or an error result, so the transcript is partial and the score it would "
+            "have produced measures where the run stopped. These are excluded from the "
+            "medians and the delta above.",
+            width=100,
+        ),
+        "",
+    ]
+
+
 def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
     """Name every task where both conditions scored full marks in every finished run.
 
@@ -1173,6 +1226,7 @@ def render_report(skill: str, stamp: str) -> str:
     table, total_delta = task_table(by_task, runs_per_condition)
     lines += table
     lines += truncated_section(by_task)
+    lines += aborted_section(by_task)
     lines += undiscriminating(by_task)
     if total_delta == 0 and by_task:
         lines += [

@@ -1,0 +1,136 @@
+{
+  "task": "gas-01-release-job",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 1,
+    "timed_out": false,
+    "started": "2026-07-28T13:58:47.428174+00:00",
+    "seconds": 58.1
+  },
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "num_turns": 12,
+  "cost_usd": 0.2530997,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 14\nwarning[artipacked]: credential persistence through GitHub Actions artifacts\n  --> ./.github/workflows/ci.yml:14:9\n   |\n14 |       - uses: actions/checkout@v4\n   |         ^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false\n   |\n   = note: audit confidence \u2192 Low\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#artipacked\n\nwarning[excessive-permissions]: overly broad permissions\n  --> ./.github/workflows/ci.yml:11:3\n   |\n11 | /   build:\n12 | |     runs-on: ubuntu-latest\n13 | |     steps:\n14 | |       - uses: actions/checkout@v4\n...  |\n18 | |       - run: npm ci\n19 | |       - run: npm test\n   | |                      ^\n   | |                      |\n   | |______________________this job\n   |                        default permissions used due to no permissions: block\n   |\n   = note: audit confidence \u2192 Medium\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#excessive-permissions\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:14:15\n   |\n14 |       - uses: actions/checkout@v4\n   |               ^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:15:15\n   |\n15 |       - uses: actions/setup-node@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\n7 findings (3 suppressed, 1 unsafe fixes): 0 informational, 0 low, 2 medium, 2 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'actionlint'"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": true,
+      "evidence": "match: 'zizmor'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\nwarning[artipacked]: credential persistence through GitHub Actions artifacts\n  --> ./.github/workflows/ci.yml:14:9\n   |\n14 |       - uses: actions/checkout@v4\n   |         ^^^^^^^^^^^^^^^^^^^^^^^^^ does not set persist-credentials: false\n   |\n   = note: audit confidence \u2192 Low\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#artipacked\n\nwarning[excessive-permissions]: overly broad permissions\n  --> ./.github/workflows/ci.yml:11:3\n   |\n11 | /   build:\n12 | |     runs-on: ubuntu-latest\n13 | |     steps:\n14 | |       - uses: actions/checkout@v4\n...  |\n18 | |       - run: npm ci\n19 | |       - run: npm test\n   | |                      ^\n   | |                      |\n   | |______________________this job\n   |                        default permissions used due to no permissions: block\n   |\n   = note: audit confidence \u2192 Medium\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#excessive-permissions\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:14:15\n   |\n14 |       - uses: actions/checkout@v4\n   |               ^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:15:15\n   |\n15 |       - uses: actions/setup-node@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\n7 findings (3 suppressed, 1 unsafe fixes): 0 informational, 0 low, 2 medium, 2 high\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": true,
+      "evidence": "match: 'gh api'"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-tag-trigger",
+      "kind": "workspace_command",
+      "source": "task prompt: runs when a version tag matching v* is pushed",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "feature-release-needs-build",
+      "kind": "workspace_command",
+      "source": "task prompt: the release job should only run after the build job has passed",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "release-job-scoped-permissions",
+      "kind": "workspace_command",
+      "source": "SKILL.md minimal permissions: create a release needs contents: write",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README's release section",
+      "passed": false,
+      "evidence": "exit 1"
+    }
+  ],
+  "passed": 6,
+  "total": 16
+}
