@@ -14,3 +14,9 @@
 # fixture's baseline commit, which is what gets committed. The workspaces stay here so
 # `run_eval.py regrade` can still re-run the graders against them.
 **/workspace/
+
+# The private HOME each run is given, holding that run's tool caches and its Claude
+# config directory. It is scratch state, it runs to hundreds of megabytes, and it
+# contains a symlink to the credentials file that authenticates the run. None of it is
+# evidence and none of it may be pushed.
+*/results/raw/**/home/
