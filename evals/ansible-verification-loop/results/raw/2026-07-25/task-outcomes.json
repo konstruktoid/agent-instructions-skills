@@ -85,7 +85,11 @@
       }
     ],
     "passed": 10,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-01-sshd-options",
@@ -175,7 +179,11 @@
       }
     ],
     "passed": 10,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-02-command-idempotence",
@@ -263,7 +271,11 @@
       }
     ],
     "passed": 5,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-02-command-idempotence",
@@ -353,7 +365,11 @@
       }
     ],
     "passed": 10,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-03-banner-quoting",
@@ -434,7 +450,11 @@
       }
     ],
     "passed": 8,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-03-banner-quoting",
@@ -517,7 +537,11 @@
       }
     ],
     "passed": 9,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-04-handler-refactor",
@@ -598,7 +622,11 @@
       }
     ],
     "passed": 9,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-04-handler-refactor",
@@ -681,7 +709,11 @@
       }
     ],
     "passed": 9,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-05-collection-review",
@@ -776,7 +808,11 @@
       }
     ],
     "passed": 11,
-    "total": 11
+    "total": 11,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-05-collection-review",
@@ -873,6 +909,12 @@
       }
     ],
     "passed": 7,
-    "total": 11
+    "total": 11,
+    "truncated": true,
+    "scheduled_wakeups": 1,
+    "outstanding_background": [
+      "bqe2mridx"
+    ],
+    "aborted": false
   }
 ]

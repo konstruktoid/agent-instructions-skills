@@ -35,6 +35,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import textwrap
@@ -94,6 +95,17 @@ RANGE_DASH = "\u2013"
 
 # Resolved once, so the fixture's git calls do not depend on a partial path.
 GIT = shutil.which("git") or "git"
+
+# Placeholders the scrubber writes in place of anything that identifies the machine a run
+# happened on. Two of them rather than one, because the difference between them is itself
+# the evidence: a path under the first stayed inside the run's own directory, and one under
+# the second reached out into the real home the run was supposed to be isolated from. A
+# single blanket redaction would erase exactly the distinction the isolation results rest on.
+REPO_PLACEHOLDER = "/repo"
+HOME_PLACEHOLDER = "/home/user"
+# Other checkouts on the same machine are named only to say "outside the eval", so the name
+# itself is dropped; publishing what else someone has cloned is not evidence of anything.
+OTHER_CHECKOUT_PLACEHOLDER = f"{HOME_PLACEHOLDER}/other-checkout"
 
 # Linked into each run's private Claude config directory. Everything else Claude Code
 # keeps there is per-run state that the run is free to create for itself.
@@ -252,6 +264,93 @@ def claude_command(
     return command
 
 
+def scrub_rules() -> list[tuple[re.Pattern[str], str]]:
+    """Build the ordered substitutions that make run evidence machine-agnostic.
+
+    A transcript records absolute paths, `ls -l` owner columns and hostnames from whichever
+    machine the run happened on, none of which is a property of the skill under test. The
+    rules are derived from the running environment rather than hardcoded, so they work for
+    any contributor, and they are ordered longest-match-first: the repository prefix has to
+    go before the bare home directory, and both dash-encoded forms have to go before the
+    bare username, whose word boundaries would otherwise match inside them.
+    """
+    home = str(Path.home())
+    repo = str(REPO_ROOT)
+    user = Path.home().name
+    host = socket.gethostname()
+    # Claude Code encodes a project path as its directory name by replacing each separator
+    # with a dash, so every path above appears in a second form that needs the same care.
+    dashed = lambda text: text.replace("/", "-")  # noqa: E731
+    # A transcript is JSON, so a name that starts a captured line appears as `\nuser`, where the
+    # character before the name is the `n` of the escape sequence rather than a separator. `\b`
+    # finds no boundary there and the name survives a scrub that reports nothing left to do, so
+    # the escapes are spelled out instead of relying on the word boundary alone.
+    bounded = lambda text: (  # noqa: E731
+        rf"(?:(?<=\\n)|(?<=\\t)|(?<=\\r)|(?<![0-9A-Za-z_])){re.escape(text)}(?![0-9A-Za-z_])"
+    )
+    rules = [
+        (re.escape(repo), REPO_PLACEHOLDER),
+        (re.escape(dashed(repo)), dashed(REPO_PLACEHOLDER)),
+        # Any sibling checkout of this repository, named only to say "outside the eval".
+        (re.escape(f"{Path(repo).parent}/") + r"[A-Za-z0-9_.-]+", OTHER_CHECKOUT_PLACEHOLDER),
+        (re.escape(home), HOME_PLACEHOLDER),
+        (re.escape(dashed(home)), dashed(HOME_PLACEHOLDER)),
+        # The uid in the scratchpad path Claude Code derives from os.getuid(). Anchored to
+        # the path so it cannot reach a model id such as claude-3-5-sonnet.
+        (r"/tmp/claude-\d+", "/tmp/claude-uid"),  # noqa: S108
+        (bounded(user), "user"),
+        (bounded(host), "host"),
+        # GitHub echoes the caller's own public address back in this error, so an unauthenticated
+        # run that hits the rate limit records the network the machine sits behind. It is the one
+        # piece of machine identity that arrives in a response body rather than in a path, which
+        # is why no path or name rule above catches it.
+        (
+            # The v6 branch has to require a colon rather than accept a run of hex digits, or it
+            # would match the leading `add` of the placeholder this rule writes and re-expand it
+            # on every later pass, costing the scrubber the idempotence that makes it a check.
+            (
+                r"(API rate limit exceeded for )"
+                r"(?:[0-9]{1,3}(?:\.[0-9]{1,3}){3}|[0-9A-Fa-f:]*:[0-9A-Fa-f:]+)"
+            ),
+            r"\g<1>address",
+        ),
+    ]
+    return [(re.compile(pattern), replacement) for pattern, replacement in rules]
+
+
+def scrub(text: str, rules: list[tuple[re.Pattern[str], str]] | None = None) -> str:
+    """Apply the machine-agnostic substitutions to one blob of run evidence."""
+    for pattern, replacement in rules if rules is not None else scrub_rules():
+        text = pattern.sub(replacement, text)
+    return text
+
+
+def cmd_scrub(args: argparse.Namespace) -> int:
+    """Rewrite stored run evidence so it names no user, host or checkout path.
+
+    Applied to the transcripts, diffs and final responses already committed. It is
+    idempotent, so re-running it over a scrubbed tree is a no-op, which is what makes it
+    safe to use as a check that nothing unscrubbed has been added.
+    """
+    root = EVALS_DIR / args.skill / "results" if args.skill else EVALS_DIR
+    rules = scrub_rules()
+    changed = 0
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix not in {".jsonl", ".diff", ".json", ".md", ".txt"}:
+            continue
+        try:
+            original = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        cleaned = scrub(original, rules)
+        if cleaned != original:
+            path.write_text(cleaned, encoding="utf-8")
+            print(f"scrubbed {path.relative_to(REPO_ROOT)}")
+            changed += 1
+    print(f"scrubbed {changed} files")
+    return 0
+
+
 def invoke_claude(
     command: Sequence[str],
     cwd: Path,
@@ -284,9 +383,11 @@ def invoke_claude(
         stderr = expired.stderr.decode() if isinstance(expired.stderr, bytes) else expired.stderr
         stdout, stderr, returncode, timed_out = stdout or "", stderr or "", -1, True
 
-    stream_path.write_text(stdout, encoding="utf-8")
+    # Scrubbed on the way to disk, so a transcript is machine-agnostic from the moment it
+    # is written and no separate step has to remember to clean it before it is committed.
+    stream_path.write_text(scrub(stdout), encoding="utf-8")
     if stderr.strip():
-        stream_path.with_suffix(".stderr.txt").write_text(stderr, encoding="utf-8")
+        stream_path.with_suffix(".stderr.txt").write_text(scrub(stderr), encoding="utf-8")
 
     return {
         "returncode": returncode,
@@ -552,7 +653,7 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
     facts = transcript_facts(run_dir / "run.jsonl")
     # Written before grading, because an assertion encoding the skill's "clean, or
     # reported" rule reads ../final-response.md from inside the workspace.
-    (run_dir / "final-response.md").write_text(facts["final_text"] + "\n", encoding="utf-8")
+    (run_dir / "final-response.md").write_text(scrub(facts["final_text"]) + "\n", encoding="utf-8")
     graded = [
         grade_assertion(assertion, workspace, facts, base_sha, home)
         for assertion in job["assertions"]
@@ -615,7 +716,7 @@ def run_one_trigger(job: dict[str, Any]) -> dict[str, Any]:
         "run": record,
     }
     (run_dir / "outcome.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
-    (run_dir / "final-response.md").write_text(facts["final_text"] + "\n", encoding="utf-8")
+    (run_dir / "final-response.md").write_text(scrub(facts["final_text"]) + "\n", encoding="utf-8")
     verdict = "ok" if outcome["correct"] else "WRONG"
     print(f"{probe['id']} expect={probe['expect']} fired={fired} {verdict}")
     return outcome
@@ -807,7 +908,8 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
             capture_output=True,
             text=True,
         )
-        (workspace.parent / "workspace.diff").write_text(diff.stdout, encoding="utf-8")
+        # Scrubbed like the transcript: a diff carries absolute paths in its headers.
+        (workspace.parent / "workspace.diff").write_text(scrub(diff.stdout), encoding="utf-8")
         written += 1
     print(f"wrote {written} workspace diffs under {root.relative_to(REPO_ROOT)}")
     return 0
@@ -816,9 +918,11 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
 def cmd_regrade(args: argparse.Namespace) -> int:
     """Re-grade stored runs against the current assertions, without calling any model.
 
-    Every input a grader needs was kept: the finished workspace, the transcript, and the
-    fixture's baseline commit, which is the workspace repository's root commit. Correcting
-    a faulty assertion therefore costs nothing and leaves the run artifacts untouched.
+    Every input a grader needs was kept for as long as the run directory survives: the
+    finished workspace, the transcript, and the fixture's baseline commit, which is the
+    workspace repository's root commit. Correcting a faulty assertion therefore costs
+    nothing and leaves the run artifacts untouched. The workspace is gitignored, so a
+    clone regrades from the transcript alone; see `regrade_one`.
     """
     skill_dir = EVALS_DIR / args.skill
     assertions = load_json(skill_dir / "assertions.json")["tasks"]
@@ -836,39 +940,64 @@ def cmd_regrade(args: argparse.Namespace) -> int:
                 if outcome is not None:
                     outcomes.append(outcome)
 
-    (root / "task-outcomes.json").write_text(
-        json.dumps(outcomes, indent=2) + "\n", encoding="utf-8"
+    # Merge rather than overwrite, on the same reasoning as `tasks`: a regrade reaches only
+    # the runs still on disk, and one that reached none of them must not silently replace a
+    # committed results file with an empty list.
+    outcomes_path = root / "task-outcomes.json"
+    if outcomes_path.is_file():
+        fresh = {
+            (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
+            for outcome in outcomes
+        }
+        previous = json.loads(outcomes_path.read_text(encoding="utf-8"))
+        outcomes += [
+            outcome
+            for outcome in previous
+            if (outcome["task"], outcome["condition"], outcome.get("run_index", 1)) not in fresh
+        ]
+    outcomes.sort(
+        key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
     )
+    outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
     return 0
 
 
 def regrade_one(
     run_dir: Path, task_id: str, assertions: list[dict[str, Any]]
 ) -> dict[str, Any] | None:
-    """Regrade one stored run in place and return its outcome, or None when it is absent."""
-    workspace = run_dir / "workspace"
-    if not (run_dir / "grade.json").is_file() or not workspace.is_dir():
+    """Regrade one stored run in place and return its outcome, or None when it is absent.
+
+    The assertions are re-run only when the finished workspace is still on disk. It is
+    gitignored, so in a fresh clone it never is, and the run is then reclassified from its
+    transcript alone: `truncated` and `aborted` are read from `run.jsonl` and the recorded
+    return code, neither of which needs the workspace. That backfill is the only way a
+    stamp graded before the truncation policy existed can ever report its truncated runs,
+    since the workspaces those runs left behind were never committed.
+    """
+    if not (run_dir / "grade.json").is_file():
         return None
-    # Recreated when absent: a stamp graded before per-run isolation existed has no
-    # home/ directory, and regrading it must not fall back to the user's own.
-    home = prepare_run_home(run_dir)
-    revision = subprocess.run(  # noqa: S603
-        [GIT, "rev-list", "--max-parents=0", "HEAD"],
-        cwd=workspace,
-        env=run_environment(home),
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    base_sha = revision.stdout.split()[0]
+    workspace = run_dir / "workspace"
     facts = transcript_facts(run_dir / "run.jsonl")
-    graded = [
-        grade_assertion(assertion, workspace, facts, base_sha, home) for assertion in assertions
-    ]
     outcome = json.loads((run_dir / "grade.json").read_text(encoding="utf-8"))
-    outcome["assertions"] = graded
-    outcome["passed"] = sum(1 for item in graded if item["passed"])
-    outcome["total"] = len(graded)
+    if workspace.is_dir():
+        # Recreated when absent: a stamp graded before per-run isolation existed has no
+        # home/ directory, and regrading it must not fall back to the user's own.
+        home = prepare_run_home(run_dir)
+        revision = subprocess.run(  # noqa: S603
+            [GIT, "rev-list", "--max-parents=0", "HEAD"],
+            cwd=workspace,
+            env=run_environment(home),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        base_sha = revision.stdout.split()[0]
+        graded = [
+            grade_assertion(assertion, workspace, facts, base_sha, home) for assertion in assertions
+        ]
+        outcome["assertions"] = graded
+        outcome["passed"] = sum(1 for item in graded if item["passed"])
+        outcome["total"] = len(graded)
     # Classified here as well as at run time, so a stamp graded before this policy
     # existed reports its truncated runs once it is regraded.
     outcome.update(
@@ -877,7 +1006,8 @@ def regrade_one(
     outcome["aborted"] = bool(outcome.get("run", {}).get("returncode", 0) != 0 or facts["is_error"])
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
     state = " TRUNCATED" if outcome["truncated"] else ""
-    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}{state}")
+    kept = "" if workspace.is_dir() else " (transcript only, workspace not kept)"
+    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}{state}{kept}")
     return outcome
 
 
@@ -1174,8 +1304,15 @@ def failure_section(
         for condition in CONDITIONS:
             # Truncated runs are left out here too: an assertion they failed reports
             # where the run stopped, not what the skill did about it.
-            failures = failed_ids(graded_runs(conditions.get(condition, [])))
-            rendered = ", ".join(f"`{name}`" for name in failures) if failures else "none"
+            runs = conditions.get(condition, [])
+            finished = graded_runs(runs)
+            failures = failed_ids(finished)
+            if runs and not finished:
+                # "none" here would read as a clean sweep. A condition with no finished run
+                # has no failure list to give, the same distinction `verdict` draws.
+                rendered = "not measured"
+            else:
+                rendered = ", ".join(f"`{name}`" for name in failures) if failures else "none"
             # Wrapped to the repository's 100-column Markdown rule, which applies to this
             # generated file as much as to a hand-written one.
             lines.append(
@@ -1267,11 +1404,17 @@ def cmd_report(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build the command-line parser for the three subcommands."""
+    """Build the command-line parser for the subcommands."""
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Alone in taking no required --skill: scrubbing is a property of the whole results
+    # tree, and the useful default is to sweep all of it rather than one skill at a time.
+    scrub_parser = subparsers.add_parser("scrub", help=cmd_scrub.__doc__)
+    scrub_parser.add_argument("--skill", default="", help="limit to one skill, default all")
+    scrub_parser.set_defaults(handler=cmd_scrub)
 
     for name, handler, model in (
         ("tasks", cmd_tasks, DEFAULT_TASK_MODEL),

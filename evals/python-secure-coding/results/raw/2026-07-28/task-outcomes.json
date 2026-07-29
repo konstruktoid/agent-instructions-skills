@@ -96,7 +96,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-01-report-export",
@@ -195,7 +196,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-01-report-export",
@@ -294,7 +296,8 @@
       }
     ],
     "passed": 11,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-01-report-export",
@@ -395,7 +398,8 @@
       }
     ],
     "passed": 11,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-01-report-export",
@@ -496,7 +500,8 @@
       }
     ],
     "passed": 11,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-01-report-export",
@@ -597,7 +602,8 @@
       }
     ],
     "passed": 11,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -689,7 +695,8 @@
       }
     ],
     "passed": 8,
-    "total": 10
+    "total": 10,
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -781,7 +788,8 @@
       }
     ],
     "passed": 8,
-    "total": 10
+    "total": 10,
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -873,7 +881,8 @@
       }
     ],
     "passed": 8,
-    "total": 10
+    "total": 10,
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -967,7 +976,8 @@
       }
     ],
     "passed": 9,
-    "total": 10
+    "total": 10,
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -1061,7 +1071,8 @@
       }
     ],
     "passed": 9,
-    "total": 10
+    "total": 10,
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -1155,7 +1166,8 @@
       }
     ],
     "passed": 9,
-    "total": 10
+    "total": 10,
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -1254,7 +1266,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -1353,7 +1366,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -1452,7 +1466,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -1553,7 +1568,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -1654,7 +1670,8 @@
       }
     ],
     "passed": 9,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -1755,7 +1772,8 @@
       }
     ],
     "passed": 8,
-    "total": 11
+    "total": 11,
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -1861,7 +1879,8 @@
       }
     ],
     "passed": 7,
-    "total": 12
+    "total": 12,
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -1967,7 +1986,8 @@
       }
     ],
     "passed": 7,
-    "total": 12
+    "total": 12,
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -2073,7 +2093,8 @@
       }
     ],
     "passed": 6,
-    "total": 12
+    "total": 12,
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -2181,7 +2202,8 @@
       }
     ],
     "passed": 7,
-    "total": 12
+    "total": 12,
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -2289,7 +2311,8 @@
       }
     ],
     "passed": 7,
-    "total": 12
+    "total": 12,
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -2397,7 +2420,8 @@
       }
     ],
     "passed": 8,
-    "total": 12
+    "total": 12,
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -2517,7 +2541,8 @@
       }
     ],
     "passed": 7,
-    "total": 14
+    "total": 14,
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -2637,7 +2662,8 @@
       }
     ],
     "passed": 7,
-    "total": 14
+    "total": 14,
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -2757,7 +2783,8 @@
       }
     ],
     "passed": 7,
-    "total": 14
+    "total": 14,
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -2879,7 +2906,8 @@
       }
     ],
     "passed": 6,
-    "total": 14
+    "total": 14,
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -3001,7 +3029,8 @@
       }
     ],
     "passed": 10,
-    "total": 14
+    "total": 14,
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -3123,6 +3152,7 @@
       }
     ],
     "passed": 8,
-    "total": 14
+    "total": 14,
+    "aborted": false
   }
 ]

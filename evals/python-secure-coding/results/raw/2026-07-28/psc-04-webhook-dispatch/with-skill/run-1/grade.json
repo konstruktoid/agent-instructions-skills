@@ -104,5 +104,6 @@
     }
   ],
   "passed": 7,
-  "total": 12
+  "total": 12,
+  "aborted": false
 }

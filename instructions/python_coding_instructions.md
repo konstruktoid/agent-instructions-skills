@@ -69,6 +69,15 @@ verify them:
 - **Secret flow through variables.** `S105`–`S107` catch hardcoded-looking
   literals; they cannot trace a credential passed through a variable into a
   log line, generated output, or persisted state.
+- **User and system information in committed files.** No rule flags a home
+  directory path, username, uid, hostname, internal IP, or real email address
+  that reached source, a test fixture or snapshot, captured tool output, or
+  generated documentation. These identify the machine a change was made on
+  rather than anything about the code, and they make the file non-portable as
+  well as over-shared. Use placeholders (`/path/to/project`,
+  `user@example.com`, RFC 5737 addresses), derive real values at runtime from
+  `Path.home()`, `getpass.getuser()`, or `socket.gethostname()`, and normalize
+  captured output before writing it anywhere that gets committed.
 - **Security rationale.** For changes to authentication, authorization, or
   credential handling, state the security reasoning in the commit message
   or surrounding docstring. No check requires this, but it is expected.
@@ -92,9 +101,12 @@ Before considering a Python change complete, verify that:
 - `ty check` passes with no new suppressions.
 - Every ignore or suppression that remains, in config or inline, carries
   a one-line justification.
-- The judgment items above (docstring/comment accuracy, secret flow,
-  security rationale, boundary-only validation, batching) have been
-  considered, since the tools cannot check them.
+- The judgment items above (docstring/comment accuracy, secret flow, user and
+  system information, security rationale, boundary-only validation, batching)
+  have been considered, since the tools cannot check them.
+- Nothing being committed carries a home-directory path, username, uid,
+  hostname, internal IP, or real email address, including in test fixtures,
+  captured output, and generated documentation.
 - Test coverage was added or updated if the change adds behavior, fixes a
   bug, or changes a public interface, following the `python-testing` skill.
   If no test was added, the reason was stated rather than left implicit.

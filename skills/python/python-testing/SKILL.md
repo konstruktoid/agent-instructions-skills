@@ -45,6 +45,11 @@ decide, write, verify.
      before applying the fix, or by reverting the fix once.
    - Keep each test independent: no shared mutable state, no ordering assumptions, no reliance on
      network or wall-clock time.
+   - Keep the machine out of the test. A home-directory path, username, hostname, or real email
+     address baked into a fixture, an expected value, or a recorded snapshot is both a test that
+     only passes on one machine and information the repository has no reason to publish. Use
+     `tmp_path`, `monkeypatch`, and placeholders, and normalize captured paths before asserting
+     on them or committing a snapshot.
 4. **Run the suite in the bounded verify loop below.**
 5. Follow `instructions/python_coding_instructions.md` for the test code itself. Test files are
    source, and the same `ruff`/`ty` gate applies to them.
@@ -103,6 +108,8 @@ test and say why it was wrong.
 - [ ] `ruff check`, `ruff format --check`, and `ty check` clean on the test files too
 - [ ] No test weakened, skipped, or marked `xfail` to obtain a green run
 - [ ] Tests are independent of ordering, network access, and wall-clock time
+- [ ] No home-directory path, username, hostname, or real email address in test code, fixtures, or
+      committed snapshots; anything machine-specific is generated or normalized
 
 ## References
 

@@ -78,7 +78,11 @@
       }
     ],
     "passed": 9,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-01-report-export",
@@ -161,7 +165,11 @@
       }
     ],
     "passed": 9,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -249,7 +257,11 @@
       }
     ],
     "passed": 8,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-02-session-restore",
@@ -339,7 +351,11 @@
       }
     ],
     "passed": 9,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -427,7 +443,11 @@
       }
     ],
     "passed": 10,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-03-audit-search",
@@ -517,7 +537,11 @@
       }
     ],
     "passed": 10,
-    "total": 10
+    "total": 10,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -619,7 +643,11 @@
       }
     ],
     "passed": 8,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-04-webhook-dispatch",
@@ -723,7 +751,11 @@
       }
     ],
     "passed": 7,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -825,7 +857,11 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "psc-05-password-reset",
@@ -929,6 +965,10 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   }
 ]

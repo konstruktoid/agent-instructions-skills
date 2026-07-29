@@ -127,7 +127,11 @@
       }
     ],
     "passed": 7,
-    "total": 16
+    "total": 16,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "gas-01-release-job",
@@ -259,7 +263,11 @@
       }
     ],
     "passed": 15,
-    "total": 16
+    "total": 16,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "gas-02-pr-triage",
@@ -396,7 +404,11 @@
       }
     ],
     "passed": 13,
-    "total": 17
+    "total": 17,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "gas-02-pr-triage",
@@ -535,7 +547,11 @@
       }
     ],
     "passed": 16,
-    "total": 17
+    "total": 17,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "gas-03-harden-deploy",
@@ -686,7 +702,11 @@
       }
     ],
     "passed": 8,
-    "total": 19
+    "total": 19,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "gas-03-harden-deploy",
@@ -839,6 +859,10 @@
       }
     ],
     "passed": 18,
-    "total": 19
+    "total": 19,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   }
 ]

@@ -75,6 +75,7 @@ security. Match the change against this table and read the files that apply:
 | Secrets, API keys, tokens, credentials, `.env` handling | [references/secrets.md](references/secrets.md) |
 | Password hashing, token generation, randomness, token comparison | [references/secrets.md](references/secrets.md) |
 | Logging of anything user-controlled or sensitive | [references/secrets.md](references/secrets.md) and [references/injection.md](references/injection.md) |
+| Writing captured output, transcripts, snapshots, or generated docs into the repository | [references/secrets.md](references/secrets.md) |
 | Encryption, signing, TLS settings, certificate verification | [references/crypto-tls.md](references/crypto-tls.md) |
 | Authentication, authorization, permissions, file modes, DB grants | [references/access-control.md](references/access-control.md) |
 | Server-side HTTP requests to user-influenced URLs or hosts (SSRF) | [references/access-control.md](references/access-control.md) |
@@ -131,6 +132,9 @@ changing anything, is not an attempt.
 - [ ] Authorization enforced server-side; security checks fail closed; debug mode off in
       production config
 - [ ] Dependency changes checked against the repository's existing vulnerability scanner (if any)
+- [ ] Nothing committed carries user or system information: no home-directory paths, usernames,
+      uids, hostnames, internal IPs, or real email addresses in code, captured output, fixtures,
+      snapshots, or generated docs
 - [ ] Every reference file matched in the triage table was read and applied
 
 ## References

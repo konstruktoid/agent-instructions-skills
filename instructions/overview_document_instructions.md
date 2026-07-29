@@ -123,6 +123,11 @@ document, and are not repeated from that file.
 - Implementation details.
 - Internal development notes.
 - Historical change logs.
+- User or system information. Any path, username, hostname, address, or email in
+  an example must be a placeholder (`/path/to/project`, `user@example.com`,
+  `192.0.2.0/24`), never a real value pasted from a terminal. It identifies the
+  machine the document was written on rather than anything about the repository,
+  and it misleads a reader whose setup differs.
 
 ## Level of Detail
 
@@ -157,4 +162,6 @@ Before finalizing the overview, verify that:
 - The repository's scope is explicitly defined.
 - The out-of-scope section establishes clear boundaries.
 - The overview avoids implementation details.
+- No example contains a real home directory path, username, hostname, internal
+  address, or email address.
 - A reader unfamiliar with the project can understand its purpose after reading the document.

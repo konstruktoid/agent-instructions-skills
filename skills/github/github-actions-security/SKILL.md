@@ -163,6 +163,7 @@ For secrets, environments, and OIDC claims, read
 | `permissions`, `GITHUB_TOKEN` scopes, any token above `read` | [references/permissions-and-secrets.md](references/permissions-and-secrets.md) |
 | Secrets, `secrets: inherit`, environments, deployment approval | [references/permissions-and-secrets.md](references/permissions-and-secrets.md) |
 | OIDC, cloud credentials, trusted publishing | [references/permissions-and-secrets.md](references/permissions-and-secrets.md) |
+| Debug logging, environment dumps, or a step that commits captured output back | [references/permissions-and-secrets.md](references/permissions-and-secrets.md) |
 | A `run:` or `script:` block referencing any `github.event` value | [references/untrusted-input.md](references/untrusted-input.md) |
 | `pull_request_target`, `workflow_run`, `issue_comment`, fork pull requests | [references/untrusted-input.md](references/untrusted-input.md) |
 | A branch name, title, body, or label used in an expression or a file path | [references/untrusted-input.md](references/untrusted-input.md) |
@@ -256,6 +257,8 @@ suppression to reach a clean run.
 - [ ] No self-hosted runner in a public repository
 - [ ] Cloud access uses OIDC with an exact-match trust condition, or the reason for a static
       credential is stated
+- [ ] No user or system information published: no environment dumps or `set -x`, and no runner
+      path, hostname, or account name left in logs, artifacts, or output a step commits back
 - [ ] Every reference file matched in the triage table was read and applied
 
 ## References

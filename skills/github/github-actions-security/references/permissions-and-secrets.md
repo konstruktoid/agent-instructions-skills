@@ -88,6 +88,12 @@ write a workflow that prints one. Scope accordingly.
   the secrets store. Masking is best-effort, not a guarantee.
 - **Never write a secret to a file the workflow later uploads**, including an artifact, a coverage
   report, or a core dump.
+- **Keep user and system detail out of logs and artifacts too.** Workflow logs are public on a
+  public repository, and an uploaded artifact outlives the run. Runner paths
+  (`/home/runner/work/...`), `whoami`/`hostname` output, `env` dumps, and full tracebacks are not
+  secrets, so nothing masks them, but on a self-hosted runner they describe your infrastructure and
+  the account the job runs as. Do not `set -x` or dump the environment as a debugging habit, and
+  normalize captured output before a step commits it back to the repository.
 - **Rotate on a schedule and after any incident.** Audit `org.update_actions_secret` and related
   events in the organization audit log.
 
@@ -163,5 +169,7 @@ crates.io. Use it in place of a stored publish token.
 - [ ] Secrets passed at step level, one value per secret
 - [ ] No `secrets: inherit`; each secret named explicitly in reusable workflow calls
 - [ ] Sensitive non-secret values masked with `::add-mask::`
+- [ ] No environment dumps, `set -x`, or self-hosted runner paths, hostnames, or account names left
+      in logs or uploaded artifacts
 - [ ] Deployments gated by an environment with required reviewers and a branch rule
 - [ ] OIDC trust conditions match `sub` or `job_workflow_ref` exactly, with no wildcard

@@ -67,7 +67,12 @@ one project's layout.
    - When stopping for either reason, report to the user instead of proceeding or silently giving
      up. Name the failing check, include its output, and state what was tried.
 8. Report any issues found during verification, with detailed reproduction steps and relevant
-   logs/output.
+   logs/output. Ansible output is unusually rich in machine detail: play recaps and `--diff` output
+   name the target host, gathered facts carry hostnames, interfaces and internal addresses, and
+   failure messages quote absolute paths under the invoking user's home. Strip that before pasting
+   output anywhere it will be stored, and never commit it into the repository. The same applies to
+   anything checked in as a fixture: use `localhost`, `example.com`, or RFC 5737 addresses
+   (`192.0.2.0/24`) in inventories, host vars, and templates rather than a real host.
 
 ## Verify
 
@@ -102,6 +107,9 @@ Never declare this done based on the edit alone. Confirm each of the following:
       variables changed
 - [ ] Platform/version support declarations (`meta/main.yml`, `galaxy.yml`) still match any
       OS-conditional logic
+- [ ] No user or system information committed: inventories, host vars, templates, and any captured
+      lint or molecule output use placeholder hosts and addresses, with no real hostname, home
+      directory path, username, or internal IP
 - [ ] No unrelated files changed
 
 ## References
