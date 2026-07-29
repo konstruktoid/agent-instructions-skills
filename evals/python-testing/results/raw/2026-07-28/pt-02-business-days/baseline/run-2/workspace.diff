@@ -1,0 +1,94 @@
+diff --git a/src/tempo/__init__.py b/src/tempo/__init__.py
+index de05eaa..0a3789b 100644
+--- a/src/tempo/__init__.py
++++ b/src/tempo/__init__.py
+@@ -1,5 +1,17 @@
+ """Date helpers."""
+ 
+-from tempo.calendar import days_between, is_holiday, is_weekend, next_weekday
++from tempo.calendar import (
++    business_days_between,
++    days_between,
++    is_holiday,
++    is_weekend,
++    next_weekday,
++)
+ 
+-__all__ = ["days_between", "is_holiday", "is_weekend", "next_weekday"]
++__all__ = [
++    "business_days_between",
++    "days_between",
++    "is_holiday",
++    "is_weekend",
++    "next_weekday",
++]
+diff --git a/src/tempo/calendar.py b/src/tempo/calendar.py
+index 1aceb2e..67aabcc 100644
+--- a/src/tempo/calendar.py
++++ b/src/tempo/calendar.py
+@@ -18,7 +18,7 @@ def is_weekend(day: datetime.date) -> bool:
+ 
+ def is_holiday(day: datetime.date) -> bool:
+     """Return True when the date is a company holiday."""
+-    return day in HOLIDAYS
++    return day.isoformat() in HOLIDAYS
+ 
+ 
+ def days_between(start: datetime.date, end: datetime.date) -> int:
+@@ -31,3 +31,14 @@ def next_weekday(day: datetime.date) -> datetime.date:
+     while is_weekend(day):
+         day += datetime.timedelta(days=1)
+     return day
++
++
++def business_days_between(start: datetime.date, end: datetime.date) -> int:
++    """Return the number of working days from start up to but not including end."""
++    count = 0
++    day = start
++    while day < end:
++        if not is_weekend(day) and not is_holiday(day):
++            count += 1
++        day += datetime.timedelta(days=1)
++    return count
+diff --git a/tests/test_calendar.py b/tests/test_calendar.py
+index a7b60d9..253f44e 100644
+--- a/tests/test_calendar.py
++++ b/tests/test_calendar.py
+@@ -4,7 +4,7 @@ import datetime
+ 
+ import pytest
+ 
+-from tempo import days_between, is_weekend, next_weekday
++from tempo import business_days_between, days_between, is_weekend, next_weekday
+ 
+ MONDAY = datetime.date(2026, 7, 20)
+ SATURDAY = datetime.date(2026, 7, 25)
+@@ -33,3 +33,28 @@ def test_next_weekday_leaves_a_weekday_alone():
+ def test_days_between_counts_both_ends():
+     """Monday to the following Saturday is six days inclusive."""
+     assert days_between(MONDAY, SATURDAY) == 6
++
++
++def test_business_days_between_excludes_weekends_and_holidays():
++    """Monday to Saturday skips the Wednesday holiday and the weekend."""
++    assert business_days_between(MONDAY, SATURDAY) == 4
++
++
++def test_business_days_between_counts_start_when_it_qualifies():
++    """A single qualifying day counts once."""
++    assert business_days_between(MONDAY, datetime.date(2026, 7, 21)) == 1
++
++
++def test_business_days_between_excludes_end():
++    """The end date itself is never counted."""
++    assert business_days_between(MONDAY, MONDAY) == 0
++
++
++def test_business_days_between_returns_zero_when_end_before_start():
++    """An end date before start yields zero business days."""
++    assert business_days_between(MONDAY, datetime.date(2026, 7, 19)) == 0
++
++
++def test_business_days_between_skips_a_weekend_span():
++    """A span covering only weekend days has no business days."""
++    assert business_days_between(SATURDAY, datetime.date(2026, 7, 27)) == 0

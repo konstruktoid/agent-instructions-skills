@@ -54,6 +54,27 @@ GRADE_TIMEOUT_SECONDS = 600
 DEFAULT_TASK_MODEL = "sonnet"
 DEFAULT_TRIGGER_MODEL = "opus"
 
+# Prepended to every task prompt, in both conditions, so it cannot bias the comparison.
+# It states a property of the harness the agent cannot otherwise discover: there is no
+# interactive turn after this one, so a wakeup scheduled for later never arrives. The
+# avl-05 run of 2026-07-25 backgrounded a molecule scenario, scheduled a wakeup to
+# collect it, and ended on a mid-loop status line that two assertions were then graded
+# against.
+TASK_PREAMBLE = (
+    "This is a single non-interactive run: no scheduled wakeup will fire and there is no "
+    "later turn, so any long-running verification must be awaited in the foreground and "
+    "its result reported before you finish.\n\n"
+)
+
+# A command that outlives its tool timeout is moved to the background and reported with
+# this marker, which is the only handle a finished transcript gives on it.
+BACKGROUND_MARKER = re.compile(r"moved to the background \(ID: ([A-Za-z0-9_-]+)\)")
+
+# A later tool result naming that id alongside one of these words is the run observing
+# that the work finished. Without one, the background task is still outstanding when the
+# transcript ends.
+COMPLETION_MARKER = re.compile(r"\b(completed|exited|finished|exit code)\b", re.IGNORECASE)
+
 # A trigger probe only has to reveal the routing decision, so it gets read-only tools
 # plus Skill, which is the tool whose use is being measured. Omitting Skill here makes
 # every probe report "did not fire" no matter what the description says.
@@ -73,6 +94,10 @@ RANGE_DASH = "\u2013"
 
 # Resolved once, so the fixture's git calls do not depend on a partial path.
 GIT = shutil.which("git") or "git"
+
+# Linked into each run's private Claude config directory. Everything else Claude Code
+# keeps there is per-run state that the run is free to create for itself.
+CREDENTIALS_FILE = ".credentials.json"
 
 
 def skill_source(name: str) -> Path:
@@ -108,16 +133,85 @@ def build_plugin(name: str, workdir: Path) -> Path:
     return plugin_dir
 
 
-def run_environment() -> dict[str, str]:
+def isolated_environment(home: Path) -> dict[str, str]:
+    """Return the environment overlay confining one run's tool state to `home`.
+
+    Every tool a fixture invokes keeps a cache or an ephemeral directory under `$HOME`,
+    so two runs sharing one `$HOME` can see each other's state. The avl-05 autopsy
+    records the two paths that actually bit: molecule derives its ephemeral directory
+    from the project basename, which is `workspace` in every run and therefore identical
+    across them, and role resolution reached a stale `~/.ansible/collections` cache
+    instead of the workspace under test. Redirecting only those two would leave every
+    other tool sharing state, so each directory the tools consult is redirected here.
+    """
+    cache = home / ".cache"
+    return {
+        "HOME": str(home),
+        "XDG_CACHE_HOME": str(cache),
+        "XDG_CONFIG_HOME": str(home / ".config"),
+        "XDG_DATA_HOME": str(home / ".local" / "share"),
+        "XDG_STATE_HOME": str(home / ".local" / "state"),
+        # The autopsy's stale collection cache. ANSIBLE_HOME moves ~/.ansible wholesale;
+        # the collections path is set as well because a role resolved from a global cache
+        # rather than the workspace is the specific defect that was observed.
+        "ANSIBLE_HOME": str(home / ".ansible"),
+        "ANSIBLE_COLLECTIONS_PATH": str(home / ".ansible" / "collections"),
+        # The autopsy's colliding ephemeral directory. A per-run HOME already separates
+        # molecule's default location; setting it explicitly keeps the separation even if
+        # that default changes.
+        "MOLECULE_EPHEMERAL_DIRECTORY": str(cache / "molecule"),
+        "UV_CACHE_DIR": str(cache / "uv"),
+        "PIP_CACHE_DIR": str(cache / "pip"),
+        "npm_config_cache": str(cache / "npm"),
+        # A run must not read the user's global git config, whose hooks and aliases would
+        # otherwise apply inside the fixture repository.
+        "GIT_CONFIG_GLOBAL": str(home / ".gitconfig"),
+        "TMPDIR": str(home / "tmp"),
+        # Claude Code's own config directory is per-run state too: it writes sessions and
+        # project records on every invocation. Without this, concurrent runs write the
+        # user's real ~/.claude at the same time.
+        "CLAUDE_CONFIG_DIR": str(home / ".claude"),
+    }
+
+
+def prepare_run_home(run_dir: Path) -> Path:
+    """Create the run's private HOME under its run directory and return it.
+
+    The credentials file is symlinked rather than copied, so a run authenticates without
+    a secret being written into the results tree.
+    """
+    home = run_dir / "home"
+    for relative in (
+        ".ansible",
+        ".cache",
+        ".claude",
+        ".config",
+        ".local/share",
+        ".local/state",
+        "tmp",
+    ):
+        (home / relative).mkdir(parents=True, exist_ok=True)
+    source = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / CREDENTIALS_FILE
+    link = home / ".claude" / CREDENTIALS_FILE
+    if source.is_file() and not link.is_symlink():
+        link.symlink_to(source)
+    return home
+
+
+def run_environment(home: Path | None = None) -> dict[str, str]:
     """Return the environment for a run, with any harness tool directory on PATH.
 
     `EVAL_TOOL_BIN` lets the caller provision `ansible-lint`, `zizmor`, or
-    `actionlint` outside the user's own PATH and still have runs find them.
+    `actionlint` outside the user's own PATH and still have runs find them. Passing
+    `home` confines the run's tool state to that directory; omitting it leaves the
+    ambient environment alone, which is what the harness's own git calls want.
     """
     env = dict(os.environ)
     tool_bin = env.get("EVAL_TOOL_BIN")
     if tool_bin:
         env["PATH"] = f"{tool_bin}{os.pathsep}{env['PATH']}"
+    if home is not None:
+        env.update(isolated_environment(home))
     return env
 
 
@@ -158,7 +252,13 @@ def claude_command(
     return command
 
 
-def invoke_claude(command: Sequence[str], cwd: Path, stream_path: Path) -> dict[str, Any]:
+def invoke_claude(
+    command: Sequence[str],
+    cwd: Path,
+    stream_path: Path,
+    home: Path,
+    timeout: int = RUN_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
     """Run one `claude -p` subprocess, storing its stream, and return a run record."""
     started = datetime.now(tz=timezone.utc)
     try:
@@ -167,10 +267,10 @@ def invoke_claude(command: Sequence[str], cwd: Path, stream_path: Path) -> dict[
         completed = subprocess.run(  # noqa: S603
             command,
             cwd=cwd,
-            env=run_environment(),
+            env=run_environment(home),
             capture_output=True,
             text=True,
-            timeout=RUN_TIMEOUT_SECONDS,
+            timeout=timeout,
             check=False,
         )
         stdout, stderr, returncode, timed_out = (
@@ -246,6 +346,48 @@ def assistant_text(events: Iterable[dict[str, Any]]) -> str:
     return "\n".join(parts)
 
 
+def truncation(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    """Report whether a run ended with work still outstanding.
+
+    Two states mean the run stopped before it could report: a scheduled wakeup, which
+    never fires under non-interactive `claude -p` and so is always unfired, and a
+    background command whose completion the transcript never records. A run in either
+    state was graded on whatever it had said by then, which for avl-05 on 2026-07-25 was
+    a mid-loop status line. Both are read from the transcript alone, so a stored run can
+    be classified after the fact.
+    """
+    wakeups = 0
+    started: list[str] = []
+    resolved: set[str] = set()
+    for event in events:
+        message = event.get("message")
+        if not isinstance(message, dict):
+            continue
+        for block in message.get("content") or []:
+            if not isinstance(block, dict):
+                continue
+            if block.get("type") == "tool_use":
+                inputs = block.get("input") or {}
+                if block.get("name") == "ScheduleWakeup" or "delaySeconds" in inputs:
+                    wakeups += 1
+                if block.get("name") == "Bash" and inputs.get("run_in_background"):
+                    started.append(f"bash-{len(started)}")
+                continue
+            if block.get("type") != "tool_result":
+                continue
+            text = json.dumps(block.get("content", ""))
+            started += BACKGROUND_MARKER.findall(text)
+            if COMPLETION_MARKER.search(text):
+                resolved.update(identifier for identifier in started if identifier in text)
+
+    outstanding = [identifier for identifier in started if identifier not in resolved]
+    return {
+        "truncated": bool(wakeups or outstanding),
+        "scheduled_wakeups": wakeups,
+        "outstanding_background": outstanding,
+    }
+
+
 def result_event(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Return the terminal result event, or an empty mapping when the run produced none."""
     for event in events:
@@ -279,12 +421,17 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
         "num_turns": result.get("num_turns"),
         "cost_usd": result.get("total_cost_usd"),
         "is_error": result.get("is_error"),
+        **truncation(events),
     }
 
 
-def run_grader(command: str, workspace: Path, base_sha: str) -> tuple[int, str]:
-    """Run one assertion command in the finished workspace and return its exit code and output."""
-    env = run_environment()
+def run_grader(command: str, workspace: Path, base_sha: str, home: Path) -> tuple[int, str]:
+    """Run one assertion command in the finished workspace and return its exit code and output.
+
+    Graders run under the same private HOME as the run they grade, so an assertion that
+    invokes ansible-lint or pytest sees the run's own caches rather than the user's.
+    """
+    env = run_environment(home)
     env["EVAL_BASE_SHA"] = base_sha
     # The command comes from a checked-in assertions.json in this repository, and
     # a shell is what an assertion such as `! grep -r ...` is written against.
@@ -302,13 +449,13 @@ def run_grader(command: str, workspace: Path, base_sha: str) -> tuple[int, str]:
 
 
 def grade_assertion(
-    assertion: dict[str, Any], workspace: Path, facts: dict[str, Any], base_sha: str
+    assertion: dict[str, Any], workspace: Path, facts: dict[str, Any], base_sha: str, home: Path
 ) -> dict[str, Any]:
     """Grade one assertion, returning its verdict and the evidence behind it."""
     kind = assertion["kind"]
     evidence = ""
     if kind == "workspace_command":
-        code, output = run_grader(assertion["command"], workspace, base_sha)
+        code, output = run_grader(assertion["command"], workspace, base_sha, home)
         passed = (code == 0) if assertion.get("expect", "exit_zero") == "exit_zero" else code != 0
         evidence = f"exit {code}\n{output}"
     elif kind in {"transcript_regex", "final_regex", "bash_regex", "skill_used"}:
@@ -337,7 +484,7 @@ def grade_assertion(
     }
 
 
-def prepare_workspace(fixture: Path, destination: Path) -> str:
+def prepare_workspace(fixture: Path, destination: Path, home: Path) -> str:
     """Copy a fixture into a fresh git repository and return the baseline commit SHA.
 
     The commit gives assertions a fixed point to diff against, so "no unrelated
@@ -346,7 +493,7 @@ def prepare_workspace(fixture: Path, destination: Path) -> str:
     if destination.exists():
         shutil.rmtree(destination)
     shutil.copytree(fixture, destination)
-    git_env = run_environment()
+    git_env = run_environment(home)
     git_env.update(
         {
             "GIT_AUTHOR_NAME": "eval-harness",
@@ -387,23 +534,28 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
     task, condition = job["task"], job["condition"]
     run_dir: Path = job["run_dir"]
     run_dir.mkdir(parents=True, exist_ok=True)
+    home = prepare_run_home(run_dir)
     workspace = run_dir / "workspace"
-    base_sha = prepare_workspace(job["fixture"], workspace)
+    base_sha = prepare_workspace(job["fixture"], workspace, home)
 
     command = claude_command(
-        prompt=task["prompt"],
+        prompt=TASK_PREAMBLE + task["prompt"],
         model=job["model"],
         plugin_dir=job["plugin_dir"] if condition == "with-skill" else None,
         tools=None,
         budget=TASK_BUDGET_USD,
     )
-    record = invoke_claude(command, workspace, run_dir / "run.jsonl")
+    # A task may raise its own ceiling. avl-05 boots a systemd container and installs
+    # packages inside it, which is what pushed the 2026-07-25 run past the default.
+    timeout = int(task.get("timeout_seconds", RUN_TIMEOUT_SECONDS))
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home, timeout)
     facts = transcript_facts(run_dir / "run.jsonl")
     # Written before grading, because an assertion encoding the skill's "clean, or
     # reported" rule reads ../final-response.md from inside the workspace.
     (run_dir / "final-response.md").write_text(facts["final_text"] + "\n", encoding="utf-8")
     graded = [
-        grade_assertion(assertion, workspace, facts, base_sha) for assertion in job["assertions"]
+        grade_assertion(assertion, workspace, facts, base_sha, home)
+        for assertion in job["assertions"]
     ]
 
     outcome = {
@@ -415,12 +567,21 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
         "skills_used": facts["skills_used"],
         "num_turns": facts["num_turns"],
         "cost_usd": facts["cost_usd"],
+        "truncated": facts["truncated"],
+        "scheduled_wakeups": facts["scheduled_wakeups"],
+        "outstanding_background": facts["outstanding_background"],
+        # A run the process itself reported as failed. The rate limit rejecting a request
+        # mid-run ends `claude -p` with a synthetic message, a non-zero exit and an error
+        # result event, having produced a partial transcript that grades like a real run
+        # and scores badly. That is a measurement of the quota, not of the skill.
+        "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
         "assertions": graded,
         "passed": sum(1 for item in graded if item["passed"]),
         "total": len(graded),
     }
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
-    print(f"{task['id']} [{condition}] {outcome['passed']}/{outcome['total']}")
+    state = " TRUNCATED" if outcome["truncated"] else ""
+    print(f"{task['id']} [{condition}] {outcome['passed']}/{outcome['total']}{state}")
     return outcome
 
 
@@ -429,6 +590,7 @@ def run_one_trigger(job: dict[str, Any]) -> dict[str, Any]:
     probe = job["probe"]
     run_dir: Path = job["run_dir"]
     run_dir.mkdir(parents=True, exist_ok=True)
+    home = prepare_run_home(run_dir)
     workspace = run_dir / "workspace"
     if workspace.exists():
         shutil.rmtree(workspace)
@@ -440,7 +602,7 @@ def run_one_trigger(job: dict[str, Any]) -> dict[str, Any]:
         tools=TRIGGER_TOOLS,
         budget=TRIGGER_BUDGET_USD,
     )
-    record = invoke_claude(command, workspace, run_dir / "run.jsonl")
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home)
     facts = transcript_facts(run_dir / "run.jsonl")
     fired = any(job["skill"] in used for used in facts["skills_used"])
     outcome = {
@@ -527,6 +689,17 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
     )
     outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
+    # The documented contract: a failing assertion is a result, but a run that did not
+    # execute is a harness failure and must not be mistaken for a completed measurement.
+    aborted = [outcome for outcome in outcomes if outcome.get("aborted")]
+    if aborted:
+        for outcome in aborted:
+            print(
+                f"ABORTED {outcome['task']} [{outcome['condition']}] "
+                f"run {outcome.get('run_index', 1)}",
+                file=sys.stderr,
+            )
+        return 1
     return 0
 
 
@@ -598,7 +771,11 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
     """
     root = results_root(args.skill, args.stamp or today())
     written = 0
-    for workspace in sorted(root.glob("*/*/workspace")):
+    # Both layouts: <task>/<condition>/workspace for a single run, and the run-<n> level
+    # a repeated measurement adds. Globbing only the first silently wrote no diffs at all
+    # for a `--runs N` stamp, which is the evidence those runs exist to leave behind.
+    workspaces = set(root.glob("*/*/workspace")) | set(root.glob("*/*/run-*/workspace"))
+    for workspace in sorted(workspaces):
         env = run_environment()
         # Only task workspaces are git repositories; trigger probes copy the sandbox
         # without initialising one. Without this guard git walks up to the enclosing
@@ -672,23 +849,35 @@ def regrade_one(
     workspace = run_dir / "workspace"
     if not (run_dir / "grade.json").is_file() or not workspace.is_dir():
         return None
+    # Recreated when absent: a stamp graded before per-run isolation existed has no
+    # home/ directory, and regrading it must not fall back to the user's own.
+    home = prepare_run_home(run_dir)
     revision = subprocess.run(  # noqa: S603
         [GIT, "rev-list", "--max-parents=0", "HEAD"],
         cwd=workspace,
-        env=run_environment(),
+        env=run_environment(home),
         check=True,
         capture_output=True,
         text=True,
     )
     base_sha = revision.stdout.split()[0]
     facts = transcript_facts(run_dir / "run.jsonl")
-    graded = [grade_assertion(assertion, workspace, facts, base_sha) for assertion in assertions]
+    graded = [
+        grade_assertion(assertion, workspace, facts, base_sha, home) for assertion in assertions
+    ]
     outcome = json.loads((run_dir / "grade.json").read_text(encoding="utf-8"))
     outcome["assertions"] = graded
     outcome["passed"] = sum(1 for item in graded if item["passed"])
     outcome["total"] = len(graded)
+    # Classified here as well as at run time, so a stamp graded before this policy
+    # existed reports its truncated runs once it is regraded.
+    outcome.update(
+        {key: facts[key] for key in ("truncated", "scheduled_wakeups", "outstanding_background")}
+    )
+    outcome["aborted"] = bool(outcome.get("run", {}).get("returncode", 0) != 0 or facts["is_error"])
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
-    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}")
+    state = " TRUNCATED" if outcome["truncated"] else ""
+    print(f"{task_id} [{outcome['condition']}] {outcome['passed']}/{outcome['total']}{state}")
     return outcome
 
 
@@ -706,20 +895,46 @@ def count(number: float) -> str:
     return f"{number:g}"
 
 
+def graded_runs(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the runs of one condition that finished, dropping the ones that did not.
+
+    Two states disqualify a run from the medians. A truncated run was graded on whatever
+    it had said before it stopped. An aborted run did not finish at all: the process
+    reported failure, which is what the rate limit rejecting a request looks like from
+    here. Neither is a measurement of the skill, and both are reported separately rather
+    than averaged in.
+    """
+    return [run for run in runs if not run.get("truncated") and not run.get("aborted")]
+
+
 def verdict(runs: list[dict[str, Any]]) -> str:
     """Render one condition's assertion tally for the results table.
 
     One run reads as it always has. Several read as the median with the observed
     range behind it, because the median is what the delta is computed from and the
-    range is what says whether the delta means anything.
+    range is what says whether the delta means anything. A condition whose every run
+    was truncated has no tally to give and says so, rather than reporting the counts
+    those runs happened to reach.
     """
     if not runs:
         return "not run"
-    total = runs[0]["total"]
-    passed = [run["passed"] for run in runs]
-    if len(runs) == 1:
-        return f"{passed[0]}/{total}"
-    return f"{count(median(passed))}/{total} ({min(passed)}{RANGE_DASH}{max(passed)})"
+    finished = graded_runs(runs)
+    if not finished:
+        state = "aborted" if all(run.get("aborted") for run in runs) else "not measured"
+        return f"{state} ({len(runs)} of {len(runs)})"
+    total = finished[0]["total"]
+    passed = [run["passed"] for run in finished]
+    tally = (
+        f"{passed[0]}/{total}"
+        if len(finished) == 1
+        else f"{count(median(passed))}/{total} ({min(passed)}{RANGE_DASH}{max(passed)})"
+    )
+    notes = [
+        f"{sum(1 for run in runs if run.get('truncated'))} truncated",
+        f"{sum(1 for run in runs if run.get('aborted'))} aborted",
+    ]
+    dropped = [note for note in notes if not note.startswith("0 ")]
+    return f"{tally}, {', '.join(dropped)}" if dropped else tally
 
 
 def ranges_overlap(left: list[int], right: list[int]) -> bool:
@@ -833,8 +1048,8 @@ def task_table(
     ]
     total_delta: float = 0
     for task_id, conditions in by_task.items():
-        baseline = conditions.get("baseline", [])
-        with_skill = conditions.get("with-skill", [])
+        baseline = graded_runs(conditions.get("baseline", []))
+        with_skill = graded_runs(conditions.get("with-skill", []))
         delta = ""
         if baseline and with_skill:
             baseline_passed = [run["passed"] for run in baseline]
@@ -844,12 +1059,104 @@ def task_table(
             delta = f"{difference:+g}"
             if len(baseline) > 1 and ranges_overlap(baseline_passed, with_skill_passed):
                 delta = f"{delta} (no reliable difference)"
-        fired = "yes" if any(run["skills_used"] for run in with_skill) else "no"
+        else:
+            # One arm has nothing left to compare, so there is no delta to state. Saying
+            # +0 here would read as "the skill changed nothing", which is not what was
+            # measured.
+            delta = "no comparable runs"
+        # Read from every run, truncated ones included: whether the skill loaded is
+        # observable however the run ended, and is not part of the delta.
+        fired = (
+            "yes" if any(run["skills_used"] for run in conditions.get("with-skill", [])) else "no"
+        )
         lines.append(
-            f"| `{task_id}` | {verdict(baseline)} | {verdict(with_skill)} | {delta} | {fired} |"
+            f"| `{task_id}` | {verdict(conditions.get('baseline', []))} | "
+            f"{verdict(conditions.get('with-skill', []))} | {delta} | {fired} |"
         )
     lines += ["", f"Net delta across {len(by_task)} tasks: **{total_delta:+g}** assertions.", ""]
     return lines, total_delta
+
+
+def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+    """Name every run the process reported as failed, or say nothing when there are none.
+
+    Unlike a truncated run, an aborted one produced no usable turn at all. The case seen
+    here is the five-hour rate limit rejecting a request mid-run, which ends the process
+    with an error result after a handful of turns.
+    """
+    named = [
+        f"`{task_id}` [{condition}] run {run.get('run_index', 1)}"
+        for task_id, conditions in by_task.items()
+        for condition in CONDITIONS
+        for run in conditions.get(condition, [])
+        if run.get("aborted")
+    ]
+    if not named:
+        return []
+    return [
+        *textwrap.wrap(
+            f"Aborted runs: {len(named)} — {', '.join(named)}. Each ended with a non-zero "
+            "exit or an error result, so the transcript is partial and the score it would "
+            "have produced measures where the run stopped. These are excluded from the "
+            "medians and the delta above.",
+            width=100,
+        ),
+        "",
+    ]
+
+
+def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+    """Name every task where both conditions scored full marks in every finished run.
+
+    Such a task cannot show a skill effect whatever the skill does: there is no headroom
+    above the baseline. evals/README.md's rule is that this measures task difficulty and
+    the fixture should be made harder, so the task is named here rather than left to read
+    as a success.
+    """
+    maxed = []
+    for task_id, conditions in by_task.items():
+        runs = [
+            run for condition in CONDITIONS for run in graded_runs(conditions.get(condition, []))
+        ]
+        both_arms = all(graded_runs(conditions.get(condition, [])) for condition in CONDITIONS)
+        if runs and both_arms and all(run["passed"] == run["total"] for run in runs):
+            maxed.append(task_id)
+    if not maxed:
+        return []
+    named = ", ".join(f"`{task_id}`" for task_id in maxed)
+    return [
+        *textwrap.wrap(
+            f"Failed to discriminate: {named}. Every finished run of both conditions scored "
+            "full marks, so there was no headroom for the skill to show an effect. This "
+            "measures the difficulty of the fixture rather than the skill, and the fixture "
+            "is what should change.",
+            width=100,
+        ),
+        "",
+    ]
+
+
+def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+    """Name every truncated run under the table, or record that there were none."""
+    named = [
+        f"`{task_id}` [{condition}] run {run.get('run_index', 1)}"
+        for task_id, conditions in by_task.items()
+        for condition in CONDITIONS
+        for run in conditions.get(condition, [])
+        if run.get("truncated")
+    ]
+    if not named:
+        return ["Truncated runs: none.", ""]
+    return [
+        *textwrap.wrap(
+            f"Truncated runs: {len(named)} — {', '.join(named)}. Each ended with background "
+            "work outstanding or a scheduled wakeup that cannot fire under non-interactive "
+            "`claude -p`, so it was graded on whatever it had said by then. These are "
+            "excluded from the medians and the delta above.",
+            width=100,
+        ),
+        "",
+    ]
 
 
 def failure_section(
@@ -865,7 +1172,9 @@ def failure_section(
         ]
     for task_id, conditions in by_task.items():
         for condition in CONDITIONS:
-            failures = failed_ids(conditions.get(condition, []))
+            # Truncated runs are left out here too: an assertion they failed reports
+            # where the run stopped, not what the skill did about it.
+            failures = failed_ids(graded_runs(conditions.get(condition, [])))
             rendered = ", ".join(f"`{name}`" for name in failures) if failures else "none"
             # Wrapped to the repository's 100-column Markdown rule, which applies to this
             # generated file as much as to a hand-written one.
@@ -916,6 +1225,9 @@ def render_report(skill: str, stamp: str) -> str:
 
     table, total_delta = task_table(by_task, runs_per_condition)
     lines += table
+    lines += truncated_section(by_task)
+    lines += aborted_section(by_task)
+    lines += undiscriminating(by_task)
     if total_delta == 0 and by_task:
         lines += [
             "The skill produced no net measurable improvement on these tasks.",

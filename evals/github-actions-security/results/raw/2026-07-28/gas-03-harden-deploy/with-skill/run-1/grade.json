@@ -1,0 +1,158 @@
+{
+  "task": "gas-03-harden-deploy",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T21:53:21.184402+00:00",
+    "seconds": 137.2
+  },
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "num_turns": 29,
+  "cost_usd": 0.7105376,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": true,
+      "evidence": "exit 0\n\u001b[32mNo findings to report. Good job!\u001b[39m (\u001b[1m\u001b[93m1\u001b[39m ignored, \u001b[93m1\u001b[39m suppressed\u001b[0m)\n\u001b[33m WARN\u001b[0m \u001b[2mzizmor\u001b[0m\u001b[2m:\u001b[0m zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'actionlint'"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": true,
+      "evidence": "match: 'zizmor'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\n\u001b[32mNo findings to report. Good job!\u001b[39m (\u001b[1m\u001b[93m1\u001b[39m ignored, \u001b[93m1\u001b[39m suppressed\u001b[0m)\n\u001b[33m WARN\u001b[0m \u001b[2mzizmor\u001b[0m\u001b[2m:\u001b[0m zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": true,
+      "evidence": "match: 'gh api'"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "static-aws-credentials-removed",
+      "kind": "workspace_command",
+      "source": "task prompt: remove the static credentials",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "oidc-id-token-permission",
+      "kind": "workspace_command",
+      "source": "SKILL.md minimal permissions: request an OIDC token needs id-token: write",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "role-assumption-configured",
+      "kind": "workspace_command",
+      "source": "task prompt: OIDC role assumption against the named role ARN",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-write-all-permissions",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: deny by default, grant permissions per job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "self-hosted-runner-removed",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: do not use self-hosted runners in a public repository",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-tag-trigger",
+      "kind": "workspace_command",
+      "source": "task prompt: also deploy when a version tag matching v* is pushed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 18,
+  "total": 19
+}

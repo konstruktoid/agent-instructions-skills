@@ -1,0 +1,25 @@
+diff --git a/src/paging/slicing.py b/src/paging/slicing.py
+index f395508..c274b53 100644
+--- a/src/paging/slicing.py
++++ b/src/paging/slicing.py
+@@ -7,7 +7,7 @@ def page_slice(items: list, page: int, per_page: int) -> list:
+         message = "page and per_page must be positive"
+         raise ValueError(message)
+     start = (page - 1) * per_page
+-    end = min(start + per_page, len(items) - 1)
++    end = min(start + per_page, len(items))
+     return items[start:end]
+ 
+ 
+diff --git a/tests/test_slicing.py b/tests/test_slicing.py
+index 089ab16..a199c5e 100644
+--- a/tests/test_slicing.py
++++ b/tests/test_slicing.py
+@@ -1,6 +1,7 @@
+ """Tests for paging.slicing."""
+ 
+ import pytest
++
+ from paging import page_count, page_slice
+ 
+ 

@@ -1,0 +1,115 @@
+{
+  "task": "pt-04-upload-validation",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T10:22:28.734212+00:00",
+    "seconds": 115.1
+  },
+  "skills_used": [
+    "eval-python-testing:python-testing"
+  ],
+  "num_turns": 23,
+  "cost_usd": 0.4894433,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+      "passed": true,
+      "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's own entry point",
+      "passed": true,
+      "evidence": "match: 'pytest'"
+    },
+    {
+      "id": "suite-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+      "passed": true,
+      "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+    },
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\n5 files already formatted"
+    },
+    {
+      "id": "no-test-weakened",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-parallel-test-tree",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "rejection-paths-tested",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "extension-allowlist-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "traversal-rejected",
+      "kind": "workspace_command",
+      "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "lowercasing-applied",
+      "kind": "workspace_command",
+      "source": "task prompt: the stored name should be the filename lowercased",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "rejection-messages-name-the-rule",
+      "kind": "workspace_command",
+      "source": "task prompt: a distinct message naming the rule that failed",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 12,
+  "total": 13
+}

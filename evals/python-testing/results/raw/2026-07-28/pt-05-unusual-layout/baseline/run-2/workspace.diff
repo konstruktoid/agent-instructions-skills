@@ -1,0 +1,62 @@
+diff --git a/src/ledger/__init__.py b/src/ledger/__init__.py
+index d50e6f1..1fb270f 100644
+--- a/src/ledger/__init__.py
++++ b/src/ledger/__init__.py
+@@ -1,5 +1,5 @@
+ """Double-entry ledger helpers."""
+ 
+-from ledger.balance import Entry, balance
++from ledger.balance import Entry, balance, running_balance
+ 
+-__all__ = ["Entry", "balance"]
++__all__ = ["Entry", "balance", "running_balance"]
+diff --git a/src/ledger/_tests/check_balance.py b/src/ledger/_tests/check_balance.py
+index 10ff4ce..d6f7478 100644
+--- a/src/ledger/_tests/check_balance.py
++++ b/src/ledger/_tests/check_balance.py
+@@ -1,6 +1,6 @@
+ """Checks for ledger.balance."""
+ 
+-from ledger import Entry, balance
++from ledger import Entry, balance, running_balance
+ from ledger._tests import _helpers
+ 
+ ENTRIES = [
+@@ -18,3 +18,18 @@ def check_balance_sums_one_account():
+ def check_balance_of_an_unknown_account_is_zero():
+     """An account with no entries has a zero balance."""
+     _helpers.check_values(balance(ENTRIES, "equity"), 0)
++
++
++def check_running_balance_accumulates_in_order():
++    """Cumulative balance is tracked after each entry for the account."""
++    assert running_balance(ENTRIES, "cash") == [100, 70]
++
++
++def check_running_balance_ignores_other_accounts():
++    """Entries for other accounts don't contribute to the running balance."""
++    assert running_balance(ENTRIES, "receivable") == [50]
++
++
++def check_running_balance_of_an_unknown_account_is_empty():
++    """An account with no entries has an empty running balance."""
++    assert running_balance(ENTRIES, "equity") == []
+diff --git a/src/ledger/balance.py b/src/ledger/balance.py
+index ba78ad0..9c4f8dd 100644
+--- a/src/ledger/balance.py
++++ b/src/ledger/balance.py
+@@ -14,3 +14,14 @@ class Entry:
+ def balance(entries: list, account: str) -> int:
+     """Return the net balance for one account."""
+     return sum(entry.amount for entry in entries if entry.account == account)
++
++
++def running_balance(entries: list, account: str) -> list:
++    """Return the cumulative balance after each entry for one account, in order."""
++    result = []
++    total = 0
++    for entry in entries:
++        if entry.account == account:
++            total += entry.amount
++            result.append(total)
++    return result

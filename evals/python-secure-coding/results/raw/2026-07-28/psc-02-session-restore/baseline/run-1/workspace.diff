@@ -1,0 +1,64 @@
+diff --git a/README.md b/README.md
+index 3455485..55a0324 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,9 @@ from sessionsvc.store import load_session
+ session = load_session(blob)
+ ```
+ 
+-Sessions never expire.
++## Session expiry
++
++Sessions carry an `issued_at` timestamp recorded when they are saved.
++Restoring a session that is older than `SESSION_TTL` (3600 seconds / 1 hour)
++raises `SessionExpired`. Restoring a session also purges any expired entries
++from the on-disk cache.
+diff --git a/src/sessionsvc/store.py b/src/sessionsvc/store.py
+index e637fb1..c12b6aa 100644
+--- a/src/sessionsvc/store.py
++++ b/src/sessionsvc/store.py
+@@ -2,15 +2,25 @@
+ 
+ import base64
+ import pickle
++import time
+ from pathlib import Path
+ 
+ CACHE_DIR = Path("/tmp/sessioncache")
++SESSION_TTL = 3600
++
++
++class SessionExpired(Exception):
++    """Raised when a restored session is older than SESSION_TTL."""
+ 
+ 
+ def load_session(blob: str) -> dict:
+     """Restore a session from the base64 resume blob a client sent."""
++    purge_expired()
+     raw = base64.b64decode(blob)
+-    return pickle.loads(raw)
++    record = pickle.loads(raw)
++    if time.time() - record["issued_at"] > SESSION_TTL:
++        raise SessionExpired("session has expired")
++    return record["session"]
+ 
+ 
+ def read_overrides(text: str) -> dict:
+@@ -26,4 +36,16 @@ def cache_path(session_id: str) -> Path:
+ def save_session(session_id: str, session: dict) -> None:
+     """Persist a session to the on-disk cache."""
+     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+-    cache_path(session_id).write_bytes(pickle.dumps(session))
++    record = {"issued_at": time.time(), "session": session}
++    cache_path(session_id).write_bytes(pickle.dumps(record))
++
++
++def purge_expired() -> None:
++    """Remove expired session entries from the on-disk cache."""
++    if not CACHE_DIR.exists():
++        return
++    now = time.time()
++    for path in CACHE_DIR.glob("*.session"):
++        record = pickle.loads(path.read_bytes())
++        if now - record["issued_at"] > SESSION_TTL:
++            path.unlink()

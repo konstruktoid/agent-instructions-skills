@@ -1,0 +1,3 @@
+Done. Added `running_balance(entries, account)` to `src/ledger/balance.py`, exported it from `src/ledger/__init__.py`, and added two checks in `src/ledger/_tests/check_balance.py` (this project's real test dir — files/functions are named `check_*`, not `test_*`, per `pyproject.toml`; the top-level `tests/` folder is an intentionally uncollected decoy).
+
+Verified: `uv run pytest` — 4/4 checks pass; `uv run ruff check .` — clean. `uv run ty check` reports one pre-existing, unrelated error in an outer eval-harness script (`scripts/check_skills.py`, missing `yaml`) that I confirmed also occurs on the unmodified repo via `git stash` — not something introduced by or fixable within this change.

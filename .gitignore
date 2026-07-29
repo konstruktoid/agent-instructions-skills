@@ -2,3 +2,9 @@
 .venv/
 __pycache__/
 node_modules/
+
+# Belt and braces. The eval harness links a credentials file into each run's private
+# config directory, which evals/.gitignore already excludes; this makes a credentials
+# file uncommittable from anywhere in the tree regardless of how it got there.
+**/.credentials.json
+.env

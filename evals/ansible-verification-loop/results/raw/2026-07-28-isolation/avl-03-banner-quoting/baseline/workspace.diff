@@ -1,0 +1,34 @@
+diff --git a/README.md b/README.md
+index f07ef50..07ee086 100644
+--- a/README.md
++++ b/README.md
+@@ -10,3 +10,5 @@ Renders the pre-authentication login banner.
+ | `banner_owner` | `root` | Owner and group of the banner file. |
+ | `banner_mode` | `"0644"` | File mode of the banner. |
+ | `banner_show_hostname` | `true` | Whether the banner includes the hostname. |
++| `banner_country_code` | `"NO"` | ISO 3166-1 alpha-2 country code rendered as the banner's `Country:` line. |
++| `banner_gateway_ports` | `false` | Whether the banner states that gateway ports are permitted. |
+diff --git a/defaults/main.yml b/defaults/main.yml
+index 6018a10..cd93ecf 100644
+--- a/defaults/main.yml
++++ b/defaults/main.yml
+@@ -3,3 +3,5 @@ banner_path: /etc/issue.net
+ banner_owner: root
+ banner_mode: "0644"
+ banner_show_hostname: true
++banner_country_code: "NO"
++banner_gateway_ports: false
+diff --git a/templates/issue.net.j2 b/templates/issue.net.j2
+index 6dd4f2c..c7ee8f1 100644
+--- a/templates/issue.net.j2
++++ b/templates/issue.net.j2
+@@ -2,3 +2,9 @@ Authorized access only.
+ {% if banner_show_hostname %}
+ Host: {{ ansible_facts['hostname'] }}
+ {% endif %}
++Country: {{ banner_country_code }}
++{% if banner_gateway_ports %}
++Gateway ports are permitted.
++{% else %}
++Gateway ports are not permitted.
++{% endif %}

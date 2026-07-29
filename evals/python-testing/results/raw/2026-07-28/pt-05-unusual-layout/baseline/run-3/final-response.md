@@ -1,0 +1,1 @@
+All checks pass. I added `running_balance(entries, account)` to `src/ledger/balance.py`, exported it from `src/ledger/__init__.py`, and added checks in `src/ledger/_tests/check_balance.py` covering the in-order accumulation and empty-list cases. `pytest`, `ruff check`, and `ty check` all pass.

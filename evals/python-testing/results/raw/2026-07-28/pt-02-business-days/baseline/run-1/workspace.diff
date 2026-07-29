@@ -1,0 +1,97 @@
+diff --git a/src/tempo/__init__.py b/src/tempo/__init__.py
+index de05eaa..0a3789b 100644
+--- a/src/tempo/__init__.py
++++ b/src/tempo/__init__.py
+@@ -1,5 +1,17 @@
+ """Date helpers."""
+ 
+-from tempo.calendar import days_between, is_holiday, is_weekend, next_weekday
++from tempo.calendar import (
++    business_days_between,
++    days_between,
++    is_holiday,
++    is_weekend,
++    next_weekday,
++)
+ 
+-__all__ = ["days_between", "is_holiday", "is_weekend", "next_weekday"]
++__all__ = [
++    "business_days_between",
++    "days_between",
++    "is_holiday",
++    "is_weekend",
++    "next_weekday",
++]
+diff --git a/src/tempo/calendar.py b/src/tempo/calendar.py
+index 1aceb2e..72dc438 100644
+--- a/src/tempo/calendar.py
++++ b/src/tempo/calendar.py
+@@ -18,7 +18,7 @@ def is_weekend(day: datetime.date) -> bool:
+ 
+ def is_holiday(day: datetime.date) -> bool:
+     """Return True when the date is a company holiday."""
+-    return day in HOLIDAYS
++    return day.isoformat() in HOLIDAYS
+ 
+ 
+ def days_between(start: datetime.date, end: datetime.date) -> int:
+@@ -31,3 +31,16 @@ def next_weekday(day: datetime.date) -> datetime.date:
+     while is_weekend(day):
+         day += datetime.timedelta(days=1)
+     return day
++
++
++def business_days_between(start: datetime.date, end: datetime.date) -> int:
++    """Return the number of working days from start up to but not including end."""
++    if end <= start:
++        return 0
++    count = 0
++    day = start
++    while day < end:
++        if not is_weekend(day) and not is_holiday(day):
++            count += 1
++        day += datetime.timedelta(days=1)
++    return count
+diff --git a/tests/test_calendar.py b/tests/test_calendar.py
+index a7b60d9..2966269 100644
+--- a/tests/test_calendar.py
++++ b/tests/test_calendar.py
+@@ -4,11 +4,12 @@ import datetime
+ 
+ import pytest
+ 
+-from tempo import days_between, is_weekend, next_weekday
++from tempo import business_days_between, days_between, is_weekend, next_weekday
+ 
+ MONDAY = datetime.date(2026, 7, 20)
+ SATURDAY = datetime.date(2026, 7, 25)
+ SUNDAY = datetime.date(2026, 7, 26)
++HOLIDAY = datetime.date(2026, 7, 22)  # Wednesday
+ 
+ 
+ @pytest.mark.parametrize(
+@@ -33,3 +34,24 @@ def test_next_weekday_leaves_a_weekday_alone():
+ def test_days_between_counts_both_ends():
+     """Monday to the following Saturday is six days inclusive."""
+     assert days_between(MONDAY, SATURDAY) == 6
++
++
++def test_business_days_between_excludes_weekend():
++    """Monday to the following Monday spans one weekend and the mid-week holiday."""
++    assert business_days_between(MONDAY, datetime.date(2026, 7, 27)) == 4
++
++
++def test_business_days_between_excludes_holiday():
++    """A company holiday within the range does not count as a business day."""
++    assert business_days_between(MONDAY, datetime.date(2026, 7, 23)) == 2
++
++
++def test_business_days_between_counts_start_when_it_qualifies():
++    """The start date itself counts when it is a qualifying business day."""
++    assert business_days_between(MONDAY, datetime.date(2026, 7, 21)) == 1
++
++
++def test_business_days_between_end_on_or_before_start_is_zero():
++    """When end is on or before start, there are no business days to count."""
++    assert business_days_between(MONDAY, MONDAY) == 0
++    assert business_days_between(MONDAY, datetime.date(2026, 7, 19)) == 0

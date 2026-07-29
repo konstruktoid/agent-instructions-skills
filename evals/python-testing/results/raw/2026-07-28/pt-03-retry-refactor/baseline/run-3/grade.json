@@ -1,0 +1,106 @@
+{
+  "task": "pt-03-retry-refactor",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T10:19:46.112236+00:00",
+    "seconds": 48.0
+  },
+  "skills_used": [],
+  "num_turns": 14,
+  "cost_usd": 0.2698686,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+      "passed": true,
+      "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's own entry point",
+      "passed": true,
+      "evidence": "match: 'pytest'"
+    },
+    {
+      "id": "suite-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+      "passed": true,
+      "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\n4 files already formatted"
+    },
+    {
+      "id": "no-test-weakened",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-parallel-test-tree",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "refactor-applied",
+      "kind": "workspace_command",
+      "source": "task prompt: extract the loop into _with_retries",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-tests-unchanged",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "absence-of-new-test-explained",
+      "kind": "final_regex",
+      "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+      "passed": true,
+      "evidence": "match: 'Refactor'"
+    },
+    {
+      "id": "behaviour-preserved",
+      "kind": "workspace_command",
+      "source": "task prompt: observable behaviour must not change",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 11,
+  "total": 12
+}

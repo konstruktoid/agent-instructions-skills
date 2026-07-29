@@ -1,0 +1,76 @@
+diff --git a/src/fetcher/client.py b/src/fetcher/client.py
+index 31af732..8e99923 100644
+--- a/src/fetcher/client.py
++++ b/src/fetcher/client.py
+@@ -17,22 +17,19 @@ class Client:
+ 
+     def get(self, path: str) -> str:
+         """Fetch a path, retrying on transport failure."""
+-        last_error = None
+-        for _ in range(MAX_ATTEMPTS):
+-            self.attempts += 1
+-            try:
+-                return self.transport("GET", path)
+-            except TransportError as error:
+-                last_error = error
+-        raise last_error
++        return self._with_retries("GET", path)
+ 
+     def head(self, path: str) -> str:
+         """Issue a HEAD for a path, retrying on transport failure."""
++        return self._with_retries("HEAD", path)
++
++    def _with_retries(self, method: str, path: str) -> str:
++        """Call the transport, retrying on failure up to MAX_ATTEMPTS times."""
+         last_error = None
+         for _ in range(MAX_ATTEMPTS):
+             self.attempts += 1
+             try:
+-                return self.transport("HEAD", path)
++                return self.transport(method, path)
+             except TransportError as error:
+                 last_error = error
+         raise last_error
+diff --git a/tests/test_client.py b/tests/test_client.py
+index 2a812b4..f723327 100644
+--- a/tests/test_client.py
++++ b/tests/test_client.py
+@@ -1,6 +1,7 @@
+ """Tests for fetcher.client."""
+ 
+ import pytest
++
+ from fetcher import Client
+ from fetcher.client import TransportError
+ 
+@@ -42,3 +43,30 @@ def test_head_uses_the_head_method():
+     """HEAD requests reach the transport as HEAD."""
+     client = Client(lambda method, path: method)
+     assert client.head("/health") == "HEAD"
++
++
++def test_head_retries_until_it_succeeds():
++    """A transport that fails twice is retried until it succeeds."""
++    calls = []
++
++    def transport(method, path):
++        calls.append(method)
++        if len(calls) < 3:
++            raise TransportError(path)
++        return "ok"
++
++    client = Client(transport)
++    assert client.head("/health") == "ok"
++    assert client.attempts == 3
++
++
++def test_head_gives_up_after_the_attempt_limit():
++    """A transport that always fails raises the last error."""
++
++    def transport(method, path):
++        raise TransportError(path)
++
++    client = Client(transport)
++    with pytest.raises(TransportError):
++        client.head("/health")
++    assert client.attempts == 3

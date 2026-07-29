@@ -1,0 +1,57 @@
+diff --git a/src/ledger/__init__.py b/src/ledger/__init__.py
+index d50e6f1..1fb270f 100644
+--- a/src/ledger/__init__.py
++++ b/src/ledger/__init__.py
+@@ -1,5 +1,5 @@
+ """Double-entry ledger helpers."""
+ 
+-from ledger.balance import Entry, balance
++from ledger.balance import Entry, balance, running_balance
+ 
+-__all__ = ["Entry", "balance"]
++__all__ = ["Entry", "balance", "running_balance"]
+diff --git a/src/ledger/_tests/check_running_balance.py b/src/ledger/_tests/check_running_balance.py
+new file mode 100644
+index 0000000..225a059
+--- /dev/null
++++ b/src/ledger/_tests/check_running_balance.py
+@@ -0,0 +1,20 @@
++"""Checks for ledger.running_balance."""
++
++from ledger import Entry, running_balance
++
++ENTRIES = [
++    Entry("cash", 100),
++    Entry("cash", -30),
++    Entry("receivable", 50),
++    Entry("cash", 10),
++]
++
++
++def check_running_balance_accumulates_for_one_account():
++    """Other accounts' entries are ignored and don't shift the running total."""
++    assert running_balance(ENTRIES, "cash") == [100, 70, 80]
++
++
++def check_running_balance_of_an_unknown_account_is_empty():
++    """An account with no entries has an empty running balance."""
++    assert running_balance(ENTRIES, "equity") == []
+diff --git a/src/ledger/balance.py b/src/ledger/balance.py
+index ba78ad0..0c5b8ac 100644
+--- a/src/ledger/balance.py
++++ b/src/ledger/balance.py
+@@ -14,3 +14,14 @@ class Entry:
+ def balance(entries: list, account: str) -> int:
+     """Return the net balance for one account."""
+     return sum(entry.amount for entry in entries if entry.account == account)
++
++
++def running_balance(entries: list, account: str) -> list:
++    """Return the cumulative balance after each entry for one account."""
++    result = []
++    total = 0
++    for entry in entries:
++        if entry.account == account:
++            total += entry.amount
++            result.append(total)
++    return result

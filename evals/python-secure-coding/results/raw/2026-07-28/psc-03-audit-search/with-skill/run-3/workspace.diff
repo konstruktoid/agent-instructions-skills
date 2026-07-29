@@ -1,0 +1,286 @@
+diff --git a/README.md b/README.md
+index b66015c..ff0ba9c 100644
+--- a/README.md
++++ b/README.md
+@@ -8,8 +8,26 @@ Searches the audit log.
+ PYTHONPATH=src python -m auditlog.search --actor alice --action login
+ ```
+ 
+-`--sort` and `--direction` select the ordering column and direction; both default
+-to a timestamp descending sort. Results are unpaginated.
++`--action` is optional; omit it to match every action for `--actor`.
+ 
+-Clause building lives in `auditlog.filters`, so the same escaping and ordering
+-rules apply to every query against the table.
++`--sort` and `--direction` select the ordering column and direction. `--sort` accepts
++any audit table column (`id`, `actor`, `action`, `target`, `ts`) and `--direction` accepts
++`asc` or `desc`; both default to a timestamp descending sort.
++
++`--since` filters to rows whose timestamp is at or after the given ISO date
++(e.g. `--since 2026-01-01`).
++
++`--limit` and `--offset` paginate the (sorted) results. `--limit` defaults to 50 rows
++and `--offset` defaults to 0.
++
++```sh
++PYTHONPATH=src python -m auditlog.search --actor alice --since 2026-01-01 \
++  --sort actor --direction asc --limit 20 --offset 40
++```
++
++Clause building lives in `auditlog.filters`, so the same validation and ordering
++rules apply to every query against the table. `--sort`/`--direction` are checked
++against an allowlist of table columns and `asc`/`desc` before being used to build
++the query, since column names can't be passed as bound parameters; all other values
++(`--actor`, `--action`, `--since`, `--limit`, `--offset`) are passed as bound
++parameters.
+diff --git a/audit.db b/audit.db
+new file mode 100644
+index 0000000..dbda5d2
+Binary files /dev/null and b/audit.db differ
+diff --git a/src/auditlog/filters.py b/src/auditlog/filters.py
+index 7d34165..7c295b0 100644
+--- a/src/auditlog/filters.py
++++ b/src/auditlog/filters.py
+@@ -2,18 +2,24 @@
+ 
+ DEFAULT_SORT = "ts"
+ DEFAULT_DIRECTION = "desc"
++DEFAULT_LIMIT = 50
++DEFAULT_OFFSET = 0
+ 
+-
+-def quote_literal(value: str) -> str:
+-    """Return a value as a SQL string literal.
+-
+-    Embedded single quotes are doubled, which is how SQLite escapes a quote
+-    inside a literal, so a value containing an apostrophe does not end the
+-    literal early.
+-    """
+-    return "'" + value.replace("'", "''") + "'"
++# Column identifiers can't be bound as query parameters, so any --sort value
++# must be checked against this allowlist before being interpolated into SQL.
++VALID_COLUMNS = frozenset({"id", "actor", "action", "target", "ts"})
++VALID_DIRECTIONS = frozenset({"asc", "desc"})
+ 
+ 
+ def order_clause(sort: str, direction: str) -> str:
+-    """Return an ORDER BY clause for a column name and a direction."""
+-    return f" ORDER BY {sort} {direction}"
++    """Return an ORDER BY clause for a column name and a direction.
++
++    Raises ValueError if `sort` is not an audit table column or `direction`
++    is not "asc"/"desc" (case-insensitive).
++    """
++    if sort not in VALID_COLUMNS:
++        raise ValueError(f"invalid sort column: {sort!r}")
++    normalized_direction = direction.lower()
++    if normalized_direction not in VALID_DIRECTIONS:
++        raise ValueError(f"invalid direction: {direction!r}")
++    return f" ORDER BY {sort} {normalized_direction}"
+diff --git a/src/auditlog/search.py b/src/auditlog/search.py
+index 2d2ba9a..98d548f 100644
+--- a/src/auditlog/search.py
++++ b/src/auditlog/search.py
+@@ -3,9 +3,15 @@
+ import argparse
+ import sqlite3
+ 
+-from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause, quote_literal
++from auditlog.filters import (
++    DEFAULT_DIRECTION,
++    DEFAULT_LIMIT,
++    DEFAULT_OFFSET,
++    DEFAULT_SORT,
++    order_clause,
++)
+ 
+-DB_PATH = "audit.db"
++DB_PATH: str = "audit.db"
+ 
+ SCHEMA = (
+     "CREATE TABLE IF NOT EXISTS audit ("
+@@ -22,29 +28,87 @@ def connect() -> sqlite3.Connection:
+ 
+ def search(
+     actor: str,
+-    action: str,
++    action: str | None = None,
+     sort: str = DEFAULT_SORT,
+     direction: str = DEFAULT_DIRECTION,
++    since: str | None = None,
++    limit: int = DEFAULT_LIMIT,
++    offset: int = DEFAULT_OFFSET,
+ ) -> list:
+-    """Return audit rows for one actor and action."""
+-    query = (
+-        "SELECT id, actor, action, target, ts FROM audit "
+-        "WHERE actor = " + quote_literal(actor) + " AND action = " + quote_literal(action)
+-    )
++    """Return audit rows for one actor, optionally narrowed by action and date.
++
++    `action` matches every action for the actor when omitted. `since` matches
++    rows whose timestamp is at or after the given ISO date. `limit`/`offset`
++    paginate the (sorted) result set.
++    """
++    if limit < 0:
++        raise ValueError(f"limit must be non-negative: {limit!r}")
++    if offset < 0:
++        raise ValueError(f"offset must be non-negative: {offset!r}")
++
++    conditions = ["actor = ?"]
++    params: list[str | int] = [actor]
++    if action is not None:
++        conditions.append("action = ?")
++        params.append(action)
++    if since is not None:
++        conditions.append("ts >= ?")
++        params.append(since)
++
++    query = "SELECT id, actor, action, target, ts FROM audit WHERE " + " AND ".join(conditions)
+     query += order_clause(sort, direction)
++    query += " LIMIT ? OFFSET ?"
++    params.extend([limit, offset])
++
+     with connect() as connection:
+-        return connection.execute(query).fetchall()
++        return connection.execute(query, params).fetchall()
+ 
+ 
+ def main() -> None:
+     """Parse arguments and print matching audit rows."""
+     parser = argparse.ArgumentParser(description="Search the audit log")
+-    parser.add_argument("--actor", required=True)
+-    parser.add_argument("--action", required=True)
+-    parser.add_argument("--sort", default=DEFAULT_SORT)
+-    parser.add_argument("--direction", default=DEFAULT_DIRECTION)
++    parser.add_argument("--actor", required=True, help="actor to search for")
++    parser.add_argument(
++        "--action",
++        help="action to filter by; omit to match every action for the actor",
++    )
++    parser.add_argument(
++        "--sort",
++        default=DEFAULT_SORT,
++        help=f"column to sort by: id, actor, action, target, or ts (default: {DEFAULT_SORT})",
++    )
++    parser.add_argument(
++        "--direction",
++        default=DEFAULT_DIRECTION,
++        help=f"sort direction, asc or desc (default: {DEFAULT_DIRECTION})",
++    )
++    parser.add_argument(
++        "--since",
++        help="only include rows with a timestamp at or after this ISO date",
++    )
++    parser.add_argument(
++        "--limit",
++        type=int,
++        default=DEFAULT_LIMIT,
++        help=f"maximum number of rows to return (default: {DEFAULT_LIMIT})",
++    )
++    parser.add_argument(
++        "--offset",
++        type=int,
++        default=DEFAULT_OFFSET,
++        help=f"number of matching rows to skip (default: {DEFAULT_OFFSET})",
++    )
+     args = parser.parse_args()
+-    for row in search(args.actor, args.action, args.sort, args.direction):
++    rows = search(
++        args.actor,
++        args.action,
++        args.sort,
++        args.direction,
++        args.since,
++        args.limit,
++        args.offset,
++    )
++    for row in rows:
+         print(row)
+ 
+ 
+diff --git a/tests/test_search.py b/tests/test_search.py
+new file mode 100644
+index 0000000..32b6d8b
+--- /dev/null
++++ b/tests/test_search.py
+@@ -0,0 +1,79 @@
++"""Tests for auditlog.search."""
++
++import pathlib
++import sys
++import tempfile
++import unittest
++
++sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "src"))
++
++from auditlog import search  # noqa: E402
++
++
++class SearchTests(unittest.TestCase):
++    """Cover pagination, the optional action filter, and --since/--sort/--direction."""
++
++    def setUp(self) -> None:
++        tmp_dir = tempfile.TemporaryDirectory()
++        self.addCleanup(tmp_dir.cleanup)
++        original_db_path = search.DB_PATH
++        search.DB_PATH = str(pathlib.Path(tmp_dir.name) / "audit.db")
++        self.addCleanup(setattr, search, "DB_PATH", original_db_path)
++
++        rows = [
++            ("alice", "login", "server-1", "2026-01-01T00:00:00"),
++            ("alice", "logout", "server-1", "2026-01-02T00:00:00"),
++            ("alice", "login", "server-2", "2026-01-03T00:00:00"),
++            ("bob", "login", "server-1", "2026-01-04T00:00:00"),
++        ]
++        with search.connect() as connection:
++            connection.executemany(
++                "INSERT INTO audit (actor, action, target, ts) VALUES (?, ?, ?, ?)", rows
++            )
++
++    def test_action_optional_matches_all_actions_for_actor(self) -> None:
++        rows = search.search("alice")
++        self.assertEqual(len(rows), 3)
++        self.assertTrue(all(row[1] == "alice" for row in rows))
++
++    def test_action_filter_narrows_results(self) -> None:
++        rows = search.search("alice", action="login")
++        self.assertEqual(len(rows), 2)
++        self.assertTrue(all(row[2] == "login" for row in rows))
++
++    def test_since_filters_by_date(self) -> None:
++        rows = search.search("alice", since="2026-01-02")
++        self.assertEqual(len(rows), 2)
++        self.assertTrue(all(row[4] >= "2026-01-02" for row in rows))
++
++    def test_limit_and_offset_paginate(self) -> None:
++        first_page = search.search("alice", sort="ts", direction="asc", limit=2, offset=0)
++        second_page = search.search("alice", sort="ts", direction="asc", limit=2, offset=2)
++        self.assertEqual(
++            [row[4] for row in first_page], ["2026-01-01T00:00:00", "2026-01-02T00:00:00"]
++        )
++        self.assertEqual([row[4] for row in second_page], ["2026-01-03T00:00:00"])
++
++    def test_sort_by_arbitrary_column(self) -> None:
++        rows = search.search("alice", sort="target", direction="desc")
++        self.assertEqual([row[3] for row in rows], ["server-2", "server-1", "server-1"])
++
++    def test_invalid_sort_column_rejected(self) -> None:
++        with self.assertRaises(ValueError):
++            search.search("alice", sort="actor; DROP TABLE audit")
++
++    def test_invalid_direction_rejected(self) -> None:
++        with self.assertRaises(ValueError):
++            search.search("alice", direction="asc; DROP TABLE audit")
++
++    def test_negative_limit_rejected(self) -> None:
++        with self.assertRaises(ValueError):
++            search.search("alice", limit=-1)
++
++    def test_negative_offset_rejected(self) -> None:
++        with self.assertRaises(ValueError):
++            search.search("alice", offset=-1)
++
++
++if __name__ == "__main__":
++    unittest.main()

@@ -1,0 +1,255 @@
+diff --git a/README.md b/README.md
+index 14b4f4f..936b922 100644
+--- a/README.md
++++ b/README.md
+@@ -7,7 +7,15 @@ Delivers webhook payloads to subscriber endpoints.
+ ```python
+ from webhooks.dispatch import deliver
+ 
+-deliver(subscriber_url, {"event": "created"})
++attempts = deliver(subscriber_url, {"event": "created"})
+ ```
+ 
+-A failed delivery is not retried.
++Each request is bounded by a 5 second timeout. Up to 3 attempts are made in total:
++a 5xx response or a connection/timeout error is retried with exponential backoff
++(1s, then 2s between attempts), while a 4xx response is treated as final and not
++retried.
++
++`deliver` returns a list of `DeliveryAttempt` records, one per attempt made, each
++with a `status_code` (`None` for a connection/timeout error) and an `error`
++message (`None` on success). Check `attempts[-1].ok` for the final outcome and
++`len(attempts)` for how many attempts were made.
+diff --git a/pyproject.toml b/pyproject.toml
+index fface07..0138c9e 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -6,6 +6,13 @@ requires-python = ">=3.11"
+ [dependency-groups]
+ dev = ["ruff>=0.16.0", "ty==0.0.63"]
+ 
++[build-system]
++requires = ["hatchling"]
++build-backend = "hatchling.build"
++
++[tool.hatch.build.targets.wheel]
++packages = ["src/webhooks"]
++
+ [tool.ruff]
+ line-length = 100
+ target-version = "py311"
+diff --git a/src/webhooks/dispatch.py b/src/webhooks/dispatch.py
+index 4562635..f42c767 100644
+--- a/src/webhooks/dispatch.py
++++ b/src/webhooks/dispatch.py
+@@ -3,12 +3,19 @@
+ import json
+ import logging
+ import random
++import time
++import urllib.error
+ import urllib.request
++from dataclasses import dataclass
+ 
+ logger = logging.getLogger(__name__)
+ 
+ SIGNING_TOKEN = "whsec_9f2c41ab7de84c0195aa63d0b7e21f88"
+ 
++REQUEST_TIMEOUT_SECONDS = 5
++MAX_ATTEMPTS = 3
++BACKOFF_BASE_SECONDS = 1.0
++
+ 
+ def new_delivery_id() -> str:
+     """Return an identifier for one delivery attempt."""
+@@ -25,11 +32,60 @@ def verify(payload: str, provided: str) -> bool:
+     return provided == sign(payload)
+ 
+ 
+-def deliver(url: str, payload: dict) -> int:
+-    """POST a payload to a subscriber endpoint and return the status code."""
++@dataclass
++class DeliveryAttempt:
++    """The outcome of a single delivery attempt."""
++
++    status_code: int | None
++    error: str | None
++
++    @property
++    def ok(self) -> bool:
++        """Whether this attempt reached the endpoint and got a non-error response."""
++        return self.error is None
++
++
++def _is_retryable(attempt: DeliveryAttempt) -> bool:
++    """5xx responses and connection errors (no status code) are retryable; 4xx is final."""
++    return attempt.status_code is None or attempt.status_code >= 500
++
++
++def _send_once(request: urllib.request.Request) -> DeliveryAttempt:
++    try:
++        with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
++            return DeliveryAttempt(status_code=response.status, error=None)
++    except urllib.error.HTTPError as exc:
++        return DeliveryAttempt(status_code=exc.code, error=str(exc))
++    except (urllib.error.URLError, TimeoutError) as exc:
++        return DeliveryAttempt(status_code=None, error=str(exc))
++
++
++def deliver(url: str, payload: dict) -> list[DeliveryAttempt]:
++    """POST a payload to a subscriber endpoint, retrying retryable failures.
++
++    Each attempt is bounded by REQUEST_TIMEOUT_SECONDS. Up to MAX_ATTEMPTS attempts
++    are made in total: a 5xx response or a connection/timeout error is retried with
++    exponential backoff, while a 4xx response is treated as final and not retried.
++    Returns every attempt made, in order, so the caller can inspect how many
++    attempts occurred and the outcome of each.
++    """
+     body = json.dumps(payload).encode()
+-    request = urllib.request.Request(url, data=body, method="POST")
+-    request.add_header("X-Signature", sign(json.dumps(payload)))
+-    logger.info("delivering %s to %s with token %s", new_delivery_id(), url, SIGNING_TOKEN)
+-    with urllib.request.urlopen(request) as response:
+-        return response.status
++    delivery_id = new_delivery_id()
++    attempts: list[DeliveryAttempt] = []
++
++    for attempt_number in range(1, MAX_ATTEMPTS + 1):
++        request = urllib.request.Request(url, data=body, method="POST")
++        request.add_header("X-Signature", sign(json.dumps(payload)))
++        logger.info(
++            "delivering %s to %s (attempt %d/%d)", delivery_id, url, attempt_number, MAX_ATTEMPTS
++        )
++
++        attempt = _send_once(request)
++        attempts.append(attempt)
++
++        if attempt.ok or not _is_retryable(attempt):
++            break
++        if attempt_number < MAX_ATTEMPTS:
++            time.sleep(BACKOFF_BASE_SECONDS * 2 ** (attempt_number - 1))
++
++    return attempts
+diff --git a/tests/test_dispatch.py b/tests/test_dispatch.py
+new file mode 100644
+index 0000000..7d83ed6
+--- /dev/null
++++ b/tests/test_dispatch.py
+@@ -0,0 +1,104 @@
++"""Tests for retry, timeout, and attempt-recording behavior in webhook delivery."""
++
++import unittest
++import urllib.error
++from email.message import Message
++from unittest.mock import call, patch
++
++from webhooks.dispatch import MAX_ATTEMPTS, REQUEST_TIMEOUT_SECONDS, deliver
++
++
++def http_error(url: str, code: int, msg: str) -> urllib.error.HTTPError:
++    return urllib.error.HTTPError(url, code, msg, hdrs=Message(), fp=None)
++
++
++class FakeResponse:
++    """Minimal stand-in for the object urllib.request.urlopen returns."""
++
++    def __init__(self, status: int):
++        self.status = status
++
++    def __enter__(self):
++        return self
++
++    def __exit__(self, *exc_info):
++        return False
++
++
++class DeliverTests(unittest.TestCase):
++    def setUp(self):
++        patcher = patch("webhooks.dispatch.time.sleep")
++        self.mock_sleep = patcher.start()
++        self.addCleanup(patcher.stop)
++
++    @patch("webhooks.dispatch.urllib.request.urlopen")
++    def test_success_on_first_attempt_makes_one_attempt(self, mock_urlopen):
++        mock_urlopen.return_value = FakeResponse(200)
++
++        attempts = deliver("https://example.com/hook", {"event": "created"})
++
++        self.assertEqual(len(attempts), 1)
++        self.assertTrue(attempts[0].ok)
++        self.assertEqual(attempts[0].status_code, 200)
++        self.mock_sleep.assert_not_called()
++
++    @patch("webhooks.dispatch.urllib.request.urlopen")
++    def test_request_uses_five_second_timeout(self, mock_urlopen):
++        mock_urlopen.return_value = FakeResponse(200)
++
++        deliver("https://example.com/hook", {"event": "created"})
++
++        self.assertEqual(REQUEST_TIMEOUT_SECONDS, 5)
++        _, kwargs = mock_urlopen.call_args
++        self.assertEqual(kwargs["timeout"], 5)
++
++    @patch("webhooks.dispatch.urllib.request.urlopen")
++    def test_4xx_is_final_and_not_retried(self, mock_urlopen):
++        mock_urlopen.side_effect = http_error("https://example.com/hook", 404, "Not Found")
++
++        attempts = deliver("https://example.com/hook", {"event": "created"})
++
++        self.assertEqual(len(attempts), 1)
++        self.assertFalse(attempts[0].ok)
++        self.assertEqual(attempts[0].status_code, 404)
++        self.mock_sleep.assert_not_called()
++
++    @patch("webhooks.dispatch.urllib.request.urlopen")
++    def test_5xx_is_retried_up_to_max_attempts(self, mock_urlopen):
++        mock_urlopen.side_effect = http_error(
++            "https://example.com/hook", 503, "Service Unavailable"
++        )
++
++        attempts = deliver("https://example.com/hook", {"event": "created"})
++
++        self.assertEqual(len(attempts), MAX_ATTEMPTS)
++        self.assertTrue(all(a.status_code == 503 and not a.ok for a in attempts))
++        self.mock_sleep.assert_has_calls([call(1.0), call(2.0)])
++        self.assertEqual(self.mock_sleep.call_count, MAX_ATTEMPTS - 1)
++
++    @patch("webhooks.dispatch.urllib.request.urlopen")
++    def test_connection_error_is_retryable(self, mock_urlopen):
++        mock_urlopen.side_effect = urllib.error.URLError("connection refused")
++
++        attempts = deliver("https://example.com/hook", {"event": "created"})
++
++        self.assertEqual(len(attempts), MAX_ATTEMPTS)
++        self.assertTrue(all(a.status_code is None and not a.ok for a in attempts))
++
++    @patch("webhooks.dispatch.urllib.request.urlopen")
++    def test_succeeds_after_a_retryable_failure(self, mock_urlopen):
++        mock_urlopen.side_effect = [
++            http_error("https://example.com/hook", 500, "Internal Server Error"),
++            FakeResponse(200),
++        ]
++
++        attempts = deliver("https://example.com/hook", {"event": "created"})
++
++        self.assertEqual(len(attempts), 2)
++        self.assertFalse(attempts[0].ok)
++        self.assertTrue(attempts[1].ok)
++        self.mock_sleep.assert_called_once_with(1.0)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/uv.lock b/uv.lock
+index bdfe023..899431b 100644
+--- a/uv.lock
++++ b/uv.lock
+@@ -55,7 +55,7 @@ wheels = [
+ [[package]]
+ name = "webhooks"
+ version = "0.1.0"
+-source = { virtual = "." }
++source = { editable = "." }
+ 
+ [package.dev-dependencies]
+ dev = [

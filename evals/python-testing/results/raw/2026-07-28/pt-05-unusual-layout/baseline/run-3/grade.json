@@ -1,0 +1,120 @@
+{
+  "task": "pt-05-unusual-layout",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T10:24:12.401667+00:00",
+    "seconds": 43.9
+  },
+  "skills_used": [],
+  "num_turns": 15,
+  "cost_usd": 0.21618450000000003,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+      "passed": true,
+      "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's own entry point",
+      "passed": true,
+      "evidence": "match: 'pytest'"
+    },
+    {
+      "id": "suite-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+      "passed": true,
+      "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+    },
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\n6 files already formatted"
+    },
+    {
+      "id": "no-test-weakened",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-parallel-test-tree",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "check-added-in-existing-location",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-naming-convention-matched",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-checks-added-to-the-stale-directory",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: add running_balance to the ledger package",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "behaviour-correct",
+      "kind": "workspace_command",
+      "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "added-checks-fail-when-the-feature-breaks",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+      "passed": true,
+      "evidence": "exit 0\n..F.                                                                     [100%]\n=================================== FAILURES ===================================\n__________________ check_running_balance_accumulates_in_order __________________\n\n    def check_running_balance_accumulates_in_order():\n        \"\"\"Each entry for the account contributes a running total, in order.\"\"\"\n>       assert running_balance(ENTRIES, \"cash\") == [100, 70]\nE       assert [] == [100, 70]\nE         \nE         Right contains 2 more items, first extra item: 100\nE         Use -v to get more diff\n\n../../../../workspace/src/ledger/_tests/check_balance.py:25: AssertionError\n=========================== short test summary info ============================\nFAILED src/ledger/_tests/check_balance.py::check_running_balance_accumulates_in_order\n1 failed, 3 passed in 0.02s"
+    }
+  ],
+  "passed": 14,
+  "total": 14
+}
