@@ -1,10 +1,8 @@
-Everything checks out. Summary of changes:
+This looks correct and complete. Summary of the design:
 
-**`.github/workflows/ci.yml`**
-- Added `tags: - 'v*'` to the push trigger so pushing a version tag kicks off the workflow.
-- Kept `build` unchanged — still runs on pushes to `main` and on pull requests (and now also on tag pushes, which is required so `release` can depend on it).
-- Added a new `release` job: `needs: build` (only runs once build passes) and gated with `if: startsWith(github.ref, 'refs/tags/v')` so it only fires for tag pushes, not for `main`/PR builds. It checks out, builds via `npm run build`, publishes with `npm publish` using `NPM_TOKEN` as `NODE_AUTH_TOKEN`, and creates a GitHub release via `softprops/action-gh-release@v2` (needs `contents: write` permission, which is set).
+- **Trigger**: `push` now includes `tags: ['v*']` alongside the existing `main` branch push, plus `pull_request` unchanged.
+- **`build` job**: unchanged behavior — runs on pushes to `main`, on PRs, and now also on tag pushes (needed so `release` has something to depend on for the tag event).
+- **`release` job**: `needs: build` (won't start until build passes) and gated with `if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')` so it never runs for `main` pushes or PRs — only tag pushes. It builds, publishes to npm via `NODE_AUTH_TOKEN: secrets.NPM_TOKEN`, and creates a GitHub release via `gh release create` using the built-in `GITHUB_TOKEN`.
+- **Least privilege**: added a top-level `permissions: contents: read`, with `contents: write` scoped only to the `release` job (needed to create the release), so the `build` job — which also runs on untrusted PR code — doesn't get write access.
 
-**`README.md`** — replaced the manual release instructions with the new tag-and-push flow, explaining that CI handles build, npm publish, and GitHub release creation.
-
-Validated the workflow YAML parses correctly with `python3 -c "import yaml..."`.
+README's release section now documents the tag-and-push flow instead of manual publishing.

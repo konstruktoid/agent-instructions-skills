@@ -1,0 +1,142 @@
+{
+  "task": "gas-05-dependabot-pinning",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T21:58:14.204598+00:00",
+    "seconds": 77.2
+  },
+  "skills_used": [],
+  "num_turns": 18,
+  "cost_usd": 0.3519295,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 13\n\u001b[1m\u001b[33mwarning[dependabot-cooldown]\u001b[0m\u001b[1m: insufficient cooldown in Dependabot updates\u001b[0m\n \u001b[1m\u001b[94m--> \u001b[0m./.github/dependabot.yml:3:5\n  \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m3\u001b[0m \u001b[1m\u001b[94m|\u001b[0m   - package-ecosystem: \"github-actions\"\n  \u001b[1m\u001b[94m|\u001b[0m     \u001b[1m\u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[33minsufficient implicit default-days (less than 7)\u001b[0m\n  \u001b[1m\u001b[94m|\u001b[0m\n  \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n  \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: this finding has an auto-fix\n  \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#dependabot-cooldown\u001b[39m\n\n\u001b[32m4\u001b[39m findings (\u001b[1m\u001b[93m3\u001b[39m suppressed, \u001b[92m1\u001b[39m safe fixes\u001b[0m): \u001b[35m0\u001b[39m informational, \u001b[36m0\u001b[39m low, \u001b[33m1\u001b[39m medium, \u001b[31m0\u001b[39m high\n\u001b[33m WARN\u001b[0m \u001b[2mzizmor\u001b[0m\u001b[2m:\u001b[0m zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\n\u001b[1m\u001b[33mwarning[dependabot-cooldown]\u001b[0m\u001b[1m: insufficient cooldown in Dependabot updates\u001b[0m\n \u001b[1m\u001b[94m--> \u001b[0m./.github/dependabot.yml:3:5\n  \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m3\u001b[0m \u001b[1m\u001b[94m|\u001b[0m   - package-ecosystem: \"github-actions\"\n  \u001b[1m\u001b[94m|\u001b[0m     \u001b[1m\u001b[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[33minsufficient implicit default-days (less than 7)\u001b[0m\n  \u001b[1m\u001b[94m|\u001b[0m\n  \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n  \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: this finding has an auto-fix\n  \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#dependabot-cooldown\u001b[39m\n\n\u001b[32m4\u001b[39m findings (\u001b[1m\u001b[93m3\u001b[39m suppressed, \u001b[92m1\u001b[39m safe fixes\u001b[0m): \u001b[35m0\u001b[39m informational, \u001b[36m0\u001b[39m low, \u001b[33m1\u001b[39m medium, \u001b[31m0\u001b[39m high\n\u001b[33m WARN\u001b[0m \u001b[2mzizmor\u001b[0m\u001b[2m:\u001b[0m zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": true,
+      "evidence": "match: 'gh api'"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "dependabot-config-created",
+      "kind": "workspace_command",
+      "source": "task prompt: add a Dependabot configuration",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "dependabot-covers-actions",
+      "kind": "workspace_command",
+      "source": "task prompt: keeps the GitHub Actions used by the workflows up to date",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "dependabot-weekly",
+      "kind": "workspace_command",
+      "source": "task prompt: on a weekly schedule",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "dependabot-grouped",
+      "kind": "workspace_command",
+      "source": "task prompt: grouping the updates into a single pull request",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: explain in the README how action updates are handled",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 13,
+  "total": 17
+}

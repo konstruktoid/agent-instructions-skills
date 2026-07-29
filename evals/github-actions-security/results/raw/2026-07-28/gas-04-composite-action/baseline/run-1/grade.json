@@ -1,0 +1,142 @@
+{
+  "task": "gas-04-composite-action",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-07-28T21:56:09.094699+00:00",
+    "seconds": 58.9
+  },
+  "skills_used": [],
+  "num_turns": 14,
+  "cost_usd": 0.26036519999999996,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 14\n\u001b[1m\u001b[91merror[template-injection]\u001b[0m\u001b[1m: code injection via template expansion\u001b[0m\n  \u001b[1m\u001b[94m--> \u001b[0m./actions/setup-toolchain/action.yml:20:32\n   \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m20\u001b[0m \u001b[1m\u001b[94m|\u001b[0m     - run: echo \"Installed ${{ inputs.version }}\"\n   \u001b[1m\u001b[94m|\u001b[0m       \u001b[1m\u001b[94m---\u001b[0m \u001b[1m\u001b[94mthis run block\u001b[0m       \u001b[1m\u001b[91m^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[91mmay expand into attacker-controllable code\u001b[0m\n   \u001b[1m\u001b[94m|\u001b[0m\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: this finding has an auto-fix\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#template-injection\u001b[39m\n\n\u001b[1m\u001b[91merror[unpinned-uses]\u001b[0m\u001b[1m: unpinned action reference\u001b[0m\n  \u001b[1m\u001b[94m--> \u001b[0m./actions/setup-toolchain/action.yml:13:13\n   \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m13\u001b[0m \u001b[1m\u001b[94m|\u001b[0m     - uses: actions/setup-python@v5\n   \u001b[1m\u001b[94m|\u001b[0m             \u001b[1m\u001b[91m^^^^^^^^^^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[91maction is not pinned to a hash (required by blanket policy)\u001b[0m\n   \u001b[1m\u001b[94m|\u001b[0m\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#unpinned-uses\u001b[39m\n\n\u001b[1m\u001b[91merror[unpinned-uses]\u001b[0m\u001b[1m: unpinned action reference\u001b[0m\n  \u001b[1m\u001b[94m--> \u001b[0m./actions/setup-toolchain/action.yml:16:13\n   \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m16\u001b[0m \u001b[1m\u001b[94m|\u001b[0m     - uses: actions/cache@v4\n   \u001b[1m\u001b[94m|\u001b[0m             \u001b[1m\u001b[91m^^^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[91maction is not pinned to a hash (required by blanket policy)\u001b[0m\n   \u001b[1m\u001b[94m|\u001b[0m\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#unpinned-uses\u001b[39m\n\n\u001b[32m4\u001b[39m findings (\u001b[1m\u001b[93m1\u001b[39m suppressed, \u001b[91m1\u001b[39m unsafe fixes\u001b[0m): \u001b[35m0\u001b[39m informational, \u001b[36m0\u001b[39m low, \u001b[33m0\u001b[39m medium, \u001b[31m3\u001b[39m high\n\u001b[33m WARN\u001b[0m \u001b[2mzizmor\u001b[0m\u001b[2m:\u001b[0m zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\n\u001b[1m\u001b[91merror[template-injection]\u001b[0m\u001b[1m: code injection via template expansion\u001b[0m\n  \u001b[1m\u001b[94m--> \u001b[0m./actions/setup-toolchain/action.yml:20:32\n   \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m20\u001b[0m \u001b[1m\u001b[94m|\u001b[0m     - run: echo \"Installed ${{ inputs.version }}\"\n   \u001b[1m\u001b[94m|\u001b[0m       \u001b[1m\u001b[94m---\u001b[0m \u001b[1m\u001b[94mthis run block\u001b[0m       \u001b[1m\u001b[91m^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[91mmay expand into attacker-controllable code\u001b[0m\n   \u001b[1m\u001b[94m|\u001b[0m\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: this finding has an auto-fix\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#template-injection\u001b[39m\n\n\u001b[1m\u001b[91merror[unpinned-uses]\u001b[0m\u001b[1m: unpinned action reference\u001b[0m\n  \u001b[1m\u001b[94m--> \u001b[0m./actions/setup-toolchain/action.yml:13:13\n   \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m13\u001b[0m \u001b[1m\u001b[94m|\u001b[0m     - uses: actions/setup-python@v5\n   \u001b[1m\u001b[94m|\u001b[0m             \u001b[1m\u001b[91m^^^^^^^^^^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[91maction is not pinned to a hash (required by blanket policy)\u001b[0m\n   \u001b[1m\u001b[94m|\u001b[0m\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#unpinned-uses\u001b[39m\n\n\u001b[1m\u001b[91merror[unpinned-uses]\u001b[0m\u001b[1m: unpinned action reference\u001b[0m\n  \u001b[1m\u001b[94m--> \u001b[0m./actions/setup-toolchain/action.yml:16:13\n   \u001b[1m\u001b[94m|\u001b[0m\n\u001b[1m\u001b[94m16\u001b[0m \u001b[1m\u001b[94m|\u001b[0m     - uses: actions/cache@v4\n   \u001b[1m\u001b[94m|\u001b[0m             \u001b[1m\u001b[91m^^^^^^^^^^^^^^^^\u001b[0m \u001b[1m\u001b[91maction is not pinned to a hash (required by blanket policy)\u001b[0m\n   \u001b[1m\u001b[94m|\u001b[0m\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mnote\u001b[0m: audit confidence \u2192 High\n   \u001b[1m\u001b[94m= \u001b[0m\u001b[1mhelp\u001b[0m: audit documentation \u2192 \u001b[32mhttps://docs.zizmor.sh/audits/#unpinned-uses\u001b[39m\n\n\u001b[32m4\u001b[39m findings (\u001b[1m\u001b[93m1\u001b[39m suppressed, \u001b[91m1\u001b[39m unsafe fixes\u001b[0m): \u001b[35m0\u001b[39m informational, \u001b[36m0\u001b[39m low, \u001b[33m0\u001b[39m medium, \u001b[31m3\u001b[39m high\n\u001b[33m WARN\u001b[0m \u001b[2mzizmor\u001b[0m\u001b[2m:\u001b[0m zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-lint-step",
+      "kind": "workspace_command",
+      "source": "task prompt: add a lint step that runs ruff",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-lockfile-cache-key",
+      "kind": "workspace_command",
+      "source": "task prompt: make the cache key include a hash of uv.lock",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-windows-job",
+      "kind": "workspace_command",
+      "source": "task prompt: add a job that runs on windows-latest",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "composite-action-pinned",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: this includes actions used inside composite actions",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README table",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 10,
+  "total": 17
+}
