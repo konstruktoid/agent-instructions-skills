@@ -281,7 +281,7 @@ def scrub_rules() -> list[tuple[re.Pattern[str], str]]:
     # Claude Code encodes a project path as its directory name by replacing each separator
     # with a dash, so every path above appears in a second form that needs the same care.
     dashed = lambda text: text.replace("/", "-")  # noqa: E731
-    # A transcript is JSON, so a name that starts a captured line appears as `\nuser`, where the
+    # A transcript is JSON, so a name that starts a captured line appears as `\n<name>`, where the
     # character before the name is the `n` of the escape sequence rather than a separator. `\b`
     # finds no boundary there and the name survives a scrub that reports nothing left to do, so
     # the escapes are spelled out instead of relying on the word boundary alone.
