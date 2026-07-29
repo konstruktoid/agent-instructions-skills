@@ -368,7 +368,9 @@ def cmd_scrub(args: argparse.Namespace) -> int:
 def as_text(stream: str | bytes | None) -> str:
     """Return one captured subprocess stream as text, whatever form it arrived in."""
     if isinstance(stream, bytes):
-        return stream.decode()
+        # A killed run can leave a multibyte character split across the capture boundary,
+        # and replacing that one character keeps the rest of the partial transcript.
+        return stream.decode("utf-8", errors="replace")
     return stream or ""
 
 
@@ -389,7 +391,8 @@ def invoke_claude(
             cwd=cwd,
             env=run_environment(home),
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=timeout,
             check=False,
         )
