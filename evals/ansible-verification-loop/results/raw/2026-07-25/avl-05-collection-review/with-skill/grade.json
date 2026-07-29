@@ -93,5 +93,11 @@
     }
   ],
   "passed": 7,
-  "total": 11
+  "total": 11,
+  "truncated": true,
+  "scheduled_wakeups": 1,
+  "outstanding_background": [
+    "bqe2mridx"
+  ],
+  "aborted": false
 }

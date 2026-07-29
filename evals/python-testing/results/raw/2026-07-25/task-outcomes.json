@@ -99,7 +99,11 @@
       }
     ],
     "passed": 11,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-01-paging-bug",
@@ -203,7 +207,11 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-02-business-days",
@@ -305,7 +313,11 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-02-business-days",
@@ -409,7 +421,11 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-03-retry-refactor",
@@ -511,7 +527,11 @@
       }
     ],
     "passed": 11,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-03-retry-refactor",
@@ -613,7 +633,11 @@
       }
     ],
     "passed": 11,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-04-upload-validation",
@@ -715,7 +739,11 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-04-upload-validation",
@@ -819,7 +847,11 @@
       }
     ],
     "passed": 12,
-    "total": 12
+    "total": 12,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-05-unusual-layout",
@@ -928,7 +960,11 @@
       }
     ],
     "passed": 13,
-    "total": 13
+    "total": 13,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "pt-05-unusual-layout",
@@ -1039,6 +1075,10 @@
       }
     ],
     "passed": 13,
-    "total": 13
+    "total": 13,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   }
 ]

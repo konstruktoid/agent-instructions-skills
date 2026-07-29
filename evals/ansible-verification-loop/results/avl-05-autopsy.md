@@ -1,8 +1,12 @@
 # Autopsy: `avl-05-collection-review`, with-skill run of 2026-07-25
 
 The only negative delta in the whole eval suite. Baseline scored 11/11, with-skill scored
-7/11, so the table reads as the skill making the agent worse. This document reads the
+7/11, so the table read as the skill making the agent worse. This document reads the
 transcript end to end and reports what actually happened.
+
+The harness has since caught up with that finding: the run is classified `truncated`, so
+`results/2026-07-25.md` now reads `not measured` for this condition rather than 7/11, and the
+stamp's net delta is +6 rather than +2. The reading below is what produced that classification.
 
 Source: `results/raw/2026-07-25/avl-05-collection-review/with-skill/run.jsonl`, 607 records
 across 76 turns, and the matching `baseline/` directory. Turn numbers below are record
@@ -137,14 +141,17 @@ repository URL, so `galaxy[no-repository]` is fixable from evidence in the repos
 by invention. The assertion is unchanged, and the finding remains a real one that a run has to
 notice and fix.
 
-Nothing was changed for the truncation. The correct fix there is a harness change — grading a
-run that ends with outstanding background work, or preventing one — which is out of scope for
-this document and would not be a change to the skill, the assertion, or the fixture.
+Nothing was changed here for the truncation, because the correct fix is a harness change
+rather than a change to the skill, the assertion, or the fixture. That harness change was made
+separately: a run ending with outstanding background work or a scheduled wakeup is now marked
+`truncated` and excluded from the medians and the delta, and `run_eval.py regrade` applies the
+same classification to stored runs, which is how this one came to be reclassified.
 
 ## What the numbers should be read as
 
 `avl-05` measures the fixture and the harness at least as much as it measures the skill. The
--4 delta in `results/2026-07-25.md` is not evidence that the skill degraded the run. Under the
-next run of this task, with the fixture fixed, `galaxy-metadata-fixed` and `lint-clean` become
-answerable; `lint-clean-or-reported` and `test-failure-not-glossed` remain hostage to whether
-the molecule scenario finishes inside the run.
+-4 delta this stamp used to report is not evidence that the skill degraded the run, which is
+why the run is now excluded rather than counted. Under the next run of this task, with the
+fixture fixed, `galaxy-metadata-fixed` and `lint-clean` become answerable;
+`lint-clean-or-reported` and `test-failure-not-glossed` remain hostage to whether the molecule
+scenario finishes inside the run.

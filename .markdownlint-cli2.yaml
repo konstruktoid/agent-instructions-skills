@@ -16,6 +16,9 @@ config:
   # Table pipe alignment is cosmetic and churns on every content edit.
   MD060: false
 # Raw eval artifacts are transcripts and workspaces produced by a graded run. They are
-# evidence of what an agent wrote, so they are kept verbatim rather than reformatted.
+# evidence of what an agent wrote, so they are kept verbatim rather than reformatted. The
+# one exception is `run_eval.py scrub`, which replaces the paths, usernames and hostnames
+# of the machine the run happened on with placeholders; that is the environment the run
+# was in, not anything the agent wrote, and it must not be published.
 ignores:
   - "evals/*/results/raw/**"

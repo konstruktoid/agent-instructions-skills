@@ -79,7 +79,11 @@
       }
     ],
     "passed": 8,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   },
   {
     "task": "avl-03-banner-quoting",
@@ -163,6 +167,10 @@
       }
     ],
     "passed": 9,
-    "total": 9
+    "total": 9,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false
   }
 ]

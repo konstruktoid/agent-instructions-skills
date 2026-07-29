@@ -51,6 +51,30 @@ python3 evals/run_eval.py report   --skill python-secure-coding
 `report` regenerates `results/<date>.md` from the graded runs, so the checked-in results file
 is never written by hand.
 
+### What gets committed, and what is stripped from it
+
+A transcript records the absolute paths, `ls -l` owner columns and hostname of whichever
+machine the run happened on, none of which is a property of the skill under test. Transcripts,
+diffs and final responses are therefore scrubbed as they are written, and `scrub` re-applies
+the same substitutions to anything already stored:
+
+```sh
+python3 evals/run_eval.py scrub                 # whole results tree
+python3 evals/run_eval.py scrub --skill python-secure-coding
+```
+
+The substitutions are derived from the environment rather than hardcoded, so they work for any
+contributor, and they are deliberately not a single blanket redaction. The repository checkout
+becomes `/repo` and everything else under the real home becomes `/home/user`, because the
+difference between those two is the evidence: a path under `/repo` stayed inside the run's own
+directory, and one under `/home/user` reached out into the home the run was supposed to be
+isolated from. Collapsing both to one token would erase exactly what the isolation results are
+there to show. Sibling checkouts become `/home/user/other-checkout`, since naming what else
+happens to be cloned on the machine proves nothing.
+
+`scrub` is idempotent, so running it over an already-scrubbed tree reports zero changes, which
+is what makes it usable as a check before committing results.
+
 ### Repeating a measurement
 
 Both measuring subcommands take `--runs N`. A single run cannot separate a skill's effect from

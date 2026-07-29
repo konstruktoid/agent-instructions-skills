@@ -118,5 +118,6 @@
     }
   ],
   "passed": 6,
-  "total": 14
+  "total": 14,
+  "aborted": false
 }

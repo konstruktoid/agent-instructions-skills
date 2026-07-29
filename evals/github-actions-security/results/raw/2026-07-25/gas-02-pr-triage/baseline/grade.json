@@ -133,5 +133,9 @@
     }
   ],
   "passed": 13,
-  "total": 17
+  "total": 17,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false
 }
