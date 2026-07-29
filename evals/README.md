@@ -75,6 +75,28 @@ happens to be cloned on the machine proves nothing.
 `scrub` is idempotent, so running it over an already-scrubbed tree reports zero changes, which
 is what makes it usable as a check before committing results.
 
+A finished workspace is a git repository carrying build artifacts, a `.venv` among them, so it
+is gitignored rather than committed. `snapshot` reduces each one to a diff against the fixture's
+baseline commit, which is the form the evidence is committed in:
+
+```sh
+python3 evals/run_eval.py snapshot --skill python-secure-coding
+```
+
+### Correcting a grade without re-running
+
+`regrade` re-scores stored runs against the current `assertions.json` and calls no model, so
+fixing a faulty assertion costs nothing and leaves the transcripts untouched:
+
+```sh
+python3 evals/run_eval.py regrade --skill python-secure-coding
+```
+
+It re-runs the assertion commands only where the workspace is still on disk. In a fresh clone
+it is not, and the run is then reclassified from its transcript alone, which is how a stamp
+graded before the truncation policy existed comes to report its truncated runs. Follow a
+regrade with `report` to rewrite the results file.
+
 ### Repeating a measurement
 
 Both measuring subcommands take `--runs N`. A single run cannot separate a skill's effect from

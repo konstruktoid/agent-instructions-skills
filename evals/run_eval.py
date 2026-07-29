@@ -45,7 +45,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Sequence
+    from collections.abc import Callable, Iterable, Iterator, Sequence
+
+    # One unit of work handed to `execute`: a task or probe plus everything its runner
+    # needs, assembled by the subcommand that schedules it.
+    Job = dict[str, Any]
+    Worker = Callable[[Job], dict[str, Any]]
 
 EVALS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = EVALS_DIR.parent
@@ -278,16 +283,25 @@ def scrub_rules() -> list[tuple[re.Pattern[str], str]]:
     repo = str(REPO_ROOT)
     user = Path.home().name
     host = socket.gethostname()
-    # Claude Code encodes a project path as its directory name by replacing each separator
-    # with a dash, so every path above appears in a second form that needs the same care.
-    dashed = lambda text: text.replace("/", "-")  # noqa: E731
-    # A transcript is JSON, so a name that starts a captured line appears as `\n<name>`, where the
-    # character before the name is the `n` of the escape sequence rather than a separator. `\b`
-    # finds no boundary there and the name survives a scrub that reports nothing left to do, so
-    # the escapes are spelled out instead of relying on the word boundary alone.
-    bounded = lambda text: (  # noqa: E731
-        rf"(?:(?<=\\n)|(?<=\\t)|(?<=\\r)|(?<![0-9A-Za-z_])){re.escape(text)}(?![0-9A-Za-z_])"
-    )
+
+    def dashed(text: str) -> str:
+        """Encode a path as Claude Code names its project directory, separators as dashes.
+
+        Every path below therefore appears in a second form that needs the same care.
+        """
+        return text.replace("/", "-")
+
+    def bounded(text: str) -> str:
+        r"""Match a bare name, including where a JSON escape sequence precedes it.
+
+        A transcript is JSON, so a name that starts a captured line appears as `\n<name>`,
+        where the character before the name is the `n` of the escape sequence rather than a
+        separator. `\b` finds no boundary there and the name survives a scrub that reports
+        nothing left to do, so the escapes are spelled out rather than relying on the word
+        boundary alone.
+        """
+        return rf"(?:(?<=\\n)|(?<=\\t)|(?<=\\r)|(?<![0-9A-Za-z_])){re.escape(text)}(?![0-9A-Za-z_])"
+
     rules = [
         (re.escape(repo), REPO_PLACEHOLDER),
         (re.escape(dashed(repo)), dashed(REPO_PLACEHOLDER)),
@@ -351,6 +365,13 @@ def cmd_scrub(args: argparse.Namespace) -> int:
     return 0
 
 
+def as_text(stream: str | bytes | None) -> str:
+    """Return one captured subprocess stream as text, whatever form it arrived in."""
+    if isinstance(stream, bytes):
+        return stream.decode()
+    return stream or ""
+
+
 def invoke_claude(
     command: Sequence[str],
     cwd: Path,
@@ -372,16 +393,13 @@ def invoke_claude(
             timeout=timeout,
             check=False,
         )
-        stdout, stderr, returncode, timed_out = (
-            completed.stdout,
-            completed.stderr,
-            completed.returncode,
-            False,
-        )
+        stdout, stderr = completed.stdout, completed.stderr
+        returncode, timed_out = completed.returncode, False
     except subprocess.TimeoutExpired as expired:
-        stdout = expired.stdout.decode() if isinstance(expired.stdout, bytes) else expired.stdout
-        stderr = expired.stderr.decode() if isinstance(expired.stderr, bytes) else expired.stderr
-        stdout, stderr, returncode, timed_out = stdout or "", stderr or "", -1, True
+        # A timeout hands back whatever had been captured so far, as bytes or as text
+        # depending on how far the run got, and the partial transcript is worth keeping.
+        stdout, stderr = as_text(expired.stdout), as_text(expired.stderr)
+        returncode, timed_out = -1, True
 
     # Scrubbed on the way to disk, so a transcript is machine-agnostic from the moment it
     # is written and no separate step has to remember to clean it before it is committed.
@@ -630,7 +648,7 @@ def load_json(path: Path) -> dict[str, Any]:
         raise SystemExit(message) from exc
 
 
-def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
+def run_one_task(job: Job) -> dict[str, Any]:
     """Run and grade one (task, condition) pair, writing every artifact under raw/."""
     task, condition = job["task"], job["condition"]
     run_dir: Path = job["run_dir"]
@@ -686,7 +704,7 @@ def run_one_task(job: dict[str, Any]) -> dict[str, Any]:
     return outcome
 
 
-def run_one_trigger(job: dict[str, Any]) -> dict[str, Any]:
+def run_one_trigger(job: Job) -> dict[str, Any]:
     """Run one trigger probe and record whether the skill under test was invoked."""
     probe = job["probe"]
     run_dir: Path = job["run_dir"]
@@ -732,7 +750,7 @@ def today() -> str:
     return datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
 
 
-def execute(jobs: list[dict[str, Any]], worker: Any, parallel: int) -> list[dict[str, Any]]:  # noqa: ANN401
+def execute(jobs: list[Job], worker: Worker, parallel: int) -> list[dict[str, Any]]:
     """Run jobs through a bounded thread pool, preserving input order in the results."""
     if parallel <= 1:
         return [worker(job) for job in jobs]
@@ -1011,6 +1029,23 @@ def regrade_one(
     return outcome
 
 
+def wrap_prose(text: str, indent: str = "") -> list[str]:
+    """Wrap one paragraph of generated report prose to the repository's 100-column rule.
+
+    That rule applies to a generated Markdown file as much as to a hand-written one. Neither a
+    hyphen nor a long word is a break point here: an assertion id such as `actions-pinned-by-sha`
+    is a code span, and split across two lines Markdown renders the newline as a space, leaving
+    a gap in the middle of the id.
+    """
+    return textwrap.wrap(
+        text,
+        width=100,
+        subsequent_indent=indent,
+        break_on_hyphens=False,
+        break_long_words=False,
+    )
+
+
 def median(values: list[int]) -> float:
     """Return the median of a non-empty list, averaging the middle pair when even."""
     ordered = sorted(values)
@@ -1107,7 +1142,7 @@ def cost_section(
     if net_delta > 0:
         per_assertion = f"${(with_skill - baseline) / net_delta:.2f}"
     else:
-        per_assertion = "n/a — no gain"
+        per_assertion = "n/a, no gain"
     return [
         "## Cost of the measured gain",
         "",
@@ -1149,8 +1184,8 @@ def trigger_section(skill: str, stamp: str) -> list[str]:
         "|-------|----------|-------|---------|",
     ]
     for outcome in outcomes:
-        count = outcome.get("fired_count", int(outcome["fired"]))
-        fired = f"{count}/{passes}" if passes > 1 else str(outcome["fired"])
+        fired_count = outcome.get("fired_count", int(outcome["fired"]))
+        fired = f"{fired_count}/{passes}" if passes > 1 else str(outcome["fired"])
         correct_cell = "yes" if outcome["correct"] else "NO"
         lines.append(f"| `{outcome['id']}` | {outcome['expect']} | {fired} | {correct_cell} |")
     lines.append("")
@@ -1224,12 +1259,11 @@ def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list
     if not named:
         return []
     return [
-        *textwrap.wrap(
-            f"Aborted runs: {len(named)} — {', '.join(named)}. Each ended with a non-zero "
+        *wrap_prose(
+            f"Aborted runs ({len(named)}): {', '.join(named)}. Each ended with a non-zero "
             "exit or an error result, so the transcript is partial and the score it would "
             "have produced measures where the run stopped. These are excluded from the "
-            "medians and the delta above.",
-            width=100,
+            "medians and the delta above."
         ),
         "",
     ]
@@ -1245,22 +1279,19 @@ def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> lis
     """
     maxed = []
     for task_id, conditions in by_task.items():
-        runs = [
-            run for condition in CONDITIONS for run in graded_runs(conditions.get(condition, []))
-        ]
-        both_arms = all(graded_runs(conditions.get(condition, [])) for condition in CONDITIONS)
-        if runs and both_arms and all(run["passed"] == run["total"] for run in runs):
+        arms = [graded_runs(conditions.get(condition, [])) for condition in CONDITIONS]
+        runs = [run for arm in arms for run in arm]
+        if all(arms) and all(run["passed"] == run["total"] for run in runs):
             maxed.append(task_id)
     if not maxed:
         return []
     named = ", ".join(f"`{task_id}`" for task_id in maxed)
     return [
-        *textwrap.wrap(
+        *wrap_prose(
             f"Failed to discriminate: {named}. Every finished run of both conditions scored "
             "full marks, so there was no headroom for the skill to show an effect. This "
             "measures the difficulty of the fixture rather than the skill, and the fixture "
-            "is what should change.",
-            width=100,
+            "is what should change."
         ),
         "",
     ]
@@ -1278,12 +1309,11 @@ def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> li
     if not named:
         return ["Truncated runs: none.", ""]
     return [
-        *textwrap.wrap(
-            f"Truncated runs: {len(named)} — {', '.join(named)}. Each ended with background "
+        *wrap_prose(
+            f"Truncated runs ({len(named)}): {', '.join(named)}. Each ended with background "
             "work outstanding or a scheduled wakeup that cannot fire under non-interactive "
             "`claude -p`, so it was graded on whatever it had said by then. These are "
-            "excluded from the medians and the delta above.",
-            width=100,
+            "excluded from the medians and the delta above."
         ),
         "",
     ]
@@ -1313,16 +1343,7 @@ def failure_section(
                 rendered = "not measured"
             else:
                 rendered = ", ".join(f"`{name}`" for name in failures) if failures else "none"
-            # Wrapped to the repository's 100-column Markdown rule, which applies to this
-            # generated file as much as to a hand-written one.
-            lines.append(
-                textwrap.fill(
-                    f"- `{task_id}` [{condition}]: {rendered}",
-                    width=100,
-                    subsequent_indent="  ",
-                    break_long_words=False,
-                )
-            )
+            lines += wrap_prose(f"- `{task_id}` [{condition}]: {rendered}", indent="  ")
     lines.append("")
     return lines
 
@@ -1365,7 +1386,7 @@ def render_report(skill: str, stamp: str) -> str:
     lines += truncated_section(by_task)
     lines += aborted_section(by_task)
     lines += undiscriminating(by_task)
-    if total_delta == 0 and by_task:
+    if total_delta == 0:
         lines += [
             "The skill produced no net measurable improvement on these tasks.",
             "",
