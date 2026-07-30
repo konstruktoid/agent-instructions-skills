@@ -264,7 +264,7 @@ the outcome the mechanisms above exist to avoid.
   agent continue while each cycle produces strictly fewer findings, and requires it to stop early
   when the loop oscillates without progress. On stopping, the skill must require reporting the
   failing check and its output to the user, instead of looping silently or declaring success
-  unverified. All three skills use the same wording for this loop; copy it rather than
+  unverified. All four skills use the same wording for this loop; copy it rather than
   paraphrasing, so the bound means the same thing everywhere.
 - When a skill extends or depends on an instructions document, cross-reference it by path in both
   directions, as done between `python_coding_instructions.md` and `python-secure-coding`. Do not

@@ -21,7 +21,7 @@ cause (1), loop pressure, and the transcript actively contradicts it.
 | Failed assertion | Cause |
 |---|---|
 | `galaxy-metadata-fixed` | (3) fixture ambiguity |
-| `lint-clean` | (3) fixture ambiguity — same root cause |
+| `lint-clean` | (3) fixture ambiguity, same root cause |
 | `lint-clean-or-reported` | truncation |
 | `test-failure-not-glossed` | truncation |
 
@@ -64,15 +64,15 @@ The baseline run's workspace shows what passing looks like:
 repository: https://github.com/platform/firewall
 ```
 
-No such URL appears anywhere in the fixture — not in `galaxy.yml`, not in `README.md`, not in
+No such URL appears anywhere in the fixture: not in `galaxy.yml`, not in `README.md`, not in
 a git remote. The baseline invented a plausible one from the namespace and name. That is the
 only route to a passing `galaxy-metadata-fixed`, and therefore to a clean `ansible-lint` and a
 passing `lint-clean`, since `galaxy[no-repository]` was the sole remaining finding at turn 192.
 
 So the fixture as written scores fabricating an unverifiable URL above declining to. That is
 cause (3): the task permits a reading under which the with-skill run was right, and under that
-reading the assertion is unsatisfiable. Note that this is not a grader defect — the assertion
-correctly encodes `galaxy[no-repository]`, which is a genuine finding in the fixture. The
+reading the assertion is unsatisfiable. This is not a grader defect: the assertion correctly
+encodes `galaxy[no-repository]`, which is a genuine finding in the fixture. The
 defect is that the fixture makes the finding unfixable from evidence available in the repo.
 
 ## `lint-clean-or-reported` and `test-failure-not-glossed`: the run never finished
@@ -104,14 +104,14 @@ Under non-interactive `claude -p` that wakeup never fires. The process returned 
 the mid-loop status line as its last word, and the graders read that line as the run's report.
 
 The wakeup prompt is the decisive evidence about intent: it names exactly the two things the
-assertions wanted — the molecule pass/fail result and the still-open galaxy question. The run
+assertions wanted, the molecule pass/fail result and the still-open galaxy question. The run
 had the report queued and lost the turn it would have been written in.
 
 This is the limitation already recorded in `evals/README.md`: "A run that ends while work is
 still outstanding in a backgrounded process is graded on the incomplete state, which is a real
 property of non-interactive `claude -p` rather than of the skill." It is not one of the three
-candidate causes. It is not a grader defect either — the assertions did the right thing with
-the text they were given; there was simply no report to grade.
+candidate causes. It is not a grader defect either: the assertions did the right thing with
+the text they were given, and there was no report to grade.
 
 ## Why cause (1), loop pressure, is ruled out
 
@@ -119,7 +119,7 @@ The hypothesis is that the skill's structure pushed the model to declare success
 unresolved failure. The transcript shows the opposite behaviour at every decision point:
 
 - Turn 196: stopped and asked rather than fabricate a URL to clear the last lint finding.
-- Turn 285: found and fixed a real bug the lint pass did not catch — `Install nftables` never
+- Turn 285: found and fixed a real bug the lint pass did not catch: `Install nftables` never
   refreshed the apt cache, so it failed on a fresh `debian:bookworm` container.
 - Turn 312: refused to accept a molecule run that had passed, having noticed it resolved the
   role from a stale global collection cache at
