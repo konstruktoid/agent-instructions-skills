@@ -1,0 +1,4 @@
+job,status,duration
+build,pass,120
+test,pass,300
+lint,fail,20

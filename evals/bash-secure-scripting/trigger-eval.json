@@ -1,0 +1,60 @@
+{
+  "skill": "bash-secure-scripting",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Two of the out-of-scope probes are the cases the skill's 'When NOT to use this' section names explicitly: a script that must run under POSIX sh, and shell built inside another language.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "bss-t01",
+      "expect": "trigger",
+      "prompt": "Write a script that archives /etc into a tarball on the backup share and keeps the last seven copies."
+    },
+    {
+      "id": "bss-t02",
+      "expect": "trigger",
+      "prompt": "Our deploy script builds the ssh command by interpolating the branch name into a string. Review it before we hand it to CI."
+    },
+    {
+      "id": "bss-t03",
+      "expect": "trigger",
+      "prompt": "The nightly cron script leaves its temporary directory behind whenever a step fails halfway. Fix the cleanup."
+    },
+    {
+      "id": "bss-t04",
+      "expect": "trigger",
+      "prompt": "Add argument parsing to the container entrypoint script so it accepts a --config path and passes the rest through."
+    },
+    {
+      "id": "bss-t05",
+      "expect": "trigger",
+      "prompt": "The provisioning script keeps the database password in a variable and hands it to mysql on the command line. Sort that out."
+    },
+    {
+      "id": "bss-t06",
+      "expect": "no-trigger",
+      "prompt": "This has to run as a Debian maintainer script under dash, so keep it POSIX sh with no bashisms."
+    },
+    {
+      "id": "bss-t07",
+      "expect": "no-trigger",
+      "prompt": "Our Python code calls subprocess with shell=True and a formatted string. Rewrite that call."
+    },
+    {
+      "id": "bss-t08",
+      "expect": "no-trigger",
+      "prompt": "Explain how job control works in an interactive bash session. No code changes needed."
+    },
+    {
+      "id": "bss-t09",
+      "expect": "no-trigger",
+      "prompt": "Add a step to the GitHub Actions workflow that uploads the build artifact after the tests pass."
+    },
+    {
+      "id": "bss-t10",
+      "expect": "no-trigger",
+      "prompt": "Our Ansible role uses the shell module to create an account. Replace it with the user module."
+    }
+  ]
+}

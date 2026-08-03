@@ -1,0 +1,2 @@
+# Provisioning queue, processed nightly as root.
+0 3 * * * root /opt/provisioning/sbin/provision-user.sh $(cat /var/lib/provisioning/next)

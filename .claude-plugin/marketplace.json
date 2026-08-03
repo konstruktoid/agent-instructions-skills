@@ -17,6 +17,16 @@
       ]
     },
     {
+      "name": "bash-standards",
+      "source": "./",
+      "strict": false,
+      "description": "Bash authoring standards: scripts that fail loudly rather than silently, built on strict-mode semantics, cleanup on every exit path, injection-safe handling of untrusted input, controlled PATH and environment, and credentials that stay out of the process table and the logs, plus test coverage that matches the target repository's existing layout. Each skill runs a bounded verify-fix loop with shellcheck and bash -n.",
+      "skills": [
+        "./skills/bash/bash-secure-scripting",
+        "./skills/bash/bash-testing"
+      ]
+    },
+    {
       "name": "ansible-standards",
       "source": "./",
       "strict": false,

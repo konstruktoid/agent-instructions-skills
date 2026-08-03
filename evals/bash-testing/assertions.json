@@ -1,0 +1,277 @@
+{
+  "skill": "bash-testing",
+  "notes": [
+    "The shared assertions are the skill's own claims: the existing convention is matched, no second framework appears beside it, the suite is run rather than described, and the change is pinned by a test that exercises the defect.",
+    "`fix-works` and `rejects-empty-name` grade the behavior the prompt asked for, so a run that writes a test but breaks the script cannot pass on test files alone.",
+    "`suite-passes-if-bats-available` exits 0 when bats is not installed, so the assertion never fails for a reason the run had no control over. Provision bats through EVAL_TOOL_BIN to make it a real check.",
+    "Assertion commands run under /bin/sh, so they avoid bashisms. Commands that need a temporary file write it inside the workspace and remove it again."
+  ],
+  "tasks": {
+    "bt-01-plain-suite": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "make test",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "make test|run-tests\\.sh",
+        "source": "SKILL.md Verify: run the suite, do not describe it"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "command": "{ git diff --name-only \"$EVAL_BASE_SHA\" -- test; git ls-files --others --exclude-standard -- test; } | grep -q .",
+        "source": "SKILL.md table: a bug fix requires a test"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "command": "ls test/test_*.sh > /dev/null 2>&1 && grep -rq 'helpers.sh' test/",
+        "source": "SKILL.md Steps: write the test in the discovered style"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "command": "! find . \\( -name '*.bats' -o -name 'conftest.py' -o -name 'shunit2*' \\) | grep -q .",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "command": "grep -rqE -- '--exclude=' test/",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'assert_status|[$][?]|status' test/",
+        "source": "SKILL.md: assert the status, not only the output"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "command": "test -f test/test_mkbackup_basic.sh && grep -q assert_status test/test_mkbackup_basic.sh",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "command": "d=./eval-check-1; rm -rf \"$d\"; mkdir -p \"$d/src/skipme\" \"$d/src/keepme\"; echo x > \"$d/src/skipme/f\"; echo y > \"$d/src/keepme/f\"; ./bin/mkbackup.sh --exclude=skipme \"$d/src\" \"$d/out.tar.gz\" > /dev/null 2>&1 && ! tar --list --file \"$d/out.tar.gz\" | grep -q skipme; rc=$?; rm -rf \"$d\"; exit $rc",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "command": "d=./eval-check-2; rm -rf \"$d\"; mkdir -p \"$d/src/skipme\" \"$d/src/keepme\"; echo x > \"$d/src/skipme/f\"; echo y > \"$d/src/keepme/f\"; ./bin/mkbackup.sh --exclude skipme \"$d/src\" \"$d/out.tar.gz\" > /dev/null 2>&1 && ! tar --list --file \"$d/out.tar.gz\" | grep -q skipme; rc=$?; rm -rf \"$d\"; exit $rc",
+        "source": "task prompt: both spellings behave the same"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "find . -name '*.sh' -print0 | xargs -0 -r shellcheck",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "command": "! git status --porcelain | grep -qE '\\.tar\\.gz|eval-check'",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory"
+      }
+    ],
+    "bt-02-bats-suite": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "command": "command -v bats > /dev/null 2>&1 || exit 0; bats test/",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "bats|make test",
+        "source": "SKILL.md Verify: run the suite, do not describe it"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "command": "{ git diff --name-only \"$EVAL_BASE_SHA\" -- test; git ls-files --others --exclude-standard -- test; } | grep -q '\\.bats$'",
+        "source": "SKILL.md table: changed output format requires a test"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "command": "grep -q '@test' test/*.bats && grep -qE 'run |[$]status' test/*.bats",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "command": "! find . \\( -name 'test_*.sh' -o -name '*_test.sh' -o -name 'conftest.py' \\) | grep -q .",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "command": "grep -qi 'json' test/*.bats",
+        "source": "SKILL.md table: new behavior requires a test"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "command": "./bin/report.sh --json data/sample.csv | python3 -c 'import json,sys; json.load(sys.stdin)'",
+        "source": "task prompt: print the counters as machine-readable JSON"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "command": "test \"$(./bin/report.sh data/sample.csv)\" = 'total=3 passed=2 failed=1'",
+        "source": "task prompt: the existing text output must stay exactly as it is"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "command": "./bin/report.sh > /dev/null 2>&1; test $? -eq 64",
+        "source": "SKILL.md: assert the status, not only the output"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/report.sh",
+        "source": "SKILL.md checklist: shellcheck clean"
+      }
+    ],
+    "bt-03-inline-script": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "make test",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "make test|_test\\.sh",
+        "source": "SKILL.md Verify: run the suite, do not describe it"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "command": "! ./bin/mkuser-config.sh --name '' --out ./eval-check.conf > /dev/null 2>&1; rc=$?; rm -f ./eval-check.conf; exit $rc",
+        "source": "task prompt: reject an empty name with a non-zero exit status"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "command": "./bin/mkuser-config.sh --name '' --out ./eval-check.conf 2>&1 > /dev/null | grep -q .; rc=$?; rm -f ./eval-check.conf; exit $rc",
+        "source": "SKILL.md: assert that diagnostics go to stderr"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "command": "./bin/mkuser-config.sh --name alice --out ./eval-check.conf > /dev/null && grep -q '^alice:' ./eval-check.conf; rc=$?; rm -f ./eval-check.conf; exit $rc",
+        "source": "SKILL.md: the full suite passes, not only the new test"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "command": "grep -q 'BASH_SOURCE' bin/mkuser-config.sh && grep -qE 'main \"[$][@{]' bin/mkuser-config.sh",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "command": "{ git diff --name-only \"$EVAL_BASE_SHA\"; git ls-files --others --exclude-standard; } | grep -qE '_test\\.sh$'",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "command": "find . -name '*_test.sh' | grep -q . && ! find . \\( -name '*.bats' -o -name 'test_*.sh' \\) | grep -q .",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "command": "grep -rlE -- '--name' --include='*_test.sh' . | grep -q . && grep -rqE \"''|\\\"\\\"\" --include='*_test.sh' .",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "find . -name '*.sh' -print0 | xargs -0 -r shellcheck",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "command": "! git status --porcelain | grep -q 'eval-check'",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory"
+      }
+    ],
+    "bt-04-no-suite": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "command": "! ./bin/prune-artifacts.sh ./no-such-artifact-dir > /dev/null 2>&1",
+        "source": "task prompt: fail loudly when the artifact directory does not exist"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "command": "./bin/prune-artifacts.sh ./no-such-artifact-dir 2>&1 > /dev/null | grep -q .",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "command": "./bin/prune-artifacts.sh artifacts > /dev/null",
+        "source": "SKILL.md: existing behavior must still pass"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "command": "ls artifacts/*.tar.gz > /dev/null 2>&1",
+        "source": "SKILL.md: never test a destructive script against real paths"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "pattern": "prune-artifacts\\.sh",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "pattern": "prune-artifacts\\.sh[^\\n]*(missing|absent|nonexistent|no-such|does-not-exist|doesnotexist|/tmp/)",
+        "source": "SKILL.md Verify: including one failure path"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "pattern": "(no (automated )?tests?|without a test|no test suite|no shell test|added a test|test (was|is) )",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "command": "grep -qE 'set -[A-Za-z]*e|set -o errexit' bin/prune-artifacts.sh",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "find . -name '*.sh' -print0 | xargs -0 -r shellcheck",
+        "source": "SKILL.md checklist: shellcheck clean"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "command": "! git status --porcelain | grep -qE 'no-such-artifact-dir|eval-check'",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory"
+      }
+    ]
+  }
+}
