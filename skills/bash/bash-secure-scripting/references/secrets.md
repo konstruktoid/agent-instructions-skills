@@ -83,9 +83,27 @@ with tracing still disabled, or, in the naive version, leaves the restore unreac
 Sending the trace elsewhere reduces the audience but does not make tracing safe:
 
 ```bash
+readonly TRACE_FILE='/var/log/script.trace'   # a root-owned directory, not /tmp
+
 umask 077
-exec {BASH_XTRACEFD}>>/var/log/script.trace   # Bash 4.1 or later
+rm -f -- "${TRACE_FILE}"        # drops a leftover file or a planted symlink
+set -C                          # noclobber: the create fails if it reappeared
+: > "${TRACE_FILE}"
+set +C
+
+exec {BASH_XTRACEFD}>"${TRACE_FILE}"   # Bash 4.1 or later
+set -x
+...
+set +x
+exec {BASH_XTRACEFD}>&-         # close it once tracing is no longer needed
 ```
+
+`umask` applies only when the file is created. Opening an existing path with `>>` keeps whatever
+mode that file already had and follows a symlink to its target, so a pre-created `0644` file, a
+symlink into a world-readable location, or a path under a directory someone else can write to
+receives the expanded credentials instead. Create the file fresh under `noclobber`, or validate
+ownership, file type, and mode `0600` before opening it with the `require_secure_file` check from
+[filesystem.md](filesystem.md).
 
 The file receives the same fully expanded commands, secrets included, so it needs a trusted path
 that only root can write to, mode `0600`, and a retention policy — it is now a credential store.

@@ -103,6 +103,19 @@ Fail immediately with a clear message when a required program is missing, rather
 through:
 
 ```bash
+# Defined before anything that can call it: a guard that aborts while resolving its
+# own error helper reports "command not found" instead of the status it documents.
+err() {
+  printf '%s: %s\n' "${0##*/}" "$*" >&2
+}
+
+die() {
+  local status="$1"
+  shift
+  err "$*"
+  exit "${status}"
+}
+
 require_commands() {
   local cmd missing=()
   for cmd in "$@"; do
@@ -133,6 +146,13 @@ the script:
 ((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 4))) ||
   die 69 'bash 4.4 or later is required'
 ```
+
+Both guards call `die`, so `die` and the `err` it uses must be defined above them, as in
+`require_commands` earlier in this section. A guard placed before its helper aborts with
+`die: command not found` on exactly the old Bash it was written to detect, and returns 127 rather
+than the status it documents. Keep the helper definitions immediately after strict mode, before the
+first check that can fail. `die` is the same helper described in
+[error-handling.md](error-handling.md).
 
 ## The contexts a script actually runs in
 
