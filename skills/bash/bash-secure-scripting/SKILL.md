@@ -59,6 +59,12 @@ Every script, without exception:
 - **Start in strict mode.** `set -Eeuo pipefail` on the line after the header comment. `-E` makes
   an `ERR` trap apply inside functions, subshells, and command substitutions, which plain `-e`
   does not. Add `shopt -s inherit_errexit` where the target is Bash 4.4 or later.
+- **A sourced library sets nothing.** Strict mode belongs to the entrypoint that runs. A library
+  runs in the caller's shell, so `set`, `shopt`, `trap`, and `IFS` at its top level silently
+  rewrite the behavior of every script that sources it, including ones written to run without
+  `errexit`. A library defines functions and constants, returns a status, and leaves the caller's
+  options and traps as it found them. Where a function needs an option, set it inside that
+  function and restore the previous value before returning.
 - **Know what strict mode does not catch.** `errexit` is ignored for commands in a condition, in
   `&&` or `||` chains other than the final command, in a pipeline other than the last element, and
   under `!`. Strict mode is a backstop, not a substitute for checking the commands whose failure
@@ -92,6 +98,13 @@ A script meeting the baseline:
 set -Eeuo pipefail
 shopt -s inherit_errexit
 
+# Runs from cron as root: the environment is the caller's, so set what matters.
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+export PATH
+export LC_ALL=C
+export TMPDIR=/var/tmp        # not a caller-chosen directory
+umask 077
+
 readonly PROGNAME="${0##*/}"
 readonly RETENTION_DIR="/var/backups/logs"
 
@@ -103,7 +116,10 @@ err() {
 }
 
 cleanup() {
-  [[ -n ${workdir} && -d ${workdir} ]] && rm -rf -- "${workdir}"
+  if [[ -n ${workdir} && -d ${workdir} ]]; then
+    rm -rf -- "${workdir}"
+  fi
+  return 0
 }
 
 # Archives the log directory of one service into a caller-provided directory.
@@ -140,7 +156,7 @@ main() {
 main "$@"
 ```
 
-Two properties of that skeleton are easy to get wrong:
+Four properties of that skeleton are easy to get wrong:
 
 - Cleanup belongs on `EXIT`, which runs when `errexit` aborts the script. A `RETURN` trap does not:
   when a command inside a function fails under `errexit`, the shell exits without running that
@@ -149,6 +165,15 @@ Two properties of that skeleton are easy to get wrong:
   that was `local` to a function runs after that function has returned, so the name is unset and,
   under `nounset`, the cleanup itself fails and removes nothing. Keep the path in a script-scope
   variable, as above.
+- Cleanup returns success even when there was nothing to clean. Written as
+  `[[ -n ${workdir} ]] && rm -rf -- "${workdir}"`, the function returns 1 whenever the directory
+  is absent, and as the last command in an `EXIT` trap that becomes the script's exit status: a
+  run that succeeded reports failure.
+- The environment is set before anything uses it. This script archives `/var/log` and writes under
+  `/var/backups` as root, so an inherited `PATH` decides which `tar`, `date`, and `mktemp` run, and
+  an inherited `TMPDIR` decides where `mktemp -d` puts the data. Set both, plus `umask`, at the top
+  rather than trusting whoever invoked the script. See
+  [references/environment.md](references/environment.md).
 
 See [references/error-handling.md](references/error-handling.md) for the signal cases `EXIT` alone
 misses.
@@ -231,8 +256,10 @@ clean run.
 - [ ] Formatter reports no diff, where the repository configures one
 - [ ] The script was executed on a representative input and on at least one failure path, with the
       exit status checked and no temporary files left behind
-- [ ] `set -Eeuo pipefail` present, and every command whose failure matters in a condition, a
-      `&&`/`||` chain, or a pipeline is checked explicitly rather than left to `errexit`
+- [ ] `set -Eeuo pipefail` present in every entrypoint, absent from every sourced library along with
+      any other change to the caller's options or traps, and every command whose failure matters in
+      a condition, a `&&`/`||` chain, or a pipeline is checked explicitly rather than left to
+      `errexit`
 - [ ] Every expansion that can hold data is quoted, lists are arrays, and no command is built by
       concatenating a string
 - [ ] No untrusted data reaches `eval`, `bash -c`, an `ssh` remote command, or a string interpreted
@@ -242,8 +269,8 @@ clean run.
       environment variables
 - [ ] No credential in a command-line argument, in `set -x` output, in a log, or in a tracked file
 - [ ] File modes are least-privilege, and no shell script is setuid or setgid
-- [ ] Destructive operations are guarded: `rm -rf -- "${dir:?}"` rather than an unguarded expansion,
-      and the script is safe to rerun after a partial failure
+- [ ] Destructive operations are guarded by an allowlisted parent or a `mktemp -d` directory, not by
+      `${dir:?}` alone, and the script is safe to rerun after a partial failure
 - [ ] Nothing committed carries user or system information: no home-directory paths, usernames,
       uids, hostnames, internal IPs, or real email addresses in scripts, fixtures, or captured output
 - [ ] Every reference file matched in the triage table was read and applied

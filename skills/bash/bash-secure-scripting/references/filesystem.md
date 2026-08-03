@@ -50,14 +50,24 @@ safer answer is not to work in a shared directory at all.
 ## Destructive commands
 
 ```bash
-rm -rf -- "${build_dir:?build_dir is unset}"/    # never expands to / or an empty path
+# Two separate checks: :? rejects the empty value, the resolved-path test rejects
+# everything else that must not be deleted.
+target="$(realpath -- "${build_dir:?build_dir is unset}")"
+[[ ${target} == "${BUILD_ROOT}"/?* ]] || die 78 "refusing to remove ${target}"
+rm -rf -- "${target}"
 ```
 
 - Use `${var:?message}` in any `rm`, `mv`, `chown`, `chmod -R`, or `find -delete` path built from a
   variable. Under `set -u` an unset variable already aborts, but `:?` also catches the empty
   string, which is the case that produces `rm -rf /`.
+- **`${var:?}` is not a destructive-operation guard on its own.** It rejects unset and empty, and
+  nothing else: `/`, `//`, `.`, `..`, `${HOME}`, and `/tmp/..` all pass it and all resolve
+  somewhere the script has no business deleting. The guard is the second check — resolve the path
+  and confirm it sits under a directory the script owns, either an allowlisted parent as above or
+  a directory the script created itself with `mktemp -d`. Delete only paths the script created or
+  was configured to manage.
 - `rm -rf "${dir}/"*` deletes the contents of `/` when `dir` is empty. ShellCheck reports this as
-  `SC2115`; write `"${dir:?}/"*`.
+  `SC2115`; write `"${dir:?}/"*`, and still bound `dir` to an allowlisted parent.
 - Pass `--` before every path operand, and prefix globs with `./`, so a filename beginning with a
   hyphen is not read as an option.
 - Prefer a narrow `find` over a broad `rm -rf`: `find "${dir:?}" -xdev -mindepth 1 -maxdepth 1

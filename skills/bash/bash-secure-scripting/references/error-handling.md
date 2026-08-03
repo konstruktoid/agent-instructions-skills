@@ -12,7 +12,10 @@ workdir=''      # script scope: the trap body runs after main has returned
 
 # Removes the work directory. Safe to run more than once, and before it exists.
 cleanup() {
-  [[ -n ${workdir} && -d ${workdir} ]] && rm -rf -- "${workdir}"
+  if [[ -n ${workdir} && -d ${workdir} ]]; then
+    rm -rf -- "${workdir}"
+  fi
+  return 0
 }
 
 main() {
@@ -39,6 +42,10 @@ Rules that follow from how traps behave:
 - **Cleanup must be idempotent and must not fail.** It can run at any point, including before the
   resource exists. Guard every removal with a test, and do not let a failure inside cleanup mask
   the original error.
+- **Guard with `if`, not with `test && command`.** A `[[ -n ${workdir} ]] && rm …` line returns 1
+  when the resource is absent, and that status is the function's status. As the last command in an
+  `EXIT` trap it becomes the script's exit status, so a successful run reports failure because
+  there was nothing to remove. Use an `if` block and `return 0`, as above.
 - **`SIGKILL` and `SIGSTOP` cannot be trapped.** Anything that must survive a hard kill needs a
   location that is cleaned externally, such as a `mktemp -d` under a systemd `RuntimeDirectory`, or
   a startup sweep of the script's own stale files.
@@ -51,14 +58,19 @@ promptly by a signal the script does not trap, and the exit status of a script t
 up, and re-raising it with the default disposition:
 
 ```bash
-on_interrupt() {
-  cleanup "${workdir}"
-  trap - INT           # restore the default handler
-  kill -INT "$$"       # die of the signal, so the caller sees 130
+on_signal() {
+  local signal="$1"
+  cleanup
+  trap - "${signal}"        # restore the default handler for the signal received
+  kill -s "${signal}" "$$"  # die of that signal: 130 for INT, 143 for TERM
 }
-trap on_interrupt INT
-trap on_interrupt TERM
+trap 'on_signal INT' INT
+trap 'on_signal TERM' TERM
 ```
+
+Pass the signal name into the handler and re-raise the one that arrived. A handler shared between
+`INT` and `TERM` that always sends `INT` reports every termination as 130, so a caller that
+distinguishes a user interrupt from a scheduler timeout sees the wrong one.
 
 For a script whose work is done by background children, kill the process group in the handler
 (`kill -- -$$` from a script that is a process group leader) so children do not outlive it.
@@ -125,24 +137,64 @@ output file, which is how a script ends up installing an HTML page as a binary.
 ## Retries
 
 Retry only operations that are safe to repeat, and only transient failures. Bound the attempts and
-back off:
+back off. Where the tool distinguishes transient failures itself, let it: `curl --retry` retries
+408, 429, and the 5xx statuses, honors `Retry-After`, and backs off exponentially, while a shell
+loop around `curl -f` also retries 401, 403, and 404, which will never succeed.
 
 ```bash
-fetch_with_retry() {
-  local url="$1" dest="$2" attempt delay=1
-  for attempt in 1 2 3; do
-    if curl -fsS --max-time 30 -o "${dest}" -- "${url}"; then
-      return 0
-    fi
-    err "attempt ${attempt} for ${url} failed, retrying in ${delay}s"
-    sleep "${delay}"
-    delay=$((delay * 2))
-  done
-  return 1
+fetch() {
+  local url="$1" dest="$2" tmp
+
+  # Same filesystem as the destination, so the move at the end is atomic and a
+  # failed transfer never leaves a partial file under the final name.
+  tmp="$(mktemp -- "${dest}.XXXXXX")"
+
+  if ! curl --proto '=https' --tlsv1.2 -fsS --max-time 30 \
+      --retry 3 --retry-delay 1 --retry-connrefused -o "${tmp}" -- "${url}"; then
+    rm -f -- "${tmp}"
+    err "download of ${dest} failed"   # not the URL: it can carry a token
+    return 1
+  fi
+
+  mv -- "${tmp}" "${dest}"
 }
 ```
 
-An unbounded `while ! command; do sleep 1; done` is not a retry, it is a hang.
+Two things that example is doing deliberately:
+
+- **The destination is written once, by `mv`.** `curl -o "${dest}"` leaves whatever arrived before
+  the failure in place, so the next reader gets a truncated file with no indication that anything
+  went wrong. `--remove-on-error` covers the same ground for `curl` specifically; the temporary
+  file and `mv` work for any producer.
+- **The diagnostic names the destination, not the URL.** A URL routinely carries basic-auth
+  credentials, an access token, or a signed query string, and stderr from a `cron` job or a CI step
+  is retained and often readable by more people than the credential is.
+
+For a command with no retry logic of its own, wrap it in a bounded loop, and check the status
+before backing off so a permanent failure fails immediately:
+
+```bash
+retry() {
+  local attempts="$1" delay=1 attempt status=0
+  shift
+  for ((attempt = 1; attempt <= attempts; attempt++)); do
+    status=0
+    "$@" || status=$?
+    if ((status == 0)); then
+      return 0
+    fi
+    is_transient "${status}" || return "${status}"
+    sleep "${delay}"
+    delay=$((delay * 2))
+  done
+  return "${status}"
+}
+```
+
+`is_transient` is the part that has to be written per command: it decides which exit statuses are
+worth another attempt. Without it the loop turns a permanent error into the same error, several
+attempts and several sleeps later. An unbounded `while ! command; do sleep 1; done` is not a retry,
+it is a hang.
 
 ## Concurrency
 

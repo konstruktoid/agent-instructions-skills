@@ -49,8 +49,14 @@ Two defenses, used together:
   environment, and `sudo` with `env_reset` (the default) and a minimal `env_keep` does the same:
 
   ```bash
-  env -i PATH="${PATH}" HOME="${HOME}" LC_ALL=C /usr/local/sbin/privileged-helper -- "${arg}"
+  env -i PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' LC_ALL=C \
+    /usr/local/sbin/privileged-helper -- "${arg}"
   ```
+
+  Set each variable to a literal the script controls. `PATH="${PATH}"` and `HOME="${HOME}"` copy
+  the caller's values straight back into the child, which is the thing `env -i` was there to
+  prevent. Pass `HOME`, `TMPDIR`, or anything else only when the helper needs it and only as a
+  fixed path.
 
 Bash's privileged mode (`bash -p`, `set -p`) ignores `BASH_ENV`, `ENV`, `SHELLOPTS`, `CDPATH`, and
 `GLOBIGNORE`, and does not inherit shell functions from the environment. It is worth knowing, but
@@ -113,10 +119,19 @@ status (`shellcheck -o deprecate-which` reports it). Where the script relies on 
 options (`sed -i`, `readlink -f`, `date -d`, `stat -c`, `sort -z`), either test for the GNU variant
 or document that the script requires GNU coreutils.
 
-For a Bash feature newer than 3.2, guard on the version rather than failing with a syntax error:
+For a Bash feature newer than 3.2, guard on the version rather than failing with a syntax error,
+and guard on the version that feature actually needs. `mapfile`, `declare -A`, and `globstar`
+arrived in 4.0, but `{fd}>file` and `BASH_XTRACEFD` need 4.1, and `${var@Q}` and
+`shopt -s inherit_errexit` need 4.4, so a major-version-only test passes on a Bash that cannot run
+the script:
 
 ```bash
-((BASH_VERSINFO[0] >= 4)) || die 69 "bash 4.0 or later is required"
+# Bash 4.0 or later: mapfile, declare -A, globstar.
+((BASH_VERSINFO[0] >= 4)) || die 69 'bash 4.0 or later is required'
+
+# Bash 4.4 or later: ${var@Q}, shopt -s inherit_errexit. Compare the minor version too.
+((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 4))) ||
+  die 69 'bash 4.4 or later is required'
 ```
 
 ## The contexts a script actually runs in

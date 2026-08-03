@@ -53,10 +53,13 @@ Two skills build on this document and are worth applying alongside it:
   `# shellcheck source=path/to/lib.sh` directive, or set `source-path=SCRIPTDIR` in `.shellcheckrc`.
   Resolving the source is preferable to silencing `SC1091`.
 - State the Bash version the script requires when it uses a feature that is not in Bash 3.2, which
-  is what macOS ships. `mapfile`/`readarray`, associative arrays (`declare -A`), `globstar`, and
-  `${var@Q}` all need Bash 4.0 or later. If the repository targets Linux only, that is an
-  acceptable answer; record it rather than leaving it implicit, and add a version guard where a
-  user could plausibly run the script on an older Bash.
+  is what macOS ships. `mapfile`/`readarray`, associative arrays (`declare -A`), and `globstar`
+  need Bash 4.0 or later; `{fd}>file` descriptor allocation and `BASH_XTRACEFD` need 4.1; the
+  `${var@Q}` family of parameter transformations and `shopt -s inherit_errexit` need 4.4. If the
+  repository targets Linux only, that is an acceptable answer; record it rather than leaving it
+  implicit, and add a version guard where a user could plausibly run the script on an older Bash.
+  Guard on the version the feature actually needs, comparing the minor version too where it is not
+  a `.0` release.
 
 ### Avoid
 

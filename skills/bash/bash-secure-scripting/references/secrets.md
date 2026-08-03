@@ -56,15 +56,41 @@ the script itself, parse the values instead of sourcing them.
 `set -x` prints every command with its arguments expanded, so it prints secrets. In CI, where the
 log may be public, this is the most common way a credential escapes.
 
+Turn it off around the sensitive section, and restore the state that was actually there rather than
+assuming it was on:
+
 ```bash
-set +x                       # disable around the sensitive section
-authenticate "${token}"
-set -x                       # restore only if it was on
+xtrace_was_on=0
+case $- in
+  *x*) xtrace_was_on=1 ;;
+esac
+set +x
+
+status=0
+authenticate "${token}" || status=$?
+
+if ((xtrace_was_on)); then
+  set -x
+fi
+((status == 0)) || die "${status}" 'authentication failed'
 ```
 
-Better, keep the trace away from the log entirely: `exec {BASH_XTRACEFD}>/var/log/script.trace`
-sends `xtrace` output to a file instead of stderr. `PS4` is expanded on every traced command, so
-never build it from data.
+An unconditional `set -x` after the section enables tracing in a script that never had it on, which
+is how the credentials in the *next* section reach the log. Capturing the status separately matters
+for the same reason: under `errexit` a bare `authenticate "${token}"` that fails exits the script
+with tracing still disabled, or, in the naive version, leaves the restore unreached.
+
+Sending the trace elsewhere reduces the audience but does not make tracing safe:
+
+```bash
+umask 077
+exec {BASH_XTRACEFD}>>/var/log/script.trace   # Bash 4.1 or later
+```
+
+The file receives the same fully expanded commands, secrets included, so it needs a trusted path
+that only root can write to, mode `0600`, and a retention policy — it is now a credential store.
+Keep tracing disabled around credential handling regardless of where the output goes. `PS4` is
+expanded on every traced command, so never build it from data.
 
 An `ERR` or `DEBUG` trap that prints `BASH_COMMAND` prints the expanded command, secrets included.
 Print the line number and the function name instead.
@@ -80,13 +106,24 @@ printf 'authenticating with token %s…\n' "${token:0:4}" >&2
 ```bash
 openssl rand -base64 32
 head -c 32 /dev/urandom | base64
-tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32; printf '\n'
+
+# Restricted to an alphabet, from a bounded input.
+secret="$(LC_ALL=C tr -dc 'A-Za-z0-9' < <(head -c 512 /dev/urandom))"
+secret="${secret:0:32}"
+((${#secret} == 32)) || die 70 'could not generate a secret'
 ```
 
 Use `/dev/urandom` or `openssl rand`. Never `$RANDOM`, which is a 15-bit value from a predictable
 generator, and never a value derived from the time, the PID, or a hash of a hostname. Where a
 password policy requires a character class, generate more entropy and filter, rather than
 constructing the value from small pieces.
+
+Filter from a bounded input, not through `head` at the end of a pipeline. `tr -dc … < /dev/urandom
+| head -c 32` reads an endless stream, so `head` exits after 32 bytes and `tr` dies of `SIGPIPE`.
+The pipeline then reports 141, and under `set -o pipefail` that aborts the script after the value
+was generated correctly. Reading a fixed 512 bytes and truncating with
+`${secret:0:32}` leaves no reader to exit early; the length check catches the case where the
+filtered result came up short.
 
 Shell has no constant-time comparison. A script that compares a submitted token against a stored
 one is doing authentication in the wrong place: move that to a program that can do it properly.

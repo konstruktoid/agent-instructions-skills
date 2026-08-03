@@ -67,7 +67,7 @@
         "id": "destructive-path-guarded",
         "kind": "workspace_command",
         "command": "! grep -qE 'rm +-[rRf]+' bin/archive-logs.sh || grep -qF ':?' bin/archive-logs.sh",
-        "source": "SKILL.md checklist: rm -rf -- \"${dir:?}\" rather than an unguarded expansion"
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory"
       },
       {
         "id": "service-name-validated",
@@ -325,7 +325,7 @@
         "id": "destructive-path-guarded",
         "kind": "workspace_command",
         "command": "! grep -qE 'rm +-[rRf]+' bin/clean-workspaces.sh || grep -qF ':?' bin/clean-workspaces.sh",
-        "source": "SKILL.md checklist: rm -rf -- \"${dir:?}\" rather than an unguarded expansion"
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory"
       },
       {
         "id": "end-of-options-used",
