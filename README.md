@@ -34,6 +34,7 @@ Current instructions documents:
 | File | Covers |
 |------|--------|
 | `python_coding_instructions.md` | Passing `ruff` and `ty` cleanly, plus the judgment calls those tools cannot make. |
+| `bash_coding_instructions.md` | Passing `shellcheck`, `bash -n`, and the repository's formatter cleanly, plus the layout, naming, and judgment rules those tools cannot enforce. |
 | `written_language_instructions.md` | Formal, concise, precise written style for any prose output. |
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 
@@ -59,6 +60,8 @@ Current skills:
 | Skill | Path | Covers |
 |-------|------|--------|
 | `ansible-verification-loop` | `skills/ansible/ansible-verification-loop/SKILL.md` | Reviewing or modifying Ansible roles and collections, verified through the repository's own lint/test loop. |
+| `bash-secure-scripting` | `skills/bash/bash-secure-scripting/SKILL.md` | The `shellcheck`/`bash -n` baseline from `bash_coding_instructions.md`, extended with the stability and security properties a linter cannot verify: strict-mode semantics, cleanup on every exit path, untrusted input and injection, `PATH` and environment control, temporary files, and credentials, run through a bounded verify-fix loop. |
+| `bash-testing` | `skills/bash/bash-testing/SKILL.md` | Adding or updating coverage for a shell change: discovering and matching the repository's existing framework (bats-core, shunit2, or plain scripts), making a script testable, covering exit codes and failure paths, and running the suite through a bounded verify-fix loop. |
 | `github-actions-security` | `skills/github/github-actions-security/SKILL.md` | Authoring and reviewing GitHub Actions workflows and actions: least-privilege `GITHUB_TOKEN` permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe triggers and runners, and structures that scale across repositories, run through a bounded verify-fix loop with `actionlint` and `zizmor`. |
 | `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
 | `python-testing` | `skills/python/python-testing/SKILL.md` | Adding or updating pytest coverage for a Python change: discovering and matching the repository's existing test layout, deciding when a test is required, and running the suite through a bounded verify-fix loop. |
@@ -98,7 +101,7 @@ Current templates:
 | `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
-auto-discovers an `agents/` directory at a plugin's root, and all three plugins here are sourced
+auto-discovers an `agents/` directory at a plugin's root, and every plugin here is sourced
 from the repository root, so templates placed in `agents/` would install into every consuming
 project as live subagents, adding their descriptions to every session. That inverts the
 copy-and-adapt rule, so the name that triggers discovery is avoided. Neither omitting the `agents`
@@ -114,12 +117,13 @@ of which keeps a single upstream copy that can be updated in place.
 
 ### Skills, as a Claude Code plugin
 
-This repository is its own plugin marketplace. The skills are grouped into three plugins so a
+This repository is its own plugin marketplace. The skills are grouped into four plugins so a
 project installs only what it needs:
 
 | Plugin | Skills |
 |--------|--------|
 | `python-standards` | `python-secure-coding`, `python-testing` |
+| `bash-standards` | `bash-secure-scripting`, `bash-testing` |
 | `ansible-standards` | `ansible-verification-loop` |
 | `github-standards` | `github-actions-security` |
 
@@ -190,6 +194,7 @@ Then reference the file by path from the project's `CLAUDE.md` or `AGENTS.md`:
 
 ```markdown
 When writing Python, follow .agent-standards/instructions/python_coding_instructions.md.
+When writing shell, follow .agent-standards/instructions/bash_coding_instructions.md.
 When writing prose, follow .agent-standards/instructions/written_language_instructions.md.
 ```
 
@@ -264,7 +269,7 @@ the outcome the mechanisms above exist to avoid.
   agent continue while each cycle produces strictly fewer findings, and requires it to stop early
   when the loop oscillates without progress. On stopping, the skill must require reporting the
   failing check and its output to the user, instead of looping silently or declaring success
-  unverified. All four skills use the same wording for this loop; copy it rather than
+  unverified. Every skill here uses the same wording for this loop; copy it rather than
   paraphrasing, so the bound means the same thing everywhere.
 - When a skill extends or depends on an instructions document, cross-reference it by path in both
   directions, as done between `python_coding_instructions.md` and `python-secure-coding`. Do not

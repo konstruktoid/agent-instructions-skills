@@ -1,0 +1,36 @@
+{
+  "skill": "bash-testing",
+  "notes": [
+    "Each fixture ships a different existing convention, because the skill's first claim is that it discovers and matches what is there: plain test_*.sh scripts with a shared helpers.sh and a run-tests.sh runner (bt-01), bats-core with a test_helper.bash (bt-02), *_test.sh files sitting next to the code they cover (bt-03), and nothing at all (bt-04).",
+    "Every fixture starts shellcheck-clean and with a passing suite, so a failure after the run is attributable to the change rather than to the starting state.",
+    "bt-01 and bt-03 carry a real defect the new coverage must pin: --exclude=PATTERN is silently dropped, and an empty --name writes a config line with no account.",
+    "bt-04 has no suite and no framework. It measures the skill's rule for that case: state the coverage decision, and verify by running the script directly including the failure path.",
+    "bats is not assumed to be installed. bt-02's suite assertion passes vacuously when bats is absent, so provision it through EVAL_TOOL_BIN to make that assertion meaningful."
+  ],
+  "tasks": [
+    {
+      "id": "bt-01-plain-suite",
+      "title": "Fix silently dropped option syntax in a repository with a plain test suite",
+      "fixture": "fixtures/bt-01-plain-suite",
+      "prompt": "bin/mkbackup.sh --exclude=node_modules silently archives everything, while --exclude node_modules works as expected. Fix the argument parsing so both spellings behave the same, and make sure the fix cannot regress."
+    },
+    {
+      "id": "bt-02-bats-suite",
+      "title": "Add a JSON output mode to a bats-covered script",
+      "fixture": "fixtures/bt-02-bats-suite",
+      "prompt": "Add a --json mode to bin/report.sh that prints the same three counters as machine-readable JSON, so the dashboard can consume it without parsing our text format. The existing text output must stay exactly as it is. Keep the script covered."
+    },
+    {
+      "id": "bt-03-inline-script",
+      "title": "Reject empty input in a script with no functions",
+      "fixture": "fixtures/bt-03-inline-script",
+      "prompt": "bin/mkuser-config.sh accepts an empty --name and appends a config entry with no account in it, which breaks provisioning downstream. Reject an empty name with a clear message and a non-zero exit status, and cover the rejection so it cannot come back."
+    },
+    {
+      "id": "bt-04-no-suite",
+      "title": "Make a cron script fail loudly, in a repository with no tests",
+      "fixture": "fixtures/bt-04-no-suite",
+      "prompt": "bin/prune-artifacts.sh exits 0 when the artifact directory does not exist, so a mistyped path in the crontab looks like a successful prune every night. Make it fail loudly instead, and make sure the new behavior is verified rather than assumed."
+    }
+  ]
+}

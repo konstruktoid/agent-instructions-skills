@@ -1,0 +1,356 @@
+{
+  "skill": "bash-secure-scripting",
+  "notes": [
+    "The shared assertions are the skill's own baseline, which it claims applies to every script touched whatever the request was: it runs shellcheck and bash -n, it sets strict mode, and it reports a check it could not get clean.",
+    "`strict-mode-set` accepts both the flag form (`set -Eeuo pipefail`) and the long form (`set -o errexit`), and requires errexit, nounset, and pipefail to all be present.",
+    "`destructive-path-guarded` passes vacuously when the finished script has no `rm -r` at all, for example when the prune is done with `find -delete`. It fails only when an rm survives without a `${var:?}` guard anywhere in the file.",
+    "Assertion commands run under /bin/sh, so they avoid bashisms.",
+    "bss-02 and bss-03 have no `script-actually-run` assertion: their scripts call ssh, curl, useradd and mysql, so `bash -n` is the strongest execution check available in the sandbox."
+  ],
+  "tasks": {
+    "bss-01-log-archive": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/archive-logs.sh",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "command": "bash -n bin/archive-logs.sh",
+        "source": "SKILL.md checklist: bash -n clean on every script touched"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "pattern": "shellcheck",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "pattern": "archive-logs\\.sh",
+        "source": "SKILL.md Verify: run the script itself on a representative input"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/archive-logs.sh || { grep -qi shellcheck ../final-response.md && grep -qE 'SC[0-9]{4}|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "command": "grep -qE 'set -[A-Za-z]*e|set -o errexit' bin/archive-logs.sh && grep -qE 'set -[A-Za-z]*u|set -o nounset' bin/archive-logs.sh && grep -q pipefail bin/archive-logs.sh",
+        "source": "SKILL.md baseline: start in strict mode"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "command": "grep -q mktemp bin/archive-logs.sh",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "command": "! grep -qE '/tmp/[A-Za-z0-9._-]*[$][$]' bin/archive-logs.sh",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "command": "grep -qE '(^|[[:space:]])trap[[:space:]]' bin/archive-logs.sh",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'rm +-[rRf]+' bin/archive-logs.sh || grep -qF ':?' bin/archive-logs.sh",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "command": "grep -qE '=~|case ' bin/archive-logs.sh",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "command": "./bin/archive-logs.sh web api > /dev/null 2>&1 && test \"$(ls archives | grep -c 'tar\\.gz')\" -ge 2",
+        "source": "task prompt: several service names in a single invocation"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "command": "grep -q 'keep-days' bin/archive-logs.sh",
+        "source": "task prompt: add a --keep-days N option"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README"
+      }
+    ],
+    "bss-02-deploy-notify": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/notify-deploy.sh",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "command": "bash -n bin/notify-deploy.sh",
+        "source": "SKILL.md checklist: bash -n clean on every script touched"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "pattern": "shellcheck",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/notify-deploy.sh || { grep -qi shellcheck ../final-response.md && grep -qE 'SC[0-9]{4}|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "command": "grep -qE 'set -[A-Za-z]*e|set -o errexit' bin/notify-deploy.sh && grep -qE 'set -[A-Za-z]*u|set -o nounset' bin/notify-deploy.sh && grep -q pipefail bin/notify-deploy.sh",
+        "source": "SKILL.md baseline: start in strict mode"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "command": "! grep -qE '(^|[^[:alnum:]_])eval[[:space:]]' bin/notify-deploy.sh",
+        "source": "SKILL.md baseline: never pass untrusted data to eval"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "command": "grep -qE 'jq|--data-urlencode|--json' bin/notify-deploy.sh",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "command": "! grep -qF '{\\\"text\\\"' bin/notify-deploy.sh",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'ssh [^|]*\"[^\"]*[$]' bin/notify-deploy.sh",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "command": "grep -qE '=~|case ' bin/notify-deploy.sh",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "command": "grep -qi 'note' bin/notify-deploy.sh",
+        "source": "task prompt: a short release note passed as a third argument"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "command": "grep -q 'dry-run' bin/notify-deploy.sh",
+        "source": "task prompt: add a --dry-run flag"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: document both in the README"
+      }
+    ],
+    "bss-03-provision-user": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "shellcheck sbin/provision-user.sh",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "command": "bash -n sbin/provision-user.sh",
+        "source": "SKILL.md checklist: bash -n clean on every script touched"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "pattern": "shellcheck",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "shellcheck sbin/provision-user.sh || { grep -qi shellcheck ../final-response.md && grep -qE 'SC[0-9]{4}|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "command": "grep -qE 'set -[A-Za-z]*e|set -o errexit' sbin/provision-user.sh && grep -qE 'set -[A-Za-z]*u|set -o nounset' sbin/provision-user.sh && grep -q pipefail sbin/provision-user.sh",
+        "source": "SKILL.md baseline: start in strict mode"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "command": "! grep -q 'RANDOM' sbin/provision-user.sh",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "command": "grep -qE 'openssl rand|/dev/urandom' sbin/provision-user.sh",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "command": "! grep -qE -- '-p[\"$]|--password=' sbin/provision-user.sh",
+        "source": "references/secrets.md: every user on the host can read a credential from ps"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "command": "! grep -qE '(echo|printf|logger)[^#]*[$][{]?PASSWORD' sbin/provision-user.sh",
+        "source": "references/secrets.md: a secret must never appear in a log"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "command": "grep -qE '^(export +)?PATH=' sbin/provision-user.sh",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "command": "! grep -qE '^[[:space:]]*([.]|source)[[:space:]]' sbin/provision-user.sh || grep -qE 'stat |%a|600|400' sbin/provision-user.sh",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "command": "grep -qE '=~|case ' sbin/provision-user.sh",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "command": "grep -q 'from-file' sbin/provision-user.sh",
+        "source": "task prompt: add a --from-file option"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "command": "grep -qE -- '--shell' sbin/provision-user.sh",
+        "source": "task prompt: add a --shell option"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README"
+      }
+    ],
+    "bss-04-workspace-cleanup": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/clean-workspaces.sh",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "command": "bash -n bin/clean-workspaces.sh",
+        "source": "SKILL.md checklist: bash -n clean on every script touched"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "pattern": "shellcheck",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "pattern": "clean-workspaces\\.sh",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "shellcheck bin/clean-workspaces.sh || { grep -qi shellcheck ../final-response.md && grep -qE 'SC[0-9]{4}|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "command": "grep -qE 'set -[A-Za-z]*e|set -o errexit' bin/clean-workspaces.sh && grep -qE 'set -[A-Za-z]*u|set -o nounset' bin/clean-workspaces.sh && grep -q pipefail bin/clean-workspaces.sh",
+        "source": "SKILL.md baseline: start in strict mode"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "command": "! grep -qE '[$][(]ls|`ls' bin/clean-workspaces.sh",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "command": "grep -qE 'print0|-exec .*[+]|mapfile|readarray|-delete|for [A-Za-z_]+ in [\"]?[.]/' bin/clean-workspaces.sh",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "command": "! grep -qE '^[[:space:]]*cd ' bin/clean-workspaces.sh || grep -qE 'cd [^;&|]*([|][|]|&&)' bin/clean-workspaces.sh",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'rm +-[rRf]+' bin/clean-workspaces.sh || grep -qF ':?' bin/clean-workspaces.sh",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'rm +-[rRf]+ ' bin/clean-workspaces.sh || grep -qE 'rm +-[rRf]+ +--' bin/clean-workspaces.sh",
+        "source": "references/filesystem.md: pass -- before every path operand"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "command": "grep -qE '[$][{]?1' bin/clean-workspaces.sh",
+        "source": "task prompt: take the root and the threshold as arguments"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "command": "grep -q 'dry-run' bin/clean-workspaces.sh",
+        "source": "task prompt: add a --dry-run mode"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README"
+      }
+    ]
+  }
+}

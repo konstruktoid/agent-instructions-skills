@@ -43,6 +43,10 @@ export UV_TOOL_BIN_DIR=/tmp/eval-bin UV_TOOL_DIR=/tmp/eval-tools
 uv tool install ansible-lint && uv tool install zizmor
 export EVAL_TOOL_BIN=/tmp/eval-bin
 
+# The bash skills grade with shellcheck, and bash-testing's bt-02 with bats. Both come
+# from the system package manager rather than uv; without shellcheck the bash assertions
+# fail in both arms, and bt-02's suite assertion passes vacuously without bats.
+
 python3 evals/run_eval.py tasks    --skill python-secure-coding --model sonnet --parallel 5
 python3 evals/run_eval.py triggers --skill python-secure-coding --model sonnet --parallel 5
 python3 evals/run_eval.py report   --skill python-secure-coding

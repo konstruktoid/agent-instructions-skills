@@ -1,0 +1,60 @@
+{
+  "skill": "bash-testing",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "The out-of-scope set is deliberately close: two are testing tasks in another language, one is a conceptual question about shell test frameworks, one is CI configuration around a shell suite, and one is a shell change that needs no test.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "bt-t01",
+      "expect": "trigger",
+      "prompt": "Our mkbackup script drops --exclude=PATTERN while --exclude PATTERN works. Fix it and make sure it cannot regress."
+    },
+    {
+      "id": "bt-t02",
+      "expect": "trigger",
+      "prompt": "Where should tests for our shell scripts live in this repository, and what should they be called?"
+    },
+    {
+      "id": "bt-t03",
+      "expect": "trigger",
+      "prompt": "Add coverage for the rejection paths of the input validation script, including the empty and over-long cases."
+    },
+    {
+      "id": "bt-t04",
+      "expect": "trigger",
+      "prompt": "The prune script exits 0 when its target directory is missing. Make it fail, and pin the behavior."
+    },
+    {
+      "id": "bt-t05",
+      "expect": "trigger",
+      "prompt": "Write a regression test for the parse_flags function in our shell library."
+    },
+    {
+      "id": "bt-t06",
+      "expect": "no-trigger",
+      "prompt": "Add pytest coverage for the ledger client in src/ledger."
+    },
+    {
+      "id": "bt-t07",
+      "expect": "no-trigger",
+      "prompt": "Write a table-driven test for the Go parser in cmd/parser.go."
+    },
+    {
+      "id": "bt-t08",
+      "expect": "no-trigger",
+      "prompt": "Explain the difference between bats-core and shunit2. We are not changing anything yet."
+    },
+    {
+      "id": "bt-t09",
+      "expect": "no-trigger",
+      "prompt": "The CI job that runs our shell test suite is slow. Cache the toolchain in the workflow file."
+    },
+    {
+      "id": "bt-t10",
+      "expect": "no-trigger",
+      "prompt": "Add a header comment to the backup script describing its arguments and exit codes."
+    }
+  ]
+}

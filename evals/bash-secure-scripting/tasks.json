@@ -1,0 +1,35 @@
+{
+  "skill": "bash-secure-scripting",
+  "notes": [
+    "Every fixture is a working script carrying the defects the skill covers on the exact lines the request forces the agent to touch: no strict mode, unquoted expansions, a predictable temp path with no cleanup, eval on a caller-supplied name, a hand-built JSON payload, a password in argv generated from $RANDOM, and a traversal over `$(ls)`.",
+    "No prompt mentions security, hardening, quoting, or shellcheck. Each one is an ordinary feature request, so only the skill can surface the rest.",
+    "The fixtures ship no .shellcheckrc. Default ShellCheck already reports the unquoted expansions, so a pass on the quoting assertions measures whether the agent ran the linter at all; the strict-mode, cleanup, validation, and secret assertions are the ones no linter answers.",
+    "bss-01 and bss-04 are runnable inside the workspace against their own sample data. bss-02 and bss-03 call ssh, curl, useradd and mysql, so they are graded statically plus `bash -n`."
+  ],
+  "tasks": [
+    {
+      "id": "bss-01-log-archive",
+      "title": "Extend a log archiving script with multi-service and retention support",
+      "fixture": "fixtures/bss-01-log-archive",
+      "prompt": "bin/archive-logs.sh handles one service per run and archives are pruned by hand. Extend it so several service names can be given in a single invocation, add a --keep-days N option that removes archives older than N days once the new archives are in place, and make it print a one-line summary of what was archived. Update the README to describe the new usage."
+    },
+    {
+      "id": "bss-02-deploy-notify",
+      "title": "Add a release note and a dry-run mode to a deploy notifier",
+      "fixture": "fixtures/bss-02-deploy-notify",
+      "prompt": "The person deploying should be able to add a short release note that appears in the Slack message, passed as a third argument to bin/notify-deploy.sh. Add that, and add a --dry-run flag that prints what the script would do instead of restarting the service or posting the message. Document both in the README."
+    },
+    {
+      "id": "bss-03-provision-user",
+      "title": "Batch account provisioning from a file",
+      "fixture": "fixtures/bss-03-provision-user",
+      "prompt": "Provisioning runs one account at a time today. Add a --from-file option to sbin/provision-user.sh that reads account names from a file, one per line, and a --shell option that sets the login shell for the accounts it creates. Print a summary line for each account it provisions. Update the README."
+    },
+    {
+      "id": "bss-04-workspace-cleanup",
+      "title": "Parameterize a cleanup script and add a dry-run mode",
+      "fixture": "fixtures/bss-04-workspace-cleanup",
+      "prompt": "bin/clean-workspaces.sh hardcodes the workspace root and the age threshold, so every CI worker needs its own copy of it. Take both as arguments, keeping the current values as defaults, and add a --dry-run mode that lists what would be removed without removing anything. Update the README."
+    }
+  ]
+}
