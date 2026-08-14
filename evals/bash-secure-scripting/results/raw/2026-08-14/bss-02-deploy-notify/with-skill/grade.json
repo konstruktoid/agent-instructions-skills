@@ -1,0 +1,116 @@
+{
+  "task": "bss-02-deploy-notify",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T18:43:54.538432+00:00",
+    "seconds": 170.8
+  },
+  "skills_used": [
+    "eval-bash-secure-scripting:bash-secure-scripting"
+  ],
+  "num_turns": 25,
+  "cost_usd": 0.8401894999999999,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean on every script touched",
+      "passed": false,
+      "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 100:\n  source \"${SCRIPT_DIR}/../etc/services.conf\"\n         ^-- SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ..."
+    },
+    {
+      "id": "bash-syntax-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: bash -n clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "shellcheck-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'shellcheck'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 100:\n  source \"${SCRIPT_DIR}/../etc/services.conf\"\n         ^-- SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ..."
+    },
+    {
+      "id": "strict-mode-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: start in strict mode",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-eval",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never pass untrusted data to eval",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "json-payload-built-with-a-tool",
+      "kind": "workspace_command",
+      "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-hand-built-json-payload",
+      "kind": "workspace_command",
+      "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "remote-command-not-a-built-string",
+      "kind": "workspace_command",
+      "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "input-validated",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-release-note",
+      "kind": "workspace_command",
+      "source": "task prompt: a short release note passed as a third argument",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-dry-run",
+      "kind": "workspace_command",
+      "source": "task prompt: add a --dry-run flag",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: document both in the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 10,
+  "total": 13
+}

@@ -1,0 +1,3 @@
+This repo is a deliberately mixed sandbox for skill-routing evals, not a real project — the README confirms it. There's only one shell script, `scripts/backup.sh`, and it does no input validation at all (no arguments, no `getopts`, no checks on user input — it just uses hardcoded paths).
+
+There's no "input validation script" for me to add rejection-path tests to. Rather than invent one, I want to check with you: did you mean `scripts/backup.sh` and want me to first add validation logic (e.g., checking `DATA_DIR` exists, rejecting empty/over-long arguments) before testing it, or is there a different script you had in mind that isn't in this workspace?

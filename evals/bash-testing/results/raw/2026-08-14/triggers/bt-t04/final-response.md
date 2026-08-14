@@ -1,0 +1,1 @@
+There's no prune script anywhere in this workspace — the only shell script present is `scripts/backup.sh`, and nothing else in the repo references "prune". Could you point me to the file (or confirm the correct path/repo) so I can make the fix?

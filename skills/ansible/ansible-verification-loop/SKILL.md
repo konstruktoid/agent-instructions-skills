@@ -64,7 +64,7 @@ one project's layout.
      fewer findings than the one before it.
    - Stop early, before 3 attempts, if the loop is oscillating: the same findings recur, the count
      stops dropping, or a fix for one finding reintroduces another.
-   - When stopping for either reason, report to the user instead of proceeding or silently giving
+   - When stopping for either reason, report to the user rather than proceeding or silently giving
      up. Name the failing check, include its output, and state what was tried.
 8. Report any issues found during verification, with detailed reproduction steps and relevant
    logs/output. Ansible output is unusually rich in machine detail: play recaps and `--diff` output

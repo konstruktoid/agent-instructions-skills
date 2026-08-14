@@ -1,0 +1,1 @@
+I don't see an actual task yet — just the constraint that it needs to be POSIX sh (no bashisms) since it'll run as a Debian maintainer script under `dash`. Could you tell me what the script should do, or point me to the file you want created/edited (e.g., is this related to `scripts/backup.sh`, or a new `postinst`/`preinst`-style maintainer script)?
