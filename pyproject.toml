@@ -10,7 +10,7 @@ dependencies = ["pyyaml>=6.0.3"]
 [dependency-groups]
 # Pinned so CI and a local run check with the same versions. `ty` is still a preview
 # tool, so it is pinned to an exact version rather than a range.
-dev = ["ruff>=0.16.0", "ty==0.0.64", "types-pyyaml>=6.0.12"]
+dev = ["ruff>=0.16.1", "ty==0.0.66", "types-pyyaml>=6.0.12"]
 
 [tool.ruff]
 # Prose and code in this repository wrap at 100 columns.
