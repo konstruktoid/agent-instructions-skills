@@ -1,0 +1,1 @@
+I can't find an `mkbackup` script (or any `--exclude` argument-parsing logic) anywhere in this repo — the only backup-related script is `scripts/backup.sh`, and it doesn't take an `--exclude` flag at all. Could you point me to the file, or confirm whether it lives in a different repo/path?

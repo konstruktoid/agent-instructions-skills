@@ -1,0 +1,266 @@
+[
+  {
+    "id": "bss-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 1,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.2633574,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:55:41.607752+00:00",
+          "seconds": 76.2
+        }
+      }
+    ],
+    "cost_usd": 0.2633574
+  },
+  {
+    "id": "bss-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 1,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.18955429999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:55:41.610528+00:00",
+          "seconds": 26.2
+        }
+      }
+    ],
+    "cost_usd": 0.18955429999999998
+  },
+  {
+    "id": "bss-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 1,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting",
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.27810369999999995,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:55:41.596017+00:00",
+          "seconds": 44.1
+        }
+      }
+    ],
+    "cost_usd": 0.27810369999999995
+  },
+  {
+    "id": "bss-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 1,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting",
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.26773269999999993,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:55:41.609529+00:00",
+          "seconds": 43.5
+        }
+      }
+    ],
+    "cost_usd": 0.26773269999999993
+  },
+  {
+    "id": "bss-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 1,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.20005830000000002,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:55:41.605550+00:00",
+          "seconds": 27.9
+        }
+      }
+    ],
+    "cost_usd": 0.20005830000000002
+  },
+  {
+    "id": "bss-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0981313,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:56:07.823804+00:00",
+          "seconds": 21.6
+        }
+      }
+    ],
+    "cost_usd": 0.0981313
+  },
+  {
+    "id": "bss-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0999285,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:56:09.563664+00:00",
+          "seconds": 16.1
+        }
+      }
+    ],
+    "cost_usd": 0.0999285
+  },
+  {
+    "id": "bss-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0702082,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:56:25.139138+00:00",
+          "seconds": 14.7
+        }
+      }
+    ],
+    "cost_usd": 0.0702082
+  },
+  {
+    "id": "bss-t09",
+    "expect": "no-trigger",
+    "fired": true,
+    "fired_count": 1,
+    "runs": 1,
+    "correct": false,
+    "passes": [
+      {
+        "id": "bss-t09",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.18333120000000003,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:56:25.672877+00:00",
+          "seconds": 37.7
+        }
+      }
+    ],
+    "cost_usd": 0.18333120000000003
+  },
+  {
+    "id": "bss-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 1,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.1031637,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-08-14T17:56:25.673783+00:00",
+          "seconds": 18.4
+        }
+      }
+    ],
+    "cost_usd": 0.1031637
+  }
+]

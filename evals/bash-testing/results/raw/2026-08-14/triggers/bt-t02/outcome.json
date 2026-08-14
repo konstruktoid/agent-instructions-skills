@@ -1,0 +1,16 @@
+{
+  "id": "bt-t02",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-bash-testing:bash-testing"
+  ],
+  "cost_usd": 0.15086779999999997,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T19:27:16.294922+00:00",
+    "seconds": 25.0
+  }
+}

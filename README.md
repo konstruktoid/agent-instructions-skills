@@ -270,7 +270,11 @@ the outcome the mechanisms above exist to avoid.
   when the loop oscillates without progress. On stopping, the skill must require reporting the
   failing check and its output to the user, instead of looping silently or declaring success
   unverified. Every skill here uses the same wording for this loop; copy it rather than
-  paraphrasing, so the bound means the same thing everywhere.
+  paraphrasing, so the bound means the same thing everywhere. `scripts/check_skills.py` compares
+  the block against the canonical wording and fails on any rewording, so this is enforced rather
+  than left to whoever copied it last. A testing skill may write "failures" for "findings" and
+  "failing test" for "failing check", since it counts failing tests; the checker folds those two
+  spellings together and holds every other word exactly.
 - When a skill extends or depends on an instructions document, cross-reference it by path in both
   directions, as done between `python_coding_instructions.md` and `python-secure-coding`. Do not
   copy the shared material into both files. The instructions document is the single source of
@@ -320,6 +324,13 @@ improvement, the results file says so. See [evals/README.md](evals/README.md) fo
 conditions are isolated, what an assertion may and may not be, and the limitations that apply
 to every number in there.
 
+Every skill defines both evals. Four have been run: `ansible-verification-loop`,
+`github-actions-security`, `python-secure-coding`, and `python-testing` each have results
+committed. `bash-secure-scripting` and `bash-testing` were added with their tasks, assertions,
+and fixtures in place but have not been run yet, so `evals/bash-*/results/` is empty and
+neither skill has a measured delta. `bash-secure-scripting` is the largest skill here, so it
+is the one carrying the most unmeasured surface.
+
 Eval fixtures are deliberately flawed inputs, so `pyproject.toml` and
 `.markdownlint-cli2.yaml` exclude `evals/*/fixtures` and `evals/*/results` from this
 repository's own lint. Each fixture carries its own tool configuration, which is what the
@@ -335,12 +346,13 @@ uv run --frozen python scripts/check_skills.py   # authoring rules for every SKI
 uv run --frozen ruff check .                     # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
-npx --yes markdownlint-cli2@0.23.1 "**/*.md"     # add --fix to correct spacing in place
+npx --yes markdownlint-cli2@0.23.2 "**/*.md"     # add --fix to correct spacing in place
 ```
 
 `scripts/check_skills.py` verifies, for each `skills/*/*/SKILL.md`, that the frontmatter parses as
 YAML, `name` matches the parent directory, `description` is non-empty, under 1,024 characters, and
-not written in first or second person, and that the body is under 500 lines. It applies the same
+not written in first or second person, that the body is under 500 lines, and that the body carries
+the bounded verify loop in the shared wording described above. It applies the same
 frontmatter rules to each `agent-templates/*.md`, with `name` matching the file name, and adds the
 neutral defaults a template must ship with: `model` is `inherit` and `tools` is a non-empty
 allowlist. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must

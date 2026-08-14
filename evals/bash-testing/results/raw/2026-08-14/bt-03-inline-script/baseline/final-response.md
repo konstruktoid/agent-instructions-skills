@@ -1,0 +1,1 @@
+`bin/mkuser-config.sh` now rejects an empty `--name` with `error: --name must not be empty` and exit code 64 (before writing anything). Added `bin/mkuser-config_test.sh`, which is picked up by `make test` and verifies the non-zero exit, the error message, and that no config file is written; also confirmed the normal `--name alice` path still works. All tests pass.

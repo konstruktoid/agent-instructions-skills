@@ -1,0 +1,130 @@
+{
+  "task": "bss-03-provision-user",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T18:44:56.144073+00:00",
+    "seconds": 353.8
+  },
+  "skills_used": [
+    "eval-bash-secure-scripting:bash-secure-scripting"
+  ],
+  "num_turns": 38,
+  "cost_usd": 1.6507986999999997,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "bash-syntax-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: bash -n clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "shellcheck-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'shellcheck'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "strict-mode-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: start in strict mode",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-random-for-secrets",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "csprng-used",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: use /dev/urandom or openssl rand",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "secret-not-in-argv",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: every user on the host can read a credential from ps",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "secret-not-logged",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: a secret must never appear in a log",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "path-set-explicitly",
+      "kind": "workspace_command",
+      "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sourced-config-checked",
+      "kind": "workspace_command",
+      "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "input-validated",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-from-file",
+      "kind": "workspace_command",
+      "source": "task prompt: add a --from-file option",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-shell-option",
+      "kind": "workspace_command",
+      "source": "task prompt: add a --shell option",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 15,
+  "total": 15
+}

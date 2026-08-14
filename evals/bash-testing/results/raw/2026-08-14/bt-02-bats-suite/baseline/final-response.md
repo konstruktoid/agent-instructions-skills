@@ -1,0 +1,1 @@
+Added `--json` mode to `bin/report.sh:6-40` (flag can appear before or after the file arg), and added three bats cases in `test/report.bats` covering JSON output, `--json` after the file, and the usage error path. Verified all 6 tests pass by cloning `bats-core` locally (not installed on this machine) and running `bats test/` — the original text-output tests are unaffected.

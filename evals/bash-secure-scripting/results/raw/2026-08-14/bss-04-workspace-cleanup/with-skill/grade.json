@@ -1,0 +1,123 @@
+{
+  "task": "bss-04-workspace-cleanup",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T18:45:33.689978+00:00",
+    "seconds": 99.1
+  },
+  "skills_used": [
+    "eval-bash-secure-scripting:bash-secure-scripting"
+  ],
+  "num_turns": 14,
+  "cost_usd": 0.4403809,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "bash-syntax-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: bash -n clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "shellcheck-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'shellcheck'"
+    },
+    {
+      "id": "script-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the script itself, in a disposable location",
+      "passed": true,
+      "evidence": "match: 'clean-workspaces.sh'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "strict-mode-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: start in strict mode",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-ls-parsing",
+      "kind": "workspace_command",
+      "source": "bash_coding_instructions.md: never iterate over $(ls)",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "traversal-handles-any-filename",
+      "kind": "workspace_command",
+      "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "cd-guarded",
+      "kind": "workspace_command",
+      "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "destructive-path-guarded",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "end-of-options-used",
+      "kind": "workspace_command",
+      "source": "references/filesystem.md: pass -- before every path operand",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-arguments",
+      "kind": "workspace_command",
+      "source": "task prompt: take the root and the threshold as arguments",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-dry-run",
+      "kind": "workspace_command",
+      "source": "task prompt: add a --dry-run mode",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 12,
+  "total": 14
+}

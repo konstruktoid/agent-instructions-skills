@@ -1,0 +1,123 @@
+{
+  "task": "bss-01-log-archive",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T18:43:54.546777+00:00",
+    "seconds": 194.9
+  },
+  "skills_used": [
+    "eval-bash-secure-scripting:bash-secure-scripting"
+  ],
+  "num_turns": 33,
+  "cost_usd": 1.2095468999999999,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "bash-syntax-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: bash -n clean on every script touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "shellcheck-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'shellcheck'"
+    },
+    {
+      "id": "script-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the script itself on a representative input",
+      "passed": true,
+      "evidence": "match: 'archive-logs.sh'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "strict-mode-set",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: start in strict mode",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "temp-created-with-mktemp",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-predictable-temp-name",
+      "kind": "workspace_command",
+      "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "cleanup-trap-installed",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "destructive-path-guarded",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "service-name-validated",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-multiple-services",
+      "kind": "workspace_command",
+      "source": "task prompt: several service names in a single invocation",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-keep-days-option",
+      "kind": "workspace_command",
+      "source": "task prompt: add a --keep-days N option",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 13,
+  "total": 14
+}
