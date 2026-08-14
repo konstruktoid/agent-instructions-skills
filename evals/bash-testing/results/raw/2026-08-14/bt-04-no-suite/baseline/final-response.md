@@ -1,0 +1,1 @@
+Fixed `bin/prune-artifacts.sh:12-17` to error to stderr and exit 1 when the artifact directory doesn't exist, instead of silently exiting 0. Verified in `/tmp/prune-test` (now cleaned up): missing dir → exit 1 with error message; existing dir → still prunes files older than the retention window and exits 0.

@@ -1,0 +1,95 @@
+{
+  "task": "bt-04-no-suite",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T18:42:12.839679+00:00",
+    "seconds": 85.0
+  },
+  "skills_used": [
+    "eval-bash-testing:bash-testing"
+  ],
+  "num_turns": 20,
+  "cost_usd": 0.460058,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "missing-directory-fails",
+      "kind": "workspace_command",
+      "source": "task prompt: fail loudly when the artifact directory does not exist",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "message-on-stderr",
+      "kind": "workspace_command",
+      "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "happy-path-still-works",
+      "kind": "workspace_command",
+      "source": "SKILL.md: existing behavior must still pass",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "recent-artifacts-kept",
+      "kind": "workspace_command",
+      "source": "SKILL.md: never test a destructive script against real paths",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "script-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+      "passed": true,
+      "evidence": "match: 'prune-artifacts.sh'"
+    },
+    {
+      "id": "failure-path-exercised",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: including one failure path",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "coverage-decision-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+      "passed": true,
+      "evidence": "match: 'no test'"
+    },
+    {
+      "id": "strict-mode-improved",
+      "kind": "workspace_command",
+      "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-leftover-scratch-files",
+      "kind": "workspace_command",
+      "source": "SKILL.md: nothing written outside the test's own temporary directory",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 8,
+  "total": 10
+}

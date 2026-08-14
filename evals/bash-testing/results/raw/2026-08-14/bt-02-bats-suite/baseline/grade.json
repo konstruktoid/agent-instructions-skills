@@ -1,0 +1,93 @@
+{
+  "task": "bt-02-bats-suite",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T18:41:28.233520+00:00",
+    "seconds": 69.0
+  },
+  "skills_used": [],
+  "num_turns": 17,
+  "cost_usd": 0.2548001,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "suite-passes-if-bats-available",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the suite, do not describe it",
+      "passed": true,
+      "evidence": "match: 'make test'"
+    },
+    {
+      "id": "bats-file-touched",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: changed output format requires a test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "bats-idiom-used",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-second-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "json-mode-covered",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: new behavior requires a test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "json-output-parses",
+      "kind": "workspace_command",
+      "source": "task prompt: print the counters as machine-readable JSON",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "text-output-unchanged",
+      "kind": "workspace_command",
+      "source": "task prompt: the existing text output must stay exactly as it is",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "exit-codes-preserved",
+      "kind": "workspace_command",
+      "source": "SKILL.md: assert the status, not only the output",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 10,
+  "total": 10
+}

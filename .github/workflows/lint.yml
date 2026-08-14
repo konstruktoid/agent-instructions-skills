@@ -65,8 +65,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Pinned rather than resolved from npm at run time, so a compromised or merely
-      # changed release cannot alter what this job executes. Bump it by hand; with no
-      # package.json there is nothing for Dependabot to track.
+      # The action rather than `npx markdownlint-cli2@<version>`, so this pin lives in
+      # the github-actions ecosystem Dependabot already watches. Resolving from npm at
+      # run time would let a changed release alter what this job executes, and the
+      # hand-bumped npm pin it replaces had already drifted a patch release behind.
+      # v24.2.0 bundles markdownlint-cli2 0.23.2.
       - name: Lint Markdown
-        run: npx --yes markdownlint-cli2@0.23.1 "**/*.md"
+        uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
+        with:
+          globs: "**/*.md"

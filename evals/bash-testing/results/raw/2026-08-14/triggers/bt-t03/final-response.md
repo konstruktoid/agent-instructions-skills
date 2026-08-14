@@ -1,0 +1,1 @@
+There's no shell-based input validation script anywhere in this repository — the only shell script present is `scripts/backup.sh`, which does a tar/scp backup and has no input validation logic. Could you point me to the specific script you mean, or is it a script you'd like me to create first?

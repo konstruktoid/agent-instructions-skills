@@ -90,6 +90,33 @@ FIRST_OR_SECOND_PERSON = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 
+# The bounded verify-fix loop, in the wording every skill must carry. README.md requires
+# this block to be copied rather than paraphrased, so that the bound means the same thing
+# in every skill; without a check, the only thing holding the wording together is whoever
+# last copied it, and it had already drifted three ways before this check existed.
+CANONICAL_VERIFY_LOOP = """
+- Baseline the loop at 3 attempts.
+- Continue past 3 only while making measurable progress, meaning each cycle ends with
+  strictly fewer findings than the one before it.
+- Stop early, before 3 attempts, if the loop is oscillating: the same findings recur, the
+  count stops dropping, or a fix for one finding reintroduces another.
+- When stopping for either reason, report to the user rather than proceeding or silently
+  giving up. Name the failing check, include its output, and state what was tried.
+"""
+
+VERIFY_LOOP_ANCHOR = "- Baseline the loop at 3 attempts."
+VERIFY_LOOP_TERMINATOR = "state what was tried."
+
+# A testing skill counts failing tests, not findings, and saying otherwise would make the
+# loop read wrong in the skill that needs it clearest. That substitution is the only
+# licensed deviation: both spellings normalise to one before the comparison, so every
+# other word still has to match exactly.
+VERIFY_LOOP_SYNONYMS = (
+    ("failing test", "failing check"),
+    ("failures", "findings"),
+    ("failure", "finding"),
+)
+
 FRONTMATTER_DELIMITER = "---"
 
 
@@ -109,6 +136,50 @@ def split_frontmatter(text: str, errors: list[str]) -> tuple[str | None, list[st
 
     errors.append("frontmatter block is not closed by a second '---'")
     return None, []
+
+
+def normalise_verify_loop(text: str) -> str:
+    """Reduce a verify-loop block to the form the canonical comparison is made against.
+
+    Collapses all whitespace, so a skill may wrap and indent the block to suit the
+    surrounding section, and folds the licensed testing-skill synonyms onto one spelling.
+    Everything else is compared verbatim.
+    """
+    collapsed = " ".join(text.split()).lower()
+    for variant, canonical in VERIFY_LOOP_SYNONYMS:
+        collapsed = collapsed.replace(variant, canonical)
+    return collapsed
+
+
+def check_verify_loop(body: list[str], errors: list[str]) -> None:
+    """Validate that the skill carries the bounded verify-fix loop, in the shared wording."""
+    text = "\n".join(body)
+
+    start = text.find(VERIFY_LOOP_ANCHOR)
+    if start == -1:
+        errors.append(
+            "does not state the bounded verify loop; every skill must carry the wording "
+            "from README.md, beginning "
+            f"{VERIFY_LOOP_ANCHOR!r}"
+        )
+        return
+
+    end = text.find(VERIFY_LOOP_TERMINATOR, start)
+    if end == -1:
+        errors.append(
+            f"bounded verify loop starts but does not reach {VERIFY_LOOP_TERMINATOR!r}; "
+            "it is truncated or reworded"
+        )
+        return
+
+    found = normalise_verify_loop(text[start : end + len(VERIFY_LOOP_TERMINATOR)])
+    expected = normalise_verify_loop(CANONICAL_VERIFY_LOOP)
+    if found != expected:
+        errors.append(
+            "bounded verify loop is reworded; README.md requires it copied verbatim so the "
+            "bound means the same thing in every skill. Expected:\n"
+            f"{CANONICAL_VERIFY_LOOP.strip()}"
+        )
 
 
 def check_description(description: object, errors: list[str], subject: str) -> None:
@@ -204,6 +275,7 @@ def check_skill(skill_path: Path) -> list[str]:
         errors.append(f"'name' is {name!r}, must match the directory name {expected_name!r}")
 
     check_description(frontmatter.get("description"), errors, "skill")
+    check_verify_loop(body, errors)
 
     if len(body) >= MAX_BODY_LINES:
         errors.append(f"body is {len(body)} lines, must be under {MAX_BODY_LINES}")

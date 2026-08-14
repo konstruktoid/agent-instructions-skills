@@ -1,0 +1,3 @@
+Done. `bin/report.sh` now accepts a `--json` flag (in either argument position) that emits `{"total":N,"passed":N,"failed":N}`; the default text output (`total=N passed=N failed=N`) is byte-for-byte unchanged, verified by the original 3 tests still passing. Added 5 bats tests covering: JSON output, flag-order independence, usage error with `--json` and no file, missing-file error in JSON mode, and rejection of an unknown flag.
+
+Verified: `make test` (all 8 tests pass, run via the repo's real `bats-core` — I had to install it locally via npm since no `bats` binary or repo-vendored copy existed), `shellcheck` clean on both the script and test file, `bash -n` clean.

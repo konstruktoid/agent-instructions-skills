@@ -1,0 +1,14 @@
+{
+  "id": "bt-t04",
+  "expect": "trigger",
+  "fired": false,
+  "correct": false,
+  "skills_used": [],
+  "cost_usd": 0.11276629999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-14T19:29:33.380190+00:00",
+    "seconds": 18.3
+  }
+}

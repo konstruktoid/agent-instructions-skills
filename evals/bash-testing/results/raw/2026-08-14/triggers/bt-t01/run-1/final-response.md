@@ -1,0 +1,1 @@
+There's no `mkbackup` script in this repository — the only script found is `scripts/backup.sh`, which doesn't parse `--exclude` at all. Could you confirm the correct file path or repo? I don't want to guess and edit the wrong script.

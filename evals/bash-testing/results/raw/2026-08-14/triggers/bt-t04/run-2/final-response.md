@@ -1,0 +1,1 @@
+There's no "prune" script in this repository — only `scripts/backup.sh` exists, and it doesn't reference pruning. Could you point me to the file (path or repo) you mean, or did you intend `scripts/backup.sh`?
