@@ -86,8 +86,11 @@ trap 'err "failed at line ${LINENO}: ${BASH_COMMAND}"' ERR
 ```
 
 `BASH_COMMAND` holds the command that failed, and `BASH_SOURCE`/`FUNCNAME`/`BASH_LINENO` give the
-call stack. Do not print variable values from an `ERR` trap without knowing what they hold; see
-[secrets.md](secrets.md).
+call stack. It holds the command *before* expansion, so `curl -H "Authorization: Bearer ${token}"`
+reaches the trap with `${token}` unexpanded and the value is not disclosed. A secret written as a
+literal argument is disclosed, because the literal is the command text; that is one more reason not
+to put one in a command line. Do not print variable values from an `ERR` trap without knowing what
+they hold; see [secrets.md](secrets.md).
 
 Diagnostics go to standard error, always. Standard output is the script's data, and a caller
 capturing it in `$(…)` receives every progress message mixed into the result. When the script runs
@@ -156,7 +159,13 @@ fetch() {
     return 1
   fi
 
-  mv -- "${tmp}" "${dest}"
+  # Every path out of here removes the temporary. errexit would abandon it on a
+  # failing mv, leaving a stray `${dest}.XXXXXX` beside the real file.
+  if ! mv -- "${tmp}" "${dest}"; then
+    rm -f -- "${tmp}"
+    err "install of ${dest} failed"
+    return 1
+  fi
 }
 ```
 
