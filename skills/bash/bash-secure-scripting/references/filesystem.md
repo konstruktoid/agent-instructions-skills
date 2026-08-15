@@ -7,18 +7,22 @@ path nobody intended.
 ## Temporary files
 
 ```bash
+workdir=''                                   # script scope, so the trap can name it
+cleanup() { [[ -n ${workdir} ]] && rm -rf -- "${workdir}"; return 0; }
+trap cleanup EXIT                            # installed before anything it removes exists
 workdir="$(mktemp -d)"                       # honors TMPDIR, mode 0700
 tmpfile="$(mktemp)"                          # mode 0600
 tmpfile="$(mktemp -t myscript.XXXXXXXX)"     # named template, at least six X characters
-trap 'rm -rf -- "${workdir}"' EXIT
 ```
 
 - Always `mktemp`. A hand-built name such as `/tmp/build.$$` is predictable, so another user can
   pre-create it, or point it at a file the script then truncates with root privileges.
 - `mktemp` creates the file or directory atomically, with a mode no other user can read. That
   atomicity is the security property; the random name alone is not.
-- Install the cleanup trap on the line after creation. See
-  [error-handling.md](error-handling.md).
+- Install the cleanup trap *before* the `mktemp` it cleans up after, not on the line following it.
+  Between the two lines the path exists with no trap naming it, and a signal there leaks the
+  directory. Declaring the variable empty at script scope first lets the trap be installed early
+  and do nothing until there is something to remove. See [error-handling.md](error-handling.md).
 - Where the script runs under systemd, prefer the unit's `RuntimeDirectory` or `PrivateTmp`, which
   the service manager creates and removes.
 - Create the temporary file in the same filesystem as its destination when the result will be moved
