@@ -122,6 +122,15 @@ cleanup() {
   return 0
 }
 
+# Clean up, then die of the signal rather than reporting a status of our own, so a
+# caller and a supervisor see the 128+n they are waiting for.
+on_signal() {
+  local sig="$1"
+  cleanup
+  trap - EXIT "${sig}"
+  kill -s "${sig}" -- "$$"
+}
+
 # Archives the log directory of one service into a caller-provided directory.
 # Globals: RETENTION_DIR
 # Arguments: service name matching ^[a-z][a-z0-9_-]*$, work directory
@@ -149,6 +158,8 @@ main() {
 
   workdir="$(mktemp -d)"
   trap cleanup EXIT
+  trap 'on_signal INT' INT
+  trap 'on_signal TERM' TERM
 
   archive_service "$1" "${workdir}"
 }
@@ -156,11 +167,17 @@ main() {
 main "$@"
 ```
 
-Four properties of that skeleton are easy to get wrong:
+Five properties of that skeleton are easy to get wrong:
 
 - Cleanup belongs on `EXIT`, which runs when `errexit` aborts the script. A `RETURN` trap does not:
   when a command inside a function fails under `errexit`, the shell exits without running that
   function's `RETURN` trap.
+- `EXIT` alone is not enough for a signal. An interrupted script should die of the signal it
+  received, so a caller or a supervisor reads the 128+n status it is waiting for. Trapping `INT`
+  and `TERM`, cleaning up, restoring the default disposition with `trap - EXIT "${sig}"`, and
+  re-raising with `kill -s` does that. Handling the signal without re-raising is worse than not
+  trapping it: `cleanup` returns 0 as the trap's last command, so a script killed mid-run reports
+  success.
 - The trap body is evaluated when the trap fires, in the script's scope. A trap naming a variable
   that was `local` to a function runs after that function has returned, so the name is unset and,
   under `nounset`, the cleanup itself fails and removes nothing. Keep the path in a script-scope

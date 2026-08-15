@@ -8,8 +8,15 @@ cannot trace data flow across calls. Treat an `S`-rule pass as a floor, not proo
 
 ## Input validation
 
-- Validate and sanitize all external input (user input, scraped data, upstream API
-  responses) at the point it enters the system, not at every layer below it.
+- Validate all external input (user input, scraped data, upstream API responses) at the
+  point it enters the system, not at every layer below it. Validate against a schema or an
+  allowlist, and reject what does not match rather than editing it into shape: a sanitizer
+  that rewrites input silently corrupts data that was merely unusual.
+- Input validation is not a substitute for handling the value safely where it is used.
+  Escaping for HTML, parameterizing SQL, passing argument lists to a subprocess, and
+  normalizing what reaches a log are all decided at the sink, by its context, and each is
+  still required after the input has been validated. OWASP treats these as two separate
+  controls, and one ingress filter cannot stand in for all of them.
 - Prefer allowlists over denylists, and enforce length limits.
 - Watch for catastrophic-backtracking regular expressions (ReDoS) when validating
   untrusted input. Prefer simple patterns over nested quantifiers.
@@ -22,8 +29,9 @@ cannot trace data flow across calls. Treat an `S`-rule pass as a floor, not proo
 
 ## Templating and rendered output
 
-- Use framework escaping (`flask.escape`, `django.utils.html.escape`) or `bleach` for
-  anything rendered as HTML.
+- Use framework escaping (`markupsafe.escape`, `django.utils.html.escape`) or `bleach` for
+  anything rendered as HTML. `flask.escape` was deprecated in Flask 2.3 and removed in 2.4;
+  it was always the MarkupSafe function re-exported, so import it from `markupsafe`.
 - Autoescaping in a template engine covers the template path only. Anything marked safe,
   or assembled as raw HTML in Python, is your responsibility.
 
@@ -35,8 +43,15 @@ cannot trace data flow across calls. Treat an `S`-rule pass as a floor, not proo
 
 ## String formatting for security-sensitive output
 
-- For user-facing text substitution that must not evaluate expressions, prefer
-  `string.Template` over f-strings and `.format()`.
+- For text substitution driven by a caller-supplied format, prefer `string.Template` over
+  f-strings and `.format()`. The risk it removes is a template string that is itself
+  untrusted: `.format()` on such a string can reach attribute and item access, and so read
+  object internals. An f-string evaluates expressions written in the source, not the values
+  substituted into it, so an f-string over untrusted *values* is not an injection risk on
+  its own.
+- `string.Template` is not a security boundary for the substituted values. It restricts
+  placeholder syntax and nothing else: it does not escape HTML, parameterize SQL, quote a
+  shell argument, or neutralize a log record. Those remain the sink's job.
 - Never concatenate untrusted input directly into a SQL string, a shell command, or a
   log format string.
 

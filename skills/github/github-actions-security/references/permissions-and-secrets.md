@@ -55,8 +55,12 @@ is short-lived and scoped to the repositories the app is installed on.
 
 ## Secrets
 
-Anyone with write access to a repository can read every secret configured on it, because they can
-write a workflow that prints one. Scope accordingly.
+Anyone with write access to a repository can read every repository secret, and every organization
+secret shared with it, because they can write a workflow that prints one. Environment secrets are
+the exception worth knowing: a job reaches them only by naming that `environment:`, and if the
+environment has required reviewers, a wait timer, or a branch restriction, the job does not start
+and the secret is never injected until those pass. That protection is the deployment gate, not the
+secret store, so it holds only while the rules stay on the environment. Scope accordingly.
 
 - **Prefer environment secrets to repository secrets, and repository to organization.** An
   environment secret is reachable only from a job that declares `environment:`, which can require
