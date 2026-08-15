@@ -75,7 +75,9 @@ Every script, without exception:
   other construct that re-parses it as shell. Validate input against an allowlist pattern at the
   boundary, and reject rather than sanitize.
 - **Clean up on every exit path.** Create temporary files and directories with `mktemp`, and remove
-  them from a `trap … EXIT` installed immediately after creation, not at the end of the script.
+  them from a `trap … EXIT` installed *before* the `mktemp` that creates them, not at the end of
+  the script. A trap installed on the next line still leaves a window in which a signal loses the
+  path; a cleanup guarded on an empty variable is safe to install first.
 - **Fail closed.** A check that cannot be completed is a failure, not a pass. Give each failure
   path a deliberate exit status.
 - **Control the environment where it matters.** A script that runs privileged, from `cron`, from a
@@ -156,10 +158,12 @@ main() {
     return 64
   fi
 
-  workdir="$(mktemp -d)"
+  # Traps first: a signal arriving between mktemp and the trap would leave the
+  # directory behind. cleanup tolerates the empty workdir until mktemp assigns it.
   trap cleanup EXIT
   trap 'on_signal INT' INT
   trap 'on_signal TERM' TERM
+  workdir="$(mktemp -d)"
 
   archive_service "$1" "${workdir}"
 }
