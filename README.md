@@ -268,9 +268,9 @@ the outcome the mechanisms above exist to avoid.
   headings, placed after the opening paragraph and before the first section. The same best
   practices document asks for one, because an agent previewing a long file with a partial read
   otherwise sees only its first screen and cannot tell what else the file covers.
-  `scripts/check_skills.py` fails when a long reference file has no `Contents` section, and when
-  the entries do not match the headings that follow them, since a list that drifts from the
-  document is worse than none.
+  `scripts/check_skills.py` fails when a long reference file has no `Contents` section, when a
+  section already precedes it, and when the entries do not match the headings that follow them,
+  since a list that drifts from the document is worse than none.
 - For any skill with a verify-then-fix cycle, bound the retries explicitly and define what one
   attempt is: one full fix-and-rerun cycle. This repo baselines the bound at 3 attempts, lets an
   agent continue while each cycle produces strictly fewer findings, and requires it to stop early
@@ -391,9 +391,9 @@ as installable subagents. It verifies the cross-references this library maintain
 `SKILL.md` may not name an `instructions/*.md` that does not exist, an `instructions/*.md` may not
 name a `skills/*/*/SKILL.md` that does not exist, and a skill that names an instructions document
 must be named back by it, which is the bidirectional rule stated above. It requires every
-`references/*.md` over 100 lines to carry a `## Contents` section, and compares its entries against
-the headings that follow, so a list cannot drift into pointing at a section that has been renamed
-or removed. Last, it holds the prose
+`references/*.md` over 100 lines to carry a `## Contents` section ahead of every other section, and
+compares its entries against the headings that follow, so a list cannot drift into pointing at a
+section that has been renamed or removed. Last, it holds the prose
 this repository writes about itself, meaning `README.md`, `instructions/*.md`, `skills/**/*.md`,
 `agent-templates/*.md`, and the hand-written `evals/*/README.md`, to the em dash, arrow,
 inflated-vocabulary, and grammatical-person rules in

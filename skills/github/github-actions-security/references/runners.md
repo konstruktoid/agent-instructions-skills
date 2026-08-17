@@ -197,4 +197,4 @@ Two points generalize past this device:
 - [ ] Container and service container images pinned by digest
 - [ ] No Docker socket mounted into a job container
 - [ ] Any change to an egress allowlist or to runner device permissions is named as unverified
-      until a run exercises it, together with the event that would
+      until a run exercises it, together with the event that would exercise it

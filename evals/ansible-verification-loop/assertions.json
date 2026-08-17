@@ -356,20 +356,20 @@
       {
         "id": "feature-min-sources-rendered",
         "kind": "workspace_command",
-        "command": "grep -q 'ntp_client_min_sources' templates/chrony.conf.j2",
-        "source": "task prompt: rendered into the configuration as a minsources line"
+        "command": "grep -qE '^[[:space:]]*minsources[[:space:]]+\\{\\{[[:space:]]*ntp_client_min_sources[[:space:]]*(\\|[^}]*)?\\}\\}' templates/chrony.conf.j2",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count"
       },
       {
         "id": "docs-updated",
         "kind": "workspace_command",
-        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
-        "source": "SKILL.md step 5: update all relevant documentation when a variable is added"
+        "command": "git diff -U0 \"$EVAL_BASE_SHA\" -- README.md | grep -qE '^\\+.*ntp_client_min_sources'",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched"
       },
       {
         "id": "autofix-diff-reviewed",
         "kind": "final_regex",
-        "pattern": "blank line|--fix|reformat|revert|diff",
-        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit"
+        "pattern": "(--fix|autofix|auto-fix|fixer)[\\s\\S]{0,400}(blank line|diff|revert|restore|reformat)|(blank line|diff|revert|restore|reformat)[\\s\\S]{0,400}(--fix|autofix|auto-fix|fixer)",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did"
       }
     ]
   }

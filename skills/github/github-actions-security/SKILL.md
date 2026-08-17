@@ -58,10 +58,12 @@ Every workflow, without exception:
 - **Pin every third-party action to a full 40-character commit SHA**, with the version in a trailing
   comment. Tags and branches are mutable. This includes actions used inside composite actions and
   reusable workflows.
-- **Pin to the latest published release of the action**, not to whatever version the file already
-  used. Look the current release up at the time of the change; do not assume that the version in
-  the file, or a recalled one, is current. Staying on an older release needs a stated reason, in a
-  comment on the line and in the pull request description.
+- **Pin to the newest published release that clears the repository's cooldown**, not to whatever
+  version the file already used. Look the current release up at the time of the change; do not
+  assume that the version in the file, or a recalled one, is current. Where a cooldown holds the
+  newest release back, say which release was chosen. Staying further behind than that needs a
+  stated reason, in a comment on the line and in the pull request description. See
+  [references/supply-chain.md](references/supply-chain.md).
 - **Never interpolate untrusted event data into a `run:` block.** `${{ }}` is substituted into the
   script before the shell sees it. Pass the value through `env:` and reference the environment
   variable, quoted.
@@ -257,12 +259,12 @@ suppression to reach a clean run.
 - [ ] `zizmor` clean, with no new suppression that lacks a stated reason
 - [ ] The workflow ran successfully, or the change is structural only and this is stated. A change
       to an egress allowlist or to runner device permissions is behavioral: name it as unverified
-      until a run exercises it, and say which event would
+      until a run exercises it, and say which event would exercise it
 - [ ] `permissions: {}` at workflow level, with every job granting only the scopes its steps use
 - [ ] Every third-party action pinned to a full commit SHA that was resolved, not recalled, with a
       version comment
-- [ ] Each pinned version is the latest published release, looked up during this change, or the
-      reason for staying on an older one is stated
+- [ ] Each pinned version is the newest release that clears the cooldown, looked up during this
+      change, or the reason for staying further behind is stated
 - [ ] No `${{ }}` interpolation of event data inside a `run:` block, a `script:` block, or a shell
       argument
 - [ ] `actions/checkout` uses `persist-credentials: false`, or the job's need for the credential is

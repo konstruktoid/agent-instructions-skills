@@ -122,9 +122,9 @@ one project's layout.
 - If invoking `molecule test` / `ansible-test` directly instead of through the repo's wrapper,
   perform first what the wrapper would otherwise have performed: install `requirements.yml`, and
   always run `ansible-lint` as its own separate step. Molecule's own `lint` subcommand was removed
-  in Molecule 6.x and has not returned, so no version of a direct `molecule test`/`molecule
-  converge` invocation lints anything; skipping the separate `ansible-lint` run silently drops the
-  primary quality gate.
+  in Molecule 5.0.0 and has not returned, so no supported version of a direct `molecule
+  test`/`molecule converge` invocation lints anything; skipping the separate `ansible-lint` run
+  silently drops the primary quality gate.
 - While iterating on a single role, use `molecule converge` / `molecule verify` (or the equivalent
   faster subcommands for whatever framework is in use) instead of the full test cycle to save
   time, but always finish with a full test run before declaring the change verified.

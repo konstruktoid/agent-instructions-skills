@@ -26,3 +26,9 @@ visible only in `git diff`. `autofix-cosmetics-preserved` asserts that no commen
 non-blank, non-comment line, which fails on the auto-fixer's output and passes on the fixture as
 shipped. `lint-clean` still has to pass alongside it, so reverting the whole `--fix` run and
 leaving the findings in place does not score.
+
+That task depends on a behavior of `ansible-lint --fix` rather than on a documented rule, and
+`evals/README.md` installs the tool unpinned. Confirm the deletion still happens before reading a
+pass as evidence: run `ansible-lint --fix .` in a copy of the fixture and check that `git diff`
+removes the blank lines. A release that stops deleting them leaves the assertion passing without
+separating a reviewed diff from a trusted summary, and the fixture then needs a new defect.

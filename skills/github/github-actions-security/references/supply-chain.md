@@ -41,9 +41,10 @@ but the reasoning is the same and the pinning rule is not worth making condition
 Immutable releases prevent a published release's tag and assets from being changed, and generate a
 signed attestation for each asset. They are generally available and configurable per repository or
 per organization, applying to releases published after the setting is turned on. They narrow the
-window but do not close it: the protection covers the release's own tag, so a branch created with
-that name still satisfies a `@v1` reference, and a repository that has not enabled the setting is
-unaffected. SHA pinning remains the guidance.
+window but do not close it: the protection covers the release's own tag, so the moving major or
+minor tags most workflows reference, `@v1` and `@v1.2`, stay mutable because they are separate tags
+that no release owns, and a repository that has not enabled the setting is unaffected. SHA pinning
+remains the guidance.
 
 ## Pin to the latest release
 
@@ -181,8 +182,8 @@ if consumers verify it, so document the verification command alongside the relea
 
 - [ ] Every `uses:` reference pinned to a full 40-character SHA with a version comment
 - [ ] The SHA was resolved from the source repository, not written from memory
-- [ ] Each version is the latest published release, looked up during this change, or the reason for
-      an older one is stated in a comment on the line
+- [ ] Each version is the newest release that clears the cooldown, looked up during this change, or
+      the reason for staying further behind is stated in a comment on the line
 - [ ] Release notes read for every version skipped by an upgrade, with major-version implications
       recorded in the pull request description
 - [ ] Composite actions, Docker base images, and install scripts inside a pinned action checked for

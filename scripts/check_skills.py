@@ -105,8 +105,12 @@ PROSE_GLOBS = (
 )
 
 # Leading whitespace is allowed on both fences: a fenced block nested in a list item is
-# indented, and anchoring at column zero would leave its contents scanned as prose.
-FENCED_BLOCK = re.compile(r"^[ \t]*```.*?^[ \t]*```", re.MULTILINE | re.DOTALL)
+# indented, and anchoring at column zero would leave its contents scanned as prose. Both
+# CommonMark fence characters are accepted, and the closing fence has to repeat the opening
+# one, so a tilde block holding backticks is still closed where its author closed it.
+FENCED_BLOCK = re.compile(
+    r"^[ \t]*(?P<fence>```|~~~).*?^[ \t]*(?P=fence)", re.MULTILINE | re.DOTALL
+)
 
 INLINE_CODE = re.compile(r"`[^`]*`")
 
@@ -576,9 +580,10 @@ def check_reference_toc(repo_root: Path) -> list[str]:
     """Check that every long reference file carries a Contents list matching its headings.
 
     README.md requires one past TOC_REQUIRED_LINES lines, so an agent that previews the file
-    rather than reading it whole still sees everything it covers. The entries are compared
-    against the headings that follow, because a list that has drifted from the document sends
-    the reader looking for a section that is no longer there.
+    rather than reading it whole still sees everything it covers. That is also why the list has
+    to precede every other section: one placed further down is outside the screen the preview
+    shows. The entries are compared against the headings that follow, because a list that has
+    drifted from the document sends the reader looking for a section that is no longer there.
     """
     errors: list[str] = []
     for path in sorted(repo_root.glob(REFERENCE_GLOB)):
@@ -605,6 +610,19 @@ def check_reference_toc(repo_root: Path) -> list[str]:
             continue
 
         start = lines.index(TOC_HEADING) + 1
+        preceding = [
+            match.group(1).strip()
+            for match in (SECTION_HEADING.match(line) for line in lines[: start - 1])
+            if match
+        ]
+        if preceding:
+            errors.append(
+                f"{relative}: the {TOC_HEADING!r} section follows {preceding[0]!r}; README.md "
+                "places it after the opening paragraph and before the first section, so a partial "
+                "read of the file still reaches it"
+            )
+            continue
+
         entries: list[str] = []
         for line in lines[start:]:
             if line.startswith("## "):

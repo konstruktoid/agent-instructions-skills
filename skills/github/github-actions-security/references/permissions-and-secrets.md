@@ -142,7 +142,7 @@ jobs:
       contents: read
     steps:
       - name: Authenticate to AWS
-        uses: aws-actions/configure-aws-credentials@<full-sha> # v6.x
+        uses: aws-actions/configure-aws-credentials@<full-sha> # v6.2.3
         with:
           role-to-assume: arn:aws:iam::123456789012:role/github-deploy
           aws-region: eu-north-1

@@ -2,8 +2,8 @@
 {% for server in ntp_client_servers %}
 server {{ server }} iburst
 {% endfor %}
-{% for server in ntp_client_fallback_servers %}
-pool {{ server }} iburst
+{% for pool in ntp_client_pools %}
+pool {{ pool }} iburst
 {% endfor %}
 driftfile /var/lib/chrony/chrony.drift
 makestep 1.0 3

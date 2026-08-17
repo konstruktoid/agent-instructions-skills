@@ -2,11 +2,8 @@
 # Time servers the client synchronises with.
 ntp_client_servers: ["0.pool.ntp.org", "1.pool.ntp.org"]
 
-# Servers used only when none of the primary servers answer.
-ntp_client_fallback_servers: []
-
-# Ports opened for outbound time synchronisation.
-ntp_client_ports: [123]
+# Pools added as extra sources alongside the servers above.
+ntp_client_pools: []
 
 # Path of the rendered configuration file.
 ntp_client_conf_path: "/etc/chrony/chrony.conf"

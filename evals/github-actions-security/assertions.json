@@ -449,6 +449,18 @@
         "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
       },
       {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
         "id": "post-step-log-read",
         "kind": "bash_regex",
         "pattern": "dependency-review-failed\\.log|ci-logs",
@@ -457,32 +469,38 @@
       {
         "id": "blocked-endpoint-allowed",
         "kind": "workspace_command",
-        "command": "grep -q 'api\\.deps\\.dev' .github/workflows/dependency-review.yml",
-        "source": "references/runners.md: an allowlist is only as complete as the events the audit observed"
+        "command": "grep -E 'api\\.deps\\.dev:[0-9]+' .github/workflows/dependency-review.yml | grep -qvE '^[[:space:]]*#'",
+        "source": "references/runners.md: an allowlist is only as complete as the events the audit observed, and an allowlist entry is a host:port on a live line rather than a mention in a comment"
       },
       {
         "id": "egress-policy-still-block",
         "kind": "workspace_command",
-        "command": "grep -q 'egress-policy: block' .github/workflows/dependency-review.yml",
-        "source": "references/runners.md: expect and diagnose this failure mode rather than retreating to audit"
+        "command": "grep -qE '^[[:space:]]*egress-policy:[[:space:]]*[\"'\\'']?block[\"'\\'']?[[:space:]]*$' .github/workflows/dependency-review.yml",
+        "source": "references/runners.md: expect and diagnose this failure mode rather than retreating to audit, which means the key itself still reads block"
       },
       {
         "id": "pin-not-reverted",
         "kind": "workspace_command",
         "command": "! grep -qE 'v2\\.20\\.0|bf7454d06d71f1098171f2acdf0cd4708d7b5920' .github/workflows/dependency-review.yml",
-        "source": "SKILL.md baseline: pin to the latest published release; references/runners.md: a version bump in the same diff is a coincidence trap"
+        "source": "SKILL.md baseline: pin to the newest release that clears the cooldown; references/runners.md: a version bump in the same diff is a coincidence trap"
+      },
+      {
+        "id": "harden-runner-still-pinned",
+        "kind": "workspace_command",
+        "command": "grep -qE '^[[:space:]]*uses:[[:space:]]*step-security/harden-runner@[0-9a-f]{40}[[:space:]]+#' .github/workflows/dependency-review.yml",
+        "source": "SKILL.md baseline: the hardening action stays pinned to a full commit SHA with a version comment, so the rollback is not made by dropping the pin"
       },
       {
         "id": "actions-still-sha-pinned",
         "kind": "workspace_command",
-        "command": "! grep -nE '^\\s*uses: [^@]+@(v?[0-9]|main|master)' .github/workflows/*.y*ml",
-        "source": "SKILL.md baseline: pin every third-party action to a full commit SHA"
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' .github/workflows | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA, which a branch, a tag, or an abbreviated SHA does not satisfy"
       },
       {
         "id": "diagnosis-stated",
         "kind": "final_regex",
-        "pattern": "api\\.deps\\.dev|not allowed",
-        "source": "references/runners.md: diagnose a blocked-egress failure from the post-step log"
+        "pattern": "api\\.deps\\.dev",
+        "source": "references/runners.md: diagnose a blocked-egress failure from the post-step log, which means naming the endpoint the log recorded as blocked"
       },
       {
         "id": "bump-exonerated",
