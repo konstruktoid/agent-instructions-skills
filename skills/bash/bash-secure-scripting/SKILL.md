@@ -124,7 +124,7 @@ cleanup() {
   return 0
 }
 
-# Clean up, then die of the signal rather than reporting a status of our own, so a
+# Clean up, then die of the signal rather than reporting a status of its own, so a
 # caller and a supervisor see the 128+n they are waiting for.
 on_signal() {
   local sig="$1"

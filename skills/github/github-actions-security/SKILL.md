@@ -59,8 +59,8 @@ Every workflow, without exception:
   comment. Tags and branches are mutable. This includes actions used inside composite actions and
   reusable workflows.
 - **Pin to the latest published release of the action**, not to whatever version the file already
-  used. Look the current release up at the time of the change; do not assume the version in the file,
-  or the one you remember, is current. Staying on an older release needs a stated reason, in a
+  used. Look the current release up at the time of the change; do not assume that the version in
+  the file, or a recalled one, is current. Staying on an older release needs a stated reason, in a
   comment on the line and in the pull request description.
 - **Never interpolate untrusted event data into a `run:` block.** `${{ }}` is substituted into the
   script before the shell sees it. Pass the value through `env:` and reference the environment
@@ -175,6 +175,7 @@ For secrets, environments, and OIDC claims, read
 | Build provenance, artifact attestations, release publishing | [references/supply-chain.md](references/supply-chain.md) |
 | `runs-on` with a self-hosted or custom label, runner groups | [references/runners.md](references/runners.md) |
 | Container jobs, service containers, egress control, network policy | [references/runners.md](references/runners.md) |
+| A generic network failure, or a device permission step, in a job that hardens the runner | [references/runners.md](references/runners.md) |
 | A workflow repeated across repositories, or a new reusable workflow | [references/scalability.md](references/scalability.md) |
 | Matrices, concurrency, path filters, job graphs, runtime or cost | [references/scalability.md](references/scalability.md) |
 | Organization or enterprise policy, rulesets, CODEOWNERS | [references/scalability.md](references/scalability.md) |
@@ -215,12 +216,18 @@ Run, in this order:
    fixes such as SHA pinning; review its diff rather than trusting it.
 
 3. **The repository's own configured checks**, if it already runs a workflow linter, a YAML linter,
-   or `pre-commit`. Run what is configured rather than a parallel tool of your own choosing.
+   or `pre-commit`. Run what is configured rather than a separately chosen parallel tool.
 
 4. **The workflow itself**, when the change alters behavior rather than only structure. Push to a
    branch and read the run, or use `gh workflow run` for a `workflow_dispatch` workflow. Confirm the
    run passed and that no step logged a secret. A syntactically valid workflow that never ran is
    unverified.
+
+   Anything provable only on a runner is behavioral, not structural, so the structural exemption
+   does not cover it. An egress allowlist entry and a runner device permission are both in this
+   category. When a run cannot exercise the change, say plainly that it is unverified and name the
+   event that would exercise it, such as a pull request that changes a dependency manifest for an
+   allowlist entry reached only by that code path.
 
 If the repository has no workflow linting configured, run these as one-off checks and report the
 findings. Do not add a linter to the repository's configuration as part of an unrelated change.
@@ -248,7 +255,9 @@ suppression to reach a clean run.
       reported, naming the failing check and its output
 - [ ] `actionlint` clean
 - [ ] `zizmor` clean, with no new suppression that lacks a stated reason
-- [ ] The workflow ran successfully, or the change is structural only and this is stated
+- [ ] The workflow ran successfully, or the change is structural only and this is stated. A change
+      to an egress allowlist or to runner device permissions is behavioral: name it as unverified
+      until a run exercises it, and say which event would
 - [ ] `permissions: {}` at workflow level, with every job granting only the scopes its steps use
 - [ ] Every third-party action pinned to a full commit SHA that was resolved, not recalled, with a
       version comment
@@ -276,8 +285,8 @@ suppression to reach a clean run.
   context inventory, and the dangerous triggers.
 - [references/supply-chain.md](references/supply-chain.md): pinning, Dependabot, allowed-actions
   policy, cache and artifact poisoning, and attestations.
-- [references/runners.md](references/runners.md): runner selection, self-hosted hardening, and
-  egress control.
+- [references/runners.md](references/runners.md): runner selection, self-hosted hardening, egress
+  control and how to diagnose a connection it blocked, and granting a job access to a device.
 - [references/scalability.md](references/scalability.md): reusable workflows, composite actions,
   cost and runtime controls, and organization-wide governance.
 

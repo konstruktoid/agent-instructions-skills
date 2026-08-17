@@ -38,7 +38,7 @@ commit the fixture started at, so "which files did this run change" is answerabl
 ## Running them
 
 ```sh
-# Tools the fixtures need, kept out of your own PATH
+# Tools the fixtures need, kept out of the caller's own PATH
 export UV_TOOL_BIN_DIR=/tmp/eval-bin UV_TOOL_DIR=/tmp/eval-tools
 uv tool install ansible-lint && uv tool install zizmor
 export EVAL_TOOL_BIN=/tmp/eval-bin

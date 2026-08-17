@@ -309,6 +309,68 @@
         "command": "grep -q 'changed_when' roles/nftables_base/tasks/main.yml",
         "source": "SKILL.md checklist: idempotence holds"
       }
+    ],
+    "avl-06-autofix-cosmetics": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "command": "awk '/^#/ && NR > 2 && prev != \"\" && prev !~ /^#/ { bad = 1 } { prev = $0 } END { exit bad }' defaults/main.yml",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '^\\s*-?\\s*(lineinfile|package|service|template|copy|command|shell):' tasks/ handlers/",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint tasks/ defaults/ handlers/ meta/",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "command": "grep -qE 'ntp_client_min_sources: *2' defaults/main.yml",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "command": "grep -q 'ntp_client_min_sources' templates/chrony.conf.j2",
+        "source": "task prompt: rendered into the configuration as a minsources line"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "pattern": "blank line|--fix|reformat|revert|diff",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit"
+      }
     ]
   }
 }

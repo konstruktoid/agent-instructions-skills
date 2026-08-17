@@ -264,6 +264,13 @@ the outcome the mechanisms above exist to avoid.
   Avoid first/second person ("I can help you...", "Use this to..."), keep it under 1,024
   characters, and keep the SKILL.md body under 500 lines, moving longer material into files it
   links to directly.
+- Give every `references/*.md` file over 100 lines a `## Contents` section listing its own
+  headings, placed after the opening paragraph and before the first section. The same best
+  practices document asks for one, because an agent previewing a long file with a partial read
+  otherwise sees only its first screen and cannot tell what else the file covers.
+  `scripts/check_skills.py` fails when a long reference file has no `Contents` section, and when
+  the entries do not match the headings that follow them, since a list that drifts from the
+  document is worse than none.
 - For any skill with a verify-then-fix cycle, bound the retries explicitly and define what one
   attempt is: one full fix-and-rerun cycle. This repo baselines the bound at 3 attempts, lets an
   agent continue while each cycle produces strictly fewer findings, and requires it to stop early
@@ -324,22 +331,37 @@ improvement, the results file says so. See [evals/README.md](evals/README.md) fo
 conditions are isolated, what an assertion may and may not be, and the limitations that apply
 to every number in there.
 
-Every skill defines both evals. Four have been run: `ansible-verification-loop`,
-`github-actions-security`, `python-secure-coding`, and `python-testing` each have results
-committed. `bash-secure-scripting` and `bash-testing` were added with their tasks, assertions,
-and fixtures in place but have not been run yet, so `evals/bash-*/results/` is empty and
-neither skill has a measured delta. `bash-secure-scripting` is the largest skill here, so it
-is the one carrying the most unmeasured surface.
+Every skill defines both evals, and all six have results committed. The table records the
+latest stamp for each skill, what it measured, and the limitation that keeps that number from
+standing as a general claim about the skill.
 
-Eval fixtures are deliberately flawed inputs, so `pyproject.toml` and
-`.markdownlint-cli2.yaml` exclude `evals/*/fixtures` and `evals/*/results` from this
-repository's own lint. Each fixture carries its own tool configuration, which is what the
-eval measures against.
+| Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
+| --- | --- | --- | --- | --- | --- |
+| `ansible-verification-loop` | 2026-07-28-isolation | +1 over 1 task | 1.8x | 10/10 (2026-07-25) | One task, one run per condition. The broader stamp, 2026-07-25, measured +6 over 5 tasks at 2.2x, with `avl-05` classified truncated rather than graded. |
+| `bash-secure-scripting` | 2026-08-14 | +9 over 4 tasks | 3.5x | 9/10 | One run per condition, so variance is uncontrolled. `bss-t09` is out of scope and routed in. |
+| `bash-testing` | 2026-08-14 | +1 over 4 tasks | 2.1x | 7/10 | Two fixtures pass fully in both conditions and cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
+| `github-actions-security` | 2026-07-27 | +21 over 3 tasks (2026-07-25) | 2.6x | 9/10 | The latest stamp graded no tasks. `gas-t06` is out of scope and routed in on all 3 repetitions. |
+| `python-secure-coding` | 2026-07-28, marked for regeneration | +4 over 5 tasks | 1.7x | 10/10 (2026-07-25) | Only `psc-02` has a delta not marked *no reliable difference*, and on `psc-03`, `psc-04` and `psc-05` the with-skill condition failed the same security assertions as the baseline. The fixtures were anchored for `ty` on 2026-08-17, which this stamp predates; see [evals/python-secure-coding/README.md](evals/python-secure-coding/README.md). |
+| `python-testing` | 2026-07-28 | +1 over 5 tasks | 1.4x | 9/10 (2026-07-25) | Four of five deltas are zero or marked *no reliable difference*, at $2.07 per net assertion gained. |
+
+Two limits cut across the whole table. A routing score carried from an earlier stamp than the
+task result was measured against an earlier revision of that skill's `description`, so it does
+not transfer forward on its own. And a task delta is a measurement of the skill revision that
+ran, not of the file as it stands now: editing a skill, its `tasks.json` or its
+`assertions.json` invalidates the stamp above it until the eval is run again.
+
+Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
+`evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each
+fixture carries its own tool configuration, which is what the eval measures against.
+Markdown is the exception: `.markdownlint-cli2.yaml` ignores only `evals/*/results/raw/**`,
+the verbatim transcripts and workspaces of a graded run, so a fixture's own `README.md` is
+still held to this repository's Markdown rules.
 
 ## Checks
 
-`.github/workflows/lint.yml` enforces the rules above on every push and pull request. Every check
-runs locally:
+`.github/workflows/lint.yml` enforces the rules above on every push and pull request, in four
+jobs: the authoring rules, this repository's own Python, its own workflows, and its Markdown.
+Every check runs locally:
 
 ```sh
 uv run --frozen python scripts/check_skills.py   # authoring rules for every SKILL.md
@@ -347,7 +369,14 @@ uv run --frozen ruff check .                     # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
 npx --yes markdownlint-cli2@0.23.2 "**/*.md"     # add --fix to correct spacing in place
+docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+uvx zizmor@1.29.0 --persona=pedantic --no-progress .github/
 ```
+
+The last two are this repository's own workflows held to the skill it publishes about them,
+at the versions `skills/github/github-actions-security/SKILL.md` pins in its Verify section.
+`zizmor` is scoped to `.github/` for the same reason `ruff` excludes `evals/*/fixtures`: a
+fixture workflow plants the finding its eval measures.
 
 `scripts/check_skills.py` verifies, for each `skills/*/*/SKILL.md`, that the frontmatter parses as
 YAML, `name` matches the parent directory, `description` is non-empty, under 1,024 characters, and
@@ -358,10 +387,22 @@ neutral defaults a template must ship with: `model` is `inherit` and `tools` is 
 allowlist. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must
 hold a `SKILL.md`, and every skill in the repository must be listed by exactly one plugin. It fails
 if an `agents/` directory has appeared at the repository root, which would ship the agent templates
-as installable subagents. Last, it verifies the cross-references this library maintains by hand: a
+as installable subagents. It verifies the cross-references this library maintains by hand: a
 `SKILL.md` may not name an `instructions/*.md` that does not exist, an `instructions/*.md` may not
 name a `skills/*/*/SKILL.md` that does not exist, and a skill that names an instructions document
-must be named back by it, which is the bidirectional rule stated above. It needs only `pyyaml`, so
+must be named back by it, which is the bidirectional rule stated above. It requires every
+`references/*.md` over 100 lines to carry a `## Contents` section, and compares its entries against
+the headings that follow, so a list cannot drift into pointing at a section that has been renamed
+or removed. Last, it holds the prose
+this repository writes about itself, meaning `README.md`, `instructions/*.md`, `skills/**/*.md`,
+`agent-templates/*.md`, and the hand-written `evals/*/README.md`, to the em dash, arrow,
+inflated-vocabulary, and grammatical-person rules in
+`instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and table rows
+are exempt, because the rule allows those and a document has to be able to quote what it bans. The
+person check additionally exempts Markdown link text and double-quoted spans, which is where a
+cited title and a quoted example live. The word list carries only the entries with no technical
+meaning in this subject matter: `harness` and `elevate` stay legal, since "test harness" and
+"privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
 `python3 scripts/check_skills.py` also works outside uv.
 
 `claude plugin validate .` checks the marketplace manifest against Claude Code's own schema. It

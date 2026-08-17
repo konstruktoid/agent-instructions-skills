@@ -30,8 +30,8 @@ No `S`-rule catches SSRF. OWASP folds it into Broken Access Control (A01:2025).
 
 A security check must fail closed. A broad `except:` or `except Exception:` around an
 authorization or cryptographic check can silently turn a failure into an allow. `BLE`
-and `TRY` keep handling narrow once you have decided to handle something, but do not
-tell you that this particular failure must deny.
+and `TRY` keep handling narrow once a decision to handle something has been made, but do
+not establish that this particular failure must deny.
 
 This maps to OWASP's Mishandling of Exceptional Conditions category (A10:2025): a caught
 exception that lets control flow continue past a failed check is as dangerous as an

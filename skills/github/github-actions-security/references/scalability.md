@@ -3,6 +3,14 @@
 Read this when a workflow is repeated across repositories, when creating a reusable workflow or
 composite action, or when workflow runtime, cost, or organization-wide policy is in scope.
 
+## Contents
+
+- Reusable workflow or composite action
+- A shared workflow repository
+- Organization and enterprise controls
+- Cost and runtime
+- Checklist
+
 ## Reusable workflow or composite action
 
 Both remove duplication, and they are not interchangeable:

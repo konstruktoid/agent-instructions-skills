@@ -3,6 +3,18 @@
 Shell passes its inputs to other programs as text that those programs parse. Every place a value
 crosses into something that parses it, including back into the shell itself, is an injection point.
 
+## Contents
+
+- What counts as untrusted
+- Never re-parse data as code
+- Arithmetic evaluation is code execution
+- Validate at the boundary, with an allowlist
+- Paths and traversal
+- Hostile filenames
+- Other interpreters
+- Reading input safely
+- Exposure through the command line
+
 ## What counts as untrusted
 
 Everything the script did not write itself:
@@ -46,8 +58,8 @@ another Bash. They do not make a value safe for `sh`, `awk`, SQL, or a URL, and 
 substitute for avoiding the second parser.
 
 The `ssh` line above is the case where that matters most, because the parser is on the other
-machine and is not yours to choose. `ssh` joins its arguments into one string and hands it to the
-remote account's login shell, so `%q` output is only safe if that shell is Bash: under `dash`,
+machine and is outside the script's control. `ssh` joins its arguments into one string and hands
+it to the remote account's login shell, so `%q` output is only safe if that shell is Bash: under `dash`,
 `csh`, or a restricted shell the quoting can be wrong, and a `ForceCommand` or an
 `authorized_keys` `command=` ignores the argument entirely and runs something else. Confirm the
 remote shell, or use a transport that never builds a remote command line, such as `scp`, `rsync`,

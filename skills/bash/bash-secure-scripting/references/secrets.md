@@ -4,6 +4,15 @@ Shell makes secrets visible in more places than most languages: the process tabl
 output, the shell history, the log the scheduler mails, and the transcript someone pastes into an
 issue.
 
+## Contents
+
+- Where a secret must never appear
+- Getting a secret into a command safely
+- Tracing and debugging
+- Generating secrets
+- Containing the damage
+- Output the repository keeps
+
 ## Where a secret must never appear
 
 - **A command-line argument.** Every user on the host can read it from `ps` and `/proc/<pid>/cmdline`
@@ -106,7 +115,7 @@ ownership, file type, and mode `0600` before opening it with the `require_secure
 [filesystem.md](filesystem.md).
 
 The file receives the same fully expanded commands, secrets included, so it needs a trusted path
-that only root can write to, mode `0600`, and a retention policy — it is now a credential store.
+that only root can write to, mode `0600`, and a retention policy: it is now a credential store.
 Keep tracing disabled around credential handling regardless of where the output goes. `PS4` is
 expanded on every traced command, so never build it from data.
 

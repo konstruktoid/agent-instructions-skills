@@ -429,6 +429,74 @@
         "source": "task prompt: update the README table"
       }
     ],
+    "gas-06-blocked-egress": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "post-step-log-read",
+        "kind": "bash_regex",
+        "pattern": "dependency-review-failed\\.log|ci-logs",
+        "source": "references/runners.md: read the hardening action's post-step output before touching the workflow"
+      },
+      {
+        "id": "blocked-endpoint-allowed",
+        "kind": "workspace_command",
+        "command": "grep -q 'api\\.deps\\.dev' .github/workflows/dependency-review.yml",
+        "source": "references/runners.md: an allowlist is only as complete as the events the audit observed"
+      },
+      {
+        "id": "egress-policy-still-block",
+        "kind": "workspace_command",
+        "command": "grep -q 'egress-policy: block' .github/workflows/dependency-review.yml",
+        "source": "references/runners.md: expect and diagnose this failure mode rather than retreating to audit"
+      },
+      {
+        "id": "pin-not-reverted",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'v2\\.20\\.0|bf7454d06d71f1098171f2acdf0cd4708d7b5920' .github/workflows/dependency-review.yml",
+        "source": "SKILL.md baseline: pin to the latest published release; references/runners.md: a version bump in the same diff is a coincidence trap"
+      },
+      {
+        "id": "actions-still-sha-pinned",
+        "kind": "workspace_command",
+        "command": "! grep -nE '^\\s*uses: [^@]+@(v?[0-9]|main|master)' .github/workflows/*.y*ml",
+        "source": "SKILL.md baseline: pin every third-party action to a full commit SHA"
+      },
+      {
+        "id": "diagnosis-stated",
+        "kind": "final_regex",
+        "pattern": "api\\.deps\\.dev|not allowed",
+        "source": "references/runners.md: diagnose a blocked-egress failure from the post-step log"
+      },
+      {
+        "id": "bump-exonerated",
+        "kind": "final_regex",
+        "pattern": "coincid|not the cause|unrelated|did not cause|is not to blame|nothing to do with",
+        "source": "references/runners.md: compare what the passing run did rather than reasoning from the version delta"
+      },
+      {
+        "id": "unverified-stated",
+        "kind": "final_regex",
+        "pattern": "unverified|not verified|cannot be verified|only be (verified|confirmed)|until a (pull request|run)",
+        "source": "SKILL.md Verify: an egress allowlist change is behavioral, so name it unverified until a run exercises it"
+      }
+    ],
     "gas-05-dependabot-pinning": [
       {
         "id": "actionlint-clean",

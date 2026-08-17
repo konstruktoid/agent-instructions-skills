@@ -3,6 +3,18 @@
 Read this when adding, upgrading, or pinning an action or reusable workflow, when configuring
 Dependabot or an allowed-actions policy, or when a workflow caches or publishes artifacts.
 
+## Contents
+
+- Pin to a commit SHA
+- Pin to the latest release
+- Pinning does not stop at `uses:`
+- Choosing an action at all
+- Dependabot
+- Policy enforcement
+- Cache and artifact poisoning
+- Provenance
+- Checklist
+
 ## Pin to a commit SHA
 
 `uses: some-org/some-action@v1` resolves a tag, and a tag is a pointer the action's maintainer, or
@@ -26,9 +38,12 @@ repositories consumed it on their next run without changing a line.
 Actions published by GitHub itself (`actions/*`, `github/*`) carry lower risk than third-party ones,
 but the reasoning is the same and the pinning rule is not worth making conditional.
 
-Immutable releases, in public preview since August 2025, prevent a published release's tag and
-assets from being changed. They narrow the window but do not close it: a branch can still be created
-with a tag's name and will satisfy a `@v1` reference. SHA pinning remains the guidance.
+Immutable releases prevent a published release's tag and assets from being changed, and generate a
+signed attestation for each asset. They are generally available and configurable per repository or
+per organization, applying to releases published after the setting is turned on. They narrow the
+window but do not close it: the protection covers the release's own tag, so a branch created with
+that name still satisfies a `@v1` reference, and a repository that has not enabled the setting is
+unaffected. SHA pinning remains the guidance.
 
 ## Pin to the latest release
 
@@ -154,7 +169,7 @@ permissions:
   attestations: write
 
 steps:
-  - uses: actions/attest-build-provenance@<full-sha> # v3.x
+  - uses: actions/attest-build-provenance@<full-sha> # v4.x
     with:
       subject-path: dist/*.tar.gz
 ```

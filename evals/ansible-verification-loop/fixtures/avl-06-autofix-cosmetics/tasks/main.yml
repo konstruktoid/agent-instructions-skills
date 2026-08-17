@@ -1,0 +1,15 @@
+---
+- name: render the time synchronisation configuration
+  template:
+    src: chrony.conf.j2
+    dest: "{{ ntp_client_conf_path }}"
+    owner: "{{ ntp_client_conf_owner }}"
+    group: "{{ ntp_client_conf_owner }}"
+    mode: "0644"
+  notify: Restart the time synchronisation service
+
+- name: manage the time synchronisation service
+  service:
+    name: chrony
+    state: started
+    enabled: "{{ ntp_client_service_enabled }}"

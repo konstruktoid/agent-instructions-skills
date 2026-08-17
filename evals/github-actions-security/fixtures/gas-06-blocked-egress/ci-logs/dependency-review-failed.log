@@ -1,0 +1,34 @@
+Job log for the Dependency Review check on the current pull request, which changes
+requirements.txt. Timestamps, run identifiers and runner host names have been removed.
+
+##[group]Run step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c
+  with:
+    egress-policy: block
+    allowed-endpoints: api.github.com:443
+      api.securityscorecards.dev:443
+      github.com:443
+      *.blob.core.windows.net:443
+##[endgroup]
+StepSecurity Harden Runner is running in block mode
+
+##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+##[endgroup]
+Syncing repository
+Fetching the repository
+
+##[group]Run actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+##[endgroup]
+##[error]fetch failed
+
+##[group]Post Harden Runner
+Uploading correlation artifact
+Terminating process
+domain resolved: github.com., ip address: 192.0.2.10, TTL: 60
+domain resolved: api.github.com., ip address: 192.0.2.11, TTL: 60
+domain resolved: codeload.github.com., ip address: 192.0.2.12, TTL: 60
+domain resolved: api.securityscorecards.dev., ip address: 192.0.2.13, TTL: 300
+domain not allowed: api.deps.dev.
+endpoint called ip address:port 192.0.2.10:443, domain: github.com., pid: 2848, process: git-remote-http
+endpoint called ip address:port 192.0.2.13:443, domain: api.securityscorecards.dev., pid: 2954, process: node
+endpoint called ip address:port 192.0.2.11:443, domain: api.github.com., pid: 2954, process: node
+##[endgroup]

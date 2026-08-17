@@ -12,3 +12,13 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
+
+# ty resolves a project by walking up for the nearest pyproject.toml carrying a `[tool.ty]`
+# section. A graded workspace is a copy of this fixture nested under the repository's own
+# results tree, so with no section here ty settles on the repository's `[tool.ty.src]` block and
+# checks the copy against the wrong first-party root and the wrong `requires-python`. That is
+# what the false `ty-clean` failures of 2026-07-28 were. `[tool.ruff]` above already anchors
+# ruff this way. `root` also states the src layout, so a test file a run adds can import the
+# package under test.
+[tool.ty.environment]
+root = ["src"]

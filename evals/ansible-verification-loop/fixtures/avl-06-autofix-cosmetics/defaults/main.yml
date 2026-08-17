@@ -1,0 +1,18 @@
+---
+# Time servers the client synchronises with.
+ntp_client_servers: ["0.pool.ntp.org", "1.pool.ntp.org"]
+
+# Servers used only when none of the primary servers answer.
+ntp_client_fallback_servers: []
+
+# Ports opened for outbound time synchronisation.
+ntp_client_ports: [123]
+
+# Path of the rendered configuration file.
+ntp_client_conf_path: "/etc/chrony/chrony.conf"
+
+# Owner and group of the rendered configuration file.
+ntp_client_conf_owner: "root"
+
+# Whether the service is started and enabled at boot.
+ntp_client_service_enabled: true
