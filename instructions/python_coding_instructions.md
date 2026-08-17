@@ -3,7 +3,7 @@
 ## Objective
 
 Produce Python code that passes the repository's `ruff` and `ty` checks
-cleanly, plus the judgment calls those tools cannot make for you. These
+cleanly, and apply the judgment those tools cannot supply. These
 instructions apply whenever an agent authors or modifies Python source in a
 repository that adopts them.
 
@@ -82,9 +82,9 @@ verify them:
   credential handling, state the security reasoning in the commit message
   or surrounding docstring. No check requires this, but it is expected.
 - **Whether validation is needed at all.** `TRY`/`BLE` keep exception
-  handling narrow once you have decided to handle something; they do not tell
-  you that validation belongs only at genuine system boundaries (user
-  input, network responses, external APIs) and not in between.
+  handling narrow once a decision to handle something has been made; they do
+  not establish that validation belongs only at genuine system boundaries
+  (user input, network responses, external APIs) and not in between.
 - **Missed batching opportunities.** No lint rule flags an external API
   call made in a loop that the API could batch.
 - **Suppression justification.** A blanket `# noqa` is itself catchable

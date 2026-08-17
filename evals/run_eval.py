@@ -40,7 +40,7 @@ import subprocess
 import sys
 import textwrap
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -382,7 +382,7 @@ def invoke_claude(
     timeout: int = RUN_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Run one `claude -p` subprocess, storing its stream, and return a run record."""
-    started = datetime.now(tz=timezone.utc)
+    started = datetime.now(tz=UTC)
     try:
         # The command is built by claude_command from checked-in eval data, and
         # runs with shell=False, so no shell metacharacter reaches an interpreter.
@@ -414,7 +414,7 @@ def invoke_claude(
         "returncode": returncode,
         "timed_out": timed_out,
         "started": started.isoformat(),
-        "seconds": round((datetime.now(tz=timezone.utc) - started).total_seconds(), 1),
+        "seconds": round((datetime.now(tz=UTC) - started).total_seconds(), 1),
     }
 
 
@@ -750,7 +750,7 @@ def results_root(skill: str, stamp: str) -> Path:
 
 def today() -> str:
     """Return the current UTC date as YYYY-MM-DD, used to name a results file."""
-    return datetime.now(tz=timezone.utc).strftime("%Y-%m-%d")
+    return datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
 
 def execute(jobs: list[Job], worker: Worker, parallel: int) -> list[dict[str, Any]]:

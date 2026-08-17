@@ -3,6 +3,14 @@
 Read this when the change touches `permissions`, `GITHUB_TOKEN` scopes, secrets, environments, or
 cloud authentication.
 
+## Contents
+
+- The permission model
+- Secrets
+- Environments and deployment gates
+- OIDC instead of stored credentials
+- Checklist
+
 ## The permission model
 
 `GITHUB_TOKEN` is minted per job, expires when the job ends, and carries whatever scopes the
@@ -95,8 +103,9 @@ secret store, so it holds only while the rules stay on the environment. Scope ac
 - **Keep user and system detail out of logs and artifacts too.** Workflow logs are public on a
   public repository, and an uploaded artifact outlives the run. Runner paths
   (`/home/runner/work/...`), `whoami`/`hostname` output, `env` dumps, and full tracebacks are not
-  secrets, so nothing masks them, but on a self-hosted runner they describe your infrastructure and
-  the account the job runs as. Do not `set -x` or dump the environment as a debugging habit, and
+  secrets, so nothing masks them, but on a self-hosted runner they describe the organization's
+  infrastructure and the account the job runs as. Do not `set -x` or dump the environment as a
+  debugging habit, and
   normalize captured output before a step commits it back to the repository.
 - **Rotate on a schedule and after any incident.** Audit `org.update_actions_secret` and related
   events in the organization audit log.
@@ -133,7 +142,7 @@ jobs:
       contents: read
     steps:
       - name: Authenticate to AWS
-        uses: aws-actions/configure-aws-credentials@<full-sha> # v5.x
+        uses: aws-actions/configure-aws-credentials@<full-sha> # v6.2.3
         with:
           role-to-assume: arn:aws:iam::123456789012:role/github-deploy
           aws-region: eu-north-1

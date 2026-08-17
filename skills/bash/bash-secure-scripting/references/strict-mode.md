@@ -4,6 +4,18 @@
 common ways a script continues after a failure, and it has documented exceptions that hide the
 rest. Knowing the exceptions is the point of this file.
 
+## Contents
+
+- What each option does
+- Where errexit is ignored
+- Capturing a status without losing errexit
+- pipefail and PIPESTATUS
+- nounset details
+- Globbing options
+- IFS
+- Subshells swallow state and failures
+- Verify strict-mode assumptions by running the failure path
+
 ## What each option does
 
 | Option | Name | Effect |

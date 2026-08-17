@@ -32,6 +32,34 @@ whose type depends on the loader is a value that must be quoted.
     a mapping's own `key: value` colon is structure rather than a scalar.
   Quote a value in either form so it does not change meaning with the loader.
 
+## Auditing quoting across a repository
+
+A sweep that adds or removes quoting across many files mixes two kinds of change, and a reviewer
+cannot judge the risk unless they are reported separately.
+
+**Correctness.** A value whose type depends on the loader changes meaning when its quoting changes.
+Check explicitly for the YAML 1.1 and 1.2 divergence set: `yes`, `no`, `on`, `off`, `y`, `n`, a
+leading `0` followed by digits `0` to `7`, and sexagesimal `NN:NN`. Each one found unquoted is a
+behavior change waiting to happen, and quoting it is a fix.
+
+**Consistency.** Everything else is cosmetic. When the divergence set turns out to be quoted already,
+which is the usual result in a repository that lints with `yaml[truthy]`, say plainly that the sweep
+changed no behavior rather than presenting it as a fix.
+
+Do not over-quote. Quoting is for values that are meant to be strings:
+
+- A default backing a `type: "int"` or `type: "bool"` entry in `meta/argument_specs.yml` must stay
+  unquoted. The `type:` value is itself a string and may be quoted; the `default:` under it has to
+  match the type it declares. A quoted `"5"` is a string, and it remains one everywhere the
+  argument spec's coercion has not been applied, which breaks any comparison or arithmetic that
+  treats it as a number.
+- A sweep must skip any value whose declared type is not a string, and must not quote a value that
+  is already a real boolean or integer.
+
+For measuring the current ratio before deciding what the convention is, and for the parser
+configuration an audit needs to see quoting at all, read
+[style-sweeps.md](style-sweeps.md).
+
 ## Relationship to the repository's linters
 
 Ansible's YAML loader accepts unquoted `yes`, `no`, `on`, and `off` rather than rejecting

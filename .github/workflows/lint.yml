@@ -26,9 +26,19 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          enable-cache: true
+          # `auto` rather than `true`, here and in the jobs below. From v10 the default
+          # disables the cache on `release`, tag push, `pull_request_target`, and
+          # `workflow_run`, which is the cache-poisoning protection
+          # references/supply-chain.md asks for. None of this workflow's triggers are in
+          # that set, so `auto` caches exactly as `true` did, and an explicit `true`
+          # would only opt out of the protection if a trigger were added later.
+          enable-cache: auto
+          # Only a uv release whose checksum this action already ships, so the download is
+          # verified against a known value rather than trusted on arrival. Introduced in
+          # setup-uv v10.
+          version: latest-known
       - name: Check SKILL.md files
         run: uv run --frozen python scripts/check_skills.py
 
@@ -44,15 +54,52 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          enable-cache: true
+          enable-cache: auto
+          version: latest-known
       - name: ruff check
         run: uv run --frozen ruff check .
       - name: ruff format
         run: uv run --frozen ruff format --check .
       - name: ty check
         run: uv run --frozen ty check .
+
+  actions:
+    name: Workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: auto
+          version: latest-known
+      # The two checks skills/github/github-actions-security/SKILL.md requires of every
+      # workflow change, run against this repository's own workflows at the versions that
+      # skill pins. A library that publishes the rule has to meet it, and the pins move
+      # only when the skill's own Verify section does. The image is pinned by digest
+      # rather than by tag, which is what references/runners.md requires of a container.
+      - name: actionlint
+        run: |
+          docker run --rm --volume "${PWD}:/repo" --workdir /repo \
+            rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
+            -color
+      # Scoped to .github/ rather than the repository root, for the reason pyproject.toml
+      # excludes evals/*/fixtures from ruff: a fixture workflow plants the finding its
+      # eval measures, and one of them references an action that does not exist, which
+      # fails the ref-confusion audit outright. GITHUB_TOKEN is passed so the audits that
+      # need the API run; without it zizmor falls back to reduced offline coverage.
+      - name: zizmor
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: uvx "zizmor@1.29.0" --persona=pedantic --no-progress .github/
 
   markdown:
     name: Markdown

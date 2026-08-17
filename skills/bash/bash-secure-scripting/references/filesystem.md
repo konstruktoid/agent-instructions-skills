@@ -4,6 +4,15 @@ Most of what a script does is create, move, and delete files, usually in directo
 can also write to. The failure modes are predictable names, races, and expansions that produce a
 path nobody intended.
 
+## Contents
+
+- Temporary files
+- Races in shared directories
+- Destructive commands
+- Writing files
+- Trusting a file before reading it
+- Downloaded artifacts
+
 ## Temporary files
 
 ```bash
@@ -66,7 +75,7 @@ rm -rf -- "${target}"
   string, which is the case that produces `rm -rf /`.
 - **`${var:?}` is not a destructive-operation guard on its own.** It rejects unset and empty, and
   nothing else: `/`, `//`, `.`, `..`, `${HOME}`, and `/tmp/..` all pass it and all resolve
-  somewhere the script has no business deleting. The guard is the second check — resolve the path
+  somewhere the script has no business deleting. The guard is the second check: resolve the path
   and confirm it sits under a directory the script owns, either an allowlisted parent as above or
   a directory the script created itself with `mktemp -d`. Delete only paths the script created or
   was configured to manage.

@@ -9,9 +9,12 @@ For every skills/<category>/<name>/SKILL.md, the rules stated in README.md are:
 - The body (everything after the frontmatter) is under 500 lines.
 
 It also checks the plugin marketplace manifest, since a skill that is not listed there
-never reaches a project that installs this library as a plugin, and the cross-references
+never reaches a project that installs this library as a plugin, the cross-references
 between skills and instructions/, which README.md requires to run in both directions and
-which nothing else would catch drifting.
+which nothing else would catch drifting, the Contents list README.md requires of every
+reference file past 100 lines, and the prose of every document this library publishes
+against the em dash, arrow, inflated-vocabulary, and grammatical-person rules in
+instructions/written_language_instructions.md.
 
 For every agent-templates/<name>.md, the rules are the same frontmatter rules with
 `name` matching the file stem, plus the neutral defaults a template must ship with:
@@ -42,6 +45,19 @@ import yaml
 MAX_DESCRIPTION_CHARS = 1024
 MAX_BODY_LINES = 500
 
+# Anthropic's skill authoring guidance asks for a table of contents in a reference file past
+# roughly this length: an agent previewing a long file with a partial read sees only its first
+# screen, and without the list it cannot tell what the rest of the file covers.
+TOC_REQUIRED_LINES = 100
+
+REFERENCE_GLOB = "skills/*/*/references/*.md"
+
+TOC_HEADING = "## Contents"
+
+SECTION_HEADING = re.compile(r"^## (.+)$")
+
+TOC_ENTRY = re.compile(r"^- (.+)$")
+
 MARKETPLACE_PATH = Path(".claude-plugin/marketplace.json")
 
 AGENT_TEMPLATE_GLOB = "agent-templates/*.md"
@@ -67,6 +83,90 @@ PLUGIN_AGENT_DIR = Path("agents")
 # A template pins no model of its own: it ships the model that follows the main
 # conversation and leaves the choice to whoever copies it.
 NEUTRAL_MODEL = "inherit"
+
+# instructions/written_language_instructions.md bans em dashes in prose and arrows outside
+# diagrams, mapping tables, code, and command output. That rule governs every document this
+# library publishes as guidance, and nothing enforced it: two reference files had already
+# drifted past it before this check existed. Fenced blocks, inline code spans, and table
+# rows are removed before the search, so a document that quotes a banned character as an
+# example of what to avoid still passes.
+PROSE_MARKERS = (("—", "em dash"), ("→", "arrow"))
+
+# The prose this repository writes about itself. Eval fixtures are deliberately flawed
+# inputs and eval results are verbatim evidence of what an agent wrote, so neither is held
+# to this rule; the hand-written README of an eval suite is.
+PROSE_GLOBS = (
+    "README.md",
+    "instructions/*.md",
+    "skills/**/*.md",
+    AGENT_TEMPLATE_GLOB,
+    "evals/README.md",
+    "evals/*/README.md",
+)
+
+# Leading whitespace is allowed on both fences: a fenced block nested in a list item is
+# indented, and anchoring at column zero would leave its contents scanned as prose. Both
+# CommonMark fence characters are accepted, and the closing fence has to repeat the opening
+# one, so a tilde block holding backticks is still closed where its author closed it.
+FENCED_BLOCK = re.compile(
+    r"^[ \t]*(?P<fence>```|~~~).*?^[ \t]*(?P=fence)", re.MULTILINE | re.DOTALL
+)
+
+INLINE_CODE = re.compile(r"`[^`]*`")
+
+# The inflated vocabulary instructions/written_language_instructions.md rules out, restricted
+# to the entries that carry no technical meaning in this repository's subject matter. `harness`
+# and `elevate` are deliberately absent: "test harness" and "privilege elevation" are the
+# domain's own terms, and that document says a term of art keeps its spelling. A word named as
+# an example rather than used is written in backticks, which the code-span strip above exempts.
+BANNED_WORDS = (
+    "beacon",
+    "cutting-edge",
+    "delve",
+    "empower",
+    "ever-evolving",
+    "facilitate",
+    "foster",
+    "game changer",
+    "intricate",
+    "landscape",
+    "leverage",
+    "meticulous",
+    "multifaceted",
+    "paradigm shift",
+    "paramount",
+    "pivotal",
+    "realm",
+    "robust",
+    "seamless",
+    "streamline",
+    "supercharge",
+    "synergy",
+    "tapestry",
+    "transformative",
+    "underpinnings",
+    "underscore",
+    "utilize",
+)
+
+# Trailing \w* so an inflected form is caught too: "utilizes", "leveraging", "underscores".
+BANNED_WORD = re.compile(
+    r"\b(?:" + "|".join(re.escape(word) for word in BANNED_WORDS) + r")\w*",
+    re.IGNORECASE,
+)
+
+# instructions/written_language_instructions.md requires the imperative and the third person in
+# instructional and reference text. The two exemptions it grants, quoted material and the title
+# of a cited work, are removed before the search: a Markdown link destroys its own link text, and
+# a double-quoted span covers both a quoted example and a quoted probe prompt. The pronoun "I" is
+# matched case-sensitively so that a single-letter flag such as `env -i` is not a finding.
+MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\([^)]*\)")
+
+QUOTED_SPAN = re.compile(r'"[^"]*"')
+
+SECOND_AND_FIRST_PERSON = re.compile(
+    r"(?i:\b(?:we|us|our|ours|my|me|you|your|yours)\b)|\bI\b(?!/)",
+)
 
 # Openings that describe the skill from the reader's side rather than stating what the
 # skill does. The README requires the description to lead with what the skill does.
@@ -434,6 +534,112 @@ def check_cross_references(repo_root: Path, skills: list[Path]) -> list[str]:
     return errors
 
 
+def check_prose_markers(repo_root: Path) -> list[str]:
+    """Return every banned prose marker found in the documents this library publishes.
+
+    Code is exempt by the rule itself, so fenced blocks and inline code spans are removed
+    before the search. Fenced blocks are replaced by their own newline count so the line
+    numbers reported still match the file. Table rows are skipped, since the rule allows an
+    arrow in a mapping table.
+    """
+    errors: list[str] = []
+    paths = sorted({path for glob in PROSE_GLOBS for path in repo_root.glob(glob)})
+    for path in paths:
+        text = FENCED_BLOCK.sub(
+            lambda match: "\n" * match.group().count("\n"),
+            path.read_text(encoding="utf-8"),
+        )
+        relative = path.relative_to(repo_root)
+        for number, line in enumerate(text.split("\n"), start=1):
+            if line.lstrip().startswith("|"):
+                continue
+            prose = INLINE_CODE.sub("", line)
+            errors.extend(
+                f"{relative}:{number}: {label} in prose; "
+                "instructions/written_language_instructions.md forbids it"
+                for marker, label in PROSE_MARKERS
+                if marker in prose
+            )
+            errors.extend(
+                f"{relative}:{number}: inflated wording {match.group()!r}; "
+                "instructions/written_language_instructions.md rules it out, so use the plain "
+                "word, or write it in backticks when naming it as an example"
+                for match in BANNED_WORD.finditer(prose)
+            )
+            impersonal = QUOTED_SPAN.sub("", MARKDOWN_LINK.sub("", prose))
+            errors.extend(
+                f"{relative}:{number}: first- or second-person {match.group()!r}; "
+                "instructions/written_language_instructions.md requires the imperative and the "
+                "third person outside quoted material and cited titles"
+                for match in SECOND_AND_FIRST_PERSON.finditer(impersonal)
+            )
+    return errors
+
+
+def check_reference_toc(repo_root: Path) -> list[str]:
+    """Check that every long reference file carries a Contents list matching its headings.
+
+    README.md requires one past TOC_REQUIRED_LINES lines, so an agent that previews the file
+    rather than reading it whole still sees everything it covers. That is also why the list has
+    to precede every other section: one placed further down is outside the screen the preview
+    shows. The entries are compared against the headings that follow, because a list that has
+    drifted from the document sends the reader looking for a section that is no longer there.
+    """
+    errors: list[str] = []
+    for path in sorted(repo_root.glob(REFERENCE_GLOB)):
+        relative = path.relative_to(repo_root)
+        raw = path.read_text(encoding="utf-8")
+        if len(raw.splitlines()) <= TOC_REQUIRED_LINES:
+            continue
+
+        # A fenced block can hold a line that looks like a heading, so drop the blocks first.
+        lines = FENCED_BLOCK.sub(lambda match: "\n" * match.group().count("\n"), raw).split("\n")
+
+        headings = [
+            match.group(1).strip()
+            for match in (SECTION_HEADING.match(line) for line in lines)
+            if match and match.group(1).strip() != "Contents"
+        ]
+
+        if TOC_HEADING not in lines:
+            errors.append(
+                f"{relative}: is over {TOC_REQUIRED_LINES} lines and has no "
+                f"{TOC_HEADING!r} section; README.md requires one listing: "
+                f"{', '.join(headings)}"
+            )
+            continue
+
+        start = lines.index(TOC_HEADING) + 1
+        preceding = [
+            match.group(1).strip()
+            for match in (SECTION_HEADING.match(line) for line in lines[: start - 1])
+            if match
+        ]
+        if preceding:
+            errors.append(
+                f"{relative}: the {TOC_HEADING!r} section follows {preceding[0]!r}; README.md "
+                "places it after the opening paragraph and before the first section, so a partial "
+                "read of the file still reaches it"
+            )
+            continue
+
+        entries: list[str] = []
+        for line in lines[start:]:
+            if line.startswith("## "):
+                break
+            entry = TOC_ENTRY.match(line)
+            if entry:
+                entries.append(entry.group(1).strip())
+
+        if entries != headings:
+            errors.append(
+                f"{relative}: the Contents list does not match the headings that follow it. "
+                f"Listed: {entries}. Found: {headings}"
+            )
+
+    return errors
+
+
 def report(repo_root: Path, paths: list[Path], check: Callable[[Path], list[str]]) -> int:
     """Run `check` over every path, print one line per file, and return the failure count."""
     failed = 0
@@ -447,6 +653,15 @@ def report(repo_root: Path, paths: list[Path], check: Callable[[Path], list[str]
         else:
             print(f"{relative}: ok")
     return failed
+
+
+def report_repository_check(errors: list[str], clean_message: str) -> list[str]:
+    """Print a repository-wide check's findings, or its clean line, and pass the findings back."""
+    for error in errors:
+        print(error, file=sys.stderr)
+    if not errors:
+        print(clean_message)
+    return errors
 
 
 def main() -> int:
@@ -465,24 +680,32 @@ def main() -> int:
     failed = report(repo_root, skills, check_skill)
     template_failed = report(repo_root, templates, check_agent_template)
 
-    manifest_errors = check_marketplace(repo_root, skills) + check_plugin_agent_dir(repo_root)
-    for error in manifest_errors:
-        print(error, file=sys.stderr)
-    if not manifest_errors:
-        print(f"{MARKETPLACE_PATH}: ok")
+    manifest_errors = report_repository_check(
+        check_marketplace(repo_root, skills) + check_plugin_agent_dir(repo_root),
+        f"{MARKETPLACE_PATH}: ok",
+    )
+    reference_errors = report_repository_check(
+        check_cross_references(repo_root, skills),
+        f"{INSTRUCTIONS_DIR}/: cross-references ok",
+    )
+    toc_errors = report_repository_check(
+        check_reference_toc(repo_root),
+        f"references/: every file over {TOC_REQUIRED_LINES} lines lists its own contents",
+    )
+    prose_errors = report_repository_check(
+        check_prose_markers(repo_root),
+        "prose: no em dashes, arrows, inflated wording, or first- and second-person address",
+    )
 
-    reference_errors = check_cross_references(repo_root, skills)
-    for error in reference_errors:
-        print(error, file=sys.stderr)
-    if not reference_errors:
-        print(f"{INSTRUCTIONS_DIR}/: cross-references ok")
-
-    if failed or template_failed or manifest_errors or reference_errors:
+    repository_errors = manifest_errors + reference_errors + toc_errors + prose_errors
+    if failed or template_failed or repository_errors:
         print(
             f"\n{failed} of {len(skills)} skill(s) failed, "
             f"{template_failed} of {len(templates)} agent template(s) failed, "
             f"{len(manifest_errors)} packaging problem(s), "
-            f"{len(reference_errors)} cross-reference problem(s)",
+            f"{len(reference_errors)} cross-reference problem(s), "
+            f"{len(toc_errors)} contents-list problem(s), "
+            f"{len(prose_errors)} prose problem(s)",
             file=sys.stderr,
         )
         return 1

@@ -3,6 +3,17 @@
 A script that stops halfway is the normal case, not the exceptional one. What matters is what it
 leaves behind and what it tells its caller.
 
+## Contents
+
+- Cleanup with a trap
+- Signals
+- Reporting the failure
+- Exit codes are an interface
+- Timeouts
+- Retries
+- Concurrency
+- Partial completion
+
 ## Cleanup with a trap
 
 Install the trap immediately after creating the resource, never at the end of the script:

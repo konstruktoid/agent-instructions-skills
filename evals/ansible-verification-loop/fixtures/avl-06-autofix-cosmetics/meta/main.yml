@@ -1,0 +1,14 @@
+---
+galaxy_info:
+  role_name: ntp_client
+  author: platform
+  description: Configures the host as a time synchronisation client.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - ntp
+dependencies: []

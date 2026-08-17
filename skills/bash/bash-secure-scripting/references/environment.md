@@ -4,6 +4,15 @@ A script inherits its environment from whoever started it. Where the script has 
 that caller, or runs unattended, the environment is input and needs the same treatment as any other
 input.
 
+## Contents
+
+- PATH
+- Variables the caller controls
+- Privilege
+- umask and file modes
+- Dependencies
+- The contexts a script actually runs in
+
 ## PATH
 
 `PATH` decides which program each unqualified command name runs. A script that runs privileged,

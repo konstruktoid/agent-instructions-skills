@@ -2,7 +2,10 @@
 name = "agent-instructions-skills"
 version = "0.1.0"
 description = "Checks that enforce this repository's own authoring rules"
-requires-python = ">=3.9"
+# 3.9 and 3.10 are past, or within months of, upstream end of life, so a floor at either
+# claims support for an interpreter that no longer receives security fixes. 3.11 is the
+# oldest release still supported a year from now.
+requires-python = ">=3.11"
 # Constrained rather than bare: Dependabot skips version upgrades in uv.lock for a
 # dependency that carries no constraint here (dependabot-core#12273).
 dependencies = ["pyyaml>=6.0.3"]
@@ -10,12 +13,14 @@ dependencies = ["pyyaml>=6.0.3"]
 [dependency-groups]
 # Pinned so CI and a local run check with the same versions. `ty` is still a preview
 # tool, so it is pinned to an exact version rather than a range.
-dev = ["ruff>=0.16.1", "ty==0.0.66", "types-pyyaml>=6.0.12"]
+dev = ["ruff>=0.16.3", "ty==0.0.72", "types-pyyaml>=6.0.12"]
 
 [tool.ruff]
 # Prose and code in this repository wrap at 100 columns.
 line-length = 100
-target-version = "py39"
+# Matches requires-python above, so the pyupgrade (`UP`) rules enforce syntax appropriate
+# to the floor automatically rather than by hand.
+target-version = "py311"
 # Eval fixtures are deliberately flawed inputs, not repository source: each one plants
 # the insecure pattern its skill is supposed to catch, and a run rewrites it in place.
 # Linting them here would report the planted flaw as a repository defect. Each fixture

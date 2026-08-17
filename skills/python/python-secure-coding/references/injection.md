@@ -33,7 +33,7 @@ cannot trace data flow across calls. Treat an `S`-rule pass as a floor, not proo
   anything rendered as HTML. `flask.escape` was deprecated in Flask 2.3 and removed in 2.4;
   it was always the MarkupSafe function re-exported, so import it from `markupsafe`.
 - Autoescaping in a template engine covers the template path only. Anything marked safe,
-  or assembled as raw HTML in Python, is your responsibility.
+  or assembled as raw HTML in Python, remains the caller's responsibility.
 
 ## Command and code injection
 

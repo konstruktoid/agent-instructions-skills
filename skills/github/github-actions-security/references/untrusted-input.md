@@ -3,6 +3,14 @@
 Read this when a workflow reads event data, or uses `pull_request_target`, `workflow_run`, or a
 comment-driven trigger.
 
+## Contents
+
+- Why `${{ }}` in a `run:` block is dangerous
+- Untrusted contexts
+- Trigger risk
+- Fork pull request settings
+- Checklist
+
 ## Why `${{ }}` in a `run:` block is dangerous
 
 The runner substitutes expressions into the script text before the shell interprets it. A value

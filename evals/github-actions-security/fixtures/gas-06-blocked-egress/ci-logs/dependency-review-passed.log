@@ -1,0 +1,31 @@
+Job log for the last Dependency Review check that passed, on the previous pull request, which
+changed no dependency manifest. Timestamps, run identifiers and runner host names have been
+removed.
+
+##[group]Run step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920
+  with:
+    egress-policy: block
+    allowed-endpoints: api.github.com:443
+      api.securityscorecards.dev:443
+      github.com:443
+      *.blob.core.windows.net:443
+##[endgroup]
+StepSecurity Harden Runner is running in block mode
+
+##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+##[endgroup]
+Syncing repository
+Fetching the repository
+
+##[group]Run actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+##[endgroup]
+Dependency review completed
+
+##[group]Post Harden Runner
+Uploading correlation artifact
+Terminating process
+domain resolved: github.com., ip address: 192.0.2.10, TTL: 60
+domain resolved: api.github.com., ip address: 192.0.2.11, TTL: 60
+endpoint called ip address:port 192.0.2.10:443, domain: github.com., pid: 2790, process: git-remote-http
+endpoint called ip address:port 192.0.2.11:443, domain: api.github.com., pid: 2901, process: node
+##[endgroup]
