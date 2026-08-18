@@ -89,15 +89,24 @@ misses are where the work that avoids it will happen.
 gh api orgs/ORG --jq '{default_repository_permission, members_can_create_repositories,
   members_can_create_public_repositories, two_factor_requirement_enabled,
   members_can_fork_private_repositories, web_commit_signoff_required}'
-gh api orgs/ORG/rulesets --jq '.[] | {id, name, target, enforcement}'
+gh api --paginate "orgs/ORG/rulesets?per_page=100" --jq '.[] | {id, name, target, enforcement}'
 gh api orgs/ORG/properties/schema --jq '.[] | {property_name, value_type, required}'
 gh api orgs/ORG/actions/permissions
 gh api orgs/ORG/actions/permissions/workflow
-gh api orgs/ORG/installations --jq '.installations[] | {app_slug, repository_selection}'
-gh api orgs/ORG/actions/runner-groups --jq '.runner_groups[] | {name, visibility}'
-gh api "orgs/ORG/members?filter=2fa_disabled" --jq '.[].login'
-gh api orgs/ORG/outside_collaborators --jq '.[].login'
+gh api --paginate "orgs/ORG/installations?per_page=100" --jq '.installations[] |
+  {app_slug, repository_selection}'
+gh api --paginate "orgs/ORG/actions/runner-groups?per_page=100" --jq '.runner_groups[] |
+  {name, visibility}'
+gh api --paginate "orgs/ORG/members?filter=2fa_disabled&per_page=100" --jq '.[].login'
+gh api --paginate "orgs/ORG/outside_collaborators?per_page=100" --jq '.[].login'
 ```
+
+Every list read above is paginated. `gh api` returns the first page only unless `--paginate` is
+passed, and `gh ruleset list` stops at 30 without `--limit`, so an inventory written without them
+reports the first page as if it were the whole organization and an audit built on it is silently
+incomplete. `--jq` is applied to each page separately, which is fine for a per-item filter and
+wrong for an aggregate: for a count or a `group_by`, use `--paginate --slurp` and pipe to `jq`,
+since `--slurp` cannot be combined with `--jq`.
 
 Endpoint names, response fields, and plan availability change as the platform changes. Where a
 command fails or a field is absent, check the current REST documentation rather than working

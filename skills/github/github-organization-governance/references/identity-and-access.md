@@ -30,7 +30,7 @@ Require it for every member, and confirm by listing the accounts that do not hav
 by reading the setting:
 
 ```sh
-gh api "orgs/ORG/members?filter=2fa_disabled" --jq '.[].login'
+gh api --paginate "orgs/ORG/members?filter=2fa_disabled&per_page=100" --jq '.[].login'
 ```
 
 Requiring it removes members who do not comply, which is why the requirement is often deferred.
@@ -84,7 +84,7 @@ to them. List them, give each an owner and an expiry, and prefer a fork and a pu
 the work allows it:
 
 ```sh
-gh api orgs/ORG/outside_collaborators --jq '.[].login'
+gh api --paginate "orgs/ORG/outside_collaborators?per_page=100" --jq '.[].login'
 ```
 
 ## Service accounts and machine identities

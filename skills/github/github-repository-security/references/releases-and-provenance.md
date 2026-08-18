@@ -57,8 +57,14 @@ stored, so nothing durable can leak.
 ## Immutable releases
 
 Immutable releases prevent a published release's tag and assets from being changed after
-publication, and generate a signed attestation for each asset. Enable the setting before the first
-release that matters, since it applies to releases published afterwards.
+publication, and generate a single release attestation binding the release tag, the commit SHA,
+and the set of assets. Enable the setting before the first release that matters, since it applies
+to releases published afterwards.
+
+That is a release-level claim, and a different one from the per-artifact provenance a workflow
+produces with `actions/attest-build-provenance`, which says how a given file was built. A release
+can carry both, and a consumer verifying only the release attestation has checked what was
+published rather than how it was built.
 
 It narrows the window rather than closing it. The protection covers the release's own tag, so a
 moving major or minor tag that no release owns stays mutable. A consumer pinning to a moving tag

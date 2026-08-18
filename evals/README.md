@@ -142,14 +142,31 @@ The last of those exists because a graded stamp with no results file is invisibl
 reader of the repository. `github-actions-security/results/raw/2026-07-28/` held five tasks at
 three runs per condition for three weeks before anything reported it.
 
-Two findings are reported separately, and neither fails the run by default, because an edit
-cannot fix either one:
+Three findings are reported separately, and none of them fails the run by default, because an
+edit cannot fix any of them:
 
 - A task defined in `tasks.json` that no stamp has ever graded. The suite's coverage is then
   smaller than its task list, which the results file has no way to say.
 - A stamp older than the skill directory, `tasks.json`, or `assertions.json` it measured.
   README.md states that such a stamp does not carry forward, and the check is what makes that
   rule visible rather than remembered.
+- A stamp that graded a modified working tree, described below. It measured source that is in
+  no commit, so nothing can reproduce it and the comparison above cannot certify it.
+
+The freshness check compares revisions rather than dates. A run writes the commit it measured
+to `results/raw/<stamp>/source-revision.json`, and the check asks `git merge-base
+--is-ancestor` whether that commit already contained the change. A date cannot answer this: a
+change committed later on the day of the run carries the same date as the stamp, and a commit
+rebased or cherry-picked forward carries an author date older than the day it landed. Stamps
+written before the run recorded a revision, and stamps whose revision a history rewrite
+removed, fall back to comparing the committer date against the stamp name, and the finding
+says which comparison produced it.
+
+The same file records whether the working tree was modified when the run started. A stamp
+that graded a modified tree is reported on its own, because the source it measured is in no
+commit: the revision it recorded is a lower bound rather than a record, and the comparison
+above can still prove a change came afterwards but cannot prove the run included one. Commit
+before measuring, and the finding does not arise.
 
 A stamp whose `assertions.json` has changed cannot be repaired by `regrade` once the finished
 workspaces are gone, which they are in any clone, since they are gitignored. Re-running the

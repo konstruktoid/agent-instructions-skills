@@ -41,10 +41,14 @@ the response before enabling the scanner.
   dismissed alerts:
 
   ```sh
-  gh api repos/OWNER/REPO/code-scanning/alerts --jq \
-    'group_by(.rule.security_severity_level) | map({severity: .[0].rule.security_severity_level,
-     count: length})'
+  gh api --paginate --slurp "repos/OWNER/REPO/code-scanning/alerts?per_page=100" |
+    jq 'add | group_by(.rule.security_severity_level) |
+      map({severity: .[0].rule.security_severity_level, count: length})'
   ```
+
+  `--jq` runs once per page, so an aggregate written that way counts each page separately and
+  reports a total for the first 30 alerts. `--slurp` collects the pages into one array instead,
+  and it cannot be combined with `--jq`, so the aggregation moves into a piped `jq`.
 
 ## Dependency alerts and updates
 

@@ -22,6 +22,12 @@ fix for each is a paid re-run rather than an edit:
 - Every task the suite defines has been graded in at least one stamp.
 - The skill, its `tasks.json`, and its `assertions.json` are no newer than the latest
   rendered stamp. README.md states that editing any of them invalidates the stamp above it.
+  This compares revisions, not dates: a stamp records the commit it measured in
+  `results/raw/<stamp>/source-revision.json`, and a change is newer when that commit does
+  not contain it. A stamp with no usable revision falls back to comparing committer dates,
+  which cannot see a change made later on the day of the run.
+- A stamp that recorded a modified working tree. It graded source that is in no commit, so
+  the measurement cannot be reproduced and the revision comparison above cannot certify it.
 
 Run it from the repository root:
 
@@ -78,10 +84,32 @@ STAMP_NAME = re.compile(r"^\d{4}-\d{2}-\d{2}")
 def load_json(path: Path, errors: list[str]) -> dict[str, Any] | None:
     """Read one JSON file, appending to `errors` and returning None when it does not parse."""
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        doc = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"{path.name}: {exc}")
         return None
+    if not isinstance(doc, dict):
+        errors.append(f"{path.name}: top level is {type(doc).__name__}, expected an object")
+        return None
+    return doc
+
+
+def object_entries(value: Any, where: str, errors: list[str]) -> list[dict[str, Any]]:  # noqa: ANN401
+    """Return the object entries of a list, reporting the container and every entry that is not.
+
+    A specification that parses is not a specification the checks below can read. Reporting
+    the shape as an error keeps a malformed file a finding rather than a traceback.
+    """
+    if not isinstance(value, list):
+        errors.append(f"{where}: is {type(value).__name__}, expected a list")
+        return []
+    entries: list[dict[str, Any]] = []
+    for index, entry in enumerate(value):
+        if isinstance(entry, dict):
+            entries.append(entry)
+        else:
+            errors.append(f"{where}[{index}]: is {type(entry).__name__}, expected an object")
+    return entries
 
 
 def check_spec_headers(suite: Path, docs: dict[str, dict[str, Any]], errors: list[str]) -> None:
@@ -169,6 +197,9 @@ def check_assertions(
     graded: dict[str, list[dict[str, Any]]], task_ids: list[str], errors: list[str]
 ) -> None:
     """Check that assertions cover exactly the defined tasks, and that each one is gradable."""
+    if not isinstance(graded, dict):
+        errors.append(f"assertions.json: 'tasks' is {type(graded).__name__}, expected an object")
+        return
     errors.extend(
         f"assertions.json: no assertions for task {task_id}"
         for task_id in sorted(set(task_ids) - set(graded))
@@ -180,7 +211,7 @@ def check_assertions(
 
     for task_id, assertions in graded.items():
         seen: set[str] = set()
-        for assertion in assertions:
+        for assertion in object_entries(assertions, f"assertions.json {task_id}", errors):
             assertion_id = assertion.get("id", "<unnamed>")
             if assertion_id in seen:
                 errors.append(f"assertions.json {task_id}: duplicate assertion id {assertion_id}")
@@ -253,7 +284,9 @@ def check_coverage(suite: Path, task_ids: list[str], stale: list[str]) -> None:
                 runs = json.loads(outcomes.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError):
                 continue
-            graded.update(run["task"] for run in runs if "task" in run)
+            if not isinstance(runs, list):
+                continue
+            graded.update(run["task"] for run in runs if isinstance(run, dict) and "task" in run)
 
     stale.extend(
         f"{task_id}: defined but never graded in any stamp, so the suite's coverage is "
@@ -263,18 +296,67 @@ def check_coverage(suite: Path, task_ids: list[str], stale: list[str]) -> None:
     )
 
 
-def last_commit_date(paths: list[Path]) -> str:
-    """Return the date of the newest commit touching any of `paths`, or an empty string."""
-    if not paths:
-        return ""
+def git_output(arguments: list[str]) -> str:
+    """Return the trimmed stdout of one git command, or an empty string when it fails."""
     # A fixed argument list built from repository paths, with no shell involved.
-    log = subprocess.run(  # noqa: S603
-        [GIT, "log", "-1", "--format=%ad", "--date=short", "--", *[str(path) for path in paths]],
+    result = subprocess.run(  # noqa: S603
+        [GIT, *arguments], capture_output=True, text=True, check=False
+    )
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def last_commit(paths: list[Path]) -> tuple[str, str]:
+    """Return the revision and date of the newest commit touching any of `paths`.
+
+    The date is the committer date rather than the author date: an author date travels with
+    a commit through a rebase or a cherry-pick, so it can be older than the day the change
+    actually landed, and a check that reads it would call a stale stamp fresh.
+    """
+    if not paths:
+        return "", ""
+    log = git_output(
+        ["log", "-1", "--format=%H %cd", "--date=short", "--", *[str(path) for path in paths]]
+    )
+    revision, _, date = log.partition(" ")
+    return revision, date
+
+
+def stamp_revision(suite: Path, stamp: str) -> tuple[str, bool]:
+    """Return the revision a stamp recorded as its source, and whether the tree was modified.
+
+    The revision is empty for a stamp written before `run_eval.py` recorded one, and for a
+    stamp whose revision no longer exists after a history rewrite. The flag is true only when
+    the stamp says outright that the tree was modified: an absent or unreadable flag is not
+    evidence of a clean tree, but it is not evidence of a dirty one either.
+    """
+    recorded = suite / "results" / "raw" / stamp / "source-revision.json"
+    try:
+        doc = json.loads(recorded.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return "", False
+    if not isinstance(doc, dict):
+        return "", False
+    dirty = doc.get("dirty") is True
+    revision = doc.get("revision")
+    if not isinstance(revision, str) or not revision:
+        return "", dirty
+    # `--is-ancestor` treats an unknown revision as an error rather than as a false, which
+    # would read as staleness. Confirm the object is present before asking about it.
+    if git_output(["cat-file", "-t", revision]) != "commit":
+        return "", dirty
+    return revision, dirty
+
+
+def contains(revision: str, ancestor: str) -> bool:
+    """Report whether `revision` already includes `ancestor`."""
+    # A fixed argument list built from resolved revisions, with no shell involved.
+    result = subprocess.run(  # noqa: S603
+        [GIT, "merge-base", "--is-ancestor", ancestor, revision],
         capture_output=True,
         text=True,
         check=False,
     )
-    return log.stdout.strip() if log.returncode == 0 else ""
+    return result.returncode == 0
 
 
 def check_freshness(suite: Path, skill_dir: Path | None, stale: list[str]) -> None:
@@ -283,15 +365,44 @@ def check_freshness(suite: Path, skill_dir: Path | None, stale: list[str]) -> No
     if not stamps or skill_dir is None:
         return
     latest = stamps[-1]
+    measured, dirty = stamp_revision(suite, latest)
+
+    if dirty:
+        # The run recorded a revision, but it measured that revision plus uncommitted edits,
+        # and those edits are in no commit for the checks below to read. The ancestor test can
+        # still prove a change came after the run; it cannot prove the run included one, since
+        # the skill it actually read is not the skill any revision holds.
+        stale.append(
+            f"latest stamp {latest} was measured against a modified working tree at "
+            f"{measured[:12] or 'an unrecorded revision'}, so the source it graded is in no "
+            "commit; the measurement cannot be reproduced and a freshness result below that "
+            "reports no change is not evidence that the stamp is current"
+        )
 
     for label, paths in (
         ("the skill", [skill_dir]),
         ("the specification", [suite / "tasks.json", suite / "assertions.json"]),
     ):
-        changed = last_commit_date([path for path in paths if path.exists()])
-        if changed and changed > latest[:10]:
+        changed_revision, changed = last_commit([path for path in paths if path.exists()])
+        if not changed:
+            continue
+        if measured and changed_revision:
+            # The stamp is fresh when the source it ran against already contained the change.
+            # This sees a change made later on the day of the run, which comparing the dates
+            # cannot, because both sides are the same date.
+            outdated = not contains(measured, changed_revision)
+            evidence = (
+                f"{changed_revision[:12]} of {changed}, which the measured source "
+                f"{measured[:12]} does not contain"
+            )
+        else:
+            # No usable revision, so fall back to the dates. A change made after the run on
+            # the day of the run reads as fresh here, which is the limit of what a date shows.
+            outdated = changed > latest[:10]
+            evidence = f"{changed}, by date, since the stamp records no revision to compare"
+        if outdated:
             stale.append(
-                f"latest stamp {latest} predates a change to {label} on {changed}; "
+                f"latest stamp {latest} predates a change to {label} in {evidence}; "
                 "README.md states that the stamp does not carry forward across it"
             )
 
@@ -312,11 +423,16 @@ def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[s
         docs[name] = doc
 
     check_spec_headers(suite, docs, errors)
-    tasks = docs["tasks.json"].get("tasks", [])
+    tasks = object_entries(docs["tasks.json"].get("tasks", []), "tasks.json 'tasks'", errors)
     task_ids = [task.get("id", "<unnamed>") for task in tasks]
     check_tasks(suite, tasks, errors)
     check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
-    check_triggers(docs["trigger-eval.json"].get("prompts", []), errors)
+    check_triggers(
+        object_entries(
+            docs["trigger-eval.json"].get("prompts", []), "trigger-eval.json 'prompts'", errors
+        ),
+        errors,
+    )
     check_results(suite, errors)
     check_coverage(suite, task_ids, stale)
     check_freshness(suite, skills.get(suite.name), stale)

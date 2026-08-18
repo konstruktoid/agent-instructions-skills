@@ -50,7 +50,8 @@ Every repository, whatever else the change touches:
 
 - The default branch is protected by a ruleset in active mode: force pushes blocked, deletion
   blocked, a pull request required before merging, and the required status checks named rather
-  than assumed.
+  than assumed, each bound to the app that reports it with `integration_id` so the check cannot
+  be satisfied by anyone with write access.
 - Review is enforced rather than requested. At least one approving review, stale approvals
   dismissed on a new push, approval of the most recent reviewable push, and review from code
   owners on the paths that carry risk.

@@ -22,10 +22,11 @@ checks, merge requirements, or a bypass grant.
 
 Branch protection is a per-branch setting owned by the repository. A ruleset is a named policy
 object that targets branches or tags by pattern, can be defined at the organization level, layers
-with other rulesets, keeps a change history, and can run in evaluate mode before it blocks
-anything. Layering is the property that matters for governance: an organization ruleset and a
-repository ruleset both apply, and the result is the union of their restrictions. A repository
-administrator can add to an organization ruleset and cannot subtract from it.
+with other rulesets, keeps a change history, and on the plans that offer it can run in evaluate
+mode before it blocks anything. Layering is the property that matters for governance: an
+organization ruleset and a repository ruleset both apply, and the result is the union of their
+restrictions. A repository administrator can add to an organization ruleset and cannot subtract
+from it.
 
 Prefer a ruleset for every new control. Migrate an existing branch protection rule when the branch
 it protects is touched for another reason, rather than leaving two overlapping mechanisms in place
@@ -66,8 +67,12 @@ single developer almost nothing:
 - Block deletion of the default branch.
 - Require a pull request before merging, even where no approval is required, so every change has a
   reviewable record and automated checks have somewhere to report.
-- Require the status checks that already run, named explicitly. A check that is not named is not
-  required, whatever the workflow does.
+- Require the status checks that already run, named explicitly, and bind each one to the app that
+  reports it with `integration_id`. A check that is not named is not required, whatever the
+  workflow does; a check named without an `integration_id` accepts a status from any person or
+  app with write access, so it records agreement rather than requiring a passing run. Re-read the
+  ruleset after applying it and confirm each check kept its `integration_id`, since the interface
+  falls back to "any source" without saying so.
 
 ## The production tier
 
@@ -136,6 +141,12 @@ required check that cannot run during an incident.
 
 ## Evaluate mode and rollout
 
+Evaluate mode requires GitHub Enterprise Cloud, or GitHub Enterprise Server after 3.10. On Free,
+Pro, and Team the enforcement status does not exist, so check the plan before planning a rollout
+around it. Where it is unavailable, run the first three stages below in active mode against a
+target narrow enough to absorb a mistake, and widen the targeting rather than changing the
+enforcement.
+
 Enforcement that arrives without warning gets bypassed or reverted. Roll a new control out in
 four stages, and let the reported violations decide when to advance:
 
@@ -163,7 +174,10 @@ gh api repos/OWNER/REPO/branches/main/protection
 
 Map each protection setting to its ruleset rule, create the ruleset in evaluate mode, compare what
 it reports against what protection blocks, and only then remove the branch protection rule.
-Removing protection first leaves the branch unprotected for the length of the migration.
+Removing protection first leaves the branch unprotected for the length of the migration. Where
+evaluate mode is unavailable, run the ruleset in active mode alongside the branch protection rule
+instead: both apply, the result is the union, and the comparison is what the developers report
+rather than what the insights page does.
 
 ## Troubleshooting a rule that blocks legitimate work
 

@@ -753,6 +753,38 @@ def today() -> str:
     return datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
 
+def record_source_revision(root: Path) -> None:
+    """Record the commit the stamp was measured against, beside the runs it graded.
+
+    The date in a stamp's name says when the measurement happened, not what it measured.
+    A commit landing later the same day, or an older commit rebased forward, both leave the
+    date unchanged, so `check_evals.py` compares revisions instead and needs one written down.
+    """
+    # A fixed argument list, with no shell involved.
+    head = subprocess.run(  # noqa: S603
+        [GIT, "rev-parse", "HEAD"], capture_output=True, text=True, check=False
+    )
+    if head.returncode != 0:
+        return
+    status = subprocess.run(  # noqa: S603
+        [GIT, "status", "--porcelain"], capture_output=True, text=True, check=False
+    )
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "source-revision.json").write_text(
+        json.dumps(
+            {
+                "revision": head.stdout.strip(),
+                # An uncommitted tree means the measured source is in no commit at all, so the
+                # revision below is a lower bound on what ran rather than a record of it.
+                "dirty": bool(status.stdout.strip()) if status.returncode == 0 else None,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def execute(jobs: list[Job], worker: Worker, parallel: int) -> list[dict[str, Any]]:
     """Run jobs through a bounded thread pool, preserving input order in the results."""
     if parallel <= 1:
@@ -770,6 +802,7 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         tasks = [task for task in tasks if task["id"] in args.task]
     stamp = args.stamp or today()
     root = results_root(args.skill, stamp)
+    record_source_revision(root)
     plugin_dir = build_plugin(args.skill, root)
 
     runs = max(1, args.runs)
@@ -1215,6 +1248,7 @@ def task_table(
         "|------|----------|------------|-------|-------------|",
     ]
     total_delta: float = 0
+    comparable = 0
     for task_id, conditions in by_task.items():
         baseline = graded_runs(conditions.get("baseline", []))
         with_skill = graded_runs(conditions.get("with-skill", []))
@@ -1224,6 +1258,7 @@ def task_table(
             with_skill_passed = [run["passed"] for run in with_skill]
             difference = median(with_skill_passed) - median(baseline_passed)
             total_delta += difference
+            comparable += 1
             delta = f"{difference:+g}"
             if len(baseline) > 1 and ranges_overlap(baseline_passed, with_skill_passed):
                 delta = f"{delta} (no reliable difference)"
@@ -1241,7 +1276,16 @@ def task_table(
             f"| `{task_id}` | {verdict(conditions.get('baseline', []))} | "
             f"{verdict(conditions.get('with-skill', []))} | {delta} | {fired} |"
         )
-    lines += ["", f"Net delta across {len(by_task)} tasks: **{total_delta:+g}** assertions.", ""]
+    # Only the tasks with both arms graded contributed to the sum, so those are the tasks
+    # the sum is across. Counting every task the suite defines would attribute the delta to
+    # runs that produced no delta at all.
+    if comparable:
+        summary = (
+            f"Net delta across {comparable} comparable task(s): **{total_delta:+g}** assertions."
+        )
+    else:
+        summary = "No task has both arms graded, so there is no net delta to state."
+    lines += ["", summary, ""]
     return lines, total_delta
 
 

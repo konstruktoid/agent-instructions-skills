@@ -60,8 +60,10 @@ is not evidence that the control exists.
 Every repository, whatever the change was:
 
 - **The default branch is protected in active mode.** Force pushes blocked, deletion blocked, a
-  pull request required before merging, required status checks named explicitly, and conversation
-  resolution required. Evaluate mode is a rollout stage, not a finished state.
+  pull request required before merging, required status checks named explicitly and each bound to
+  the app that reports it with `integration_id`, and conversation resolution required. A check
+  with no `integration_id` can be satisfied by anyone with write access. Evaluate mode is a
+  rollout stage, not a finished state.
 - **Review is enforced, not requested.** At least one approving review, stale approvals dismissed
   on a new push, approval of the most recent reviewable push, and code owner review on the paths
   that carry risk.
@@ -88,14 +90,24 @@ compared against.
 ```sh
 gh api repos/OWNER/REPO --jq '{private, default_branch, archived, security_and_analysis,
   delete_branch_on_merge, allow_auto_merge, web_commit_signoff_required}'
-gh ruleset list --repo OWNER/REPO
-gh api repos/OWNER/REPO/rulesets --jq '.[] | {id, name, target, enforcement}'
-gh api repos/OWNER/REPO/collaborators --jq '.[] | {login, role_name}'
-gh api repos/OWNER/REPO/keys --jq '.[] | {id, title, read_only}'
+gh ruleset list --repo OWNER/REPO --limit 100
+gh api --paginate "repos/OWNER/REPO/rulesets?per_page=100" --jq '.[] |
+  {id, name, target, enforcement}'
+gh api --paginate "repos/OWNER/REPO/collaborators?affiliation=direct&per_page=100" --jq '.[] |
+  {login, role_name}'
+gh api --paginate "repos/OWNER/REPO/keys?per_page=100" --jq '.[] | {id, title, read_only}'
 gh api repos/OWNER/REPO/actions/permissions
 gh api repos/OWNER/REPO/actions/permissions/workflow
-gh api repos/OWNER/REPO/environments --jq '.environments[] | {name, protection_rules}'
+gh api --paginate "repos/OWNER/REPO/environments?per_page=100" --jq '.environments[] |
+  {name, protection_rules}'
 ```
+
+Every list read above is paginated. `gh api` returns the first page only unless `--paginate` is
+passed, and `gh ruleset list` stops at 30 without `--limit`, so an inventory written without them
+reports the first page as if it were the whole repository and an audit built on it is silently
+incomplete. `--jq` is applied to each page separately, which is fine for a per-item filter and
+wrong for an aggregate: for a count or a `group_by`, use `--paginate --slurp` and pipe to `jq`,
+since `--slurp` cannot be combined with `--jq`.
 
 Endpoint names and response fields change as the platform changes. Where a command fails or a
 field is absent, check the current REST documentation rather than working around it, and say which

@@ -77,7 +77,9 @@ archived repository that is unarchived returns without the tier if the targeting
 Three tiers cover most organizations, and each adds to the one before it:
 
 - **Baseline**, every repository: force pushes and deletion blocked, a pull request required,
-  the shared security checks required.
+  the shared security checks required and each bound to its reporting app with `integration_id`.
+  Status checks are not indexed above the repository level, so the name is entered by hand and a
+  typo produces a check that is never required; verify the applied ruleset rather than the draft.
 - **Production**, where the repository supports a running service: approvals, code owner review,
   stale approval dismissal, approval of the most recent reviewable push, conversation resolution,
   and code scanning results required.

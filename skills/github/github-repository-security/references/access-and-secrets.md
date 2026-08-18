@@ -40,13 +40,20 @@ access that no membership review will find, because it is attached to the reposi
 to a group anyone reviews.
 
 ```sh
-gh api repos/OWNER/REPO/collaborators --jq '.[] | select(.role_name != "read") |
-  {login, role_name}'
-gh api repos/OWNER/REPO/teams --jq '.[] | {name, permission}'
+gh api --paginate "repos/OWNER/REPO/collaborators?affiliation=direct&per_page=100" \
+  --jq '.[] | {login, role_name}'
+gh api --paginate "repos/OWNER/REPO/teams?per_page=100" --jq '.[] | {name, permission}'
 ```
 
-Where a direct grant already exists, the fix is to move the person into a team with that access
-and remove the direct grant, not to leave both in place.
+`affiliation=direct` is what makes the first command an audit of direct grants. The default,
+`affiliation=all`, returns everyone who can reach the repository through a team or through the
+organization as well, and `role_name` reports the effective permission without saying where it
+came from, so the two are indistinguishable in the output. Do not filter `read` out either: a
+direct `read` grant is still a grant no membership review will find, which is the whole finding.
+
+Compare the two lists before changing anything. Where a direct grant already exists, the fix is
+to move the person into a team with that access and remove the direct grant, not to leave both
+in place.
 
 ## Outside collaborators
 
@@ -83,7 +90,8 @@ holding to, since a write-capable deploy key is a credential that can push to th
 carries no user identity in the audit trail.
 
 ```sh
-gh api repos/OWNER/REPO/keys --jq '.[] | {id, title, read_only, created_at, last_used}'
+gh api --paginate "repos/OWNER/REPO/keys?per_page=100" --jq '.[] |
+  {id, title, read_only, created_at, last_used}'
 ```
 
 A key with a title nobody recognizes, or one that has never been used, is a finding. Removing it

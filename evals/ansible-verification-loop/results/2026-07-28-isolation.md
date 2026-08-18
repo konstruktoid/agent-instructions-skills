@@ -10,7 +10,7 @@ the finished workspace or a regex over the run transcript.
 |------|----------|------------|-------|-------------|
 | `avl-03-banner-quoting` | 8/9 | 9/9 | +1 | yes |
 
-Net delta across 1 tasks: **+1** assertions.
+Net delta across 1 comparable task(s): **+1** assertions.
 
 Truncated runs: none.
 

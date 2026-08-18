@@ -109,7 +109,7 @@ that machine has:
 An app installation is a standing grant of permissions that survives the person who installed it:
 
 ```sh
-gh api orgs/ORG/installations --jq '.installations[] |
+gh api --paginate "orgs/ORG/installations?per_page=100" --jq '.installations[] |
   {app_slug, repository_selection, permissions}'
 ```
 
@@ -135,8 +135,8 @@ individual apps, rather than allowing every member to authorize whatever they si
 - Review pending and approved token requests on the access review cadence:
 
   ```sh
-  gh api orgs/ORG/personal-access-tokens --jq '.[] | {owner: .owner.login, repository_selection,
-    token_expired, token_expires_at}'
+  gh api --paginate "orgs/ORG/personal-access-tokens?per_page=100" --jq '.[] |
+    {owner: .owner.login, repository_selection, token_expired, token_expires_at}'
   ```
 
 ## Checklist

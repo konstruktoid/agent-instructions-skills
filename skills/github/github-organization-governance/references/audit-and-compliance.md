@@ -33,8 +33,8 @@ The audit log records what happened, including the things no settings read will 
 that was changed and changed back, a bypass that was used, an app that was installed for a day.
 
 ```sh
-gh api "orgs/ORG/audit-log?phrase=action:repo.access&per_page=100"
-gh api "orgs/ORG/audit-log?phrase=action:repository_ruleset.update"
+gh api --paginate "orgs/ORG/audit-log?phrase=action:repo.access&per_page=100"
+gh api --paginate "orgs/ORG/audit-log?phrase=action:repository_ruleset.update&per_page=100"
 ```
 
 Availability depends on the plan, and the API needs an owner token. Where the log cannot be read

@@ -436,11 +436,16 @@ every `workspace_command` parses under `bash -n` and every regex compiles, that 
 invisible, which is how a five-task, three-run `github-actions-security` stamp sat unread in
 `results/raw/2026-07-28/`.
 
-Two further findings are reported separately and do not fail the run, because the fix for each is
-a paid re-run rather than an edit: a task no stamp has ever graded, and a stamp older than the
-skill or the specification it measured. `--strict` fails on those as well. The staleness check
-reads `git log`, so it reports nothing useful outside a checkout. Like `check_skills.py` it needs
-no third-party package, and the lint workflow does not run it.
+Three further findings are reported separately and do not fail the run, because the fix for each
+is a paid re-run rather than an edit: a task no stamp has ever graded, a stamp older than the
+skill or the specification it measured, and a stamp that graded a modified working tree.
+`--strict` fails on those as well. Freshness compares the commit a stamp recorded in
+`source-revision.json` against the commit that last changed the skill or the specification, so a
+change made later on the day of the run is still seen; a stamp with no recorded revision falls
+back to comparing dates, and a stamp that graded a modified tree measured source held in no
+commit, which nothing can reproduce. The staleness check reads `git log`, so it reports nothing
+useful outside a checkout. Like `check_skills.py` it needs no third-party package, and the lint
+workflow does not run it.
 
 `claude plugin validate .` checks the marketplace manifest against Claude Code's own schema. It
 needs the Claude Code CLI, so it is a local step rather than a CI one.

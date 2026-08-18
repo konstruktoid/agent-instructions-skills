@@ -48,6 +48,16 @@ they read as documentation.
   behavior has no trivial change.
 - Cover every agent-facing path in `CODEOWNERS`, alongside `.github/workflows/` and the packaging
   manifest, so a change is reviewed by someone accountable for it.
+- Make `CODEOWNERS` own itself, as the last rule in the file, and assign it to a team that does
+  not overlap with the owners of the paths above:
+
+  ```text
+  /.github/CODEOWNERS  @ORG/security-team
+  ```
+
+  GitHub evaluates `CODEOWNERS` from the base branch and the last matching pattern wins, so
+  without that rule one pull request can delete the ownership of every path listed above and
+  merge with no code owner having seen it. The rule is what makes the rest of the file hold.
 - Require review from a second person for those paths where the project has the people for it, and
   hold the review to reading the diff rather than the description.
 - Run the merge-blocking checks the content deserves: lint, the project's own authoring checks,
