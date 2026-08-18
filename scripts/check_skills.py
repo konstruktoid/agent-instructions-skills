@@ -31,6 +31,7 @@ Exits 0 when everything passes, 1 otherwise.
 
 from __future__ import annotations
 
+import io
 import json
 import re
 import sys
@@ -666,6 +667,13 @@ def report_repository_check(errors: list[str], clean_message: str) -> list[str]:
 
 def main() -> int:
     """Check every skill and agent template plus the manifest, and report the results."""
+    # stdout is block-buffered when it is not a terminal, and stderr is line-buffered
+    # always, so under a pipe or a CI log every finding would print before the pass lines
+    # it belongs after. Line buffering puts the two streams back in the order they were
+    # written, without merging them into one.
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        sys.stdout.reconfigure(line_buffering=True)
+
     repo_root = Path(__file__).resolve().parent.parent
     skills = sorted(repo_root.glob("skills/*/*/SKILL.md"))
     templates = sorted(repo_root.glob(AGENT_TEMPLATE_GLOB))
