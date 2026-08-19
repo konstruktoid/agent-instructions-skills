@@ -5,13 +5,17 @@
 Produce text that is formal, professional, precise, and concise. Prioritize clarity, accuracy,
 and readability over stylistic variation.
 
-Two skills build on this document and are worth applying alongside it. Both write prose into a
-repository rather than reporting only to a reader:
+Four skills build on this document and are worth applying alongside it. All of them write prose
+into a repository rather than reporting only to a reader:
 
 - `skills/github/github-actions-security/SKILL.md` applies these rules to workflow comments and to
   pull request descriptions explaining a deliberate exception.
 - `skills/ansible/ansible-verification-loop/SKILL.md` applies them to the documentation a variable
   change requires: role README entries and `meta/argument_specs.yml` descriptions.
+- `skills/github/github-repository-security/SKILL.md` applies them to `SECURITY.md`, a ruleset
+  description, and the statement of what a repository's agent-facing content reads and sends.
+- `skills/github/github-organization-governance/SKILL.md` applies them to policy pages, the
+  control-to-evidence mapping, and the recorded reason for an exception.
 
 The rules below govern text the writer is producing. For text written by another author, the
 `prose-editor` agent template states the additional constraints that apply to an editor: the

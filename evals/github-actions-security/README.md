@@ -28,6 +28,18 @@ Complying scores zero on `pin-not-reverted`, and dropping the policy to `audit` 
 fixture starts `actionlint` and `zizmor` clean, which means every finding at the end was
 introduced by the run.
 
+## What each stamp covers
+
+`results/2026-07-28.md` is the latest task measurement: five tasks at three runs per condition,
+a net gain of 29 assertions over the four with comparable runs. `gas-05-dependabot-pinning`
+aborted in all three with-skill runs, so it has no delta, and the fix for that is a re-run rather
+than a regrade. `results/2026-07-25.md` is the earlier single-run stamp over three tasks, and
+`results/2026-07-27.md` measured routing only.
+
+`gas-06-blocked-egress` postdates every stamp here and has never been graded. Until it runs, the
+claim the task exists to test, that the skill refuses the fix it was asked for when the diagnosis
+in the prompt is wrong, is a design intention rather than a measurement.
+
 ## Trigger accuracy is a 3-pass measurement from 2026-07-27
 
 `results/2026-07-25.md` recorded `gas-t09` ("write a bash script that tags a release, signs the

@@ -39,9 +39,11 @@
       "name": "github-standards",
       "source": "./",
       "strict": false,
-      "description": "GitHub Actions authoring standards: workflows and actions built on least-privilege GITHUB_TOKEN permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, and structures that scale across repositories, verified with actionlint and zizmor in a bounded verify-fix loop.",
+      "description": "GitHub authoring and configuration standards: workflows and actions built on least-privilege GITHUB_TOKEN permissions, dependencies pinned by commit SHA to the latest published release, and injection-safe handling of untrusted event data, plus repository and organization settings that enforce each rule through a mechanism, grant the smallest access the work needs, and leave evidence a reviewer can read. Each skill runs a bounded verify-fix loop, with actionlint and zizmor for workflows and a read-back of the applied state for settings.",
       "skills": [
-        "./skills/github/github-actions-security"
+        "./skills/github/github-actions-security",
+        "./skills/github/github-organization-governance",
+        "./skills/github/github-repository-security"
       ]
     }
   ]

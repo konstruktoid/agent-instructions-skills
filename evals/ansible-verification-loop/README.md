@@ -32,3 +32,7 @@ That task depends on a behavior of `ansible-lint --fix` rather than on a documen
 pass as evidence: run `ansible-lint --fix .` in a copy of the fixture and check that `git diff`
 removes the blank lines. A release that stops deleting them leaves the assertion passing without
 separating a reviewed diff from a trusted summary, and the fixture then needs a new defect.
+
+That task has never been graded. `results/2026-07-28-isolation.md` covers `avl-03` alone, and
+`results/2026-07-25.md` predates the task, so the suite's measured coverage is five of its six
+tasks.

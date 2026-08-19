@@ -37,6 +37,7 @@ Current instructions documents:
 | `bash_coding_instructions.md` | Passing `shellcheck`, `bash -n`, and the repository's formatter cleanly, plus the layout, naming, and judgment rules those tools cannot enforce. |
 | `written_language_instructions.md` | Formal, concise, precise written style for any prose output. |
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
+| `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
 
 ### skills/
 
@@ -63,6 +64,8 @@ Current skills:
 | `bash-secure-scripting` | `skills/bash/bash-secure-scripting/SKILL.md` | The `shellcheck`/`bash -n` baseline from `bash_coding_instructions.md`, extended with the stability and security properties a linter cannot verify: strict-mode semantics, cleanup on every exit path, untrusted input and injection, `PATH` and environment control, temporary files, and credentials, run through a bounded verify-fix loop. |
 | `bash-testing` | `skills/bash/bash-testing/SKILL.md` | Adding or updating coverage for a shell change: discovering and matching the repository's existing framework (bats-core, shunit2, or plain scripts), making a script testable, covering exit codes and failure paths, and running the suite through a bounded verify-fix loop. |
 | `github-actions-security` | `skills/github/github-actions-security/SKILL.md` | Authoring and reviewing GitHub Actions workflows and actions: least-privilege `GITHUB_TOKEN` permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe triggers and runners, and structures that scale across repositories, run through a bounded verify-fix loop with `actionlint` and `zizmor`. |
+| `github-organization-governance` | `skills/github/github-organization-governance/SKILL.md` | Configuring and reviewing the settings that span repositories: member privileges and base permissions, authentication and provisioning, app and token policy, the actions and runner policy, organization rulesets targeted by custom properties, and audit evidence, run through a bounded verify-fix loop that reads the applied state back and measures coverage across the fleet. |
+| `github-repository-security` | `skills/github/github-repository-security/SKILL.md` | Configuring and reviewing one repository: rulesets and review requirements, secret and code scanning, dependency alerts, access and deploy keys, tag and release protection, and the agent-facing content a repository ships, run through a bounded verify-fix loop that reads the applied state back rather than trusting the API response. |
 | `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
 | `python-testing` | `skills/python/python-testing/SKILL.md` | Adding or updating pytest coverage for a Python change: discovering and matching the repository's existing test layout, deciding when a test is required, and running the suite through a bounded verify-fix loop. |
 
@@ -125,7 +128,7 @@ project installs only what it needs:
 | `python-standards` | `python-secure-coding`, `python-testing` |
 | `bash-standards` | `bash-secure-scripting`, `bash-testing` |
 | `ansible-standards` | `ansible-verification-loop` |
-| `github-standards` | `github-actions-security` |
+| `github-standards` | `github-actions-security`, `github-repository-security`, `github-organization-governance` |
 
 From inside Claude Code, in the consuming project:
 
@@ -331,16 +334,28 @@ improvement, the results file says so. See [evals/README.md](evals/README.md) fo
 conditions are isolated, what an assertion may and may not be, and the limitations that apply
 to every number in there.
 
-Every skill defines both evals, and all six have results committed. The table records the
-latest stamp for each skill, what it measured, and the limitation that keeps that number from
-standing as a general claim about the skill.
+Six of the eight skills define both evals and have results committed. The table records the
+latest stamp for each of those, what it measured, and the limitation that keeps that number
+from standing as a general claim about the skill. `github-repository-security` and
+`github-organization-governance` have neither eval yet: both act on live GitHub settings, so
+a task eval needs a fixture that stands in for an organization, and until that exists there is
+no measurement of what either skill changes.
+
+`scripts/check_evals.py` holds the six suites to the structure described here, and separates
+what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
+every committed results file regenerates byte-identically from the artifacts under
+`results/raw/`, so no number in the table was written by hand. What the checker reports instead
+is staleness: two defined tasks, `avl-06-autofix-cosmetics` and `gas-06-blocked-egress`, have
+never been graded in any stamp, and five of the six stamps predate a change to the skill they
+measured. No skill's `description` has changed since the stamp that measured its routing, so
+the routing column still describes the descriptions as they stand.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `ansible-verification-loop` | 2026-07-28-isolation | +1 over 1 task | 1.8x | 10/10 (2026-07-25) | One task, one run per condition. The broader stamp, 2026-07-25, measured +6 over 5 tasks at 2.2x, with `avl-05` classified truncated rather than graded. |
+| `ansible-verification-loop` | 2026-07-28-isolation | +1 over 1 task | 1.8x | 10/10 (2026-07-25) | One task, one run per condition. The broader stamp, 2026-07-25, measured +6 over 5 tasks at 2.2x, with `avl-05` classified truncated rather than graded. `avl-06-autofix-cosmetics` has never been graded in any stamp. |
 | `bash-secure-scripting` | 2026-08-14 | +9 over 4 tasks | 3.5x | 9/10 | One run per condition, so variance is uncontrolled. `bss-t09` is out of scope and routed in. |
 | `bash-testing` | 2026-08-14 | +1 over 4 tasks | 2.1x | 7/10 | Two fixtures pass fully in both conditions and cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
-| `github-actions-security` | 2026-07-27 | +21 over 3 tasks (2026-07-25) | 2.6x | 9/10 | The latest stamp graded no tasks. `gas-t06` is out of scope and routed in on all 3 repetitions. |
+| `github-actions-security` | 2026-07-28 | +29 over 4 comparable tasks | 2.4x | 9/10 (2026-07-27) | Three runs per condition. `gas-05-dependabot-pinning` aborted in all three with-skill runs and has no comparable measurement, and `gas-02` is marked *no reliable difference*. `gas-06-blocked-egress` has never been graded in any stamp. `gas-t06` is out of scope and routed in on all 3 repetitions. |
 | `python-secure-coding` | 2026-07-28, marked for regeneration | +4 over 5 tasks | 1.7x | 10/10 (2026-07-25) | Only `psc-02` has a delta not marked *no reliable difference*, and on `psc-03`, `psc-04` and `psc-05` the with-skill condition failed the same security assertions as the baseline. The fixtures were anchored for `ty` on 2026-08-17, which this stamp predates; see [evals/python-secure-coding/README.md](evals/python-secure-coding/README.md). |
 | `python-testing` | 2026-07-28 | +1 over 5 tasks | 1.4x | 9/10 (2026-07-25) | Four of five deltas are zero or marked *no reliable difference*, at $2.07 per net assertion gained. |
 
@@ -348,7 +363,12 @@ Two limits cut across the whole table. A routing score carried from an earlier s
 task result was measured against an earlier revision of that skill's `description`, so it does
 not transfer forward on its own. And a task delta is a measurement of the skill revision that
 ran, not of the file as it stands now: editing a skill, its `tasks.json` or its
-`assertions.json` invalidates the stamp above it until the eval is run again.
+`assertions.json` invalidates the stamp above it until the eval is run again. That second limit
+is not hypothetical here. Every row except `bash-testing` carries a stamp older than the skill
+directory it measured, and `ansible-verification-loop` and `github-actions-security` are older
+than their own `tasks.json` and `assertions.json`, both of which gained a task on 2026-08-17.
+Neither can be repaired by `regrade`, since that re-runs assertions only where the finished
+workspace survives, and a workspace is gitignored.
 
 Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
 `evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each
@@ -365,6 +385,7 @@ Every check runs locally:
 
 ```sh
 uv run --frozen python scripts/check_skills.py   # authoring rules for every SKILL.md
+python3 scripts/check_evals.py                   # structure and coverage of every eval suite
 uv run --frozen ruff check .                     # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
@@ -404,6 +425,27 @@ cited title and a quoted example live. The word list carries only the entries wi
 meaning in this subject matter: `harness` and `elevate` stay legal, since "test harness" and
 "privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
 `python3 scripts/check_skills.py` also works outside uv.
+
+`scripts/check_evals.py` verifies, for each `evals/<skill>/` suite, that `tasks.json`,
+`assertions.json`, and `trigger-eval.json` parse and name their own skill, that the suite defines
+4 to 6 tasks whose fixtures exist at `fixtures/<task-id>` with none unreferenced, that the
+assertions cover exactly the defined tasks with unique ids, a known kind, and a `source`, that
+every `workspace_command` parses under `bash -n` and every regex compiles, that the probes number
+10 in a 5 and 5 split, and that every raw stamp holding graded runs has a rendered
+`results/<stamp>.md` beside it. A measurement that ran and was never reported is otherwise
+invisible, which is how a five-task, three-run `github-actions-security` stamp sat unread in
+`results/raw/2026-07-28/`.
+
+Three further findings are reported separately and do not fail the run, because the fix for each
+is a paid re-run rather than an edit: a task no stamp has ever graded, a stamp older than the
+skill or the specification it measured, and a stamp that graded a modified working tree.
+`--strict` fails on those as well. Freshness compares the commit a stamp recorded in
+`source-revision.json` against the commit that last changed the skill or the specification, so a
+change made later on the day of the run is still seen; a stamp with no recorded revision falls
+back to comparing dates, and a stamp that graded a modified tree measured source held in no
+commit, which nothing can reproduce. The staleness check reads `git log`, so it reports nothing
+useful outside a checkout. Like `check_skills.py` it needs no third-party package, and the lint
+workflow does not run it.
 
 `claude plugin validate .` checks the marketplace manifest against Claude Code's own schema. It
 needs the Claude Code CLI, so it is a local step rather than a CI one.
