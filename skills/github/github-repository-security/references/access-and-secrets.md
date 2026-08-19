@@ -87,12 +87,22 @@ does not govern the account, so offboarding at the employer does not remove the 
 
 ## Machine identities
 
-Automation authenticates in one of four ways, in descending order of preference:
+What the automation authenticates to decides what it should present, so OIDC and the four
+credentials below answer different questions and do not belong in one ranking.
 
-1. **OIDC**, where the workload exchanges a short-lived token for access. Nothing is stored.
+Use OIDC where a workflow authenticates to something outside GitHub, such as a cloud provider, a
+registry, or a package index. The workload exchanges a short-lived GitHub-issued token for access
+at the far end, and no credential is stored on either side. It authenticates nothing to GitHub
+itself, so it replaces a stored cloud credential rather than any of the four below.
+
+For access to GitHub, automation authenticates in one of four ways, in descending order of
+preference:
+
+1. **The workflow's `GITHUB_TOKEN`**, with `permissions` narrowed to what the job needs. It is
+   minted per job, expires when the job ends, and reaches only the one repository.
 2. **A GitHub App**, scoped to the permissions the automation needs and installed on named
-   repositories. The token is short-lived and the app is visible in the organization's
-   installations.
+   repositories, where the work crosses repositories or outlives a run. The token is short-lived
+   and the app is visible in the organization's installations.
 3. **A fine-grained personal access token**, scoped to named repositories and permissions, with an
    expiry, owned by a named person who answers for it.
 4. **A classic personal access token**, which is scoped to everything the owner can reach. Treat

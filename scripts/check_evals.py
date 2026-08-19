@@ -26,10 +26,11 @@ fix for each is a paid re-run rather than an edit:
   `results/raw/<stamp>/source-revision.json`, and a change is newer when that commit does
   not contain it. A stamp with no usable revision falls back to comparing committer dates,
   which cannot see a change made later on the day of the run.
-- A stamp that recorded a modified working tree. It graded source that is in no commit, so
-  the measurement cannot be reproduced and the revision comparison above cannot certify it.
+- A stamp that recorded a modified working tree, or one that could not read the tree it
+  measured at all. Either way it graded source that no commit is known to hold, so the
+  measurement cannot be reproduced and the revision comparison above cannot certify it.
 
-Run it from the repository root:
+It reports on the checkout it lives in and can be run from anywhere:
 
     python3 scripts/check_evals.py           # structural errors fail, staleness is reported
     python3 scripts/check_evals.py --strict  # staleness fails as well
@@ -51,6 +52,10 @@ from typing import Any
 
 BASH = shutil.which("bash") or "bash"
 GIT = shutil.which("git") or "git"
+
+# The checkout this validator reports on, resolved from the file rather than from the
+# working directory, so it names the same repository wherever the command was run from.
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 EVALS_DIR = Path("evals")
 
@@ -330,10 +335,16 @@ def check_coverage(suite: Path, task_ids: list[str], stale: list[str]) -> None:
 
 
 def git_output(arguments: list[str]) -> str:
-    """Return the trimmed stdout of one git command, or an empty string when it fails."""
+    """Return the trimmed stdout of one git command, or an empty string when it fails.
+
+    The command runs in `REPO_ROOT`, not in the working directory. The paths below are absolute
+    ones under this checkout, and git rejects a path outside the repository it was asked in, so
+    a run started elsewhere would turn every lookup into the empty string that reads here as
+    "nothing changed" and would let the freshness check pass without having compared anything.
+    """
     # A fixed argument list built from repository paths, with no shell involved.
     result = subprocess.run(  # noqa: S603
-        [GIT, *arguments], capture_output=True, text=True, check=False
+        [GIT, *arguments], cwd=REPO_ROOT, capture_output=True, text=True, check=False
     )
     return result.stdout.strip() if result.returncode == 0 else ""
 
@@ -354,13 +365,18 @@ def last_commit(paths: list[Path]) -> tuple[str, str]:
     return revision, date
 
 
-def stamp_revision(suite: Path, stamp: str) -> tuple[str, bool]:
+def stamp_revision(suite: Path, stamp: str) -> tuple[str, bool | None]:
     """Return the revision a stamp recorded as its source, and whether the tree was modified.
 
     The revision is empty for a stamp written before `run_eval.py` recorded one, and for a
-    stamp whose revision no longer exists after a history rewrite. The flag is true only when
-    the stamp says outright that the tree was modified: an absent or unreadable flag is not
-    evidence of a clean tree, but it is not evidence of a dirty one either.
+    stamp whose revision no longer exists after a history rewrite.
+
+    The flag has three states rather than two, because `run_eval.py` writes three. True and
+    false are the run reporting what it saw. `None` is the run reporting that it could not
+    look, which is not evidence of a clean tree, and reading it as one would let a stamp of
+    unknown provenance pass the checks below in silence. A stamp with no recorded source at
+    all is a different case: it predates the field, the caller falls back to comparing dates,
+    and saying its tree state is unknown would add nothing the missing revision does not.
     """
     recorded = suite / "results" / "raw" / stamp / "source-revision.json"
     try:
@@ -369,7 +385,8 @@ def stamp_revision(suite: Path, stamp: str) -> tuple[str, bool]:
         return "", False
     if not isinstance(doc, dict):
         return "", False
-    dirty = doc.get("dirty") is True
+    flag = doc.get("dirty")
+    dirty = flag if isinstance(flag, bool) else None
     revision = doc.get("revision")
     if not isinstance(revision, str) or not revision:
         return "", dirty
@@ -385,6 +402,7 @@ def contains(revision: str, ancestor: str) -> bool:
     # A fixed argument list built from resolved revisions, with no shell involved.
     result = subprocess.run(  # noqa: S603
         [GIT, "merge-base", "--is-ancestor", ancestor, revision],
+        cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=False,
@@ -400,7 +418,17 @@ def check_freshness(suite: Path, skill_dir: Path | None, stale: list[str]) -> No
     latest = stamps[-1]
     measured, dirty = stamp_revision(suite, latest)
 
-    if dirty:
+    if dirty is None:
+        # The run wrote the stamp without being able to read the tree it measured. Everything
+        # below still applies, but none of it can rule out uncommitted edits, so the stamp
+        # carries no more provenance than the dirty case does.
+        stale.append(
+            f"latest stamp {latest} records no readable working-tree state, so whether it "
+            "measured uncommitted edits on top of "
+            f"{measured[:12] or 'an unrecorded revision'} is unknown; a freshness result "
+            "below that reports no change is not evidence that the stamp is current"
+        )
+    elif dirty:
         # The run recorded a revision, but it measured that revision plus uncommitted edits,
         # and those edits are in no commit for the checks below to read. The ancestor test can
         # still prove a change came after the run; it cannot prove the run included one, since
@@ -499,11 +527,10 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    repo_root = Path(__file__).resolve().parent.parent
-    skills = {path.parent.name: path.parent for path in sorted(repo_root.glob(SKILL_GLOB))}
+    skills = {path.parent.name: path.parent for path in sorted(REPO_ROOT.glob(SKILL_GLOB))}
     suites = sorted(
         path
-        for path in (repo_root / EVALS_DIR).iterdir()
+        for path in (REPO_ROOT / EVALS_DIR).iterdir()
         if path.is_dir() and path.name not in NOT_A_SUITE
     )
     if not suites:
@@ -514,7 +541,7 @@ def main() -> int:
     stale_total: list[str] = []
     for suite in suites:
         errors, stale = check_suite(suite, skills)
-        relative = suite.relative_to(repo_root)
+        relative = suite.relative_to(REPO_ROOT)
         if errors:
             failed += 1
             for error in errors:
