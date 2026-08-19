@@ -132,12 +132,25 @@ individual apps, rather than allowing every member to authorize whatever they si
   its owner can reach, which no review can narrow.
 - Require an expiry, and treat a request to extend one as the moment to ask whether an app would
   do the job.
-- Review pending and approved token requests on the access review cadence:
+- Review approved tokens and pending requests on the access review cadence. Each is a separate
+  endpoint, and a review that reads only the first says nothing about the access waiting on a
+  decision:
 
   ```sh
+  # Approved tokens holding access now.
   gh api --paginate "orgs/ORG/personal-access-tokens?per_page=100" --jq '.[] |
     {owner: .owner.login, repository_selection, token_expired, token_expires_at}'
+
+  # Requests awaiting approval or denial.
+  gh api --paginate "orgs/ORG/personal-access-token-requests?per_page=100" --jq '.[] |
+    {owner: .owner.login, repository_selection, reason, created_at}'
   ```
+
+  Only a GitHub App can call either endpoint. An owner's own credential, whether a personal
+  access token or an OAuth token, is refused, so both commands run as an installation holding
+  the organization permission for personal access tokens. An organization that has no such app
+  reviews these two lists in the settings interface, and the absence of an app is itself the
+  finding: the token policy has no automated evidence behind it.
 
 ## Checklist
 
@@ -153,4 +166,5 @@ individual apps, rather than allowing every member to authorize whatever they si
 - [ ] App installations reviewed, scoped to selected repositories, with unused permissions removed
 - [ ] Third-party OAuth application access restricted and approved individually
 - [ ] Fine-grained tokens approved and expiring, classic tokens denied where the plan allows
+- [ ] Approved tokens and pending requests both reviewed, each from its own endpoint
 - [ ] Repositories created without classifying properties detected by a scheduled check

@@ -76,6 +76,12 @@ REGEX_KINDS = ("transcript_regex", "final_regex", "bash_regex", "skill_used")
 COMMAND_EXPECT = ("exit_zero", "non_zero")
 REGEX_EXPECT = ("match", "no_match")
 
+# The fields each entry names as text. A field of another type reaches a set, a path join,
+# or a regex compile before the check that would report it, so the type is established first.
+TASK_FIELDS = ("id", "title", "fixture", "prompt")
+ASSERTION_FIELDS = ("id", "kind", "source", "command", "pattern", "expect")
+PROBE_FIELDS = ("id", "prompt", "expect")
+
 # A rendered stamp is named for its date; a hand-written analysis beside it, such as
 # ansible-verification-loop's avl-05 autopsy, is not and is not treated as one.
 STAMP_NAME = re.compile(r"^\d{4}-\d{2}-\d{2}")
@@ -112,6 +118,30 @@ def object_entries(value: Any, where: str, errors: list[str]) -> list[dict[str, 
     return entries
 
 
+def scalar_fields(
+    entries: list[dict[str, Any]], fields: tuple[str, ...], where: str, errors: list[str]
+) -> list[dict[str, Any]]:
+    """Return the entries whose named fields are text, reporting and dropping the rest.
+
+    `object_entries` establishes that an entry is an object; this establishes that the fields
+    the checks below read are the type those checks assume. An id that is a list reaches a set,
+    a fixture that is a number reaches a path join, and a pattern that is neither reaches
+    `re.compile`, each raising before anything reports the file as malformed.
+    """
+    valid: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries):
+        wrong = [
+            f"{name} is {type(entry[name]).__name__}"
+            for name in fields
+            if name in entry and not isinstance(entry[name], str)
+        ]
+        if wrong:
+            errors.append(f"{where}[{index}]: {', '.join(wrong)}, expected a string")
+            continue
+        valid.append(entry)
+    return valid
+
+
 def check_spec_headers(suite: Path, docs: dict[str, dict[str, Any]], errors: list[str]) -> None:
     """Check that each specification file names its own suite and states its notes."""
     for name, doc in docs.items():
@@ -133,7 +163,7 @@ def check_tasks(suite: Path, tasks: list[dict[str, Any]], errors: list[str]) -> 
 
     for task in tasks:
         task_id = task.get("id", "<unnamed>")
-        missing = [field for field in ("id", "title", "fixture", "prompt") if not task.get(field)]
+        missing = [field for field in TASK_FIELDS if not task.get(field)]
         if missing:
             errors.append(f"tasks.json {task_id}: missing {', '.join(missing)}")
         expected = f"fixtures/{task_id}"
@@ -211,7 +241,10 @@ def check_assertions(
 
     for task_id, assertions in graded.items():
         seen: set[str] = set()
-        for assertion in object_entries(assertions, f"assertions.json {task_id}", errors):
+        where = f"assertions.json {task_id}"
+        for assertion in scalar_fields(
+            object_entries(assertions, where, errors), ASSERTION_FIELDS, where, errors
+        ):
             assertion_id = assertion.get("id", "<unnamed>")
             if assertion_id in seen:
                 errors.append(f"assertions.json {task_id}: duplicate assertion id {assertion_id}")
@@ -423,13 +456,23 @@ def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[s
         docs[name] = doc
 
     check_spec_headers(suite, docs, errors)
-    tasks = object_entries(docs["tasks.json"].get("tasks", []), "tasks.json 'tasks'", errors)
+    tasks = scalar_fields(
+        object_entries(docs["tasks.json"].get("tasks", []), "tasks.json 'tasks'", errors),
+        TASK_FIELDS,
+        "tasks.json 'tasks'",
+        errors,
+    )
     task_ids = [task.get("id", "<unnamed>") for task in tasks]
     check_tasks(suite, tasks, errors)
     check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
     check_triggers(
-        object_entries(
-            docs["trigger-eval.json"].get("prompts", []), "trigger-eval.json 'prompts'", errors
+        scalar_fields(
+            object_entries(
+                docs["trigger-eval.json"].get("prompts", []), "trigger-eval.json 'prompts'", errors
+            ),
+            PROBE_FIELDS,
+            "trigger-eval.json 'prompts'",
+            errors,
         ),
         errors,
     )

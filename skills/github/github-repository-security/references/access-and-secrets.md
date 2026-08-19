@@ -42,7 +42,7 @@ to a group anyone reviews.
 ```sh
 gh api --paginate "repos/OWNER/REPO/collaborators?affiliation=direct&per_page=100" \
   --jq '.[] | {login, role_name}'
-gh api --paginate "repos/OWNER/REPO/teams?per_page=100" --jq '.[] | {name, permission}'
+gh api --paginate "repos/OWNER/REPO/teams?per_page=100" --jq '.[] | {slug, name, permission}'
 ```
 
 `affiliation=direct` is what makes the first command an audit of direct grants. The default,
@@ -51,9 +51,27 @@ organization as well, and `role_name` reports the effective permission without s
 came from, so the two are indistinguishable in the output. Do not filter `read` out either: a
 direct `read` grant is still a grant no membership review will find, which is the whole finding.
 
-Compare the two lists before changing anything. Where a direct grant already exists, the fix is
-to move the person into a team with that access and remove the direct grant, not to leave both
-in place.
+The second command returns the teams and the permission each one holds, not the people in them,
+so the two outputs cannot be compared as they stand. Take the `slug` of each team with a
+permission at least equal to the direct grant and read its membership:
+
+```sh
+gh api --paginate "orgs/ORG/teams/TEAM_SLUG/members?per_page=100" \
+  --jq '.[] | {login, role, inherited}'
+```
+
+`role` and `inherited` appear only where the organization has the feature enabled. Where they are
+absent, read one membership at a time with `gh api orgs/ORG/teams/TEAM_SLUG/memberships/LOGIN`,
+which returns `role` and `state` in every organization. A `state` of `pending` is an invitation
+rather than access, and `inherited` set to `true` means the person is in a child team rather than
+this one, which still grants the repository permission but is administered elsewhere.
+
+Where the person already holds equivalent access through a team, the direct grant is redundant and
+the fix is to remove it. Where no team gives that access, add the person to a team that does, or
+create one, before removing the grant. Removing first leaves the person without access they were
+using. An outside collaborator is not a candidate for either move: the account is outside the
+organization and cannot hold team membership, so route it through the owner-and-expiry process
+below instead.
 
 ## Outside collaborators
 

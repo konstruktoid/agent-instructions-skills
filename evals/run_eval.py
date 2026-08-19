@@ -759,15 +759,25 @@ def record_source_revision(root: Path) -> None:
     The date in a stamp's name says when the measurement happened, not what it measured.
     A commit landing later the same day, or an older commit rebased forward, both leave the
     date unchanged, so `check_evals.py` compares revisions instead and needs one written down.
+
+    Both commands run in `REPO_ROOT` rather than wherever the harness was invoked from. The
+    subject is the skills this run measures, and a run started from another checkout, or from
+    inside one of the workspace repositories this harness builds, would otherwise record a
+    revision belonging to something else. A stamp with the wrong revision is worse than one
+    with none, because the freshness check has no way to tell the two apart, so a lookup that
+    fails stops the run here rather than leaving the provenance to be guessed at later.
     """
     # A fixed argument list, with no shell involved.
     head = subprocess.run(  # noqa: S603
-        [GIT, "rev-parse", "HEAD"], capture_output=True, text=True, check=False
+        [GIT, "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True, check=False
     )
     if head.returncode != 0:
-        return
+        message = f"cannot read the revision of {REPO_ROOT}: {head.stderr.strip()}"
+        raise SystemExit(message)
+    # Unlike the revision, a failure here is recordable: `dirty` below carries the difference
+    # between a clean tree, a dirty one, and a state that could not be read.
     status = subprocess.run(  # noqa: S603
-        [GIT, "status", "--porcelain"], capture_output=True, text=True, check=False
+        [GIT, "status", "--porcelain"], cwd=REPO_ROOT, capture_output=True, text=True, check=False
     )
     root.mkdir(parents=True, exist_ok=True)
     (root / "source-revision.json").write_text(
@@ -775,7 +785,7 @@ def record_source_revision(root: Path) -> None:
             {
                 "revision": head.stdout.strip(),
                 # An uncommitted tree means the measured source is in no commit at all, so the
-                # revision below is a lower bound on what ran rather than a record of it.
+                # revision above is a lower bound on what ran rather than a record of it.
                 "dirty": bool(status.stdout.strip()) if status.returncode == 0 else None,
             },
             indent=2,
