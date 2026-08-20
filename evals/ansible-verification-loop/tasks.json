@@ -1,10 +1,11 @@
 {
   "skill": "ansible-verification-loop",
   "notes": [
-    "avl-01, avl-03 and avl-04 start ansible-lint clean, so a finding at the end was introduced by the run.",
+    "avl-01, avl-03, avl-04 and avl-07 start ansible-lint clean, so a finding at the end was introduced by the run.",
     "avl-02, avl-05 and avl-06 start with existing findings on the files the request forces the agent to touch.",
     "avl-06's findings are all repairable by `ansible-lint --fix`, and that run also deletes three blank lines in defaults/main.yml that no rule ever flagged. Lint reports a clean pass either way, so `autofix-cosmetics-preserved` is the only assertion that separates an agent that reviewed the auto-fixer's diff from one that trusted its summary.",
-    "avl-05's test entry point cannot complete in this environment, because molecule is not installed. That is deliberate: the skill requires reporting the failing check and its output rather than declaring success unverified."
+    "avl-05's test entry point cannot complete in this environment, because molecule is not installed. That is deliberate: the skill requires reporting the failing check and its output rather than declaring success unverified.",
+    "avl-07's subject is what the verify loop leaves behind rather than the loop itself: linting its fixture installs the collection into `.ansible/`, which the build then packages along with the rest of the local state already in the working copy."
   ],
   "tasks": [
     {
@@ -43,6 +44,12 @@
       "title": "Clear the lint findings on a role and add a variable",
       "fixture": "fixtures/avl-06-autofix-cosmetics",
       "prompt": "This time synchronisation role does not lint clean. Clear every finding, and add an ntp_client_min_sources variable defaulting to 2 that is rendered into the configuration as a minsources line and documented in the README. Leave the formatting of the files you touch as it is otherwise."
+    },
+    {
+      "id": "avl-07-artifact-hygiene",
+      "title": "Stop a collection build from packaging local development state",
+      "fixture": "fixtures/avl-07-artifact-hygiene",
+      "prompt": "Publishing 1.4.0 of this collection produced a 31M tarball from a source tree well under 300K, and someone who installed it reported finding an internal hostname and a set of local credentials in the copy they downloaded. Work out what the build is picking up and stop it, both in this working copy and in anything built from it from now on. Those files are local development state that is needed on this machine, so keep them on disk rather than deleting them. Tell me what the artifact holds once you are done."
     }
   ]
 }

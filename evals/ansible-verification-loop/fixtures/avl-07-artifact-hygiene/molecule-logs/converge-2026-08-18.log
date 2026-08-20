@@ -1,0 +1,17 @@
+PLAY [Converge] ****************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [instance] => {"ansible_facts": {"ansible_default_ipv4": {"address":
+"192.0.2.41", "gateway": "192.0.2.1", "interface": "eth0"}, "ansible_fqdn":
+"buildnode-04.corp.example.net", "ansible_user_id": "mbraun"}, "changed": false}
+
+TASK [platform.storage.storage_lvm : Install the LVM tools] ********************
+changed: [instance]
+
+TASK [platform.storage.storage_lvm : Write the LVM configuration] **************
+--- before: /etc/lvm/lvm.conf
++++ after: /home/mbraun/work/platform-storage/roles/storage_lvm/templates/lvm.conf.j2
+changed: [instance]
+
+PLAY RECAP *********************************************************************
+instance : ok=3 changed=2 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0

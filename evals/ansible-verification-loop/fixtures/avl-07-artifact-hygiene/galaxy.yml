@@ -1,0 +1,20 @@
+---
+namespace: platform
+name: storage
+version: 1.4.0
+readme: README.md
+authors:
+  - platform team
+description: Storage roles for Debian and RedHat hosts.
+license:
+  - MIT
+tags:
+  - storage
+  - lvm
+  - linux
+repository: https://github.com/platform/storage
+build_ignore:
+  - .ansible/
+  - .cache/
+  - .github/
+  - collections/

@@ -60,7 +60,7 @@ Current skills:
 
 | Skill | Path | Covers |
 |-------|------|--------|
-| `ansible-verification-loop` | `skills/ansible/ansible-verification-loop/SKILL.md` | Reviewing or modifying Ansible roles and collections, verified through the repository's own lint/test loop. |
+| `ansible-verification-loop` | `skills/ansible/ansible-verification-loop/SKILL.md` | Reviewing or modifying Ansible roles and collections, verified through the repository's own lint/test loop, and keeping the local state a test run leaves behind out of both the repository and the built collection artifact. |
 | `bash-secure-scripting` | `skills/bash/bash-secure-scripting/SKILL.md` | The `shellcheck`/`bash -n` baseline from `bash_coding_instructions.md`, extended with the stability and security properties a linter cannot verify: strict-mode semantics, cleanup on every exit path, untrusted input and injection, `PATH` and environment control, temporary files, and credentials, run through a bounded verify-fix loop. |
 | `bash-testing` | `skills/bash/bash-testing/SKILL.md` | Adding or updating coverage for a shell change: discovering and matching the repository's existing framework (bats-core, shunit2, or plain scripts), making a script testable, covering exit codes and failure paths, and running the suite through a bounded verify-fix loop. |
 | `github-actions-security` | `skills/github/github-actions-security/SKILL.md` | Authoring and reviewing GitHub Actions workflows and actions: least-privilege `GITHUB_TOKEN` permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe triggers and runners, and structures that scale across repositories, run through a bounded verify-fix loop with `actionlint` and `zizmor`. |
@@ -312,7 +312,7 @@ the outcome the mechanisms above exist to avoid.
 [Checks](#checks) confirm a skill is well formed; they cannot confirm it changes an agent's
 output, or that its `description` routes the right tasks to it. Two measurements cover that:
 
-- **Task evals.** Each skill has 4 to 6 multi-step task prompts in `tasks.json`, each with a
+- **Task evals.** Each skill has 4 to 7 multi-step task prompts in `tasks.json`, each with a
   fixture repository and a set of objective checks in `assertions.json` derived from that
   skill's own Verify and Verification checklist sections. Every task runs twice against an
   identical fixture copy, once with the skill available and once without. The only difference
@@ -346,13 +346,16 @@ what an edit can fix from what only a re-run can. Every suite passes the structu
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
 is staleness: two defined tasks, `avl-06-autofix-cosmetics` and `gas-06-blocked-egress`, have
-never been graded in any stamp, and five of the six stamps predate a change to the skill they
-measured. No skill's `description` has changed since the stamp that measured its routing, so
-the routing column still describes the descriptions as they stand.
+never been graded in any stamp, four of the six stamps predate a change to the skill they
+measured, and the newest stamp, `ansible-verification-loop`'s 2026-08-20-repeat, was measured
+against a modified working tree, so the source it graded is in no commit and the run cannot be
+reproduced from the repository until it is repeated from a clean checkout. No skill's
+`description` has changed since the stamp that measured its routing, so the routing column still
+describes the descriptions as they stand.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `ansible-verification-loop` | 2026-07-28-isolation | +1 over 1 task | 1.8x | 10/10 (2026-07-25) | One task, one run per condition. The broader stamp, 2026-07-25, measured +6 over 5 tasks at 2.2x, with `avl-05` classified truncated rather than graded. `avl-06-autofix-cosmetics` has never been graded in any stamp. |
+| `ansible-verification-loop` | 2026-08-20-repeat | +6 over 1 task | 1.2x | 10/10 (2026-07-25) | Three runs per condition on `avl-07-artifact-hygiene` alone, 15/16 in all three with-skill runs against 9 to 10 in the baseline, so the ranges do not overlap. Two of its assertions were corrected after the single-run 2026-08-20 stamp but before these six runs, which makes this stamp a measurement of checks fixed in advance rather than after the fact; both stamps and that reasoning are in [evals/ansible-verification-loop/README.md](evals/ansible-verification-loop/README.md). The stamp was measured against an uncommitted tree. Earlier stamps: 2026-07-28-isolation measured +1 over `avl-03` at 1.8x, and 2026-07-25 measured +6 over 5 tasks at 2.2x with `avl-05` classified truncated rather than graded. `avl-06-autofix-cosmetics` has never been graded in any stamp. |
 | `bash-secure-scripting` | 2026-08-14 | +9 over 4 tasks | 3.5x | 9/10 | One run per condition, so variance is uncontrolled. `bss-t09` is out of scope and routed in. |
 | `bash-testing` | 2026-08-14 | +1 over 4 tasks | 2.1x | 7/10 | Two fixtures pass fully in both conditions and cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
 | `github-actions-security` | 2026-07-28 | +29 over 4 comparable tasks | 2.4x | 9/10 (2026-07-27) | Three runs per condition. `gas-05-dependabot-pinning` aborted in all three with-skill runs and has no comparable measurement, and `gas-02` is marked *no reliable difference*. `gas-06-blocked-egress` has never been graded in any stamp. `gas-t06` is out of scope and routed in on all 3 repetitions. |
@@ -364,11 +367,13 @@ task result was measured against an earlier revision of that skill's `descriptio
 not transfer forward on its own. And a task delta is a measurement of the skill revision that
 ran, not of the file as it stands now: editing a skill, its `tasks.json` or its
 `assertions.json` invalidates the stamp above it until the eval is run again. That second limit
-is not hypothetical here. Every row except `bash-testing` carries a stamp older than the skill
-directory it measured, and `ansible-verification-loop` and `github-actions-security` are older
-than their own `tasks.json` and `assertions.json`, both of which gained a task on 2026-08-17.
-Neither can be repaired by `regrade`, since that re-runs assertions only where the finished
-workspace survives, and a workspace is gitignored.
+is not hypothetical here. Every row except `ansible-verification-loop` and `bash-testing`
+carries a stamp older than the skill directory it measured, and `github-actions-security` is
+older than its own `tasks.json` and `assertions.json`, both of which gained a task on
+2026-08-17. That cannot be repaired by `regrade`, since it re-runs assertions only where the
+finished workspace survives, and a workspace is gitignored. The `ansible-verification-loop` row
+is the one case where the workspaces were still on disk, which is why its correction could be
+applied by regrading rather than by paying for the runs again.
 
 Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
 `evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each
@@ -428,7 +433,7 @@ meaning in this subject matter: `harness` and `elevate` stay legal, since "test 
 
 `scripts/check_evals.py` verifies, for each `evals/<skill>/` suite, that `tasks.json`,
 `assertions.json`, and `trigger-eval.json` parse and name their own skill, that the suite defines
-4 to 6 tasks whose fixtures exist at `fixtures/<task-id>` with none unreferenced, that the
+4 to 7 tasks whose fixtures exist at `fixtures/<task-id>` with none unreferenced, that the
 assertions cover exactly the defined tasks with unique ids, a known kind, and a `source`, that
 every `workspace_command` parses under `bash -n` and every regex compiles, that the probes number
 10 in a 5 and 5 split, and that every raw stamp holding graded runs has a rendered

@@ -18,6 +18,8 @@ one project's layout.
 - Reviewing or modifying any Ansible role, collection, playbook, or task.
 - A change must be consistent with existing conventions and actually verified before being
   reported done.
+- A collection's `.gitignore` or `galaxy.yml` changes, or a collection is being prepared for
+  publication and what the built artifact carries has to be established.
 
 ## When NOT to use this
 
@@ -72,7 +74,19 @@ one project's layout.
      stops dropping, or a fix for one finding reintroduces another.
    - When stopping for either reason, report to the user rather than proceeding or silently giving
      up. Name the failing check, include its output, and state what was tried.
-8. Report any issues found during verification, with detailed reproduction steps and relevant
+8. Keep the local state the loop just produced out of the repository and out of the built
+   collection artifact. A test run leaves behind exactly what must not ship: collections
+   downloaded under `.ansible/`, molecule logs, the detached run log and sentinel from the step
+   above, caches, virtualenvs, and `.env` files. Two separate lists control this, and neither
+   implies the other. `.gitignore` decides what enters the repository, and `build_ignore` in
+   `galaxy.yml` decides what enters the tarball `ansible-galaxy collection build` writes. The
+   build never reads `.gitignore`, so it packages untracked local state unless a `build_ignore`
+   pattern excludes it, and a pattern written with a trailing slash, such as `.ansible/`, excludes
+   nothing. Give every `.gitignore` entry a `build_ignore` counterpart, add the tracked
+   development files a consumer has no use for to `build_ignore` as well, and confirm the result
+   by building the collection and reading the file list rather than by reading the configuration.
+   See [references/artifact-hygiene.md](references/artifact-hygiene.md).
+9. Report any issues found during verification, with detailed reproduction steps and relevant
    logs/output. Ansible output is unusually rich in machine detail: play recaps and `--diff` output
    name the target host, gathered facts carry hostnames, interfaces and internal addresses, and
    failure messages quote absolute paths under the invoking user's home. Strip that before pasting
@@ -118,7 +132,7 @@ one project's layout.
   process and for the sentinel before relaunching anything. A blind relaunch spends the full cycle
   again and risks two runs racing on the same containers or VMs. This decides whether the loop's
   attempt budget is spent on real findings or on lost runs. Keep the log and sentinel out of the
-  repository, and remember the log carries the machine detail described in step 8.
+  repository, and remember the log carries the machine detail described in step 9.
 - If invoking `molecule test` / `ansible-test` directly instead of through the repo's wrapper,
   perform first what the wrapper would otherwise have performed: install `requirements.yml`, and
   always run `ansible-lint` as its own separate step. Molecule's own `lint` subcommand was removed
@@ -128,6 +142,22 @@ one project's layout.
 - While iterating on a single role, use `molecule converge` / `molecule verify` (or the equivalent
   faster subcommands for whatever framework is in use) instead of the full test cycle to save
   time, but always finish with a full test run before declaring the change verified.
+- After the test run, confirm the state it left behind is ignored. `git status --porcelain`
+  shows what the repository would take, and for a collection the artifact needs its own check,
+  since `build_ignore` is independent of `.gitignore`:
+
+  ```sh
+  ansible-galaxy collection build --force
+  out="$(mktemp -d)"
+  tar -tzf <namespace>-<name>-<version>.tar.gz | grep -v '/$' | sort > "${out}/artifact"
+  git ls-files | sort > "${out}/tracked"
+  comm -23 "${out}/artifact" "${out}/tracked"
+  ```
+
+  Apart from the generated `MANIFEST.json` and `FILES.json`, every line that prints is local state
+  a `build_ignore` pattern failed to exclude, and a pattern written with a trailing slash is the
+  usual cause. Keep the comparison files outside the collection root and remove the tarball
+  afterwards. See [references/artifact-hygiene.md](references/artifact-hygiene.md).
 
 ## Verification checklist
 
@@ -153,6 +183,14 @@ Never declare this done based on the edit alone. Confirm each of the following:
 - [ ] No secrets in anything reported, stored, or uploaded: no passwords, API tokens, private
       keys, vault contents, or credential-bearing URLs in pasted output, CI artifacts, or issue
       attachments, and `no_log: true` set on any task that handles one
+- [ ] Nothing the test run produced is left untracked and unignored: downloaded collections, logs,
+      sentinels, caches, virtualenvs, and `.env` files all covered by `.gitignore`
+- [ ] Every `.gitignore` entry has a `build_ignore` counterpart in `galaxy.yml`, written without a
+      trailing slash so it matches, and the development files a consumer has no use for are
+      excluded there too
+- [ ] For a collection, the artifact was built and its file list read: nothing untracked in it
+      beyond `MANIFEST.json` and `FILES.json`, confirmed by comparison against `git ls-files`
+      rather than by reading `build_ignore`
 - [ ] No unrelated files changed
 
 ## References
@@ -165,6 +203,11 @@ Never declare this done based on the edit alone. Confirm each of the following:
   rules, how a lint-ignore file hides a new finding, and how to measure a convention before
   editing every file that uses it. Read it before running `--fix` or a formatter, and before any
   repository-wide consistency change.
+- [references/artifact-hygiene.md](references/artifact-hygiene.md): how `.gitignore` and
+  `build_ignore` divide the work, the pattern rules that decide whether a `build_ignore` entry
+  matches anything, what each list must carry, and how to verify the built artifact instead of the
+  configuration. Read it when a change touches either file, when an artifact is larger than the
+  source it was built from, or before a collection is published.
 
 The documentation this skill writes into the repository, meaning role README entries and
 `meta/argument_specs.yml` descriptions, follows `instructions/written_language_instructions.md`.

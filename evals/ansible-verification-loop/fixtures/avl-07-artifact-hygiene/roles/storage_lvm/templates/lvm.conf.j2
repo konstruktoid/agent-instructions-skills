@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+global {
+    use_lvmetad = {{ 1 if storage_lvm_use_lvmetad else 0 }}
+}
+
+activation {
+    reserved_stack = {{ storage_lvm_reserved_stack }}
+}

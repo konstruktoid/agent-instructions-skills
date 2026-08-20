@@ -5,7 +5,7 @@ For every evals/<skill>/ suite, the structural rules are:
 
 - `tasks.json`, `assertions.json`, and `trigger-eval.json` parse, and each names the skill
   its directory is named after.
-- The suite defines 4 to 6 tasks, each with an id, a title, a prompt, and a fixture at
+- The suite defines 4 to 7 tasks, each with an id, a title, a prompt, and a fixture at
   `fixtures/<task-id>` that exists and is not empty. No fixture directory is unreferenced.
 - `assertions.json` covers exactly the tasks `tasks.json` defines. Every assertion carries a
   unique id, a known kind, and a `source` naming the line of the skill it comes from. Every
@@ -66,9 +66,9 @@ NOT_A_SUITE = {"probe-sandbox", "__pycache__"}
 
 SPEC_FILES = ("tasks.json", "assertions.json", "trigger-eval.json")
 
-# evals/README.md: "4 to 6 realistic multi-step task prompts".
+# evals/README.md: "4 to 7 realistic multi-step task prompts".
 MIN_TASKS = 4
-MAX_TASKS = 6
+MAX_TASKS = 7
 
 # evals/README.md: "10 routing probes, 5 in scope and 5 adjacent but out of scope".
 PROBE_COUNT = 10

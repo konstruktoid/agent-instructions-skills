@@ -1,0 +1,6 @@
+---
+storage_lvm_packages:
+  - lvm2
+storage_lvm_config_path: /etc/lvm/lvm.conf
+storage_lvm_reserved_stack: 64
+storage_lvm_use_lvmetad: false

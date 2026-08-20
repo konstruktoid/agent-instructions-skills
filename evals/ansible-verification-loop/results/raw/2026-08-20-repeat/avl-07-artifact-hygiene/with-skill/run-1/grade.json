@@ -1,0 +1,137 @@
+{
+  "task": "avl-07-artifact-hygiene",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-08-20T05:46:17.401022+00:00",
+    "seconds": 156.3
+  },
+  "skills_used": [
+    "eval-ansible-verification-loop:ansible-verification-loop"
+  ],
+  "num_turns": 19,
+  "cost_usd": 0.5987035000000002,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/54a4b206-b4df-4c38-8aaa-18cb60bb1562/scratchpad/eval-tools/ansible-lint/bin, /tmp/claude-uid/-repo/54a4b206-b4df-4c38-8aaa-18cb60bb1562/scratchpad/eval-tools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\nWARNING: PATH altered to include /tmp/claude-uid/-repo/54a4b206-b4df-4c38-8aaa-18cb60bb1562/scratchpad/eval-tools/ansible-lint/bin, /tmp/claude-uid/-repo/54a4b206-b4df-4c38-8aaa-18cb60bb1562/scratchpad/eval-tools/ansible-lint/bin :: This is usually a sign of broken local setup, which can cause unexpected behaviors."
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "no-suppression-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: do not add suppressions to silence findings",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gitignore-covers-dependencies",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gitignore-covers-test-output",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gitignore-covers-caches",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gitignore-covers-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "local-state-untracked",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "build-ignore-patterns-match",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "build-ignore-covers-gitignore",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "artifact-excludes-local-state",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "artifact-excludes-workflow-config",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "build-verified-not-assumed",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+      "passed": true,
+      "evidence": "match: 'ansible-galaxy collection build'"
+    },
+    {
+      "id": "local-state-preserved",
+      "kind": "workspace_command",
+      "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "roles-unchanged",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no unrelated files changed",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 15,
+  "total": 16
+}
