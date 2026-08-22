@@ -3,11 +3,11 @@
   "notes": [
     "`lint-clean-or-reported` encodes the skill's step 7 rule directly: the loop either reaches a clean result, or it stops and the failing check is named with its output. It reads ../final-response.md, which is the run's final message to the user.",
     "`lint-clean` is graded separately from `lint-clean-or-reported`, so a run that stopped and reported honestly is distinguishable from one that reached clean.",
-    "`no-suppression-added` covers the skill's rule against silencing findings instead of fixing them.",
+    "`no-suppression-added` covers the skill's rule against silencing findings instead of fixing them. For avl-07 it also requires `.ansible-lint` to be unchanged, since widening `exclude_paths` hides findings just as `skip_list` does and `roles-unchanged` would not catch it. That term was added after the recorded runs, and it changes none of their grades: no run in either condition touched the file.",
     "avl-07's `gitignore-covers-*` checks were one five-way conjunction when the 2026-08-20 runs were graded, which scored a run that covered four of the five entries the same as one that covered none. They are one assertion per category now, and the fifth entry, `.ansible`, was dropped: the harness sets ANSIBLE_HOME to the run's private home, so linting never creates `.ansible/` in the workspace and neither condition could have seen it.",
     "`local-state-untracked` was added after the same runs. Step 8 requires the local state to stay out of the repository, and a file still in the index is in it, so a run that only ignores it going forward has done half the work. It is graded from `git ls-files` rather than from the diff, so staging the removal is enough and committing is not required.",
     "avl-07's two artifact assertions run `ansible-galaxy collection build`, which comes from `uv tool install ansible-core`. Without it on PATH they fail in both conditions rather than passing vacuously.",
-    "avl-07 does not grade whether the now-ignored files were also removed from the index with `git rm --cached`, or whether `ansible.cfg` was excluded from the artifact. Both are defensible either way, and an assertion on either would grade a judgment call rather than the skill's rule."
+    "avl-07 does not grade whether `ansible.cfg` was excluded from the artifact. It is defensible either way, and an assertion on it would grade a judgment call rather than the skill's rule."
   ],
   "tasks": {
     "avl-01-sshd-options": [
@@ -398,8 +398,8 @@
       {
         "id": "no-suppression-added",
         "kind": "workspace_command",
-        "command": "! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint roles/ meta/",
-        "source": "SKILL.md Verify: do not add suppressions to silence findings"
+        "command": "[ -z \"$(git diff --name-only \"$EVAL_BASE_SHA\" -- .ansible-lint)\" ] && ! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint roles/ meta/",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do"
       },
       {
         "id": "gitignore-covers-dependencies",

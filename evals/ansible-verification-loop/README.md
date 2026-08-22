@@ -74,8 +74,8 @@ it measures checks fixed in advance rather than after it. The with-skill conditi
 in all three runs and the baseline 9, 9 and 10, ranges that do not overlap, at 1.2x the cost.
 The two conditions diverge on the same points every time: no baseline run touched `.gitignore`
 at all or untracked anything, and two of the three never ran `ansible-lint`, while all three
-with-skill runs fixed both lists, untracked the local state without deleting it, and built the
-artifact to check what it held.
+with-skill runs updated both lists, though none carried the `*.tar.gz` counterpart across,
+untracked the local state without deleting it, and built the artifact to check what it held.
 
 `build-ignore-covers-gitignore` is the one assertion that failed in all eight runs across both
 stamps and both conditions, always on the same entry: `*.tar.gz` was already in `.gitignore` and
