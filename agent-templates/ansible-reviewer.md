@@ -46,6 +46,9 @@ conventions, test coverage, and the bounded verify loop. This file adds only the
   auth-adjacent tasks as high-sensitivity, whatever the repository's own documentation says.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
+- The verify loop writes logs, caches and downloaded collections into the working copy. Leave none
+  of it behind: the skill's hygiene step covers what belongs in `.gitignore` and in the
+  `build_ignore` list of a collection's `galaxy.yml`.
 - The main conversation sees only the final summary, not the lint and test output. State in that
   summary what changed, which checks were run, their result, and every finding left unresolved,
   naming the failing check and quoting its output.

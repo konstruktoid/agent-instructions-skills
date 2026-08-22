@@ -12,7 +12,7 @@ evals/
   run_eval.py            The harness: tasks, triggers, and report subcommands
   probe-sandbox/         A mixed repository the trigger probes run against
   <skill>/
-    tasks.json           4 to 6 realistic multi-step task prompts
+    tasks.json           4 to 7 realistic multi-step task prompts
     assertions.json      Objective pass/fail checks per task, derived from the skill
     trigger-eval.json    10 routing probes, 5 in scope and 5 adjacent but out of scope
     fixtures/<task-id>/  The starting repository for one task
@@ -46,6 +46,11 @@ export EVAL_TOOL_BIN=/tmp/eval-bin
 # The bash skills grade with shellcheck, and bash-testing's bt-02 with bats. Both come
 # from the system package manager rather than uv; without shellcheck the bash assertions
 # fail in both arms, and bt-02's suite assertion passes vacuously without bats.
+
+# ansible-verification-loop's avl-07 grades by building the collection, which needs
+# ansible-galaxy. `uv tool install ansible-lint` does not expose it, since it publishes
+# only its own entry point, so ansible-core is installed as a tool of its own.
+uv tool install ansible-core
 
 python3 evals/run_eval.py tasks    --skill python-secure-coding --model sonnet --parallel 5
 python3 evals/run_eval.py triggers --skill python-secure-coding --model sonnet --parallel 5
@@ -132,7 +137,7 @@ python3 scripts/check_evals.py --strict  # staleness fails as well
 ```
 
 Structural checks cover what an edit can break: the three specification files parse and name
-their own skill, the suite defines 4 to 6 tasks, each fixture exists at `fixtures/<task-id>`
+their own skill, the suite defines 4 to 7 tasks, each fixture exists at `fixtures/<task-id>`
 and is referenced, the assertions cover exactly the defined tasks with unique ids and a known
 kind, each one carries the `source` line it comes from, each `workspace_command` parses under
 `bash -n` and each regex compiles, the probes number 10 in a 5 and 5 split, and every stamp

@@ -1,0 +1,5 @@
+---
+- name: Restart lvm2-lvmpolld
+  ansible.builtin.service:
+    name: lvm2-lvmpolld
+    state: restarted

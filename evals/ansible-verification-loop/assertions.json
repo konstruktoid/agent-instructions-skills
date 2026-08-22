@@ -3,7 +3,11 @@
   "notes": [
     "`lint-clean-or-reported` encodes the skill's step 7 rule directly: the loop either reaches a clean result, or it stops and the failing check is named with its output. It reads ../final-response.md, which is the run's final message to the user.",
     "`lint-clean` is graded separately from `lint-clean-or-reported`, so a run that stopped and reported honestly is distinguishable from one that reached clean.",
-    "`no-suppression-added` covers the skill's rule against silencing findings instead of fixing them."
+    "`no-suppression-added` covers the skill's rule against silencing findings instead of fixing them. For avl-07 it also requires `.ansible-lint` to be unchanged, since widening `exclude_paths` hides findings just as `skip_list` does and `roles-unchanged` would not catch it. That term was added after the recorded runs, and it changes none of their grades: no run in either condition touched the file.",
+    "avl-07's `gitignore-covers-*` checks were one five-way conjunction when the 2026-08-20 runs were graded, which scored a run that covered four of the five entries the same as one that covered none. They are one assertion per category now, and the fifth entry, `.ansible`, was dropped: the harness sets ANSIBLE_HOME to the run's private home, so linting never creates `.ansible/` in the workspace and neither condition could have seen it.",
+    "`local-state-untracked` was added after the same runs. Step 8 requires the local state to stay out of the repository, and a file still in the index is in it, so a run that only ignores it going forward has done half the work. It is graded from `git ls-files` rather than from the diff, so staging the removal is enough and committing is not required.",
+    "avl-07's two artifact assertions run `ansible-galaxy collection build`, which comes from `uv tool install ansible-core`. Without it on PATH they fail in both conditions rather than passing vacuously.",
+    "avl-07 does not grade whether `ansible.cfg` was excluded from the artifact. It is defensible either way, and an assertion on it would grade a judgment call rather than the skill's rule."
   ],
   "tasks": {
     "avl-01-sshd-options": [
@@ -370,6 +374,104 @@
         "kind": "final_regex",
         "pattern": "(--fix|autofix|auto-fix|fixer)[\\s\\S]{0,400}(blank line|diff|revert|restore|reformat)|(blank line|diff|revert|restore|reformat)[\\s\\S]{0,400}(--fix|autofix|auto-fix|fixer)",
         "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did"
+      }
+    ],
+    "avl-07-artifact-hygiene": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q .",
+        "source": "SKILL.md checklist: lint passes"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "ansible-lint -q . || { grep -qi 'ansible-lint' ../final-response.md && grep -qE '\\[[a-z-]+\\]|:[0-9]+' ../final-response.md; }",
+        "source": "SKILL.md step 7: stop and report the failing check and its output"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "ansible-lint",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "command": "[ -z \"$(git diff --name-only \"$EVAL_BASE_SHA\" -- .ansible-lint)\" ] && ! grep -rqE 'skip_list|warn_list|noqa' .ansible-lint roles/ meta/",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "command": "grep -qE '^/?collections(/|$)' .gitignore",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "command": "grep -qE '^/?molecule-logs(/|$)' .gitignore",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "command": "grep -qE '^/?\\.cache(/|$)' .gitignore",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "command": "grep -qE '^/?\\.env(\\.yml)?(/|$)' .gitignore",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "command": "[ -z \"$(git ls-files -- .env.yml molecule-logs collections .cache)\" ]",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "command": "! sed -n '/^build_ignore:/,/^[^[:space:]#-]/p' galaxy.yml | sed -n 's/^[[:space:]]*-[[:space:]]*//p' | tr -d \"\\\"'\" | grep -qE '/[[:space:]]*$'",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "command": "bi=\"$(sed -n '/^build_ignore:/,/^[^[:space:]#-]/p' galaxy.yml | sed -n 's/^[[:space:]]*-[[:space:]]*//p' | tr -d \"\\\"'\" | sed 's:/*$::')\"; while IFS= read -r line; do case \"$line\" in \"\"|\"#\"*) continue ;; esac; entry=\"${line#/}\"; printf '%s\\n' \"$bi\" | grep -qxF \"${entry%/}\" || exit 1; done < .gitignore",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "command": "out=\"$(mktemp -d)\"; ansible-galaxy collection build --force --output-path \"$out\" >/dev/null 2>&1 && ! tar -tzf \"$out\"/*.tar.gz | grep -qE '^(\\.ansible/|\\.cache/|collections/|molecule-logs/|\\.env\\.yml)'",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "command": "out=\"$(mktemp -d)\"; ansible-galaxy collection build --force --output-path \"$out\" >/dev/null 2>&1 && ! tar -tzf \"$out\"/*.tar.gz | grep -qE '^\\.github/'",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "pattern": "ansible-galaxy collection build",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "command": "test -f molecule-logs/converge-2026-08-18.log && test -d collections/ansible_collections && test -f .env.yml",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "command": "[ -z \"$(git diff --name-only \"$EVAL_BASE_SHA\" -- roles/ molecule/)\" ]",
+        "source": "SKILL.md checklist: no unrelated files changed"
       }
     ]
   }

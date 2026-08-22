@@ -1,0 +1,5 @@
+{
+    "collections_path": "/home/mbraun/work/platform-storage/collections",
+    "cache_dir": "/home/mbraun/.cache/ansible-compat/f3a1",
+    "runtime": "ansible-core 2.16.6"
+}

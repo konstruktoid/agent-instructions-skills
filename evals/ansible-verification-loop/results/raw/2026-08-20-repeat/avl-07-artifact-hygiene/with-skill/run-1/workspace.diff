@@ -1,0 +1,115 @@
+diff --git a/.cache/ansible-compat/collection-paths.json b/.cache/ansible-compat/collection-paths.json
+deleted file mode 100644
+index 0eb7dd1..0000000
+--- a/.cache/ansible-compat/collection-paths.json
++++ /dev/null
+@@ -1,5 +0,0 @@
+-{
+-    "collections_path": "/home/mbraun/work/platform-storage/collections",
+-    "cache_dir": "/home/mbraun/.cache/ansible-compat/f3a1",
+-    "runtime": "ansible-core 2.16.6"
+-}
+diff --git a/.env.yml b/.env.yml
+deleted file mode 100644
+index 259baf2..0000000
+--- a/.env.yml
++++ /dev/null
+@@ -1,5 +0,0 @@
+----
+-# Local credentials for the staging inventory, created by hand on this machine.
+-vault_password: example-vault-password-not-in-use
+-storage_api_token: example-token-not-in-use
+-staging_ssh_user: mbraun
+diff --git a/.gitignore b/.gitignore
+index 6bd94eb..4f7f44f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,2 +1,13 @@
+ # Built artifacts.
+ *.tar.gz
++
++# Local dependency downloads and caches.
++.ansible/
++.cache/
++collections/
++
++# Local test/lint output.
++molecule-logs/
++
++# Local credentials and environment overrides.
++.env.yml
+diff --git a/collections/ansible_collections/community/general/MANIFEST.json b/collections/ansible_collections/community/general/MANIFEST.json
+deleted file mode 100644
+index ebafd27..0000000
+--- a/collections/ansible_collections/community/general/MANIFEST.json
++++ /dev/null
+@@ -1,10 +0,0 @@
+-{
+-    "collection_info": {
+-        "namespace": "community",
+-        "name": "general",
+-        "version": "8.6.0",
+-        "authors": ["Ansible community"],
+-        "license_file": "COPYING"
+-    },
+-    "format": 1
+-}
+diff --git a/collections/ansible_collections/community/general/plugins/modules/parted.py b/collections/ansible_collections/community/general/plugins/modules/parted.py
+deleted file mode 100644
+index e21a519..0000000
+--- a/collections/ansible_collections/community/general/plugins/modules/parted.py
++++ /dev/null
+@@ -1,10 +0,0 @@
+-# Vendored copy, installed by `ansible-galaxy collection install -p ./collections`.
+-DOCUMENTATION = r"""
+-module: parted
+-short_description: Configure block device partitions
+-"""
+-
+-
+-def main():
+-    """Entry point for the vendored module."""
+-    raise NotImplementedError
+diff --git a/galaxy.yml b/galaxy.yml
+index e65cf72..7278781 100644
+--- a/galaxy.yml
++++ b/galaxy.yml
+@@ -14,7 +14,11 @@ tags:
+   - linux
+ repository: https://github.com/platform/storage
+ build_ignore:
+-  - .ansible/
+-  - .cache/
+-  - .github/
+-  - collections/
++  - .ansible
++  - .cache
++  - .github
++  - collections
++  - molecule-logs
++  - .env.yml
++  - .ansible-lint
++  - ansible.cfg
+diff --git a/molecule-logs/converge-2026-08-18.log b/molecule-logs/converge-2026-08-18.log
+deleted file mode 100644
+index 4948f54..0000000
+--- a/molecule-logs/converge-2026-08-18.log
++++ /dev/null
+@@ -1,17 +0,0 @@
+-PLAY [Converge] ****************************************************************
+-
+-TASK [Gathering Facts] *********************************************************
+-ok: [instance] => {"ansible_facts": {"ansible_default_ipv4": {"address":
+-"192.0.2.41", "gateway": "192.0.2.1", "interface": "eth0"}, "ansible_fqdn":
+-"buildnode-04.corp.example.net", "ansible_user_id": "mbraun"}, "changed": false}
+-
+-TASK [platform.storage.storage_lvm : Install the LVM tools] ********************
+-changed: [instance]
+-
+-TASK [platform.storage.storage_lvm : Write the LVM configuration] **************
+---- before: /etc/lvm/lvm.conf
+-+++ after: /home/mbraun/work/platform-storage/roles/storage_lvm/templates/lvm.conf.j2
+-changed: [instance]
+-
+-PLAY RECAP *********************************************************************
+-instance : ok=3 changed=2 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0

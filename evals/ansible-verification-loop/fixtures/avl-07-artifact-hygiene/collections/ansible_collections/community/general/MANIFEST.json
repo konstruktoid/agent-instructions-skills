@@ -1,0 +1,10 @@
+{
+    "collection_info": {
+        "namespace": "community",
+        "name": "general",
+        "version": "8.6.0",
+        "authors": ["Ansible community"],
+        "license_file": "COPYING"
+    },
+    "format": 1
+}

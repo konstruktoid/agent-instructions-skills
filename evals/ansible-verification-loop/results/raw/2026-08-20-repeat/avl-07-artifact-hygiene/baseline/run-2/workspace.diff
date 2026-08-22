@@ -1,0 +1,18 @@
+diff --git a/galaxy.yml b/galaxy.yml
+index e65cf72..7295418 100644
+--- a/galaxy.yml
++++ b/galaxy.yml
+@@ -14,7 +14,9 @@ tags:
+   - linux
+ repository: https://github.com/platform/storage
+ build_ignore:
+-  - .ansible/
+-  - .cache/
+-  - .github/
+-  - collections/
++  - .ansible
++  - .cache
++  - .github
++  - collections
++  - .env.yml
++  - molecule-logs

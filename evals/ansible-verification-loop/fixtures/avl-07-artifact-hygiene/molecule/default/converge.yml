@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Include the storage_lvm role
+      ansible.builtin.include_role:
+        name: platform.storage.storage_lvm

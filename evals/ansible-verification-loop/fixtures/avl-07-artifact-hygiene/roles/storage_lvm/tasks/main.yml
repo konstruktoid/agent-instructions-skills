@@ -1,0 +1,14 @@
+---
+- name: Install the LVM tools
+  ansible.builtin.package:
+    name: "{{ storage_lvm_packages }}"
+    state: present
+
+- name: Write the LVM configuration
+  ansible.builtin.template:
+    src: lvm.conf.j2
+    dest: "{{ storage_lvm_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lvm2-lvmpolld
