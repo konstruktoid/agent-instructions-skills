@@ -130,12 +130,20 @@ project installs only what it needs:
 | `ansible-standards` | `ansible-verification-loop` |
 | `github-standards` | `github-actions-security`, `github-repository-security`, `github-organization-governance` |
 
-From inside Claude Code, in the consuming project:
+From inside Claude Code, in the consuming project. Pin to a release tag:
+
+```shell
+/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0
+/plugin install python-standards@konstruktoid
+/reload-plugins
+```
+
+Without the `@<tag>` suffix the marketplace tracks the default branch, and every commit
+pushed here reaches the project at its next update, reviewed by nobody on the consuming side.
+Use the unpinned form only when following this repository's `main` is the intent:
 
 ```shell
 /plugin marketplace add konstruktoid/agent-instructions-skills
-/plugin install python-standards@konstruktoid
-/reload-plugins
 ```
 
 The same operations exist as `claude plugin marketplace add` and `claude plugin install` outside a
@@ -147,15 +155,17 @@ Installing the plugin brings the whole library along, `instructions/` included, 
 resolve their own references to `instructions/python_coding_instructions.md` without the project
 doing anything.
 
-To update to the current upstream state:
+To move to a newer release, re-add the marketplace at the new tag, then update:
 
 ```shell
+/plugin marketplace add konstruktoid/agent-instructions-skills@v0.2.0
 /plugin marketplace update konstruktoid
 /plugin update python-standards
 ```
 
-The plugin entries declare no `version`, so every commit here counts as a new version and an
-update always fetches the current default branch.
+Every plugin entry declares the same `version`, which matches the tag it ships from, so an
+installed plugin names a fixed point rather than whatever the default branch held that day.
+On an unpinned marketplace, `update` still fetches the current default branch.
 
 ### For a whole team, through project settings
 
@@ -178,8 +188,11 @@ plugins when they trust the project folder:
 }
 ```
 
-Add `"ref": "<branch-or-tag>"` next to `repo` to pin the team to a fixed branch or tag rather
-than tracking the default branch. A marketplace source accepts a branch or tag, not a commit SHA.
+Add `"ref": "v0.1.0"` next to `repo` to pin the team to a release tag rather than tracking the
+default branch. The field accepts a branch or a tag, not a commit SHA, and the two are not
+equivalent: a tag in this repository is protected against deletion and force update, so it names
+the same tree tomorrow, while a branch is a moving reference that the next push changes. Pin to a
+tag unless following a branch is the intent.
 
 ### Instructions documents, and non-plugin setups
 
@@ -384,18 +397,20 @@ still held to this repository's Markdown rules.
 
 ## Checks
 
-`.github/workflows/lint.yml` enforces the rules above on every push and pull request, in four
-jobs: the authoring rules, this repository's own Python, its own workflows, and its Markdown.
-Every check runs locally:
+`.github/workflows/lint.yml` enforces the rules above on every push and pull request, in five
+jobs: the authoring rules, this repository's own Python, its eval suites, its own workflows, and
+its Markdown. Every check runs locally:
 
 ```sh
 uv run --frozen python scripts/check_skills.py   # authoring rules for every SKILL.md
+python3 scripts/check_capabilities.py            # capabilities a change adds without declaring
 python3 scripts/check_evals.py                   # structure and coverage of every eval suite
 uv run --frozen ruff check .                     # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
 npx --yes markdownlint-cli2@0.23.2 "**/*.md"     # add --fix to correct spacing in place
-docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 -color
+docker run --rm -v "$PWD:/repo" -w /repo \
+  rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
 uvx zizmor@1.29.0 --persona=pedantic --no-progress .github/
 ```
 
@@ -449,14 +464,65 @@ skill or the specification it measured, and a stamp that graded a modified worki
 change made later on the day of the run is still seen; a stamp with no recorded revision falls
 back to comparing dates, and a stamp that graded a modified tree measured source held in no
 commit, which nothing can reproduce. The staleness check reads `git log`, so it reports nothing
-useful outside a checkout. Like `check_skills.py` it needs no third-party package, and the lint
-workflow does not run it.
+useful outside a checkout. Like `check_skills.py` it needs no third-party package, and the `evals`
+job runs it with `fetch-depth: 0` so the freshness comparison has history to read.
 
-`claude plugin validate .` checks the marketplace manifest against Claude Code's own schema. It
-needs the Claude Code CLI, so it is a local step rather than a CI one.
+Every `SKILL.md` declares a `capabilities` block: the tools it uses, the commands it runs, the
+paths it touches, and the hosts it reaches. `check_skills.py` checks that block's shape and fails
+without it. `check_capabilities.py` compares a branch against `origin/main` and prints what the
+change adds that the block does not declare: a hostname, a path outside the repository, or a
+command name inside a shell fence. It reports and does not fail, on purpose. The declaration and
+the body have the same author, so a contributor who adds a command and declares it passes; the
+block exists to put a capability change in a four-line frontmatter diff rather than a
+four-hundred-line body diff. It cannot see a capability written in prose, which is most of them.
+
+`claude plugin validate .` checks the marketplace manifest against Claude Code's own schema, and
+`claude plugin validate --strict <plugin-dir>` checks the skills themselves, which is what catches
+frontmatter that fails to parse. Both need the Claude Code CLI, so they are local steps rather
+than CI ones.
 
 Markdown rules apply to every `.md` file and are configured in `.markdownlint-cli2.yaml`: prose
 wraps at 100 columns, headings and lists are surrounded by blank lines, and code fences declare a
 language. The `ruff` and `ty` steps hold this repository's own Python to
 `instructions/python_coding_instructions.md`, with the tool versions pinned in `uv.lock` and every
 lint ignore justified in `pyproject.toml`.
+
+## Security
+
+[SECURITY.md](SECURITY.md) carries the private reporting channel and the response time, the
+supported versions, the procedure for withdrawing a bad release, and the data-access statement:
+what this content reads, what it runs, and what it sends, named by path and endpoint. A project
+installing these skills is the reader that statement is written for.
+
+## Releases
+
+Consumers install from a tag, so a release is a tag rather than a branch state. The rule this
+repository publishes at `skills/github/github-repository-security/references/agent-content.md:113`
+applies to itself: release from a tag, and make the tag protected and immutable.
+
+A release is cut in this order:
+
+1. Set the same `version` on every plugin entry in `.claude-plugin/marketplace.json`. It is
+   `MAJOR.MINOR.PATCH` without the `v`, and `scripts/check_skills.py` fails the build when an
+   entry is missing one, when one is malformed, or when the four entries disagree. One repository
+   at one tag is one version.
+2. Merge that change through a pull request, like any other.
+3. Tag the merge commit `v<version>` and push the tag.
+4. State in the release notes what changed in what a skill can do: a new command, a new file it
+   reads, a new host it reaches, a changed pin. Prose about improvements is not that.
+
+`.github/rulesets/release-tags.json` holds the tag protection, kept in the repository so the
+policy is reviewable and reproducible rather than living only in a settings page. It targets
+`refs/tags/v*`, blocks deletion and non-fast-forward updates, and lists no bypass actors, so a
+published tag names the same tree permanently and a mistake in one is corrected by cutting the
+next version rather than by moving the old one. Apply and read it back with:
+
+```sh
+gh api --method POST repos/konstruktoid/agent-instructions-skills/rulesets \
+  --input .github/rulesets/release-tags.json
+gh api repos/konstruktoid/agent-instructions-skills/rulesets --jq '.[] | {id, name, target}'
+```
+
+A tag is a fixed point, not a safe one: a tag cut from a bad commit is a bad tag. What tagging
+changes is that a consumer moves between versions deliberately instead of receiving every commit
+at the moment it merges.
