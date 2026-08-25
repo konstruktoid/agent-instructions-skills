@@ -81,8 +81,15 @@ configured, `pre-commit` hooks included.
 **Sends.** Only what those commands send:
 
 - `api.github.com` and the repository's own git remote, through `gh` and `git`.
-- A container registry, through `docker run` of `rhysd/actionlint`, pinned by digest.
+- A container registry, through `docker run` of `rhysd/actionlint` on `docker.io`, pinned by
+  digest, and of the OpenSSF Scorecard image on `gcr.io`, which `github-repository-security`
+  asks to be resolved to a current release and pinned by digest before it runs.
 - A Python package index, through `uvx` resolving `zizmor` at run time.
+- `docs.github.com`, through the instruction in `github-repository-security` and
+  `github-organization-governance` to check the current REST documentation where an endpoint
+  fails or a field is absent. That one is a fetch written in prose rather than a command, which
+  is the case `scripts/check_capabilities.py` names as the one it cannot detect: it is listed
+  here because a reader comparing this statement against the files would not find it otherwise.
 - Whatever the target repository's own dependency installation reaches, which this content does
   not choose.
 

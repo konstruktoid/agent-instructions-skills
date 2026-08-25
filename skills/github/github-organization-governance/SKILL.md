@@ -19,6 +19,7 @@ capabilities:
     - "the target repository working tree"
   egress:
     - api.github.com
+    - docs.github.com
 ---
 
 # github-organization-governance

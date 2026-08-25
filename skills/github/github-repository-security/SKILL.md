@@ -23,7 +23,9 @@ capabilities:
   egress:
     - api.github.com
     - docker.io
+    - docs.github.com
     - files.pythonhosted.org
+    - gcr.io
     - github.com
     - pypi.org
 ---

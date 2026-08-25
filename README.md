@@ -402,13 +402,13 @@ jobs: the authoring rules, this repository's own Python, its eval suites, its ow
 its Markdown. Every check runs locally:
 
 ```sh
-uv run --frozen python scripts/check_skills.py   # authoring rules for every SKILL.md
-python3 scripts/check_capabilities.py            # capabilities a change adds without declaring
-python3 scripts/check_evals.py                   # structure and coverage of every eval suite
-uv run --frozen ruff check .                     # the repository's own Python
+uv run --frozen python scripts/check_skills.py         # authoring rules for every SKILL.md
+uv run --frozen python scripts/check_capabilities.py   # capabilities a change adds undeclared
+python3 scripts/check_evals.py                         # structure and coverage of every suite
+uv run --frozen ruff check .                           # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
-npx --yes markdownlint-cli2@0.23.2 "**/*.md"     # add --fix to correct spacing in place
+npx --yes markdownlint-cli2@0.23.2 "**/*.md"           # add --fix to correct spacing in place
 docker run --rm -v "$PWD:/repo" -w /repo \
   rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
 uvx zizmor@1.29.0 --persona=pedantic --no-progress .github/

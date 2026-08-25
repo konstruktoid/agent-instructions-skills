@@ -645,18 +645,31 @@ def changed_grader_sources(baseline: str, skill: str) -> list[str] | None:
     The comparison is against the working tree rather than against `HEAD`, because the string
     that reaches `run_grader` is the one on disk. A contributor's change arrives committed on
     a branch or applied as a patch, and both produce the same shell command.
+
+    A path git is not tracking counts as differing, which is why this asks twice. `git diff`
+    says nothing at all about an untracked file, so a suite dropped into the working tree and
+    never added would read as "no grader source changed" and skip the review this exists to
+    require. `--others` is deliberately not paired with `--exclude-standard`: an assertions
+    file that some ignore rule covers is still a file whose commands would run.
     """
     paths = [source.format(skill=skill) for source in GRADER_SOURCES]
-    diff = subprocess.run(  # noqa: S603
-        [GIT, "diff", "--name-only", baseline, "--", *paths],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if diff.returncode != 0:
-        return None
-    return [line for line in diff.stdout.splitlines() if line.strip()]
+    changed: list[str] = []
+    for arguments in (
+        ["diff", "--name-only", baseline, "--", *paths],
+        ["ls-files", "--others", "--", *paths],
+    ):
+        # A fixed argument list built from repository paths, with no shell involved.
+        result = subprocess.run(  # noqa: S603
+            [GIT, *arguments],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            return None
+        changed += [line for line in result.stdout.splitlines() if line.strip()]
+    return sorted(set(changed))
 
 
 def require_reviewed_graders(skill: str, *, reviewed: bool) -> None:
