@@ -35,6 +35,14 @@ transcript, its Bash commands, or its final message. Each carries a `source` fie
 line of the skill it comes from. `$EVAL_BASE_SHA` is exported to every grading command as the
 commit the fixture started at, so "which files did this run change" is answerable.
 
+A task run acts on its workspace without a permission prompt, because `claude -p` cannot
+answer one and a denied call would be recorded as a skill that did not act. What bounds the
+run is therefore the tool list rather than the permission mode: `TASK_TOOLS` in
+`run_eval.py` allows Bash, the file tools, and `Skill`, and nothing else. A fixture is
+attacker-shaped input by construction, since every one of them plants the flaw its eval
+measures, and the allowlist keeps a run that reads one from reaching the rest of the tool
+surface. Pass `--all-tools` to measure a task against every tool the CLI offers instead.
+
 ## Running them
 
 ```sh
@@ -59,6 +67,26 @@ python3 evals/run_eval.py report   --skill python-secure-coding
 
 `report` regenerates `results/<date>.md` from the graded runs, so the checked-in results file
 is never written by hand.
+
+### The grader review gate
+
+An assertion of kind `workspace_command` is handed to a shell by `run_grader`, in a process whose
+HOME holds a symlink to the credentials that authenticate the run. Whoever writes that string
+chooses what runs on this machine. `tasks` and `regrade`, the two subcommands that execute one,
+therefore refuse to start when a suite's `assertions.json` or `run_eval.py` differs from
+`origin/main`, falling back to `main`:
+
+```sh
+python3 evals/run_eval.py tasks --skill python-testing
+# refusing to grade python-testing: evals/python-testing/assertions.json differs from origin/main
+```
+
+The refusal lists the `workspace_command` strings that are new or changed against the baseline,
+which is what a review of them consists of. Read those, then pass `--graders-reviewed` to proceed.
+The comparison is against the working tree rather than `HEAD`, so it covers a contributor's branch
+and a patch applied locally alike, and it fires on uncommitted edits to a suite of one's own. That
+is the intended cost: the flag is an assertion that a human read the commands, and it is recorded
+in the run's output when it is used.
 
 ### What gets committed, and what is stripped from it
 

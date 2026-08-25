@@ -10,6 +10,7 @@
       "name": "python-standards",
       "source": "./",
       "strict": false,
+      "version": "0.1.0",
       "description": "Python authoring standards: the ruff/ty quality gate, security practices aligned to the OWASP Top 10:2025, and pytest coverage that matches the target repository's existing test layout. Each skill runs a bounded verify-fix loop and reports unresolved findings rather than declaring success unverified.",
       "skills": [
         "./skills/python/python-secure-coding",
@@ -20,6 +21,7 @@
       "name": "bash-standards",
       "source": "./",
       "strict": false,
+      "version": "0.1.0",
       "description": "Bash authoring standards: scripts that fail loudly rather than silently, built on strict-mode semantics, cleanup on every exit path, injection-safe handling of untrusted input, controlled PATH and environment, and credentials that stay out of the process table and the logs, plus test coverage that matches the target repository's existing layout. Each skill runs a bounded verify-fix loop with shellcheck and bash -n.",
       "skills": [
         "./skills/bash/bash-secure-scripting",
@@ -30,6 +32,7 @@
       "name": "ansible-standards",
       "source": "./",
       "strict": false,
+      "version": "0.1.0",
       "description": "Ansible authoring standards: review and modify roles, collections, playbooks, and tasks, verified through the target repository's own lint and test loop rather than declaring success from the edit alone.",
       "skills": [
         "./skills/ansible/ansible-verification-loop"
@@ -39,6 +42,7 @@
       "name": "github-standards",
       "source": "./",
       "strict": false,
+      "version": "0.1.0",
       "description": "GitHub authoring and configuration standards: workflows and actions built on least-privilege GITHUB_TOKEN permissions, dependencies pinned by commit SHA to the latest published release, and injection-safe handling of untrusted event data, plus repository and organization settings that enforce each rule through a mechanism, grant the smallest access the work needs, and leave evidence a reviewer can read. Each skill runs a bounded verify-fix loop, with actionlint and zizmor for workflows and a read-back of the applied state for settings.",
       "skills": [
         "./skills/github/github-actions-security",

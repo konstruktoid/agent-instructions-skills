@@ -6,10 +6,14 @@ For every skills/<category>/<name>/SKILL.md, the rules stated in README.md are:
 - The frontmatter block parses as YAML and defines `name` and `description`.
 - `name` matches the skill's parent directory name.
 - `description` is non-empty, under 1,024 characters, and written in third person.
+- `capabilities` declares `tools`, `shell`, `paths` and `egress`, each a sorted list of
+  strings, with `tools` drawn from the declarable set. The shape is checked, not the truth
+  of it; `scripts/check_capabilities.py` reports what a diff adds without declaring it.
 - The body (everything after the frontmatter) is under 500 lines.
 
 It also checks the plugin marketplace manifest, since a skill that is not listed there
-never reaches a project that installs this library as a plugin, the cross-references
+never reaches a project that installs this library as a plugin and a plugin entry with no
+`version` turns every commit into a release, the cross-references
 between skills and instructions/, which README.md requires to run in both directions and
 which nothing else would catch drifting, the Contents list README.md requires of every
 reference file past 100 lines, and the prose of every document this library publishes
@@ -18,9 +22,11 @@ instructions/written_language_instructions.md.
 
 For every agent-templates/<name>.md, the rules are the same frontmatter rules with
 `name` matching the file stem, plus the neutral defaults a template must ship with:
-`model: inherit` and an explicit `tools` allowlist. It also fails when an `agents`
-directory appears at the repository root, because Claude Code auto-discovers that name
-at a plugin root and would install every template as a live subagent.
+`model: inherit` and an explicit `tools` allowlist. It also fails when an entry appears
+at the repository root that is not on the packaging allowlist, because the marketplace
+manifest sources every plugin from the root and Claude Code auto-discovers `agents/`,
+`commands/`, `hooks/` and `.mcp.json` at a plugin root, installing what it finds into
+every consuming project.
 
 Run it from the repository root:
 
@@ -61,6 +67,13 @@ TOC_ENTRY = re.compile(r"^- (.+)$")
 
 MARKETPLACE_PATH = Path(".claude-plugin/marketplace.json")
 
+# Every plugin entry has to declare a version, and all of them have to declare the same
+# one. They ship from a single repository at a single tag, so a per-plugin version would be
+# a claim this repository has no way to make true. Without a version, Claude Code treats
+# every commit on the default branch as a new release and an update fetches whatever is
+# there, which is the moving-ref exposure README.md's release section describes.
+PLUGIN_VERSION = re.compile(r"^\d+\.\d+\.\d+$")
+
 AGENT_TEMPLATE_GLOB = "agent-templates/*.md"
 
 INSTRUCTIONS_DIR = Path("instructions")
@@ -79,11 +92,53 @@ SKILL_REFERENCE = re.compile(r"(?<![\w./-])skills/([A-Za-z0-9_-]+)/([A-Za-z0-9_-
 # every plugin in the marketplace manifest is sourced from the repository root. Templates
 # placed there would install into every consuming project as live subagents, which is the
 # opposite of the copy-and-adapt rule they exist under.
-PLUGIN_AGENT_DIR = Path("agents")
+# Every plugin in the marketplace manifest is sourced from the repository root, which makes
+# the repository root a plugin root: Claude Code auto-discovers `agents/`, `commands/`,
+# `hooks/` and `.mcp.json` there and installs what it finds into every consuming project.
+# This is an allowlist of the entries the repository is allowed to have rather than a
+# denylist of those four names, because the discovery list belongs to Claude Code and can
+# grow without this repository being told. An entry that is not listed fails, which is the
+# direction a wrong answer has to fail in.
+PLUGIN_ROOT_ALLOWED = frozenset(
+    {
+        ".claude-plugin",
+        ".github",
+        ".gitignore",
+        ".markdownlint-cli2.yaml",
+        "LICENSE",
+        "README.md",
+        "SECURITY.md",
+        "agent-templates",
+        "docs",
+        "evals",
+        "instructions",
+        "pyproject.toml",
+        "scripts",
+        "skills",
+        "uv.lock",
+    }
+)
+
+# Local-only entries that .gitignore already keeps out of the repository, plus git's own
+# directory. They are skipped rather than allowlisted: none of them is published, and a
+# contributor's virtual environment is not a packaging decision.
+PLUGIN_ROOT_IGNORED = frozenset({".git", ".ruff_cache", ".venv", "__pycache__", "node_modules"})
 
 # A template pins no model of its own: it ships the model that follows the main
 # conversation and leaves the choice to whoever copies it.
 NEUTRAL_MODEL = "inherit"
+
+# The capability block every SKILL.md declares, and the only keys it may hold. The block is
+# checked for shape here and never for truth: the declaration and the body have the same
+# author, so a capability added to both passes. Its value is that a capability change shows
+# up in the frontmatter diff, one line per capability, where a reviewer has a chance of
+# seeing it. `scripts/check_capabilities.py` reports what a diff adds without touching it.
+CAPABILITY_KEYS = ("tools", "shell", "paths", "egress")
+
+# The tools a skill may declare. Anything outside this set is a capability worth stopping
+# on rather than absorbing: WebFetch and WebSearch are egress, Task spawns an agent this
+# repository cannot describe, and an unknown name is one nobody has reviewed.
+DECLARABLE_TOOLS = frozenset({"Bash", "Edit", "Glob", "Grep", "NotebookEdit", "Read", "Write"})
 
 # instructions/written_language_instructions.md bans em dashes in prose and arrows outside
 # diagrams, mapping tables, code, and command output. That rule governs every document this
@@ -98,6 +153,7 @@ PROSE_MARKERS = (("—", "em dash"), ("→", "arrow"))
 # to this rule; the hand-written README of an eval suite is.
 PROSE_GLOBS = (
     "README.md",
+    "SECURITY.md",
     "instructions/*.md",
     "skills/**/*.md",
     AGENT_TEMPLATE_GLOB,
@@ -349,6 +405,48 @@ def check_tools(tools: object, errors: list[str]) -> None:
         errors.append("'tools' must list at least one tool name, with no empty entries")
 
 
+def check_capabilities(capabilities: object, errors: list[str]) -> None:
+    """Check that a skill's capability block has the required shape.
+
+    Shape only. Whether the declaration matches the body is not checkable here and is not
+    claimed anywhere: a contributor who adds a command and declares it passes. The block
+    exists so that the addition is visible in a four-line diff rather than a four-hundred
+    line one, which makes a capability change reviewable rather than impossible.
+    """
+    if not isinstance(capabilities, dict):
+        errors.append(
+            f"frontmatter is missing a 'capabilities' mapping with {', '.join(CAPABILITY_KEYS)}"
+        )
+        return
+
+    unknown = sorted(set(capabilities) - set(CAPABILITY_KEYS))
+    if unknown:
+        errors.append(f"'capabilities' has unknown key(s): {', '.join(unknown)}")
+
+    for key in CAPABILITY_KEYS:
+        if key not in capabilities:
+            errors.append(f"'capabilities' is missing '{key}'")
+            continue
+        value = capabilities[key]
+        if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+            errors.append(f"'capabilities.{key}' must be a list of strings, got {value!r}")
+            continue
+        if value != sorted(value):
+            errors.append(
+                f"'capabilities.{key}' must be sorted, so that an addition is one line of diff"
+            )
+
+    tools = capabilities.get("tools")
+    if isinstance(tools, list):
+        outside = sorted({tool for tool in tools if tool not in DECLARABLE_TOOLS})
+        if outside:
+            errors.append(
+                f"'capabilities.tools' names {', '.join(outside)}, which is outside the "
+                f"declarable set ({', '.join(sorted(DECLARABLE_TOOLS))}); a tool that reaches "
+                "the network or spawns an agent is a decision to make deliberately"
+            )
+
+
 def check_skill(skill_path: Path) -> list[str]:
     """Return the list of rule violations for one SKILL.md, empty when it passes."""
     errors: list[str] = []
@@ -376,6 +474,7 @@ def check_skill(skill_path: Path) -> list[str]:
         errors.append(f"'name' is {name!r}, must match the directory name {expected_name!r}")
 
     check_description(frontmatter.get("description"), errors, "skill")
+    check_capabilities(frontmatter.get("capabilities"), errors)
     check_verify_loop(body, errors)
 
     if len(body) >= MAX_BODY_LINES:
@@ -424,28 +523,67 @@ def check_agent_template(template_path: Path) -> list[str]:
     return errors
 
 
-def check_plugin_agent_dir(repo_root: Path) -> list[str]:
-    """Fail when an `agents/` directory exists at the repository root.
+def check_plugin_root(repo_root: Path) -> list[str]:
+    """Fail when an entry at the repository root is not on the packaging allowlist.
 
-    Every plugin in the marketplace manifest is sourced from the repository root, so that
-    directory name would ship the copy-and-adapt templates as installable subagents.
+    Every plugin in the marketplace manifest is sourced from the repository root, so a
+    file or directory named for anything Claude Code auto-discovers at a plugin root
+    ships into every consuming project. `agents/` is the case this repository already had
+    a reason to name: it would install the copy-and-adapt templates as live subagents.
+    `commands/`, `hooks/` and `.mcp.json` reach a consumer the same way, and a name added
+    by a future release of Claude Code would too, which is why this reads as an allowlist.
     """
-    if not (repo_root / PLUGIN_AGENT_DIR).is_dir():
-        return []
-    return [
-        (
-            f"{PLUGIN_AGENT_DIR}/: Claude Code auto-discovers this directory at a plugin "
-            "root, which would install its contents into every consuming project as live "
-            "subagents; keep agent templates in agent-templates/"
+    errors: list[str] = []
+    for entry in sorted(repo_root.iterdir(), key=lambda path: path.name):
+        if entry.name in PLUGIN_ROOT_IGNORED or entry.name in PLUGIN_ROOT_ALLOWED:
+            continue
+        suffix = "/" if entry.is_dir() else ""
+        errors.append(
+            f"{entry.name}{suffix}: not on the repository-root allowlist. The marketplace "
+            "manifest sources every plugin from here, so Claude Code auto-discovers "
+            "agents/, commands/, hooks/ and .mcp.json at this level and installs what it "
+            "finds into every consuming project; keep agent templates in agent-templates/, "
+            "and add a name to PLUGIN_ROOT_ALLOWED only after checking that Claude Code "
+            "does not discover it"
         )
-    ]
+    return errors
+
+
+def check_plugin_versions(manifest: dict[str, object]) -> list[str]:
+    """Check that every plugin entry declares one and the same MAJOR.MINOR.PATCH version.
+
+    They ship from one repository at one tag, so differing versions would be a claim this
+    repository cannot make true, and a missing one makes every commit a release.
+    """
+    errors: list[str] = []
+    versions: set[str] = set()
+    plugins = manifest.get("plugins")
+    for entry in plugins if isinstance(plugins, list) else []:
+        name = entry.get("name", "<unnamed>")
+        version = entry.get("version")
+        if isinstance(version, str) and PLUGIN_VERSION.match(version):
+            versions.add(version)
+        else:
+            errors.append(
+                f"{MARKETPLACE_PATH}: plugin {name!r} declares version {version!r}, must "
+                "be a MAJOR.MINOR.PATCH string matching the release tag it ships from"
+            )
+    if len(versions) > 1:
+        errors.append(
+            f"{MARKETPLACE_PATH}: plugins declare {len(versions)} different versions "
+            f"({', '.join(sorted(versions))}); one repository at one tag is one version"
+        )
+    return errors
 
 
 def check_marketplace(repo_root: Path, skills: list[Path]) -> list[str]:
-    """Check that the marketplace manifest exposes every skill exactly once.
+    """Check that the manifest exposes every skill exactly once and declares one version.
 
     A skill missing from the manifest is invisible to any project that installs this
-    library as a Claude Code plugin, which no other check would catch.
+    library as a Claude Code plugin, which no other check would catch. The version is
+    checked here for a related reason: a plugin entry without one turns every commit into
+    a release, so a consumer who followed the pinning instructions in README.md would be
+    pinning to a version the manifest never declares.
     """
     errors: list[str] = []
     manifest_path = repo_root / MARKETPLACE_PATH
@@ -456,6 +594,8 @@ def check_marketplace(repo_root: Path, skills: list[Path]) -> list[str]:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         return [f"{MARKETPLACE_PATH}: does not parse as JSON: {exc}"]
+
+    errors += check_plugin_versions(manifest)
 
     declared: dict[Path, str] = {}
     for entry in manifest.get("plugins", []):
@@ -689,7 +829,7 @@ def main() -> int:
     template_failed = report(repo_root, templates, check_agent_template)
 
     manifest_errors = report_repository_check(
-        check_marketplace(repo_root, skills) + check_plugin_agent_dir(repo_root),
+        check_marketplace(repo_root, skills) + check_plugin_root(repo_root),
         f"{MARKETPLACE_PATH}: ok",
     )
     reference_errors = report_repository_check(

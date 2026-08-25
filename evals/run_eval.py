@@ -42,7 +42,7 @@ import textwrap
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -85,6 +85,17 @@ COMPLETION_MARKER = re.compile(r"\b(completed|exited|finished|exit code)\b", re.
 # plus Skill, which is the tool whose use is being measured. Omitting Skill here makes
 # every probe report "did not fire" no matter what the description says.
 TRIGGER_TOOLS = "Skill,Read,Glob,Grep"
+
+# A graded task run edits files, runs linters, and runs the repository's own test entry
+# point, so it needs Bash and the file tools. `claude -p` cannot answer a permission
+# prompt, and a denied prompt is indistinguishable from a skill that did not act, so the
+# run still needs a permission mode that does not raise one. That makes the tool list,
+# rather than the permission mode, the thing that bounds what a fixture can reach. It is
+# an allowlist for the same reason the graded workspace is a copy: the 2026-07-28
+# github-actions-security transcripts record runs reaching WebFetch, and single runs
+# reaching ToolSearch and ScheduleWakeup, none of which any task in any suite asks for.
+# `--all-tools` restores the unbounded surface for a run that needs to be measured with it.
+TASK_TOOLS = "Bash,Edit,Glob,Grep,Read,Skill,Write"
 TRIGGER_BUDGET_USD = 0.35
 TASK_BUDGET_USD = 2.0
 
@@ -232,11 +243,27 @@ def run_environment(home: Path | None = None) -> dict[str, str]:
     return env
 
 
+class RunPermissions(NamedTuple):
+    """What one run is allowed to do: a tool allowlist, and a permission mode.
+
+    The two travel together because neither bounds a run on its own. A tool list with
+    no mode denies every call `claude -p` cannot prompt for, and a mode with no tool
+    list is the unbounded surface this pair exists to avoid handing to a fixture.
+    """
+
+    tools: str | None
+    mode: str | None
+
+
+# Read-only tools, no mode: nothing a probe is allowed to call raises a prompt.
+TRIGGER_PERMISSIONS = RunPermissions(tools=TRIGGER_TOOLS, mode=None)
+
+
 def claude_command(
     prompt: str,
     model: str,
     plugin_dir: Path | None,
-    tools: str | None,
+    permissions: RunPermissions,
     budget: float,
 ) -> list[str]:
     """Build the `claude -p` argument list for one run.
@@ -262,10 +289,12 @@ def claude_command(
     ]
     if plugin_dir is not None:
         command += ["--plugin-dir", str(plugin_dir)]
-    if tools is not None:
-        command += ["--tools", tools]
-    else:
-        command += ["--permission-mode", "bypassPermissions"]
+    if permissions.tools is not None:
+        command += ["--tools", permissions.tools]
+    # Stated rather than inferred from the absence of a tool list, so that widening a run
+    # to the full tool surface and letting it act without prompting are two decisions.
+    if permissions.mode is not None:
+        command += ["--permission-mode", permissions.mode]
     return command
 
 
@@ -547,6 +576,162 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
     }
 
 
+# The refs a grader change is reviewed against, in the order they are tried. `origin/main`
+# is preferred because a stale local `main` would let a change that was never reviewed look
+# reviewed; the local branch is the fallback for a checkout with no remote.
+GRADER_BASELINE_REFS = ("origin/main", "main")
+
+# The files that decide what `run_grader` executes. `assertions.json` holds the strings
+# themselves, and `run_eval.py` decides whether, where and as what they run, so a change to
+# either one is a change to what a contributor can make this machine do.
+GRADER_SOURCES = ("evals/{skill}/assertions.json", "evals/run_eval.py")
+
+
+def resolve_grader_baseline() -> str | None:
+    """Return the first review baseline ref that resolves here, or None if none does."""
+    for ref in GRADER_BASELINE_REFS:
+        # A fixed argument list, with no shell involved.
+        found = subprocess.run(  # noqa: S603
+            [GIT, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if found.returncode == 0:
+            return ref
+    return None
+
+
+def shell_assertions(suite: dict[str, Any]) -> set[str]:
+    """Return every assertion command in one suite that reaches `run_grader` as a shell string.
+
+    Only `workspace_command` does. The regex kinds are matched against a transcript in this
+    process and execute nothing, so a change to one of them is not a change to what runs.
+    """
+    return {
+        assertion["command"]
+        for assertions in suite.get("tasks", {}).values()
+        for assertion in assertions
+        if assertion.get("kind") == "workspace_command" and "command" in assertion
+    }
+
+
+def baseline_shell_assertions(baseline: str, skill: str) -> set[str] | None:
+    """Return the suite's shell assertions as the baseline holds them, or None if unreadable.
+
+    Unreadable covers a suite the baseline does not have at all, which is what a pull request
+    adding a new suite looks like. None means "no comparison is possible", and the caller
+    treats that as everything being new rather than as nothing having changed.
+    """
+    show = subprocess.run(  # noqa: S603
+        [GIT, "show", f"{baseline}:evals/{skill}/assertions.json"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if show.returncode != 0:
+        return None
+    try:
+        return shell_assertions(json.loads(show.stdout))
+    except json.JSONDecodeError:
+        return None
+
+
+def changed_grader_sources(baseline: str, skill: str) -> list[str] | None:
+    """Return the grader-bearing paths that differ from the baseline, or None on a git failure.
+
+    The comparison is against the working tree rather than against `HEAD`, because the string
+    that reaches `run_grader` is the one on disk. A contributor's change arrives committed on
+    a branch or applied as a patch, and both produce the same shell command.
+
+    A path git is not tracking counts as differing, which is why this asks twice. `git diff`
+    says nothing at all about an untracked file, so a suite dropped into the working tree and
+    never added would read as "no grader source changed" and skip the review this exists to
+    require. `--others` is deliberately not paired with `--exclude-standard`: an assertions
+    file that some ignore rule covers is still a file whose commands would run.
+    """
+    paths = [source.format(skill=skill) for source in GRADER_SOURCES]
+    changed: list[str] = []
+    for arguments in (
+        ["diff", "--name-only", baseline, "--", *paths],
+        ["ls-files", "--others", "--", *paths],
+    ):
+        # A fixed argument list built from repository paths, with no shell involved.
+        result = subprocess.run(  # noqa: S603
+            [GIT, *arguments],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            return None
+        changed += [line for line in result.stdout.splitlines() if line.strip()]
+    return sorted(set(changed))
+
+
+def require_reviewed_graders(skill: str, *, reviewed: bool) -> None:
+    """Stop before any grading when the grader-bearing files differ from the review baseline.
+
+    `run_grader` passes an assertion command to a shell, in a process whose HOME holds a
+    symlink to the credentials that authenticate the run. The comment there justifies the
+    shell by saying the command is checked in to this repository, which is true of the
+    baseline and false of a branch someone else wrote. This is the check that makes the
+    justification true again: on an unreviewed ref the run stops, names what differs, and
+    prints the commands that would run, so the decision to proceed is made by a human who
+    has seen them rather than by whichever ref happens to be checked out.
+
+    It refuses rather than sandboxes. A human who waives it has read the commands; a human
+    who waives it out of habit has not, and this control fails open at exactly that point.
+    """
+    baseline = resolve_grader_baseline()
+    changed = None if baseline is None else changed_grader_sources(baseline, skill)
+    if baseline is not None and changed == []:
+        return
+
+    if baseline is None:
+        reason = f"no baseline ref resolves here, tried {', '.join(GRADER_BASELINE_REFS)}"
+        commands: set[str] = set()
+    elif changed is None:
+        reason = f"the comparison against {baseline} could not be made"
+        commands = set()
+    else:
+        reason = f"{', '.join(changed)} differs from {baseline}"
+        current = shell_assertions(load_json(EVALS_DIR / skill / "assertions.json"))
+        previous = baseline_shell_assertions(baseline, skill)
+        commands = current if previous is None else current - previous
+
+    if reviewed:
+        print(f"grader review waived with --graders-reviewed: {reason}")
+        return
+
+    lines = [
+        "",
+        f"refusing to grade {skill}: {reason}.",
+        "",
+        "Assertion commands run through a shell on this machine, in a process whose HOME",
+        "holds a symlink to the credentials that authenticate the run. On a ref this",
+        "repository has not reviewed, that is a contributor choosing what this machine does.",
+    ]
+    if commands:
+        lines += ["", "Commands that are new or changed against the baseline:"]
+        lines += [f"  {command}" for command in sorted(commands)]
+        subject = "them"
+    elif baseline is not None and changed:
+        lines += ["", "No shell assertion changed; the difference is in the harness itself."]
+        subject = "the change"
+    else:
+        subject = "the suite"
+    lines += [
+        "",
+        f"Read {subject}, then re-run with --graders-reviewed.",
+        "",
+    ]
+    raise SystemExit("\n".join(lines))
+
+
 def run_grader(command: str, workspace: Path, base_sha: str, home: Path) -> tuple[int, str]:
     """Run one assertion command in the finished workspace and return its exit code and output.
 
@@ -664,7 +849,7 @@ def run_one_task(job: Job) -> dict[str, Any]:
         prompt=TASK_PREAMBLE + task["prompt"],
         model=job["model"],
         plugin_dir=job["plugin_dir"] if condition == "with-skill" else None,
-        tools=None,
+        permissions=job["permissions"],
         budget=TASK_BUDGET_USD,
     )
     # A task may raise its own ceiling. avl-05 boots a systemd container and installs
@@ -721,7 +906,7 @@ def run_one_trigger(job: Job) -> dict[str, Any]:
         prompt=probe["prompt"],
         model=job["model"],
         plugin_dir=job["plugin_dir"],
-        tools=TRIGGER_TOOLS,
+        permissions=TRIGGER_PERMISSIONS,
         budget=TRIGGER_BUDGET_USD,
     )
     record = invoke_claude(command, workspace, run_dir / "run.jsonl", home)
@@ -805,6 +990,7 @@ def execute(jobs: list[Job], worker: Worker, parallel: int) -> list[dict[str, An
 
 def cmd_tasks(args: argparse.Namespace) -> int:
     """Run every task for one skill in both conditions and grade the runs."""
+    require_reviewed_graders(args.skill, reviewed=args.graders_reviewed)
     skill_dir = EVALS_DIR / args.skill
     tasks = load_json(skill_dir / "tasks.json")["tasks"]
     assertions = load_json(skill_dir / "assertions.json")["tasks"]
@@ -834,6 +1020,10 @@ def cmd_tasks(args: argparse.Namespace) -> int:
                 else root / task["id"] / condition / f"run-{index}"
             ),
             "run_index": index,
+            "permissions": RunPermissions(
+                tools=None if args.all_tools else TASK_TOOLS,
+                mode="bypassPermissions",
+            ),
         }
         for task in tasks
         for condition in CONDITIONS
@@ -988,6 +1178,7 @@ def cmd_regrade(args: argparse.Namespace) -> int:
     nothing and leaves the run artifacts untouched. The workspace is gitignored, so a
     clone regrades from the transcript alone; see `regrade_one`.
     """
+    require_reviewed_graders(args.skill, reviewed=args.graders_reviewed)
     skill_dir = EVALS_DIR / args.skill
     assertions = load_json(skill_dir / "assertions.json")["tasks"]
     root = results_root(args.skill, args.stamp or today())
@@ -1505,6 +1696,14 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--skill", required=True, help="skill directory name under evals/")
         sub.add_argument("--stamp", default="", help="results date stamp, defaults to today (UTC)")
         sub.set_defaults(handler=handler)
+        # Both subcommands that execute an assertion command carry the waiver flag, and
+        # nothing else does: `report` and `snapshot` read what a graded run already wrote.
+        if name in {"tasks", "regrade"}:
+            sub.add_argument(
+                "--graders-reviewed",
+                action="store_true",
+                help="proceed after reading the assertion commands this run will execute",
+            )
         if name in {"report", "regrade", "snapshot"}:
             continue
         sub.add_argument("--model", default=model, help=f"model for each run (default: {model})")
@@ -1516,6 +1715,11 @@ def build_parser() -> argparse.ArgumentParser:
                 type=int,
                 default=1,
                 help="runs per condition, reported as median and range (default: 1)",
+            )
+            sub.add_argument(
+                "--all-tools",
+                action="store_true",
+                help=f"give each run every tool instead of the allowlist ({TASK_TOOLS})",
             )
         if name == "triggers":
             sub.add_argument(

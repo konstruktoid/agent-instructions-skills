@@ -1,6 +1,25 @@
 ---
 name: python-testing
 description: Adds or updates pytest coverage for a Python change by first discovering the repository's existing test layout and conventions, matching them rather than imposing a new structure, deciding whether the change requires a test at all, and running the suite in a bounded verify loop. Use when a Python change adds behavior, fixes a bug, changes a public interface, or touches security-relevant logic, and when deciding where a new test belongs in an unfamiliar repository.
+capabilities:
+  tools:
+    - Bash
+    - Edit
+    - Glob
+    - Grep
+    - Read
+    - Write
+  shell:
+    - pytest
+    - ruff
+    - tox
+    - ty
+    - uv
+  paths:
+    - "${CLAUDE_PLUGIN_ROOT}/instructions/"
+    - "the target repository working tree"
+  egress:
+    - target-repository-tooling
 ---
 
 # python-testing

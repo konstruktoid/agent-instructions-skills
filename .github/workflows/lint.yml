@@ -25,6 +25,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The capability report below compares this branch against the base commit, so
+          # the base commit has to be in the clone. Without history the script says it has
+          # no baseline and exits 0, which would read as a passing check that ran nothing.
+          fetch-depth: 0
       - name: Set up uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
@@ -41,6 +45,15 @@ jobs:
           version: latest-known
       - name: Check SKILL.md files
         run: uv run --frozen python scripts/check_skills.py
+      # Reports, and does not fail. scripts/check_capabilities.py carries the reason: the
+      # capability block and the body have the same author, so a contributor who adds a
+      # command and declares it passes anything that can be checked here. The output is a
+      # reviewer's attention list. BASE_SHA is empty on a push to main, where there is
+      # nothing to compare against and origin/main stands in.
+      - name: Report undeclared capabilities
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: uv run --frozen python scripts/check_capabilities.py --base "${BASE_SHA:-origin/main}"
 
   python:
     name: Python
@@ -64,6 +77,32 @@ jobs:
         run: uv run --frozen ruff format --check .
       - name: ty check
         run: uv run --frozen ty check .
+
+  evals:
+    name: Eval suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Full history rather than the default single commit. The staleness half of this
+          # check compares the commit a stamp recorded against the commits that have since
+          # touched the skill it measured, and scripts/check_evals.py degrades a failed git
+          # lookup to an empty string, which reads as "nothing changed". A shallow checkout
+          # would therefore report every suite as fresh without having compared anything.
+          fetch-depth: 0
+      # No uv setup: the script is standard library only, and it needs git and bash, which
+      # the runner image already provides. Not --strict, because staleness is a statement
+      # about when a measurement was last taken and a pull request that does not touch a
+      # skill cannot fix it; a structural error in a suite is the part that has to block.
+      # The structural checks are also the slot a grader-command check belongs in, which
+      # docs/controls.md records as still open.
+      - name: Check eval suites
+        run: python3 scripts/check_evals.py
 
   actions:
     name: Workflows
