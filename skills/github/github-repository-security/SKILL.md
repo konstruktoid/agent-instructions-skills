@@ -198,8 +198,12 @@ Never declare a configuration change done from the API response alone. Run, in t
    rather than the rules that were written:
 
    ```sh
-   gh ruleset check main --repo OWNER/REPO
+   gh ruleset check --default --repo OWNER/REPO
    ```
+
+   `--default` resolves the repository's default branch, which is what the rules were written
+   for. Naming a branch literally checks whatever branch was named, and reports nothing useful
+   for a repository whose default is not the one guessed.
 
 3. **Run an external baseline check** where the repository is reachable by one. OpenSSF Scorecard
    grades branch protection, code review, token permissions, pinned dependencies, dangerous

@@ -155,8 +155,14 @@ one project's layout.
   file rather than for the watcher:
 
   ```sh
-  setsid bash -c '<test entry point> > run.log 2>&1; echo $? > run.done' < /dev/null > /dev/null 2>&1 &
+  run_dir="$(mktemp -d)"
+  setsid bash -c "<test entry point> > \"${run_dir}/run.log\" 2>&1; echo \$? > \"${run_dir}/run.done\"" \
+    < /dev/null > /dev/null 2>&1 &
   ```
+
+  Poll `${run_dir}/run.done` and read `${run_dir}/run.log`. The directory has to come from
+  `mktemp -d` rather than from the working directory, because a run started from inside the
+  repository would otherwise write both files into the tree the same step checks for leftovers.
 
   The poller dying is not the run dying. When a watcher is killed, look for the still-running
   process and for the sentinel before relaunching anything. A blind relaunch spends the full cycle

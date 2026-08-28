@@ -179,12 +179,21 @@ event a later audit will look for. Run, in this order:
    the ones it misses, and report the misses by name:
 
    ```sh
-   comm -23 \
-     <(gh api --paginate orgs/ORG/repos --jq '.[] | select(.archived == false) | .name' | sort) \
-     <(gh api --paginate orgs/ORG/properties/values --jq '.[] |
-         select([.properties[] | select(.property_name == "data-classification")] | length > 0) |
-         .repository_name' | sort)
+   work_dir="$(mktemp -d)"
+   gh api --paginate orgs/ORG/repos --jq '.[] | select(.archived == false) | .name' |
+     sort > "${work_dir}/all"
+   gh api --paginate orgs/ORG/properties/values --jq '.[] |
+     select([.properties[] | select(.property_name == "data-classification")] | length > 0) |
+     .repository_name' |
+     sort > "${work_dir}/classified"
+   comm -23 "${work_dir}/all" "${work_dir}/classified"
    ```
+
+   Writing each list to a file first is what makes the result trustworthy. Run as process
+   substitutions, the two requests fail asynchronously and `comm` still exits `0`, so a failed
+   properties request reads exactly like an organization where nothing is classified, which is
+   the worst possible way to be wrong about coverage. Under `set -o pipefail`, a file that was
+   not written is an error the loop stops on rather than a coverage number.
 
 3. **Read what evaluate mode reported** before switching a ruleset to active, and name the rule
    that fires most. A rule firing constantly is a rule written against an assumption the fleet

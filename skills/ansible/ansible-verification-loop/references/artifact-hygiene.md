@@ -25,8 +25,11 @@ None of that appears in `git status`, and the build reports no warning.
 
 The relationship between the two lists is not equality:
 
-- Every `.gitignore` entry needs a `build_ignore` counterpart. It names local state, which belongs
-  in neither the repository nor the artifact.
+- Every `.gitignore` entry that is an exclusion pattern needs a `build_ignore` counterpart. It
+  names local state, which belongs in neither the repository nor the artifact. Comments and `!`
+  negations are the exception: neither exists in `build_ignore` syntax, so a comment is dropped
+  and a negation has to be resolved by narrowing the pattern it was re-including from, or by
+  leaving that pattern out.
 - `build_ignore` carries more than that. Tracked development files, such as `.github`,
   `ansible.cfg`, agent instructions and linter configuration, belong in the repository and are of
   no use to whoever installs the collection.

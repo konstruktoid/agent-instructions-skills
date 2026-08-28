@@ -68,9 +68,19 @@ properties at creation, use them; otherwise, run a scheduled check for unclassif
 
 ## Forking policy
 
-Forking a private repository moves the code into a namespace the organization's rulesets do not
-govern. Disable forking of private repositories by default, and allow it only where a named case
-needs it. A fork made for convenience is a copy that stays behind and keeps its access.
+Forking a private repository moves the code into a namespace most of the organization's rules do
+not reach. Which rules follow the fork is worth being exact about, because assuming the wrong one
+produces a wrong assessment in either direction:
+
+- Branch and tag rulesets are not inherited by a fork. A fork owned outside the organization is
+  governed by none of them.
+- Push rulesets on a private or internal repository apply to the whole fork network, and their
+  bypass grants are the root repository's, so a fork cannot widen them.
+- A fork owned by the organization is a repository in the organization, and organization rulesets
+  target it like any other.
+
+Disable forking of private repositories by default, and allow it only where a named case needs
+it. A fork made for convenience is a copy that stays behind and keeps its access.
 
 ## Actions policy
 
@@ -147,9 +157,11 @@ individual apps, rather than allowing every member to authorize whatever they si
   ```
 
   Only a GitHub App can call either endpoint. An owner's own credential, whether a personal
-  access token or an OAuth token, is refused, so both commands run as an installation holding
-  the organization permission for personal access tokens. An organization that has no such app
-  reviews these two lists in the settings interface, and the absence of an app is itself the
+  access token or an OAuth token, is refused, so both commands run as an installation. The two
+  endpoints need two different organization permissions, and an installation granted only the
+  first gets a `403` from the second: approved tokens need `Personal access tokens: read`, and
+  pending requests need `Personal access token requests: read`. An organization that has no such
+  app reviews these two lists in the settings interface, and the absence of an app is itself the
   finding: the token policy has no automated evidence behind it.
 
 ## Checklist
