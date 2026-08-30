@@ -45,6 +45,11 @@ jobs:
           version: latest-known
       - name: Check SKILL.md files
         run: uv run --frozen python scripts/check_skills.py
+      # It reads only the checkout, so it needs no uv and no history. It runs in this job
+      # rather than its own because the citations it checks are part of the same authoring
+      # rules, and a separate job would be a separate required status check to configure.
+      - name: Check line citations
+        run: python3 scripts/check_citations.py
       # Reports, and does not fail. scripts/check_capabilities.py carries the reason: the
       # capability block and the body have the same author, so a contributor who adds a
       # command and declares it passes anything that can be checked here. The output is a

@@ -10,6 +10,10 @@ model: inherit
 # needs nothing else. Add Grep and Glob when it must find the files itself. Add
 # Bash only to run a Markdown linter, and accept that it then executes commands.
 tools: Read, Edit
+# Left unset, and check_skills.py fails a template that sets it. `memory: project` would
+# let this agent carry a project's own style exceptions between runs, which is the closest
+# fit for memory in this library. It costs Write beside the line above, and under that
+# scope it commits model-authored text that every later run reads as system prompt.
 ---
 
 # prose-editor

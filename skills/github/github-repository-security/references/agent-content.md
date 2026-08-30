@@ -8,7 +8,7 @@ before it is trusted.
 ## Contents
 
 - Why this content is different
-- The five components that execute or steer
+- The six components that execute or steer
 - Repository controls for a repository that publishes agent content
 - Reviewing an instruction file for injection
 - Reviewing hooks, commands, and scripts
@@ -28,7 +28,7 @@ The consequence for repository configuration: the paths holding this content nee
 protection as build and release configuration, because a change to them changes what every
 consumer's agent does.
 
-## The five components that execute or steer
+## The six components that execute or steer
 
 | Component | What it can do | Review focus |
 |---|---|---|
@@ -37,6 +37,7 @@ consumer's agent does.
 | Slash commands | Trigger tool calls and file operations from a prompt | Whether the prompt widens scope beyond what the name implies |
 | MCP server configuration | Point at endpoints outside the repository's control | Which endpoint, what it receives, who controls it |
 | Skill and instruction files | Enter the model's context as authoritative text | Reach, egress, and priority language, described below |
+| Agent memory directories | Carry model-authored text into the system prompt of every later session that loads them | What the agent read before it wrote the file, and whether a reviewer sees the change |
 
 Skill and instruction files are the hardest case, because there is no automated defense at all and
 they read as documentation.
@@ -47,7 +48,12 @@ they read as documentation.
   approval required before merging. A repository whose content becomes another user's agent
   behavior has no trivial change.
 - Cover every agent-facing path in `CODEOWNERS`, alongside `.github/workflows/` and the packaging
-  manifest, so a change is reviewed by someone accountable for it.
+  manifest, so a change is reviewed by someone accountable for it. A committed agent memory
+  directory, `.claude/agent-memory/`, belongs on that list for a reason the others do not share:
+  its contents are written by a model rather than by a person, from whatever that session read,
+  and every later session loads them as system prompt. Review it as agent-facing content, or keep
+  it out of version control with the `local` scope, which writes to `.claude/agent-memory-local/`
+  instead.
 - Make `CODEOWNERS` own itself, as the last rule in the file, and assign it to a team that does
   not overlap with the owners of the paths above:
 

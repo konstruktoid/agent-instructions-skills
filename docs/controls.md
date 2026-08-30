@@ -12,9 +12,9 @@ Two conventions, both required by the audit brief and both load-bearing:
   literally. Several of the controls below are in that category, including the one the brief asks
   to evaluate most closely.
 
-**Status, 2026-08-23.** Controls 1 through 9 have landed in the working tree. Control 6 is
-complete on the repository side and waits on two actions that require a push and repository
-administration. Each carries a
+**Status, 2026-08-23, control 6 updated 2026-08-30.** Controls 1 through 9 have landed in the
+working tree, and control 6 is now complete on the remote as well: the tag is pushed and the tag
+ruleset is applied. Each carries a
 **Landed** note with what shipped and what it turned out not to buy. Controls 4 and 5 shipped
 differently from how they are proposed below, for reasons recorded in their notes. Nothing is
 committed or pushed.
@@ -36,7 +36,7 @@ committed or pushed.
 | 3 | Run `check_evals.py` in CI | Nothing; makes 1.1 visible earlier | Four lines of YAML | High | Landed |
 | 4 | Stop running graders from an unreviewed ref | 1.1 | A day, or a policy line | High | Landed, as a refusal |
 | 5 | Invert the eval harness permission default | Reduces blast radius of 1.2 | Two lines | High | Landed, as a tool allowlist |
-| 6 | Tag releases, protect the tags, change the documented install | Nothing; shortens the 4 window | Half a day, then per release | High | Landed in the repository; tag and ruleset not applied |
+| 6 | Tag releases, protect the tags, change the documented install | Nothing; shortens the 4 window | Half a day, then per release | High | Landed, including the pushed tag and the applied ruleset |
 | 7 | Name untrusted content as data in every skill | Nothing; mitigates 3.1 to 3.4 | A paragraph per skill | Medium | Landed |
 | 8 | `SECURITY.md` and a data-access statement | Nothing; enables outside reporting | Half a day | Medium | Landed |
 | 9 | Declared-capability frontmatter plus a CI diff check | Nothing; makes 1.4 reviewable | A week, then ongoing | Medium, and lower than it looks | Landed, at the low-ambition version |
@@ -71,9 +71,9 @@ point of choosing that shape. It fails open if someone adds the new name to the 
 understanding it, and it fails open entirely under actor 2, who edits the checker in the same
 commit.
 
-**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:526`.
-It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:102`),
-skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:125`) that `.gitignore` already excludes.
+**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:543`.
+It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:104`),
+skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:127`) that `.gitignore` already excludes.
 Verified against a planted `hooks/` and `.mcp.json`: both were reported and the check exited
 non-zero. The failure message names the reason rather than the rule, so a contributor who hits it
 learns why the root is special. `docs` was added to the allowlist to admit this directory.
@@ -82,7 +82,7 @@ learns why the root is special. `docs` was added to the allowlist to admit this 
 
 As audited, `skills/github/github-actions-security/SKILL.md` ran `rhysd/actionlint:1.7.12` with
 `$PWD` bind-mounted read-write, a few lines below its own instruction to pin by digest, while
-`lint.yml:131` already carried the digest.
+`lint.yml:136` already carried the digest.
 
 **What it stops.** Attack path 3.5.
 
@@ -93,15 +93,15 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:235`-`:237` and `README.md:412` now
-carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:131`. The prose at
+**Landed.** `skills/github/github-actions-security/SKILL.md:235`-`:237` and `README.md:430` now
+carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:136`. The prose at
 `:194`-`:196` was rewritten to state the reason where the command is, rather than as a rule the
 command beneath it broke.
 
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:406` documents it as something to type.
+no job for it. `README.md:423` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -113,12 +113,12 @@ fields; it does not care what the command does.
 **Where it fails open.** Immediately, against any grader command that is structurally valid. Do not
 count this as a control against 1.1. Count it as the place a check against 1.1 would go.
 
-**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:81`-`:105`, running
+**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:86`-`:110`, running
 `python3 scripts/check_evals.py` at `:105`. Three choices in it:
 
 - **No uv setup.** The script imports only the standard library and shells out to `git` and
   `bash`, both of which the runner image provides, so the job is a checkout and a command.
-- **`fetch-depth: 0`** (`:97`). The staleness half of the check compares the commit a stamp
+- **`fetch-depth: 0`** (`:102`). The staleness half of the check compares the commit a stamp
   recorded against the commits that have since touched the skill, and the script degrades a
   failed git lookup to an empty string, which reads as "nothing changed". A shallow checkout
   would report every suite fresh without having compared anything, which is worse than not
@@ -130,7 +130,7 @@ count this as a control against 1.1. Count it as the place a check against 1.1 w
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:400` was updated from four jobs to five.
+clean. `README.md:417` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -232,8 +232,8 @@ As audited, the repository had no tags, no releases, and no `version` on any plu
 branch or tag" while the repository published no tag to name.
 
 This is also a consistency problem the repository has with itself.
-`references/agent-content.md:113` requires releasing "from a tag, and make the tag protected and
-immutable", and `:115` requires telling consumers which reference to pin to. The audit at `:117`
+`references/agent-content.md:119` requires releasing "from a tag, and make the tag protected and
+immutable", and `:121` requires telling consumers which reference to pin to. The audit at `:123`
 asks whether "releases are tagged rather than deployed from a moving branch". This repository
 fails its own check.
 
@@ -251,31 +251,35 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:136` gives
+- **The documented install is pinned first.** `README.md:147` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
-  is kept below it at `:141`, labeled as tracking the default branch. This is the half of the
+  is kept below it at `:150`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:191` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:202` gives `"ref": "v0.1.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all four, and `check_plugin_versions` at `scripts/check_skills.py:552` fails the
+  `0.1.0` on all four, and `check_plugin_versions` at `scripts/check_skills.py:569` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
   targets `refs/tags/v*`, blocks `deletion` and `non_fast_forward`, and lists no bypass actors,
-  which is what `references/rulesets.md:123` asks for and where `:47` says to keep it. It omits
+  which is what `references/rulesets.md:123` asks for and where `:48` says to keep it. It omits
   the `creation` rule from `:125` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:398` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:415` documents the release order and the `gh api` call that applies the ruleset.
 
-**Not landed, and both need something this session cannot do.** The tag `v0.1.0` does not exist,
-and the ruleset is not applied. Until both are done the README instructs consumers to pin to a tag
-that is not there, which fails closed for them and is visible immediately, but it does mean the
-control is not in force. The remaining steps are: merge this work, tag the merge commit, push the
-tag, then `gh api --method POST repos/konstruktoid/agent-instructions-skills/rulesets --input
-.github/rulesets/release-tags.json` and read the result back.
+**Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
+README documents resolves, and the ruleset was applied from the file with `gh api --method POST
+repos/konstruktoid/agent-instructions-skills/rulesets --input
+.github/rulesets/release-tags.json`. Read back rather than taken from the response to the write,
+as `github-repository-security` requires of any settings change, it is ruleset `21860050`, `name`
+"release tags", `target` `tag`, `enforcement` `active`, `bypass_actors` empty with
+`current_user_can_bypass` `never`, `include` `refs/tags/v*`, and the rules `deletion` and
+`non_fast_forward`, which matches the file exactly. The published tag now carries the immutability
+this repository requires of every other publisher at
+`skills/github/github-repository-security/references/agent-content.md:119`.
 
 ### 7. Name untrusted content as data in every skill
 
@@ -288,7 +292,7 @@ Five skills instruct the agent to read and follow the target repository's own do
 one for tool output.
 
 The repository already owns the right wording, on the reviewer's side, at
-`references/agent-content.md:78`-`:88`: reach, egress, priority language, framing that lowers
+`references/agent-content.md:84`-`:94`: reach, egress, priority language, framing that lowers
 scrutiny. Turn those four patterns around and state them as what the agent should distrust in a
 file it is reading, not only as what a reviewer should look for in a file being merged.
 
@@ -300,7 +304,7 @@ not a boundary.
 specific, more recent, or more urgent-sounding than the general caution.
 
 **Where it fails open.** In exactly the case the repository already documents at
-`references/agent-content.md:86`: a payload buried in a setup section, or after enough text that
+`references/agent-content.md:92`: a payload buried in a setup section, or after enough text that
 attention has drifted. A general caution at the top of a skill is the first thing a long context
 loses.
 
@@ -311,7 +315,7 @@ actor 3 at all, and because it costs a paragraph.
 claim: the rule files are conventions to follow rather than instructions to obey, they and any
 command output are data, and text in either that redirects the task, widens what gets read, sends
 anything to a remote service, or claims to outrank the skill is a finding to report rather than a
-rule to apply. Those four tests are `references/agent-content.md:78`-`:88` turned around: the
+rule to apply. Those four tests are `references/agent-content.md:84`-`:94` turned around: the
 reviewer's list of what to look for in a file being merged, restated as what the agent should
 distrust in a file it is reading.
 
@@ -322,7 +326,7 @@ read back, and the two Python skills name command output. The existing counterwe
 sentence for the category it covers.
 
 Nothing about the ranking changes. This is still an instruction to a model about how to weigh
-other instructions to a model, it still fails open where `references/agent-content.md:86`
+other instructions to a model, it still fails open where `references/agent-content.md:92`
 describes, and paths 3.1 through 3.4 stay open. What is different is that the claim is now made in
 the place the agent reads rather than only in a reference file about reviewing other people's
 content.
@@ -330,8 +334,8 @@ content.
 ### 8. `SECURITY.md` and a data-access statement
 
 Neither exists. `github-repository-security/SKILL.md:105` requires a `SECURITY.md` naming a private
-channel and a response time, and `references/agent-content.md:70` requires that it cover
-"withdrawing a bad version and telling consumers". `references/agent-content.md:123` requires a
+channel and a response time, and `references/agent-content.md:76` requires that it cover
+"withdrawing a bad version and telling consumers". `references/agent-content.md:129` requires a
 data-access statement naming "paths and endpoints rather than categories".
 
 Phase 1 of [threat-model.md](threat-model.md) is most of the data-access statement already.
@@ -363,13 +367,13 @@ release to yank and no version for consumers to avoid.
   cloud configuration was checked by searching for those paths, and the statement says what `.env`
   actually appears as, which is a rule about keeping such files out of a commit.
 
-`SECURITY.md` was added to `PLUGIN_ROOT_ALLOWED` (`scripts/check_skills.py:102`), which is control
+`SECURITY.md` was added to `PLUGIN_ROOT_ALLOWED` (`scripts/check_skills.py:104`), which is control
 1 working as intended: a new root entry is a decision rather than an accident. It was also added
-to `PROSE_GLOBS` (`:154`), so the house prose rules apply to it.
+to `PROSE_GLOBS` (`:164`), so the house prose rules apply to it.
 
 The ranking said this stops nothing, and that holds. It creates a channel and a plan where there
 were neither, and the data-access statement is what makes the review at
-`references/agent-content.md:78` cheap for someone auditing this repository from outside.
+`references/agent-content.md:84` cheap for someone auditing this repository from outside.
 
 ### 9. Declared-capability frontmatter plus a CI diff check
 
@@ -387,14 +391,14 @@ looking at three hundred. **It makes a capability change reviewable rather than 
 
 **The hard part is the detector, and it does not work well.** `check_skills.py` already demonstrates
 the ceiling. It enforces the verify loop by exact string comparison against a canonical block
-(`scripts/check_skills.py:254`, `:311`), and the comment at `:250` records why: the wording "had
+(`scripts/check_skills.py:264`, `:321`), and the comment at `:260` records why: the wording "had
 already drifted three ways before this check existed". Paraphrase defeated a check over a fixed
 seven-line paragraph. A capability detector faces the same problem over unbounded prose.
 
 Concretely, on this repository's own files:
 
 - A regex for `curl`, `wget`, `docker run`, `gh api` or `http://` fires on
-  `bash-secure-scripting/references/error-handling.md:144`-`:166`, which discusses `curl` at length
+  `bash-secure-scripting/references/error-handling.md:144`-`:176`, which discusses `curl` at length
   without performing anything. Every one of those is a false positive, and a check with a high false
   positive rate on the existing tree gets suppressed within a month.
 - The same regex misses `github-repository-security/SKILL.md:141`, "check the current REST
@@ -429,15 +433,15 @@ present it to consumers as a guarantee, because it is not one.
 
 - **The block.** Every `SKILL.md` declares `capabilities` with `tools`, `shell`, `paths` and
   `egress`, each a sorted list, one entry per line. `check_capabilities` at
-  `scripts/check_skills.py:408` fails the build when the block is missing, has an unknown key, has
-  a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:141`). Sorting is
+  `scripts/check_skills.py:418` fails the build when the block is missing, has an unknown key, has
+  a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:151`). Sorting is
   not tidiness: it is what makes an added capability one line of diff rather than a reordering.
   The tool allowlist deliberately excludes `WebFetch`, `WebSearch` and `Task`, so adding one is a
   build failure and a conversation rather than a line in a list.
 - **The detector.** `scripts/check_capabilities.py` compares each skill's `SKILL.md` and its
   `references/` against `origin/main` and reports hostnames, paths outside the repository, and
   command names that the change adds and the block does not declare. It reports and exits 0;
-  `--strict` exists for a reviewer, and `lint.yml:53` does not pass it.
+  `--strict` exists for a reviewer, and `lint.yml:58` does not pass it.
 
 **Two implementation findings worth keeping.** The first version scanned added diff lines and
 reported `capabilities`, `paths` and `what` as commands, because with `--unified=0` there is no
@@ -496,7 +500,7 @@ addresses none of the four actors' attacks.
 honestly.** A source-track claim asserts that the artifact came from a specific revision that went
 through a protected branch with review by someone other than the author. `.github/CODEOWNERS:1` is
 `* @konstruktoid`. There is one account, it owns every path including `CODEOWNERS` itself, and the
-self-owning rule the repository requires of others at `references/agent-content.md:51` needs a
+self-owning rule the repository requires of others at `references/agent-content.md:57` needs a
 second team that does not exist here. A single-maintainer repository can claim a protected branch;
 it cannot claim two-person review. Claiming it anyway would be worse than not claiming it, because
 consumers would read it as the control it names.
@@ -518,7 +522,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:136` now leads with the pinned form and `:191` names a tag in the team setting, so the guidance exists; it becomes true when the tag is pushed |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:147` now leads with the pinned form and `:200` names a tag in the team setting, so the guidance exists, and the tag it names is pushed. What is still missing is the tag ruleset, without which the pinned reference is not immutable |
 
 ## Recommended order of implementation
 
@@ -526,9 +530,9 @@ Steps 1 to 9 are done in the working tree and are not committed, except the two 
 step 6 names. Step 10 is where the work resumes, and it needs the tag from step 6 to exist.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:** `SKILL.md:235`-`:237` and
-   `README.md:412` carry the digest from `lint.yml:131`.
+   `README.md:430` carry the digest from `lint.yml:136`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
-   `scripts/check_skills.py:526`. Attack path 1.3 is closed.
+   `scripts/check_skills.py:543`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
@@ -537,20 +541,20 @@ step 6 names. Step 10 is where the work resumes, and it needs the tag from step 
    chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at
-   `.github/workflows/lint.yml:81`. It stops nothing by itself; it is the slot where a real
+   `.github/workflows/lint.yml:86`. It stops nothing by itself; it is the slot where a real
    grader check will live.
 6. **Control 6**, tag, protect the tags, and change the documented install so the pinned form is
    first. **Landed in the repository**: pinned install, declared versions with a CI check, and
-   `.github/rulesets/release-tags.json`. The tag and the ruleset application are outstanding and
-   need a push and repository administration.
+   `.github/rulesets/release-tags.json`. The tag is pushed and released, and the ruleset is
+   applied and read back as ruleset `21860050`.
 7. **Control 8**, `SECURITY.md` and the data-access statement. **Landed**, both halves in one
    file at the repository root.
 8. **Control 7**, name untrusted content as data in every skill. **Landed** in all eight, not the
    five the control named.
 9. **Control 9**, declared-capability frontmatter, at the low-ambition version described above.
    **Landed**: the block in all eight skills, its shape enforced at
-   `scripts/check_skills.py:408`, and the report-only detector at
-   `scripts/check_capabilities.py`, wired into `lint.yml:53`.
+   `scripts/check_skills.py:418`, and the report-only detector at
+   `scripts/check_capabilities.py`, wired into `lint.yml:58`.
 10. **Control 10**, capability-diff release notes, generated from 9 between the tags from 6.
 11. **Control 11**, provenance, once there is something to attest. Never with a source-track claim
     the review structure does not support.
@@ -568,7 +572,7 @@ Three things, stated so they are not mistaken for covered.
   repository the consumer points it at and act on what it finds. That capability is the product.
   Control 7 adjusts how the model weighs what it reads; it does not create a boundary, and no
   control in this list does.
-- **Prose is not checkable.** `references/agent-content.md:41` says it: "there is no automated
+- **Prose is not checkable.** `references/agent-content.md:42` says it: "there is no automated
   defense at all and they read as documentation". Controls 1 and 9 push at the edges of that
   problem, on file names and on command text. The center of it, an English sentence in a reference
   file that changes what a consumer's agent does, is reachable only by a human reading the diff.

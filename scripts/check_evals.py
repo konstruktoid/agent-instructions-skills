@@ -16,9 +16,12 @@ For every evals/<skill>/ suite, the structural rules are:
   graded runs has a rendered `results/<stamp>.md` beside it. A measurement that was run and
   never reported is invisible to every reader of the repository.
 
-Two further checks are reported as staleness rather than as structural errors, because the
+Further findings are reported separately rather than as structural errors, because the
 fix for each is a paid re-run rather than an edit:
 
+- A skill under skills/ that no suite here measures at all. It is reported rather than
+  failed for the same reason as the rest: the structural rules above require a rendered
+  results file, so a suite cannot be authored complete without paying for a run first.
 - Every task the suite defines has been graded in at least one stamp.
 - The skill, its `tasks.json`, and its `assertions.json` are no newer than the latest
   rendered stamp. README.md states that editing any of them invalidates the stamp above it.
@@ -550,20 +553,30 @@ def main() -> int:
             print(f"{relative}: ok")
         stale_total += [f"{relative}: {finding}" for finding in stale]
 
-    for skill in sorted(set(skills) - {suite.name for suite in suites}):
-        print(f"{EVALS_DIR}/{skill}: no suite, so nothing measures this skill")
+    # A skill nothing measures is weaker evidence than a skill measured by a stale stamp, so
+    # it is reported on the same footing rather than a quieter one, and --strict fails on it.
+    # It is not a structural error because check_results requires a rendered results file,
+    # which only a paid run produces.
+    unmeasured = [
+        f"{EVALS_DIR}/{skill}: no suite, so nothing measures this skill"
+        for skill in sorted(set(skills) - {suite.name for suite in suites})
+    ]
+    for finding in unmeasured:
+        print(f"unmeasured: {finding}", file=sys.stderr)
 
     for finding in stale_total:
         print(f"stale: {finding}", file=sys.stderr)
 
-    if failed or (args.strict and stale_total):
+    counts = f"{len(unmeasured)} unmeasured skill(s), {len(stale_total)} staleness finding(s)"
+    if failed or (args.strict and (unmeasured or stale_total)):
+        strict_only = "; --strict fails on the findings above" if not failed else ""
         print(
-            f"\n{failed} of {len(suites)} suite(s) failed, {len(stale_total)} staleness finding(s)",
+            f"\n{failed} of {len(suites)} suite(s) failed, {counts}{strict_only}",
             file=sys.stderr,
         )
         return 1
 
-    print(f"\nall {len(suites)} suite(s) passed, {len(stale_total)} staleness finding(s)")
+    print(f"\nall {len(suites)} suite(s) passed, {counts}")
     return 0
 
 

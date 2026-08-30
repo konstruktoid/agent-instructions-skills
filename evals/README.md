@@ -5,6 +5,16 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
+## Current state, 2026-08-30
+
+Nothing measured here is current. `scripts/check_evals.py` reports every one of the six suites
+as older than the skill or the specification it measured, so the results files below describe
+the content as it stood at each stamp rather than as it stands now. Two skills have no suite at
+all, `github-repository-security` and `github-organization-governance`, so nothing measures
+either. Both states are reported by the checker and neither is answerable by an edit: each needs
+a paid re-run, and in the second case a run has to happen before the suite can even be complete,
+since a suite with no rendered results file is a structural error.
+
 ## Layout
 
 ```text
@@ -175,9 +185,12 @@ The last of those exists because a graded stamp with no results file is invisibl
 reader of the repository. `github-actions-security/results/raw/2026-07-28/` held five tasks at
 three runs per condition for three weeks before anything reported it.
 
-Three findings are reported separately, and none of them fails the run by default, because an
+Four findings are reported separately, and none of them fails the run by default, because an
 edit cannot fix any of them:
 
+- A skill under `skills/` with no directory here, so nothing measures it. It is reported rather
+  than failed because the structural rules above require a rendered results file, which means the
+  suite that would answer the finding cannot be authored complete before a run is paid for.
 - A task defined in `tasks.json` that no stamp has ever graded. The suite's coverage is then
   smaller than its task list, which the results file has no way to say.
 - A stamp older than the skill directory, `tasks.json`, or `assertions.json` it measured.

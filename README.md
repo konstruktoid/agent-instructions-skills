@@ -82,7 +82,7 @@ runs there. Copy one into the consuming project's `.claude/agents/` and edit it.
 it. Divergence between the copy and this library is the intended outcome, which is the opposite of
 the rule for `instructions/` and `skills/`.
 
-Two frontmatter fields must be set by whoever copies a template:
+Three frontmatter fields are left for whoever copies a template to decide:
 
 - `model:`. Every template ships `model: inherit`, so a fresh copy pins no model of its own and
   runs on whatever the main conversation uses. Pin a stronger model for review-heavy agents, or a
@@ -90,6 +90,15 @@ Two frontmatter fields must be set by whoever copies a template:
 - `tools:`. Every template ships the smallest allowlist its work needs. Widen or narrow it against
   what the project trusts the agent to do. Frontmatter comments in each template state what to
   consider changing and why.
+- `memory:`. No template ships it, so a fresh copy keeps nothing between runs. Setting it to
+  `user`, `project`, or `local` gives the agent a memory directory whose `MEMORY.md` is read into
+  its system prompt at startup and written to as it works. Read the caveat before setting it:
+  memory adds `Read`, `Write`, and `Edit` to the agent whatever `tools:` holds, so a review-only
+  copy that dropped `Edit` gets it back and a copy of `prose-editor` gains `Write`. Under
+  `project` scope the directory is committed, which puts model-authored text into the system
+  prompt of every later run for everyone working in that repository. `scripts/check_skills.py`
+  fails a template that ships the field, so the decision is made in the copy rather than
+  inherited from here.
 
 Each template is a thin wrapper. Its system prompt names the instructions document or skill that
 holds the substance and points at it by path, rather than restating it. What the agent file adds
@@ -102,6 +111,8 @@ Current templates:
 | `ansible-reviewer.md` | `skills/ansible/ansible-verification-loop` | Needs `Bash` for `ansible-lint` and the target repository's test entry point. Consider pinning a strong model. |
 | `python-security-reviewer.md` | `skills/python/python-secure-coding` | Needs `Bash` for `ruff` and `ty`. Consider pinning a strong model. |
 | `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
+| `workflow-security-reviewer.md` | `skills/github/github-actions-security` | Needs `Bash` for `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA. Consider pinning a strong model. |
+| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the five. Consider pinning a strong model. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
 auto-discovers an `agents/` directory at a plugin's root, and every plugin here is sourced
@@ -308,8 +319,11 @@ the outcome the mechanisms above exist to avoid.
   thin wrapper, naming the instructions document or skill that holds the substance and pointing at
   it by path rather than restating it. What belongs in the agent file is routing and policy:
   scope, and what the agent reports back to the main conversation.
-- Ship agent templates with neutral defaults, `model: inherit` and the smallest `tools:` allowlist
-  the work needs, so copying one pins no model on the consumer and grants no broad tool access.
+- Ship agent templates with neutral defaults: `model: inherit`, the smallest `tools:` allowlist
+  the work needs, and no `memory:` field, so copying one pins no model on the consumer, grants no
+  broad tool access, and carries nothing between runs. Memory stays out of the defaults because
+  enabling it grants `Read`, `Write`, and `Edit` beside the allowlist rather than within it, which
+  is a widening no reader of the `tools:` line would see.
   State in frontmatter comments what to consider changing and why, for example pinning a stronger
   model for a review-heavy agent, or adding `Bash` only because the verify loop needs it.
 - A template aimed at a cheaper model needs its verification spelled out rather than assumed. Keep
@@ -325,12 +339,15 @@ the outcome the mechanisms above exist to avoid.
 [Checks](#checks) confirm a skill is well formed; they cannot confirm it changes an agent's
 output, or that its `description` routes the right tasks to it. Two measurements cover that:
 
-- **Task evals.** Each skill has 4 to 7 multi-step task prompts in `tasks.json`, each with a
+- **Task evals.** A suite holds 4 to 7 multi-step task prompts in `tasks.json`, each with a
   fixture repository and a set of objective checks in `assertions.json` derived from that
   skill's own Verify and Verification checklist sections. Every task runs twice against an
   identical fixture copy, once with the skill available and once without. The only difference
   between the two runs is a single-skill plugin passed with `--plugin-dir`, so a delta is
-  attributable to the skill.
+  attributable to the skill. Six of the eight skills have a suite.
+  `github-repository-security` and `github-organization-governance` have none, because a task
+  for either acts on a live GitHub organization rather than on a fixture directory;
+  `scripts/check_evals.py` reports each of them as unmeasured.
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
 
@@ -405,6 +422,7 @@ its Markdown. Every check runs locally:
 uv run --frozen python scripts/check_skills.py         # authoring rules for every SKILL.md
 uv run --frozen python scripts/check_capabilities.py   # capabilities a change adds undeclared
 python3 scripts/check_evals.py                         # structure and coverage of every suite
+python3 scripts/check_citations.py                     # every `path:line` citation in the prose
 uv run --frozen ruff check .                           # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
@@ -422,10 +440,11 @@ fixture workflow plants the finding its eval measures.
 `scripts/check_skills.py` verifies, for each `skills/*/*/SKILL.md`, that the frontmatter parses as
 YAML, `name` matches the parent directory, `description` is non-empty, under 1,024 characters, and
 not written in first or second person, that the body is under 500 lines, and that the body carries
-the bounded verify loop in the shared wording described above. It applies the same
-frontmatter rules to each `agent-templates/*.md`, with `name` matching the file name, and adds the
-neutral defaults a template must ship with: `model` is `inherit` and `tools` is a non-empty
-allowlist. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must
+the bounded verify loop in the shared wording described above. It applies the same frontmatter rules
+to each `agent-templates/*.md`, with `name` matching the file name, and adds the neutral defaults a
+template must ship with: `model` is `inherit`, `tools` is a non-empty allowlist, and `memory` is
+absent, since a template that set it would grant `Read`, `Write`, and `Edit` past the allowlist
+beside it. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must
 hold a `SKILL.md`, and every skill in the repository must be listed by exactly one plugin. It fails
 if an `agents/` directory has appeared at the repository root, which would ship the agent templates
 as installable subagents. It verifies the cross-references this library maintains by hand: a
@@ -434,16 +453,15 @@ name a `skills/*/*/SKILL.md` that does not exist, and a skill that names an inst
 must be named back by it, which is the bidirectional rule stated above. It requires every
 `references/*.md` over 100 lines to carry a `## Contents` section ahead of every other section, and
 compares its entries against the headings that follow, so a list cannot drift into pointing at a
-section that has been renamed or removed. Last, it holds the prose
-this repository writes about itself, meaning `README.md`, `instructions/*.md`, `skills/**/*.md`,
-`agent-templates/*.md`, and the hand-written `evals/*/README.md`, to the em dash, arrow,
-inflated-vocabulary, and grammatical-person rules in
-`instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and table rows
-are exempt, because the rule allows those and a document has to be able to quote what it bans. The
-person check additionally exempts Markdown link text and double-quoted spans, which is where a
-cited title and a quoted example live. The word list carries only the entries with no technical
-meaning in this subject matter: `harness` and `elevate` stay legal, since "test harness" and
-"privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
+section that has been renamed or removed. Last, it holds the prose this repository writes about
+itself, meaning `README.md`, `instructions/*.md`, `skills/**/*.md`, `agent-templates/*.md`, and the
+hand-written `evals/*/README.md`, to the em dash, arrow, inflated-vocabulary, and grammatical-person
+rules in `instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and
+table rows are exempt, because the rule allows those and a document has to be able to quote what it
+bans. The person check additionally exempts Markdown link text and double-quoted spans, which is
+where a cited title and a quoted example live. The word list carries only the entries with no
+technical meaning in this subject matter: `harness` and `elevate` stay legal, since "test harness"
+and "privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
 `python3 scripts/check_skills.py` also works outside uv.
 
 `scripts/check_evals.py` verifies, for each `evals/<skill>/` suite, that `tasks.json`,
@@ -456,16 +474,33 @@ every `workspace_command` parses under `bash -n` and every regex compiles, that 
 invisible, which is how a five-task, three-run `github-actions-security` stamp sat unread in
 `results/raw/2026-07-28/`.
 
-Three further findings are reported separately and do not fail the run, because the fix for each
-is a paid re-run rather than an edit: a task no stamp has ever graded, a stamp older than the
-skill or the specification it measured, and a stamp that graded a modified working tree.
-`--strict` fails on those as well. Freshness compares the commit a stamp recorded in
-`source-revision.json` against the commit that last changed the skill or the specification, so a
-change made later on the day of the run is still seen; a stamp with no recorded revision falls
-back to comparing dates, and a stamp that graded a modified tree measured source held in no
-commit, which nothing can reproduce. The staleness check reads `git log`, so it reports nothing
-useful outside a checkout. Like `check_skills.py` it needs no third-party package, and the `evals`
-job runs it with `fetch-depth: 0` so the freshness comparison has history to read.
+Four further findings are reported separately and do not fail the run, because the fix for each is a
+paid re-run rather than an edit: a skill with no suite at all, a task no stamp has ever graded, a
+stamp older than the skill or the specification it measured, and a stamp that graded a modified
+working tree. `--strict` fails on those as well. The first is reported rather than failed for a
+reason worth stating: the structural rules require a rendered results file, so the suite that would
+answer the finding cannot be authored complete until a run has been paid for. Freshness compares the
+commit a stamp recorded in `source-revision.json` against the commit that last changed the skill or
+the specification, so a change made later on the day of the run is still seen; a stamp with no
+recorded revision falls back to comparing dates, and a stamp that graded a modified tree measured
+source held in no commit, which nothing can reproduce. The staleness check reads `git log`, so it
+reports nothing useful outside a checkout. Like `check_skills.py` it needs no third-party package,
+and the `evals` job runs it with `fetch-depth: 0` so the freshness comparison has history to read.
+
+`scripts/check_citations.py` reads the `path/to/file:123` citations this repository argues from,
+in `README.md`, `SECURITY.md`, `docs/*.md`, `instructions/*.md`, `skills/**/*.md`,
+`agent-templates/*.md` and the hand-written eval READMEs, and fails when one does not hold. A
+citation is evidence only while it resolves, and an edit anywhere above a cited line moves it
+without touching the document that cites it. It checks that the line number is inside the file,
+that the cited line is not blank, which is what a shifted number looks like most of the time,
+that a range such as `` `path:12`-`:15` `` ends after it starts, and, where the citing sentence
+quotes the source, that the quoted passage is near the line named. A
+cited path resolves as a repository path or as a unique path suffix among tracked files, since the
+documents abbreviate; eval fixtures are left out of that index, because a fixture ships its own
+`lint.yml` and would make every citation of the real one ambiguous. A bare continuation such as
+`` `:21` `` is not checked, because which file it belongs to is a question about the sentence
+rather than about the text, and the count of those is printed so the coverage is visible. It needs
+no third-party package.
 
 Every `SKILL.md` declares a `capabilities` block: the tools it uses, the commands it runs, the
 paths it touches, and the hosts it reaches. `check_skills.py` checks that block's shape and fails
@@ -497,7 +532,7 @@ installing these skills is the reader that statement is written for.
 ## Releases
 
 Consumers install from a tag, so a release is a tag rather than a branch state. The rule this
-repository publishes at `skills/github/github-repository-security/references/agent-content.md:113`
+repository publishes at `skills/github/github-repository-security/references/agent-content.md:119`
 applies to itself: release from a tag, and make the tag protected and immutable.
 
 A release is cut in this order:
