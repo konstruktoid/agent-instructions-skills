@@ -47,8 +47,10 @@ the response before enabling the scanner.
   ```
 
   `--jq` runs once per page, so an aggregate written that way counts each page separately and
-  reports a total for the first 30 alerts. `--slurp` collects the pages into one array instead,
-  and it cannot be combined with `--jq`, so the aggregation moves into a piped `jq`.
+  prints one partial result per page, each covering the 100 alerts of the `per_page=100` above,
+  or 30 if that parameter is dropped. `--slurp` collects the pages into one
+  array instead, and it cannot be combined with `--jq`, so the aggregation moves into a piped
+  `jq`.
 
 ## Dependency alerts and updates
 

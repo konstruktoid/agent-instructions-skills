@@ -8,3 +8,7 @@ node_modules/
 # file uncommittable from anywhere in the tree regardless of how it got there.
 **/.credentials.json
 .env
+
+# The `local` agent-memory scope moves model-authored notes here rather than making them
+# uncommittable, and the files are written without a person reading them first.
+/.claude/agent-memory-local/

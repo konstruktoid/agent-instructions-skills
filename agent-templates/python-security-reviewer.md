@@ -10,6 +10,11 @@ model: inherit
 # repository's package manager. Drop Edit for a review-only agent. Add WebFetch
 # only if advisory lookups are part of the work.
 tools: Read, Grep, Glob, Edit, Bash
+# Left unset, and check_skills.py fails a template that sets it. Setting `memory:` gives
+# this agent a directory it carries between runs, and grants Read, Write and Edit beside
+# the line above rather than within it, so the review-only variant suggested there stops
+# being reachable. A remembered verdict is also the opposite of what a security review
+# owes the code in front of it.
 # Uncomment when this repository installs the library as a plugin, to preload
 # the procedure instead of loading it on demand.
 # skills:

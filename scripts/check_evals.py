@@ -15,10 +15,16 @@ For every evals/<skill>/ suite, the structural rules are:
 - The suite has a README and at least one rendered results file, and every raw stamp holding
   graded runs has a rendered `results/<stamp>.md` beside it. A measurement that was run and
   never reported is invisible to every reader of the repository.
+- Every graded stamp dated on or after REVISION_REQUIRED_FROM records the revision it
+  measured. Stamps written before the field existed are grandfathered, since a stamp cannot
+  be given a provenance it never recorded.
 
-Two further checks are reported as staleness rather than as structural errors, because the
+Further findings are reported separately rather than as structural errors, because the
 fix for each is a paid re-run rather than an edit:
 
+- A skill under skills/ that no suite here measures at all. It is reported rather than
+  failed for the same reason as the rest: the structural rules above require a rendered
+  results file, so a suite cannot be authored complete without paying for a run first.
 - Every task the suite defines has been graded in at least one stamp.
 - The skill, its `tasks.json`, and its `assertions.json` are no newer than the latest
   rendered stamp. README.md states that editing any of them invalidates the stamp above it.
@@ -32,8 +38,8 @@ fix for each is a paid re-run rather than an edit:
 
 It reports on the checkout it lives in and can be run from anywhere:
 
-    python3 scripts/check_evals.py           # structural errors fail, staleness is reported
-    python3 scripts/check_evals.py --strict  # staleness fails as well
+    python3 scripts/check_evals.py           # structural errors fail, the rest is reported
+    python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
 
 Exits 0 when everything passes, 1 otherwise. It needs only the standard library.
 """
@@ -292,6 +298,14 @@ def rendered_stamps(suite: Path) -> list[str]:
     return sorted(path.stem for path in results.glob("*.md") if STAMP_NAME.match(path.stem))
 
 
+# The date-comparison fallback in check_freshness is strictly weaker than the revision
+# comparison beside it: it cannot see a change made later on the day of the run. Requiring the
+# field keeps the weaker signal from spreading to stamps written from here on. The cutoff is
+# the first stamp that recorded a revision, so every stamp that predates the field passes and
+# every stamp written after it does not.
+REVISION_REQUIRED_FROM = "2026-08-20"
+
+
 def check_results(suite: Path, errors: list[str]) -> None:
     """Check that the suite is documented and that every graded stamp was rendered."""
     if not (suite / "README.md").is_file():
@@ -305,10 +319,25 @@ def check_results(suite: Path, errors: list[str]) -> None:
     for stamp in sorted(path for path in raw.iterdir() if path.is_dir()):
         graded = (stamp / "task-outcomes.json").is_file()
         triggers = (stamp / "triggers" / "trigger-outcomes.json").is_file()
-        if (graded or triggers) and not (suite / "results" / f"{stamp.name}.md").is_file():
+        if not (graded or triggers):
+            continue
+        if not (suite / "results" / f"{stamp.name}.md").is_file():
             errors.append(
                 f"results/raw/{stamp.name}/: holds graded runs with no results/{stamp.name}.md; "
                 "run `run_eval.py report` so the measurement is readable"
+            )
+        # Only `run_eval.py tasks` writes the file, so a trigger-only stamp cannot carry one.
+        # Sliced rather than parsed, because a stamp carries an optional suffix after the
+        # date, as in `2026-08-20-repeat`, and only the date orders it against the cutoff.
+        if (
+            graded
+            and stamp.name[:10] >= REVISION_REQUIRED_FROM
+            and not (stamp / "source-revision.json").is_file()
+        ):
+            errors.append(
+                f"results/raw/{stamp.name}/: holds graded runs with no source-revision.json, so "
+                "its freshness can only be compared by date; re-run `run_eval.py` so the stamp "
+                "records the revision it measured"
             )
 
 
@@ -523,7 +552,7 @@ def main() -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="fail on staleness as well, not only on structural errors",
+        help="fail on unmeasured skills and staleness as well, not only on structural errors",
     )
     args = parser.parse_args()
 
@@ -550,20 +579,30 @@ def main() -> int:
             print(f"{relative}: ok")
         stale_total += [f"{relative}: {finding}" for finding in stale]
 
-    for skill in sorted(set(skills) - {suite.name for suite in suites}):
-        print(f"{EVALS_DIR}/{skill}: no suite, so nothing measures this skill")
+    # A skill nothing measures is weaker evidence than a skill measured by a stale stamp, so
+    # it is reported on the same footing rather than a quieter one, and --strict fails on it.
+    # It is not a structural error because check_results requires a rendered results file,
+    # which only a paid run produces.
+    unmeasured = [
+        f"{EVALS_DIR}/{skill}: no suite, so nothing measures this skill"
+        for skill in sorted(set(skills) - {suite.name for suite in suites})
+    ]
+    for finding in unmeasured:
+        print(f"unmeasured: {finding}", file=sys.stderr)
 
     for finding in stale_total:
         print(f"stale: {finding}", file=sys.stderr)
 
-    if failed or (args.strict and stale_total):
+    counts = f"{len(unmeasured)} unmeasured skill(s), {len(stale_total)} staleness finding(s)"
+    if failed or (args.strict and (unmeasured or stale_total)):
+        strict_only = "; --strict fails on the findings above" if not failed else ""
         print(
-            f"\n{failed} of {len(suites)} suite(s) failed, {len(stale_total)} staleness finding(s)",
+            f"\n{failed} of {len(suites)} suite(s) failed, {counts}{strict_only}",
             file=sys.stderr,
         )
         return 1
 
-    print(f"\nall {len(suites)} suite(s) passed, {len(stale_total)} staleness finding(s)")
+    print(f"\nall {len(suites)} suite(s) passed, {counts}")
     return 0
 
 

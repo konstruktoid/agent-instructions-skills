@@ -10,6 +10,10 @@ model: inherit
 # repository's own test entry point. Drop Edit for a review-only agent. Add
 # WebFetch only if the work needs module documentation the repository lacks.
 tools: Read, Grep, Glob, Edit, Bash
+# Left unset, and check_skills.py fails a template that sets it. Setting `memory:` gives
+# this agent a directory it carries between runs, and grants Read, Write and Edit beside
+# the line above rather than within it, so the review-only variant suggested there stops
+# being reachable. Weigh that against a skill whose verify loop asks for a fresh read.
 # Uncomment when this repository installs the library as a plugin, to preload
 # the procedure instead of loading it on demand.
 # skills:

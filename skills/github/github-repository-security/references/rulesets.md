@@ -141,11 +141,13 @@ required check that cannot run during an incident.
 
 ## Evaluate mode and rollout
 
-Evaluate mode requires GitHub Enterprise Cloud, or GitHub Enterprise Server after 3.10. On Free,
-Pro, and Team the enforcement status does not exist, so check the plan before planning a rollout
-around it. Where it is unavailable, run the first three stages below in active mode against a
-target narrow enough to absorb a mistake, and widen the targeting rather than changing the
-enforcement.
+Evaluate mode is not available everywhere, and which plans carry it has changed more than once.
+Check the capability against the target repository rather than inferring it from the plan name:
+write the ruleset with `"enforcement": "evaluate"` against a repository nobody depends on and
+read the stored value back. A rejected request or an enforcement that reads back as something
+else is the answer. Where it is unavailable, run the first three stages below in active mode
+against a target narrow enough to absorb a mistake, and widen the targeting rather than changing
+the enforcement.
 
 Enforcement that arrives without warning gets bypassed or reverted. Roll a new control out in
 four stages, and let the reported violations decide when to advance:

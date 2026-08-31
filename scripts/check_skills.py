@@ -22,7 +22,9 @@ instructions/written_language_instructions.md.
 
 For every agent-templates/<name>.md, the rules are the same frontmatter rules with
 `name` matching the file stem, plus the neutral defaults a template must ship with:
-`model: inherit` and an explicit `tools` allowlist. It also fails when an entry appears
+`model: inherit`, an explicit `tools` allowlist, and no `memory` field, since enabling
+memory grants Read, Write and Edit whatever that allowlist holds. It also fails when an entry
+appears
 at the repository root that is not on the packaging allowlist, because the marketplace
 manifest sources every plugin from the root and Claude Code auto-discovers `agents/`,
 `commands/`, `hooks/` and `.mcp.json` at a plugin root, installing what it finds into
@@ -127,6 +129,14 @@ PLUGIN_ROOT_IGNORED = frozenset({".git", ".ruff_cache", ".venv", "__pycache__", 
 # A template pins no model of its own: it ships the model that follows the main
 # conversation and leaves the choice to whoever copies it.
 NEUTRAL_MODEL = "inherit"
+
+# `memory:` is left to the copier for the same reason as the two fields above, and it decides
+# something they would not see in the frontmatter diff: a subagent with memory enabled is given
+# Read, Write and Edit so that it can maintain its own memory files, whatever `tools` allows.
+# A template that shipped the field would widen the allowlist that check_tools keeps narrow,
+# and under `project` scope it would also commit model-authored text that every later run reads
+# as part of its system prompt.
+MEMORY_FIELD = "memory"
 
 # The capability block every SKILL.md declares, and the only keys it may hold. The block is
 # checked for shape here and never for truth: the declaration and the body have the same
@@ -519,6 +529,13 @@ def check_agent_template(template_path: Path) -> list[str]:
         )
 
     check_tools(frontmatter.get("tools"), errors)
+
+    if MEMORY_FIELD in frontmatter:
+        errors.append(
+            f"'{MEMORY_FIELD}' is {frontmatter[MEMORY_FIELD]!r}; a template ships without it, "
+            "since enabling memory grants Read, Write and Edit whatever 'tools' allows and the "
+            "scope is the copier's decision"
+        )
 
     return errors
 
