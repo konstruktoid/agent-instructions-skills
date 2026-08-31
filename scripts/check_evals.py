@@ -15,6 +15,9 @@ For every evals/<skill>/ suite, the structural rules are:
 - The suite has a README and at least one rendered results file, and every raw stamp holding
   graded runs has a rendered `results/<stamp>.md` beside it. A measurement that was run and
   never reported is invisible to every reader of the repository.
+- Every graded stamp dated on or after REVISION_REQUIRED_FROM records the revision it
+  measured. Stamps written before the field existed are grandfathered, since a stamp cannot
+  be given a provenance it never recorded.
 
 Further findings are reported separately rather than as structural errors, because the
 fix for each is a paid re-run rather than an edit:
@@ -35,8 +38,8 @@ fix for each is a paid re-run rather than an edit:
 
 It reports on the checkout it lives in and can be run from anywhere:
 
-    python3 scripts/check_evals.py           # structural errors fail, staleness is reported
-    python3 scripts/check_evals.py --strict  # staleness fails as well
+    python3 scripts/check_evals.py           # structural errors fail, the rest is reported
+    python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
 
 Exits 0 when everything passes, 1 otherwise. It needs only the standard library.
 """
@@ -295,6 +298,14 @@ def rendered_stamps(suite: Path) -> list[str]:
     return sorted(path.stem for path in results.glob("*.md") if STAMP_NAME.match(path.stem))
 
 
+# The date-comparison fallback in check_freshness is strictly weaker than the revision
+# comparison beside it: it cannot see a change made later on the day of the run. Requiring the
+# field keeps the weaker signal from spreading to stamps written from here on. The cutoff is
+# the first stamp that recorded a revision, so every stamp that predates the field passes and
+# every stamp written after it does not.
+REVISION_REQUIRED_FROM = "2026-08-20"
+
+
 def check_results(suite: Path, errors: list[str]) -> None:
     """Check that the suite is documented and that every graded stamp was rendered."""
     if not (suite / "README.md").is_file():
@@ -308,10 +319,23 @@ def check_results(suite: Path, errors: list[str]) -> None:
     for stamp in sorted(path for path in raw.iterdir() if path.is_dir()):
         graded = (stamp / "task-outcomes.json").is_file()
         triggers = (stamp / "triggers" / "trigger-outcomes.json").is_file()
-        if (graded or triggers) and not (suite / "results" / f"{stamp.name}.md").is_file():
+        if not (graded or triggers):
+            continue
+        if not (suite / "results" / f"{stamp.name}.md").is_file():
             errors.append(
                 f"results/raw/{stamp.name}/: holds graded runs with no results/{stamp.name}.md; "
                 "run `run_eval.py report` so the measurement is readable"
+            )
+        # Sliced rather than parsed, because a stamp carries an optional suffix after the
+        # date, as in `2026-08-20-repeat`, and only the date orders it against the cutoff.
+        if (
+            stamp.name[:10] >= REVISION_REQUIRED_FROM
+            and not (stamp / "source-revision.json").is_file()
+        ):
+            errors.append(
+                f"results/raw/{stamp.name}/: holds graded runs with no source-revision.json, so "
+                "its freshness can only be compared by date; re-run `run_eval.py` so the stamp "
+                "records the revision it measured"
             )
 
 
@@ -526,7 +550,7 @@ def main() -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="fail on staleness as well, not only on structural errors",
+        help="fail on unmeasured skills and staleness as well, not only on structural errors",
     )
     args = parser.parse_args()
 

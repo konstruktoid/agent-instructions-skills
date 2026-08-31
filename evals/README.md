@@ -171,7 +171,7 @@ than half of its passes.
 
 ```sh
 python3 scripts/check_evals.py           # structural problems fail, staleness is reported
-python3 scripts/check_evals.py --strict  # staleness fails as well
+python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
 ```
 
 Structural checks cover what an edit can break: the three specification files parse and name

@@ -532,7 +532,7 @@ installing these skills is the reader that statement is written for.
 ## Releases
 
 Consumers install from a tag, so a release is a tag rather than a branch state. The rule this
-repository publishes at `skills/github/github-repository-security/references/agent-content.md:119`
+repository publishes at `skills/github/github-repository-security/references/agent-content.md:120`
 applies to itself: release from a tag, and make the tag protected and immutable.
 
 A release is cut in this order:

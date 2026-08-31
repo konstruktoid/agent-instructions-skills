@@ -258,9 +258,10 @@ Run, in this order:
    run passed and that no step logged a secret. A syntactically valid workflow that never ran is
    unverified.
 
-   `git push` and `gh workflow run` are the two steps here that leave the working copy. One
-   mutates a remote ref, the other spends the repository's credentials on a runner, and neither
-   is undone by discarding local changes. Ask before each of them and wait for the answer, unless
+   `git push` and `gh workflow run` are the two steps here that have effects outside the working
+   copy. One mutates a remote ref; the other triggers the workflow as it exists on the remote and
+   spends whatever credentials that workflow's configuration grants the runner. Neither is undone
+   by discarding local changes. Ask before each of them and wait for the answer, unless
    the host runtime already gates the command, in which case say which gate is relied on. Naming
    the branch and the workflow in the question is what makes the answer meaningful.
 

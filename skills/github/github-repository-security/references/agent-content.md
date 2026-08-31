@@ -53,7 +53,8 @@ they read as documentation.
   its contents are written by a model rather than by a person, from whatever that session read,
   and every later session loads them as system prompt. Review it as agent-facing content, or keep
   it out of version control with the `local` scope, which writes to `.claude/agent-memory-local/`
-  instead.
+  instead. That scope only moves the path, so pair it with a `.gitignore` entry for that directory
+  or the files stay as committable as before.
 - Make `CODEOWNERS` own itself, as the last rule in the file, and assign it to a team that does
   not overlap with the owners of the paths above:
 

@@ -5,13 +5,12 @@ path and line in this repository. Where a field could not be determined from the
 reads `UNKNOWN` rather than a guess.
 
 **Status, 2026-08-23, control 6 updated 2026-08-30.** Nine controls from
-[controls.md](controls.md) have since landed in the working tree: controls 1 through 9. Control 6
-is complete on the remote as well, with the tag pushed and the tag ruleset applied. The passages
-they change carry a
-**Landed** note stating the current behavior, and the finding each note answers is kept in the
-past tense rather than deleted,
-because the finding is what the note is evidence against. Every citation in this document points at
-the current file, so a line number inside a landed passage names the fix, not the code it replaced.
+[controls.md](controls.md) have since landed and are committed: controls 1 through 9. Control 6 is
+complete on the remote as well, with `v0.1.0` pushed and the tag ruleset applied. The passages they
+change carry a **Landed** note stating the current behavior, and the finding each note answers is
+kept in the past tense rather than deleted, because the finding is what the note is evidence
+against. Every citation in this document points at the current file, so a line number inside a
+landed passage names the fix, not the code it replaced.
 
 The repository is both a library of Claude Code skills and its own plugin marketplace. Two facts
 from Phase 1 shape everything in Phase 2, so they are stated first:
@@ -192,7 +191,7 @@ states they are templates, not installable agents.
 | `agent-templates/workflow-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:13`) | Yes, through Bash, for `actionlint` and `zizmor` (`:9`) | Yes, and the only template that states egress of its own, though not by hostname. `:9`-`:10` names `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA; `:62`-`:64` states what each reaches, the container run that mounts the tree, the package index `zizmor` resolves from, and the GitHub API, and requires the summary to say when a check ran without `GH_TOKEN` |
 | `agent-templates/bash-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:13`) | Yes, and wider than the others: `shellcheck`, `bash -n`, the repository's formatter, and the script under review itself (`:9`-`:12`), bounded at `:53`-`:57` to a disposable location with a report-instead-of-run rule for a destructive script | No host named in the file. Egress occurs indirectly through the script under review, which `:53` has this agent run: hosts UNKNOWN, determined by that script |
 
-All three set `model: inherit`, enforced at `scripts/check_skills.py:524`. The tools field is
+All five set `model: inherit`, enforced at `scripts/check_skills.py:524`. The tools field is
 enforced non-empty at `scripts/check_skills.py:390`.
 
 The tools column above states what the `tools:` line declares, which is the whole tool surface
@@ -358,7 +357,7 @@ directory or file at the plugin root and loads it.
 **Blast radius.** A hook runs shell on every consumer's machine with the consumer's permissions
 and without the consumer asking, which is the precise definition
 `references/agent-content.md:35` gives. An MCP definition adds a tool surface backed by a host the
-project does not control (`references/agent-content.md:112`). This is the keyv precedent's
+project does not control (`references/agent-content.md:113`). This is the keyv precedent's
 `.claude/settings.json` persistence move, reached through a normal pull request rather than
 through a compromised publish. The only control standing in the way was one human reading the diff.
 
@@ -384,7 +383,7 @@ documentation".
 **What happens.** A reference file is the better hiding place: it is loaded on demand rather than
 at session start, it runs to 250 lines, and it is where the commands already live. The four
 review patterns the repository publishes for other people's content, reach, egress, priority
-language, and framing that lowers scrutiny (`references/agent-content.md:84`-`:94`), are applied
+language, and framing that lowers scrutiny (`references/agent-content.md:85`-`:95`), are applied
 to consumers' repositories and to nothing in this one's CI.
 
 **Blast radius.** Every consumer's agent, at the next update, at whatever privilege the abused
@@ -413,7 +412,7 @@ distribution channel.
 #### 2.2 Review offers no resistance
 
 `.github/CODEOWNERS:1` is `* @konstruktoid`. A single account owns every path, including
-`CODEOWNERS` itself, so the self-owning rule `references/agent-content.md:57` requires of every
+`CODEOWNERS` itself, so the self-owning rule `references/agent-content.md:58` requires of every
 other repository cannot be satisfied here for lack of a second team. An attacker holding those
 credentials satisfies every review requirement the repository can express.
 
@@ -464,7 +463,7 @@ skills a token with repository or organization admin.
 
 **Blast radius.** The consumer's machine and the consumer's GitHub org, bounded only by what the
 consumer's session already permits. This is the same mechanism the repository documents at
-`references/agent-content.md:96`, where "files read from a project directory were fed into a
+`references/agent-content.md:97`, where "files read from a project directory were fed into a
 trusted channel". The repository describes the vulnerability from the reviewer's side and
 instructs the behavior from the victim's side.
 
@@ -472,7 +471,7 @@ instructs the behavior from the victim's side.
 conventions rather than instructions, that they and any command output are data, and that text in
 either which redirects the task, widens what gets read, sends anything to a remote service, or
 claims to outrank the skill is a finding to report. Those are
-`references/agent-content.md:84`-`:94` restated from the reading side. This changes how a model
+`references/agent-content.md:85`-`:95` restated from the reading side. This changes how a model
 weighs what it reads. It does not create a boundary, and this path stays open.
 
 **Partial mitigation, one skill only, as audited.** `ansible-verification-loop/SKILL.md:65`
@@ -571,7 +570,7 @@ unpinned form kept below and labeled as tracking the default branch (`:150`). Th
 `version`, and `scripts/check_skills.py:569` fails the build when one is missing, malformed, or
 disagrees with the others. `README.md:415` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
-`references/agent-content.md:119` and `references/rulesets.md:48` require.
+`references/agent-content.md:120` and `references/rulesets.md:48` require.
 
 **Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0` in
 `README.md:147` names a reference that resolves and that cannot be deleted or moved. Read back,
@@ -584,6 +583,6 @@ their next `/plugin update` with no version number to notice, no release note to
 diff between what they had and what they now run. The consumer's exposure window is one command,
 and the consumer has no way to shorten it because the repository publishes no fixed point to hold.
 
-The consumer-side audit the repository itself specifies at `references/agent-content.md:123`
+The consumer-side audit the repository itself specifies at `references/agent-content.md:124`
 asks whether "releases are tagged rather than deployed from a moving branch". Run against this
 repository today, that check fails.

@@ -12,12 +12,11 @@ Two conventions, both required by the audit brief and both load-bearing:
   literally. Several of the controls below are in that category, including the one the brief asks
   to evaluate most closely.
 
-**Status, 2026-08-23, control 6 updated 2026-08-30.** Controls 1 through 9 have landed in the
-working tree, and control 6 is now complete on the remote as well: the tag is pushed and the tag
-ruleset is applied. Each carries a
-**Landed** note with what shipped and what it turned out not to buy. Controls 4 and 5 shipped
-differently from how they are proposed below, for reasons recorded in their notes. Nothing is
-committed or pushed.
+**Status, 2026-08-23, control 6 updated 2026-08-30.** Controls 1 through 9 have landed and are
+committed, and control 6 is now complete on the remote as well: `v0.1.0` is pushed and the tag
+ruleset is applied. Each carries a **Landed** note with what shipped and what it turned out not to
+buy. Controls 4 and 5 shipped differently from how they are proposed below, for reasons recorded in
+their notes.
 
 ## Contents
 
@@ -232,7 +231,7 @@ As audited, the repository had no tags, no releases, and no `version` on any plu
 branch or tag" while the repository published no tag to name.
 
 This is also a consistency problem the repository has with itself.
-`references/agent-content.md:119` requires releasing "from a tag, and make the tag protected and
+`references/agent-content.md:120` requires releasing "from a tag, and make the tag protected and
 immutable", and `:121` requires telling consumers which reference to pin to. The audit at `:123`
 asks whether "releases are tagged rather than deployed from a moving branch". This repository
 fails its own check.
@@ -279,7 +278,7 @@ as `github-repository-security` requires of any settings change, it is ruleset `
 `current_user_can_bypass` `never`, `include` `refs/tags/v*`, and the rules `deletion` and
 `non_fast_forward`, which matches the file exactly. The published tag now carries the immutability
 this repository requires of every other publisher at
-`skills/github/github-repository-security/references/agent-content.md:119`.
+`skills/github/github-repository-security/references/agent-content.md:120`.
 
 ### 7. Name untrusted content as data in every skill
 
@@ -292,7 +291,7 @@ Five skills instruct the agent to read and follow the target repository's own do
 one for tool output.
 
 The repository already owns the right wording, on the reviewer's side, at
-`references/agent-content.md:84`-`:94`: reach, egress, priority language, framing that lowers
+`references/agent-content.md:85`-`:95`: reach, egress, priority language, framing that lowers
 scrutiny. Turn those four patterns around and state them as what the agent should distrust in a
 file it is reading, not only as what a reviewer should look for in a file being merged.
 
@@ -304,7 +303,7 @@ not a boundary.
 specific, more recent, or more urgent-sounding than the general caution.
 
 **Where it fails open.** In exactly the case the repository already documents at
-`references/agent-content.md:92`: a payload buried in a setup section, or after enough text that
+`references/agent-content.md:93`: a payload buried in a setup section, or after enough text that
 attention has drifted. A general caution at the top of a skill is the first thing a long context
 loses.
 
@@ -315,7 +314,7 @@ actor 3 at all, and because it costs a paragraph.
 claim: the rule files are conventions to follow rather than instructions to obey, they and any
 command output are data, and text in either that redirects the task, widens what gets read, sends
 anything to a remote service, or claims to outrank the skill is a finding to report rather than a
-rule to apply. Those four tests are `references/agent-content.md:84`-`:94` turned around: the
+rule to apply. Those four tests are `references/agent-content.md:85`-`:95` turned around: the
 reviewer's list of what to look for in a file being merged, restated as what the agent should
 distrust in a file it is reading.
 
@@ -326,7 +325,7 @@ read back, and the two Python skills name command output. The existing counterwe
 sentence for the category it covers.
 
 Nothing about the ranking changes. This is still an instruction to a model about how to weigh
-other instructions to a model, it still fails open where `references/agent-content.md:92`
+other instructions to a model, it still fails open where `references/agent-content.md:93`
 describes, and paths 3.1 through 3.4 stay open. What is different is that the claim is now made in
 the place the agent reads rather than only in a reference file about reviewing other people's
 content.
@@ -334,8 +333,8 @@ content.
 ### 8. `SECURITY.md` and a data-access statement
 
 Neither exists. `github-repository-security/SKILL.md:105` requires a `SECURITY.md` naming a private
-channel and a response time, and `references/agent-content.md:76` requires that it cover
-"withdrawing a bad version and telling consumers". `references/agent-content.md:129` requires a
+channel and a response time, and `references/agent-content.md:77` requires that it cover
+"withdrawing a bad version and telling consumers". `references/agent-content.md:130` requires a
 data-access statement naming "paths and endpoints rather than categories".
 
 Phase 1 of [threat-model.md](threat-model.md) is most of the data-access statement already.
@@ -373,7 +372,7 @@ to `PROSE_GLOBS` (`:164`), so the house prose rules apply to it.
 
 The ranking said this stops nothing, and that holds. It creates a channel and a plan where there
 were neither, and the data-access statement is what makes the review at
-`references/agent-content.md:84` cheap for someone auditing this repository from outside.
+`references/agent-content.md:85` cheap for someone auditing this repository from outside.
 
 ### 9. Declared-capability frontmatter plus a CI diff check
 
@@ -500,7 +499,7 @@ addresses none of the four actors' attacks.
 honestly.** A source-track claim asserts that the artifact came from a specific revision that went
 through a protected branch with review by someone other than the author. `.github/CODEOWNERS:1` is
 `* @konstruktoid`. There is one account, it owns every path including `CODEOWNERS` itself, and the
-self-owning rule the repository requires of others at `references/agent-content.md:57` needs a
+self-owning rule the repository requires of others at `references/agent-content.md:58` needs a
 second team that does not exist here. A single-maintainer repository can claim a protected branch;
 it cannot claim two-person review. Claiming it anyway would be worse than not claiming it, because
 consumers would read it as the control it names.
@@ -526,8 +525,8 @@ Collected, so the answers are in one place.
 
 ## Recommended order of implementation
 
-Steps 1 to 9 are done in the working tree and are not committed, except the two remote actions
-step 6 names. Step 10 is where the work resumes, and it needs the tag from step 6 to exist.
+Steps 1 to 9 are done and committed, and the two remote actions step 6 names are applied. Step 10
+is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:** `SKILL.md:235`-`:237` and
    `README.md:430` carry the digest from `lint.yml:136`.

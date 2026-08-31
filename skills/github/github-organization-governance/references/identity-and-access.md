@@ -43,7 +43,8 @@ for anyone who can change a control, since the attacks that matter defeat one-ti
 ## Single sign-on
 
 Enforcing single sign-on puts authentication under the identity provider, so a suspended employee
-can no longer sign in. It does not remove them: the organization membership, their personal access
+can no longer authenticate to the organization through it. It does not touch their GitHub account,
+and it does not remove them: the organization membership, their personal access
 tokens and their SSH and deploy keys survive the suspension, and revoking those stays an explicit
 offboarding action unless SCIM is provisioning the organization, which is the piece that turns a
 directory removal into a membership removal. Two details decide whether the enforcement holds:

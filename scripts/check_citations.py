@@ -135,6 +135,17 @@ def check_citation(cited: str, number: int, target: Path) -> str | None:
     return None
 
 
+def check_range_end(cited: str, number: int, end: int, target: Path) -> str | None:
+    """Return the failure a range's endpoint carries, None when the file reaches that far."""
+    lines = target.read_text(encoding="utf-8").splitlines()
+    if end > len(lines):
+        return (
+            f"{cited}:{number} opens a range ending at :{end}, past the end of the file, "
+            f"which has {len(lines)} lines"
+        )
+    return None
+
+
 def check_quote(cited: str, number: int, target: Path, quote: str) -> str | None:
     """Return the failure a quoted citation carries, None when the quote is where it says."""
     lines = target.read_text(encoding="utf-8").splitlines()
@@ -155,14 +166,17 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
         cited, number = match.group(1), int(match.group(2))
         line = text.count("\n", 0, match.start()) + 1
 
-        # Checked before resolution, since it holds whatever file the range names.
+        # Ordering holds whatever file the range names, so it is checked before resolution.
         end = RANGE_END.match(text[match.end() :])
-        if end is not None and int(end.group(1)) <= number:
+        end_line = int(end.group(1)) if end is not None else None
+        if end_line is not None:
             tally["ranges"] += 1
+        if end_line is not None and end_line <= number:
             failures.append(
                 f"{doc.relative_to(REPO_ROOT)}:{line}: {cited}:{number} opens a range ending at "
-                f":{end.group(1)}, which is not after it"
+                f":{end_line}, which is not after it"
             )
+            end_line = None
 
         matches = candidates(cited, tracked)
         if len(matches) != 1:
@@ -170,6 +184,8 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
             continue
         target = REPO_ROOT / matches[0]
         failure = check_citation(cited, number, target)
+        if failure is None and end_line is not None:
+            failure = check_range_end(cited, number, end_line, target)
         if failure is None:
             tally["checked"] += 1
             quote = quote_after(text, match.end())

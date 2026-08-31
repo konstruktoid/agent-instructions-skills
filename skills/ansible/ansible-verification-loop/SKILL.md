@@ -155,7 +155,7 @@ one project's layout.
   file rather than for the watcher:
 
   ```sh
-  run_dir="$(mktemp -d)"
+  run_dir="$(mktemp -d -t ansible-verify-XXXXXXXX)"
   setsid bash -c "<test entry point> > \"${run_dir}/run.log\" 2>&1; echo \$? > \"${run_dir}/run.done\"" \
     < /dev/null > /dev/null 2>&1 &
   ```
@@ -165,7 +165,10 @@ one project's layout.
   repository would otherwise write both files into the tree the same step checks for leftovers.
 
   The poller dying is not the run dying. When a watcher is killed, look for the still-running
-  process and for the sentinel before relaunching anything. A blind relaunch spends the full cycle
+  process and for the sentinel before relaunching anything. The name template is what makes that
+  possible after `${run_dir}` is lost with the shell that held it: a replacement watcher finds the
+  run by globbing `ansible-verify-*` under the temporary directory, and takes the newest match
+  with no `run.done` in it as a run still going. A blind relaunch spends the full cycle
   again and risks two runs racing on the same containers or VMs. This decides whether the loop's
   attempt budget is spent on real findings or on lost runs. Keep the log and sentinel out of the
   repository, and remember the log carries the machine detail described in step 9.
