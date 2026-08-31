@@ -29,7 +29,7 @@
       {
         "id": "existing-convention-followed",
         "kind": "workspace_command",
-        "command": "ls test/test_*.sh > /dev/null 2>&1 && grep -rq 'helpers.sh' test/",
+        "command": "for f in $(git ls-files --others --exclude-standard -- test); do case \"$f\" in test/test_*.sh) ;; *) exit 1 ;; esac; done; { git diff \"$EVAL_BASE_SHA\" -- test; for f in $(git ls-files --others --exclude-standard -- test); do sed 's/^/+/' \"$f\"; done; } | grep -qE '^[+].*helpers\\.sh'",
         "source": "SKILL.md Steps: write the test in the discovered style"
       },
       {
@@ -47,7 +47,7 @@
       {
         "id": "asserts-exit-status",
         "kind": "workspace_command",
-        "command": "grep -rqE 'assert_status|[$][?]|status' test/",
+        "command": "{ git diff \"$EVAL_BASE_SHA\" -- test; for f in $(git ls-files --others --exclude-standard -- test); do sed 's/^/+/' \"$f\"; done; } | grep -qE '^[+].*(assert_status|[$][?])'",
         "source": "SKILL.md: assert the status, not only the output"
       },
       {

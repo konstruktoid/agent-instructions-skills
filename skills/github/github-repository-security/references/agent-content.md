@@ -37,7 +37,7 @@ consumer's agent does.
 | Slash commands | Trigger tool calls and file operations from a prompt | Whether the prompt widens scope beyond what the name implies |
 | MCP server configuration | Point at endpoints outside the repository's control | Which endpoint, what it receives, who controls it |
 | Skill and instruction files | Enter the model's context as authoritative text | Reach, egress, and priority language, described below |
-| Agent memory directories | Carry model-authored text into the system prompt of every later session that loads them | What the agent read before it wrote the file, and whether a reviewer sees the change |
+| Agent memory directories | Carry model-authored text into every later session with auto memory enabled, the start of the index as system prompt and the rest on demand | What the agent read before it wrote the file, and whether a reviewer sees the change |
 
 Skill and instruction files are the hardest case, because there is no automated defense at all and
 they read as documentation.
@@ -51,7 +51,8 @@ they read as documentation.
   manifest, so a change is reviewed by someone accountable for it. A committed agent memory
   directory, `.claude/agent-memory/`, belongs on that list for a reason the others do not share:
   its contents are written by a model rather than by a person, from whatever that session read,
-  and every later session loads them as system prompt. Review it as agent-facing content, or keep
+  and every later session with auto memory enabled loads the first 200 lines or 25 KB of its
+  `MEMORY.md` as system prompt and the rest on demand. Review it as agent-facing content, or keep
   it out of version control with the `local` scope, which writes to `.claude/agent-memory-local/`
   instead. That scope only moves the path, so pair it with a `.gitignore` entry for that directory
   or the files stay as committable as before.

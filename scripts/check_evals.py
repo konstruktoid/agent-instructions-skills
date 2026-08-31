@@ -326,10 +326,12 @@ def check_results(suite: Path, errors: list[str]) -> None:
                 f"results/raw/{stamp.name}/: holds graded runs with no results/{stamp.name}.md; "
                 "run `run_eval.py report` so the measurement is readable"
             )
+        # Only `run_eval.py tasks` writes the file, so a trigger-only stamp cannot carry one.
         # Sliced rather than parsed, because a stamp carries an optional suffix after the
         # date, as in `2026-08-20-repeat`, and only the date orders it against the cutoff.
         if (
-            stamp.name[:10] >= REVISION_REQUIRED_FROM
+            graded
+            and stamp.name[:10] >= REVISION_REQUIRED_FROM
             and not (stamp / "source-revision.json").is_file()
         ):
             errors.append(

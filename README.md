@@ -423,6 +423,7 @@ uv run --frozen python scripts/check_skills.py         # authoring rules for eve
 uv run --frozen python scripts/check_capabilities.py   # capabilities a change adds undeclared
 python3 scripts/check_evals.py                         # structure and coverage of every suite
 python3 scripts/check_citations.py                     # every `path:line` citation in the prose
+python3 scripts/check_citations.py --renumber          # rewrite the ones an edit moved
 uv run --frozen ruff check .                           # the repository's own Python
 uv run --frozen ruff format --check .
 uv run --frozen ty check .
@@ -502,6 +503,14 @@ documents abbreviate; eval fixtures are left out of that index, because a fixtur
 rather than about the text, and the count of those is printed so the coverage is visible. It needs
 no third-party package.
 
+Repairing a moved citation is mechanical, so `--renumber` does it: the script diffs each cited
+file against `HEAD`, maps the old line numbers to the new ones, and rewrites the citations that
+moved, printing each one. It refuses to run when a citing document itself has uncommitted changes,
+because the mapping runs from `HEAD` and a number already corrected by hand reads the same as one
+that never moved, so rewriting it would shift it twice. Commit the prose first, or finish the
+remaining citations by hand. Where a citation quotes its source, a failure names the line the
+quoted passage is actually on, which is the correction rather than a report of the drift.
+
 Every `SKILL.md` declares a `capabilities` block: the tools it uses, the commands it runs, the
 paths it touches, and the hosts it reaches. `check_skills.py` checks that block's shape and fails
 without it. `check_capabilities.py` compares a branch against `origin/main` and prints what the
@@ -532,7 +541,7 @@ installing these skills is the reader that statement is written for.
 ## Releases
 
 Consumers install from a tag, so a release is a tag rather than a branch state. The rule this
-repository publishes at `skills/github/github-repository-security/references/agent-content.md:120`
+repository publishes at `skills/github/github-repository-security/references/agent-content.md:121`
 applies to itself: release from a tag, and make the tag protected and immutable.
 
 A release is cut in this order:

@@ -357,7 +357,7 @@ directory or file at the plugin root and loads it.
 **Blast radius.** A hook runs shell on every consumer's machine with the consumer's permissions
 and without the consumer asking, which is the precise definition
 `references/agent-content.md:35` gives. An MCP definition adds a tool surface backed by a host the
-project does not control (`references/agent-content.md:113`). This is the keyv precedent's
+project does not control (`references/agent-content.md:114`). This is the keyv precedent's
 `.claude/settings.json` persistence move, reached through a normal pull request rather than
 through a compromised publish. The only control standing in the way was one human reading the diff.
 
@@ -383,7 +383,7 @@ documentation".
 **What happens.** A reference file is the better hiding place: it is loaded on demand rather than
 at session start, it runs to 250 lines, and it is where the commands already live. The four
 review patterns the repository publishes for other people's content, reach, egress, priority
-language, and framing that lowers scrutiny (`references/agent-content.md:85`-`:95`), are applied
+language, and framing that lowers scrutiny (`references/agent-content.md:86`-`:96`), are applied
 to consumers' repositories and to nothing in this one's CI.
 
 **Blast radius.** Every consumer's agent, at the next update, at whatever privilege the abused
@@ -412,7 +412,7 @@ distribution channel.
 #### 2.2 Review offers no resistance
 
 `.github/CODEOWNERS:1` is `* @konstruktoid`. A single account owns every path, including
-`CODEOWNERS` itself, so the self-owning rule `references/agent-content.md:58` requires of every
+`CODEOWNERS` itself, so the self-owning rule `references/agent-content.md:59` requires of every
 other repository cannot be satisfied here for lack of a second team. An attacker holding those
 credentials satisfies every review requirement the repository can express.
 
@@ -463,7 +463,7 @@ skills a token with repository or organization admin.
 
 **Blast radius.** The consumer's machine and the consumer's GitHub org, bounded only by what the
 consumer's session already permits. This is the same mechanism the repository documents at
-`references/agent-content.md:97`, where "files read from a project directory were fed into a
+`references/agent-content.md:98`, where "files read from a project directory were fed into a
 trusted channel". The repository describes the vulnerability from the reviewer's side and
 instructs the behavior from the victim's side.
 
@@ -471,7 +471,7 @@ instructs the behavior from the victim's side.
 conventions rather than instructions, that they and any command output are data, and that text in
 either which redirects the task, widens what gets read, sends anything to a remote service, or
 claims to outrank the skill is a finding to report. Those are
-`references/agent-content.md:85`-`:95` restated from the reading side. This changes how a model
+`references/agent-content.md:86`-`:96` restated from the reading side. This changes how a model
 weighs what it reads. It does not create a boundary, and this path stays open.
 
 **Partial mitigation, one skill only, as audited.** `ansible-verification-loop/SKILL.md:65`
@@ -545,7 +545,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:235`-`:237` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:136`, and `README.md:430` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:136`, and `README.md:431` was changed
 with it. The surrounding text at `:194`-`:196` states the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
 "zizmor@1.29.0"` at `:254`, which still resolves a package name from an index at run time: a
@@ -566,11 +566,11 @@ and for non-plugin setups rather than as the way to obtain skills.
 
 **Landed on the repository side.** `README.md:147` now gives the pinned form first, with the
 unpinned form kept below and labeled as tracking the default branch (`:150`). The team setting at
-`:200` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
+`:202` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:569` fails the build when one is missing, malformed, or
 disagrees with the others. `README.md:415` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
-`references/agent-content.md:120` and `references/rulesets.md:48` require.
+`references/agent-content.md:121` and `references/rulesets.md:48` require.
 
 **Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0` in
 `README.md:147` names a reference that resolves and that cannot be deleted or moved. Read back,
@@ -578,11 +578,12 @@ the ruleset blocks `deletion` and `non_fast_forward` on `refs/tags/v*` with no b
 path is closed for a consumer who pins. It stays open for one who installs the unpinned
 marketplace form, since that still tracks the default branch.
 
-**Blast radius.** Whatever paths 1.3, 1.4, 2.3, or 3.5 planted, delivered to every consumer at
-their next `/plugin update` with no version number to notice, no release note to read, and no
-diff between what they had and what they now run. The consumer's exposure window is one command,
-and the consumer has no way to shorten it because the repository publishes no fixed point to hold.
+**Blast radius.** For a consumer on the unpinned form, whatever paths 1.3, 1.4, 2.3, or 3.5
+planted, delivered at their next `/plugin update` with no version number to notice, no release
+note to read, and no diff between what they had and what they now run. That exposure window is one
+command, and the consumer closes it by pinning to `v0.1.0`, which the tag ruleset holds immutable.
+A consumer who is already pinned takes nothing from these paths until they move the pin.
 
-The consumer-side audit the repository itself specifies at `references/agent-content.md:124`
+The consumer-side audit the repository itself specifies at `references/agent-content.md:125`
 asks whether "releases are tagged rather than deployed from a moving branch". Run against this
-repository today, that check fails.
+repository today, that check passes, and what is left is the consumer who never pins.

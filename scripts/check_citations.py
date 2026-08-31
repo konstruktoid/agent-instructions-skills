@@ -23,16 +23,24 @@ tracked file, such as a bare `SKILL.md`, names no single target. And a citation 
 wrong non-blank line with no quote beside it carries nothing that says where it was meant to
 point. The first two are counted in the summary rather than passed over in silence.
 
+An edit that moves a cited line is mechanical to repair, so `--renumber` repairs it: it reads
+the working tree against `HEAD`, maps every cited target's old line numbers to its new ones, and
+rewrites the citations that moved. It refuses to run while a citing document has uncommitted
+changes of its own, since the mapping runs from `HEAD` and a number already corrected by hand
+reads the same as one that never moved, so rewriting it would shift it twice.
+
 Run it from anywhere; it reports on the checkout it lives in and needs only the standard
 library:
 
     python3 scripts/check_citations.py
+    python3 scripts/check_citations.py --renumber
 
 Exits 0 when every checked citation holds, 1 otherwise.
 """
 
 from __future__ import annotations
 
+import argparse
 import io
 import re
 import shutil
@@ -79,6 +87,9 @@ QUOTE_MUST_START_WITHIN = 120
 # A citation names where a passage starts, and a wrapped passage runs past it.
 WINDOW_BEFORE = 2
 WINDOW_AFTER = 8
+
+# `git diff -U0` emits only headers and changed lines, so the headers alone carry the mapping.
+HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
 def collapse(text: str) -> str:
@@ -146,6 +157,33 @@ def check_range_end(cited: str, number: int, end: int, target: Path) -> str | No
     return None
 
 
+def locate_quote(lines: list[str], quote: str) -> int | None:
+    """Return the line a quoted passage starts on, None when the file holds it zero or twice.
+
+    Blank lines are dropped and the rest joined by a single space, which is what `check_quote`
+    compares against, so a passage found here would satisfy the citation that named its line.
+    """
+    starts: list[tuple[int, int]] = []
+    parts: list[str] = []
+    position = 0
+    for number, line in enumerate(lines, start=1):
+        collapsed = collapse(line)
+        if not collapsed:
+            continue
+        if parts:
+            position += 1
+        starts.append((position, number))
+        parts.append(collapsed)
+        position += len(collapsed)
+
+    body = " ".join(parts).lower()
+    needle = quote.lower()
+    first = body.find(needle)
+    if first < 0 or body.find(needle, first + 1) >= 0:
+        return None
+    return max(number for offset, number in starts if offset <= first)
+
+
 def check_quote(cited: str, number: int, target: Path, quote: str) -> str | None:
     """Return the failure a quoted citation carries, None when the quote is where it says."""
     lines = target.read_text(encoding="utf-8").splitlines()
@@ -153,7 +191,166 @@ def check_quote(cited: str, number: int, target: Path, quote: str) -> str | None
     body = collapse(" ".join(lines[start : number + WINDOW_AFTER]))
     if quote.lower() in body.lower():
         return None
+    # The window is what the citation claims; naming where the passage actually sits turns the
+    # failure into the correction, which is the only part of a citation a reader cannot derive.
+    moved = locate_quote(lines, quote)
+    if moved is not None:
+        return (
+            f"{cited}:{number} names the wrong line for the text quoted beside it, "
+            f"which is at :{moved}"
+        )
     return f'{cited}:{number} does not carry the text quoted beside it: "{quote[:72]}"'
+
+
+def line_map(target: str) -> dict[int, int] | None:
+    """Return each line of a target at `HEAD` mapped to its line now, None when it is unchanged.
+
+    A line inside a hunk's replaced range is left out rather than guessed at: its content is not
+    the content the citation was written against, so no number for it is defensible.
+    """
+    # Fixed argument list, no shell.
+    result = subprocess.run(  # noqa: S603
+        [GIT, "diff", "-U0", "HEAD", "--", target],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+
+    hunks: list[tuple[int, int, int]] = []
+    for line in result.stdout.splitlines():
+        header = HUNK.match(line)
+        if header is None:
+            continue
+        old_start, old_count, new_count = (
+            int(header.group(1)),
+            int(header.group(2) or 1),
+            int(header.group(4) or 1),
+        )
+        hunks.append((old_start, old_count, new_count - old_count))
+
+    old_lines = len((REPO_ROOT / target).read_text(encoding="utf-8").splitlines())
+    # The old file may have been longer than the new one, so every hunk's reach is included.
+    reach = max([old_lines] + [start + count for start, count, _ in hunks])
+    moved = (moved_line(number, hunks) for number in range(1, reach + 1))
+    return {number: new for number, new in enumerate(moved, start=1) if new is not None}
+
+
+def moved_line(number: int, hunks: list[tuple[int, int, int]]) -> int | None:
+    """Return where one line of the old file sits now, None when a hunk replaced it."""
+    delta = 0
+    for old_start, old_count, shift in hunks:
+        # A pure insertion carries `old_count` 0 and sits after `old_start`, so it moves the
+        # lines below that one without replacing any.
+        if old_count == 0:
+            if number > old_start:
+                delta += shift
+        elif number >= old_start + old_count:
+            delta += shift
+        elif number >= old_start:
+            return None
+    return number + delta
+
+
+def modified_documents(docs: list[Path]) -> list[str]:
+    """Return the citing documents that differ from `HEAD`, which renumbering cannot trust."""
+    # Fixed argument list, no shell.
+    result = subprocess.run(  # noqa: S603
+        [GIT, "diff", "--name-only", "HEAD", "--", *[str(doc) for doc in docs]],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return []
+    return sorted(path for path in result.stdout.split() if path)
+
+
+def renumber_document(doc: Path, maps: dict[str, dict[int, int]], tracked: list[str]) -> list[str]:
+    """Rewrite one document's moved citations in place, returning a line for each one moved."""
+    text = doc.read_text(encoding="utf-8")
+    moved: list[str] = []
+    pieces: list[str] = []
+    cursor = 0
+
+    for match in CITATION.finditer(text):
+        cited, number = match.group(1), int(match.group(2))
+        matches = candidates(cited, tracked)
+        if len(matches) != 1:
+            continue
+        mapping = maps.get(matches[0])
+        if mapping is None:
+            continue
+
+        end = RANGE_END.match(text[match.end() :])
+        tail = end.group(0) if end is not None else ""
+        span_end = match.end() + (end.end() if end is not None else 0)
+
+        citation = f"{cited}:{mapping.get(number, number)}"
+        if end is not None:
+            end_line = int(end.group(1))
+            tail = tail.replace(f":{end_line}`", f":{mapping.get(end_line, end_line)}`", 1)
+        if citation + tail == text[match.start() : span_end]:
+            continue
+
+        line = text.count("\n", 0, match.start()) + 1
+        moved.append(
+            f"{doc.relative_to(REPO_ROOT)}:{line}: "
+            f"{text[match.start() : span_end]} -> {citation}{tail}"
+        )
+        pieces.append(text[cursor : match.start()])
+        pieces.append(citation + tail)
+        cursor = span_end
+
+    if moved:
+        pieces.append(text[cursor:])
+        doc.write_text("".join(pieces), encoding="utf-8")
+    return moved
+
+
+def renumber(docs: list[Path], tracked: list[str]) -> int:
+    """Rewrite every citation whose target moved since `HEAD`, and report what was rewritten."""
+    dirty = modified_documents(docs)
+    if dirty:
+        # The mapping runs from `HEAD`, so a citation already corrected by hand is indistinguishable
+        # from one that never moved, and rewriting it shifts it a second time.
+        print(
+            "renumber: these citing document(s) have uncommitted changes, so a citation in them "
+            "may already have been corrected by hand and would be shifted twice:",
+            file=sys.stderr,
+        )
+        for doc in dirty:
+            print(f"  {doc}", file=sys.stderr)
+        print("commit or stash them, or correct the remaining citations by hand", file=sys.stderr)
+        return 1
+
+    cited_paths = set()
+    for doc in docs:
+        text = doc.read_text(encoding="utf-8")
+        for match in CITATION.finditer(text):
+            matches = candidates(match.group(1), tracked)
+            if len(matches) == 1:
+                cited_paths.add(matches[0])
+
+    maps = {path: line_map(path) for path in sorted(cited_paths)}
+    maps = {path: mapping for path, mapping in maps.items() if mapping is not None}
+    if not maps:
+        print("renumber: no cited file has changed since HEAD, so no citation has moved")
+        return 0
+
+    moved: list[str] = []
+    for doc in docs:
+        moved += renumber_document(doc, maps, tracked)
+    for line in moved:
+        print(line)
+    print(
+        f"renumber: {len(moved)} citation(s) rewritten across {len(maps)} changed file(s); "
+        "re-run without --renumber to check them"
+    )
+    return 0
 
 
 def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[str]]:
@@ -200,6 +397,14 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
 
 def main() -> int:
     """Check every citation in this repository's prose and report the ones that do not hold."""
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--renumber",
+        action="store_true",
+        help="rewrite citations whose target moved since HEAD, instead of checking them",
+    )
+    args = parser.parse_args()
+
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(line_buffering=True)
 
@@ -209,6 +414,9 @@ def main() -> int:
         return 1
 
     docs = sorted({path for glob in CITING_GLOBS for path in REPO_ROOT.glob(glob)})
+    if args.renumber:
+        return renumber(docs, tracked)
+
     failures: list[str] = []
     counts: Counter[str] = Counter()
     for doc in docs:

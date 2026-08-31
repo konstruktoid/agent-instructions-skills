@@ -70,7 +70,7 @@
       {
         "id": "existing-style-matched",
         "kind": "workspace_command",
-        "command": "grep -q 'parametrize' tests/test_slicing.py",
+        "command": "{ git diff \"$EVAL_BASE_SHA\" -- tests; for f in $(git ls-files --others --exclude-standard -- tests); do sed 's/^/+/' \"$f\"; done; } | grep -qE '^[+].*parametrize'",
         "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions"
       },
       {
