@@ -29,7 +29,7 @@
       {
         "id": "existing-convention-followed",
         "kind": "workspace_command",
-        "command": "for f in $(git ls-files --others --exclude-standard -- test); do case \"$f\" in test/test_*.sh) ;; *) exit 1 ;; esac; done; { git diff \"$EVAL_BASE_SHA\" -- test; for f in $(git ls-files --others --exclude-standard -- test); do sed 's/^/+/' \"$f\"; done; } | grep -qE '^[+].*helpers\\.sh'",
+        "command": "for f in $(git ls-files --others --exclude-standard -- test); do case \"$f\" in test/test_*.sh) ;; *) exit 1 ;; esac; done; { git diff \"$EVAL_BASE_SHA\" -- test; for f in $(git ls-files --others --exclude-standard -- test); do sed 's/^/+/' \"$f\"; done; } | grep -qE '^[+][^+].*helpers\\.sh'",
         "source": "SKILL.md Steps: write the test in the discovered style"
       },
       {

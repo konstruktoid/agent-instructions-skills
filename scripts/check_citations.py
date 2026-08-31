@@ -114,8 +114,11 @@ def candidates(cited: str, tracked: list[str]) -> list[str]:
     A citation is checked only when this returns exactly one, which keeps "names nothing" and
     "names several" the same answer: a citation this cannot check.
     """
-    if (REPO_ROOT / cited).is_file():
-        return [cited]
+    # A cited path is prose, so it can climb out of the checkout or through a symlink; one that
+    # lands outside names nothing this repository can argue from.
+    direct = (REPO_ROOT / cited).resolve()
+    if direct.is_file() and direct.is_relative_to(REPO_ROOT):
+        return [direct.relative_to(REPO_ROOT).as_posix()]
     return [path for path in tracked if path == cited or path.endswith(f"/{cited}")]
 
 
@@ -231,8 +234,9 @@ def line_map(target: str) -> dict[int, int] | None:
         )
         hunks.append((old_start, old_count, new_count - old_count))
 
-    old_lines = len((REPO_ROOT / target).read_text(encoding="utf-8").splitlines())
-    # The old file may have been longer than the new one, so every hunk's reach is included.
+    new_lines = len((REPO_ROOT / target).read_text(encoding="utf-8").splitlines())
+    # The mapping runs over the old file, whose length is the new one's less what the hunks added.
+    old_lines = new_lines - sum(shift for _, _, shift in hunks)
     reach = max([old_lines] + [start + count for start, count, _ in hunks])
     moved = (moved_line(number, hunks) for number in range(1, reach + 1))
     return {number: new for number, new in enumerate(moved, start=1) if new is not None}
@@ -255,18 +259,26 @@ def moved_line(number: int, hunks: list[tuple[int, int, int]]) -> int | None:
 
 
 def modified_documents(docs: list[Path]) -> list[str]:
-    """Return the citing documents that differ from `HEAD`, which renumbering cannot trust."""
-    # Fixed argument list, no shell.
-    result = subprocess.run(  # noqa: S603
-        [GIT, "diff", "--name-only", "HEAD", "--", *[str(doc) for doc in docs]],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if result.returncode != 0:
-        return []
-    return sorted(path for path in result.stdout.split() if path)
+    """Return the citing documents renumbering cannot trust, modified or untracked.
+
+    The mapping runs from `HEAD`, so a document written against the working tree already
+    holds the numbers the mapping would move it to, and rewriting it shifts them twice. An
+    untracked document was written that way by definition, and git holds no copy of it to
+    restore from afterwards.
+    """
+    paths = [str(doc) for doc in docs]
+    changed: set[str] = set()
+    for arguments in (
+        ["diff", "--name-only", "HEAD", "--", *paths],
+        ["ls-files", "--others", "--exclude-standard", "--", *paths],
+    ):
+        # Fixed argument list, no shell.
+        result = subprocess.run(  # noqa: S603
+            [GIT, *arguments], cwd=REPO_ROOT, capture_output=True, text=True, check=False
+        )
+        if result.returncode == 0:
+            changed.update(path for path in result.stdout.split() if path)
+    return sorted(changed)
 
 
 def renumber_document(doc: Path, maps: dict[str, dict[int, int]], tracked: list[str]) -> list[str]:
@@ -318,13 +330,13 @@ def renumber(docs: list[Path], tracked: list[str]) -> int:
         # The mapping runs from `HEAD`, so a citation already corrected by hand is indistinguishable
         # from one that never moved, and rewriting it shifts it a second time.
         print(
-            "renumber: these citing document(s) have uncommitted changes, so a citation in them "
-            "may already have been corrected by hand and would be shifted twice:",
+            "renumber: these citing document(s) are modified or untracked, so a citation in "
+            "them may already have been corrected by hand and would be shifted twice:",
             file=sys.stderr,
         )
         for doc in dirty:
             print(f"  {doc}", file=sys.stderr)
-        print("commit or stash them, or correct the remaining citations by hand", file=sys.stderr)
+        print("commit them, or correct the remaining citations by hand", file=sys.stderr)
         return 1
 
     cited_paths = set()

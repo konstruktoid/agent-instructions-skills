@@ -37,7 +37,7 @@ consumer's agent does.
 | Slash commands | Trigger tool calls and file operations from a prompt | Whether the prompt widens scope beyond what the name implies |
 | MCP server configuration | Point at endpoints outside the repository's control | Which endpoint, what it receives, who controls it |
 | Skill and instruction files | Enter the model's context as authoritative text | Reach, egress, and priority language, described below |
-| Agent memory directories | Carry model-authored text into every later session with auto memory enabled, the start of the index as system prompt and the rest on demand | What the agent read before it wrote the file, and whether a reviewer sees the change |
+| Agent memory directories | Carry model-authored text into every later session of the agent they belong to, once auto memory is on: the first 200 lines or 25 KB of `MEMORY.md` as system prompt, the rest read on demand | What the agent read before it wrote the file, and whether a reviewer sees the change |
 
 Skill and instruction files are the hardest case, because there is no automated defense at all and
 they read as documentation.
