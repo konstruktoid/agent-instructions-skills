@@ -237,6 +237,30 @@ made harder rather than read as success. The failed-assertion list under each ta
 exactly which checks each run missed, and every one of those traces to a `grade.json` holding
 the command that was run and the output it produced.
 
+## What a suite is for after the first measurement
+
+The first run answers whether a skill changes anything. What the suite is worth afterwards is
+different: it is the only check in this repository that notices when an edit to a skill removes
+the behavior the skill was written to produce. Nothing else does. `check_skills.py` confirms the
+file is well formed, `markdownlint` confirms it is formatted, and both pass on a skill whose steps
+have been gutted.
+
+That makes a suite the gate on a configuration change rather than a one-time measurement. A change
+to a `SKILL.md`, to a `description`, or to a hook that backs one alters what every session in
+every consuming project does, and it ships without a single failing test. Where a project can
+afford the runs, they belong in the pull request that makes the change, with the pass rate as the
+merge condition. This repository cannot afford that per pull request: a task eval costs real money
+per task per condition, and the cost multiples are in the table in `README.md`. What it does
+instead is report staleness, which is `check_evals.py` naming every stamp older than the skill it
+measured, so an unmeasured edit is visible rather than prevented.
+
+Each failure a skill was supposed to prevent, and did not, belongs in the suite as a task. A rule
+added to a skill after an incident is exactly the kind of rule a later edit removes without anyone
+noticing, and a task derived from that incident is what makes the removal fail rather than pass
+quietly. Write it the same way as any other: a prompt that reproduces the starting condition, a
+fixture that carries the defect, and assertions whose `source` field names the skill lines that
+address it.
+
 ## Limitations that apply to every result here
 
 - Everything under `results/2026-07-25.md` is one run per condition. Single-run variance is

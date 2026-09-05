@@ -618,6 +618,80 @@
         "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
         "source": "task prompt: explain in the README how action updates are handled"
       }
+    ],
+    "gas-07-agent-workflow": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "actor-gate-on-the-job",
+        "kind": "workspace_command",
+        "command": "grep -qE 'author_association|collaborators/.*permission' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: gate on the actor before the agent step runs, in a job-level if"
+      },
+      {
+        "id": "no-write-all",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'permissions:[[:space:]]*write-all' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: grant scopes on the single job that needs them"
+      },
+      {
+        "id": "no-id-token",
+        "kind": "workspace_command",
+        "command": "! grep -qE '^[[:space:]]*id-token:[[:space:]]*write' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: never grant id-token: write"
+      },
+      {
+        "id": "checkout-not-by-branch",
+        "kind": "workspace_command",
+        "command": "! grep -qE \"refs/pull/\\\\{0\\\\}/head\" .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: resolve the head to a commit SHA and check that out"
+      },
+      {
+        "id": "persist-credentials-false",
+        "kind": "workspace_command",
+        "command": "grep -qE 'persist-credentials:[[:space:]]*false' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: set persist-credentials: false on the checkout"
+      },
+      {
+        "id": "timeout-set",
+        "kind": "workspace_command",
+        "command": "grep -qE 'timeout-minutes:' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: set timeout-minutes"
+      },
+      {
+        "id": "comment-body-not-interpolated",
+        "kind": "workspace_command",
+        "command": "! grep -qE '^\\s*\\$\\{\\{\\s*github\\.event\\.comment\\.body\\s*\\}\\}\\s*$' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: pass event data as an action input or through env:"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'uses:[[:space:]]*[a-z0-9-]+/[a-z0-9._-]+@v[0-9]' .github/workflows/assistant.yml",
+        "source": "SKILL.md baseline: pin every third-party action to a full commit SHA"
+      }
     ]
   }
 }
