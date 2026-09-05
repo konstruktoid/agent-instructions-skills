@@ -122,11 +122,13 @@ asking the agent. What it can decide depends on the event:
   valid JSON: the action proceeds and the transcript records that the hook failed. Where valid
   JSON was printed, the exit code is ignored and the JSON decides.
 
-Deciding with a message is a separate channel from the exit status. A hook prints JSON on standard
-output carrying `permissionDecision` of `allow`, `deny`, or `ask`, with a
-`permissionDecisionReason`, and exit 2 overrides it either way. `ask` is the value that puts the
-question to a person. Exiting 0 with no decision does not: it leaves the configured permission flow
-in place, and for a tool the project has already allowed that is a silent allow.
+Deciding with a message is a separate channel from the exit status. A `PreToolUse` hook prints a
+JSON object on standard output whose `hookSpecificOutput` sets `hookEventName` to `PreToolUse` and
+carries a `permissionDecision` of `allow`, `deny`, or `ask` with a `permissionDecisionReason`;
+the nesting is required, since a bare top-level `permissionDecision` is ignored. Exit 2 overrides
+it either way. `ask` is the value that puts the question to a person. Exiting 0 with no decision
+does not: it leaves the configured permission flow in place, and for a tool the project has
+already allowed that is a silent allow.
 
 ### Required
 

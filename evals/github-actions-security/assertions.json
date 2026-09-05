@@ -645,6 +645,54 @@
         "source": "SKILL.md Verify: zizmor is the security audit step"
       },
       {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
         "id": "actor-gate-on-the-job",
         "kind": "workspace_command",
         "command": "grep -qE 'author_association|collaborators/.*permission' .github/workflows/assistant.yml",
@@ -675,22 +723,22 @@
         "source": "references/agentic-workflows.md: set persist-credentials: false on the checkout"
       },
       {
-        "id": "timeout-set",
-        "kind": "workspace_command",
-        "command": "grep -qE 'timeout-minutes:' .github/workflows/assistant.yml",
-        "source": "references/agentic-workflows.md: set timeout-minutes"
-      },
-      {
         "id": "comment-body-not-interpolated",
         "kind": "workspace_command",
         "command": "! grep -qE '^\\s*\\$\\{\\{\\s*github\\.event\\.comment\\.body\\s*\\}\\}\\s*$' .github/workflows/assistant.yml",
         "source": "references/agentic-workflows.md: pass event data as an action input or through env:"
       },
       {
-        "id": "actions-pinned-by-sha",
+        "id": "comment-trigger-created-only",
         "kind": "workspace_command",
-        "command": "! grep -qE 'uses:[[:space:]]*[a-z0-9-]+/[a-z0-9._-]+@v[0-9]' .github/workflows/assistant.yml",
-        "source": "SKILL.md baseline: pin every third-party action to a full commit SHA"
+        "command": "grep -qE 'types:[[:space:]]*\\[[[:space:]]*created[[:space:]]*\\]' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: issue_comment scoped to types: [created], not edited"
+      },
+      {
+        "id": "comment-on-pull-request-only",
+        "kind": "workspace_command",
+        "command": "grep -qE 'github\\.event\\.issue\\.pull_request' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: distinguish a pull request comment from an issue comment"
       }
     ]
   }

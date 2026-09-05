@@ -166,40 +166,42 @@ def quote_after(text: str, offset: int) -> str | None:
     return collapse(quoted.group(1)).rstrip(".")
 
 
-def owner_offsets(text: str, tracked: list[str]) -> list[tuple[int, str, bool]]:
+def owner_offsets(text: str, tracked: list[str]) -> list[tuple[int, str, str]]:
     """Return every offset that sets the file a later continuation inherits, in document order.
 
-    Three things set it, and the flag says whether it holds inside a table row. A heading whose
-    whole text is one backticked path opens a section about that file, and a row whose first
-    cell is one backticked path is a row about that file: both are the subject a row's other
-    cells are read against. A full citation names a file mid-sentence, which sets the subject in
-    running prose but not inside a row, where naming another file in one cell does not change
-    what the rest of the row is about.
+    The third field is the kind. A `heading` whose whole text is one backticked path opens a
+    section about that file and governs every continuation under it. A `row` whose first cell is
+    one backticked path is the subject its other cells are read against, and governs only while
+    the continuation is inside that row. A `citation` names a file mid-sentence, which sets the
+    subject in running prose but not inside a row, where naming another file in one cell does not
+    change what the rest of the row is about.
     """
-    owners: list[tuple[int, str, bool]] = []
-    for pattern, subject in ((HEADING_PATH, True), (ROW_PATH, True), (CITATION, False)):
+    owners: list[tuple[int, str, str]] = []
+    for pattern, kind in ((HEADING_PATH, "heading"), (ROW_PATH, "row"), (CITATION, "citation")):
         for match in pattern.finditer(text):
             matches = candidates(match.group(1), tracked)
             if len(matches) == 1:
-                owners.append((match.end(), matches[0], subject))
+                owners.append((match.end(), matches[0], kind))
     owners.sort()
     return owners
 
 
-def owner_before(owners: list[tuple[int, str, bool]], offset: int, *, in_row: bool) -> str | None:
+def owner_before(owners: list[tuple[int, str, str]], offset: int, *, in_row: bool) -> str | None:
     """Return the file a continuation at `offset` inherits, None when nothing named one.
 
-    Inside a table row only a subject counts, so a citation of another file in one cell does not
-    capture the row. Elsewhere the nearest of either kind wins, which is the rule the prose
-    follows: a continuation belongs to whichever file the sentence last named. Where a document
-    breaks that rule the continuation resolves to the wrong file and is reported, which is the
-    correction, since the fix is to name the file.
+    A heading subject always counts. A row subject counts only while the continuation is inside a
+    row, so it does not leak into the prose after the table. A citation counts only outside a row,
+    since a citation of another file in one cell does not capture the row. Elsewhere the nearest
+    owner of a counting kind wins, which is the rule the prose follows: a continuation belongs to
+    whichever file the sentence last named. Where a document breaks that rule the continuation
+    resolves to the wrong file and is reported, which is the correction, since the fix is to name
+    the file.
     """
     found: str | None = None
-    for end, path, subject in owners:
+    for end, path, kind in owners:
         if end > offset:
             break
-        if subject or not in_row:
+        if kind == "heading" or (kind == "row" and in_row) or (kind == "citation" and not in_row):
             found = path
     return found
 
@@ -457,6 +459,26 @@ def renumber_continuations(
     return "".join(pieces), moved
 
 
+def cited_targets(docs: list[Path], tracked: list[str]) -> set[str]:
+    """Return every tracked file the documents cite, by full citation or by continuation.
+
+    A continuation's inherited file is included too: one whose target is named only in a heading
+    or a table subject has no full citation to seed a map, so without it `renumber_continuations`
+    would leave that continuation behind when its target moves.
+    """
+    paths: set[str] = set()
+    for doc in docs:
+        text = doc.read_text(encoding="utf-8")
+        for match in CITATION.finditer(text):
+            matches = candidates(match.group(1), tracked)
+            if len(matches) == 1:
+                paths.add(matches[0])
+        for _, _, owner in continuations(text, tracked):
+            if owner is not None:
+                paths.add(owner)
+    return paths
+
+
 def renumber(docs: list[Path], tracked: list[str]) -> int:
     """Rewrite every citation whose target moved since `HEAD`, and report what was rewritten."""
     dirty = modified_documents(docs)
@@ -473,14 +495,7 @@ def renumber(docs: list[Path], tracked: list[str]) -> int:
         print("commit them, or correct the remaining citations by hand", file=sys.stderr)
         return 1
 
-    cited_paths = set()
-    for doc in docs:
-        text = doc.read_text(encoding="utf-8")
-        for match in CITATION.finditer(text):
-            matches = candidates(match.group(1), tracked)
-            if len(matches) == 1:
-                cited_paths.add(matches[0])
-
+    cited_paths = cited_targets(docs, tracked)
     maps = {path: line_map(path) for path in sorted(cited_paths)}
     maps = {path: mapping for path, mapping in maps.items() if mapping is not None}
     if not maps:
