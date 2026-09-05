@@ -695,7 +695,7 @@
       {
         "id": "actor-gate-on-the-job",
         "kind": "workspace_command",
-        "command": "grep -qE 'author_association|collaborators/.*permission' .github/workflows/assistant.yml",
+        "command": "awk '/^  assistant:/{f=1} f&&/^    steps:/{f=0} f' .github/workflows/assistant.yml | grep -qE '^    if:' && awk '/^  assistant:/{f=1} f&&/^    steps:/{f=0} f' .github/workflows/assistant.yml | grep -qE 'author_association|collaborators/[^ ]+/permission|needs\\.[A-Za-z0-9_-]+\\.outputs'",
         "source": "references/agentic-workflows.md: gate on the actor before the agent step runs, in a job-level if"
       },
       {
@@ -713,7 +713,7 @@
       {
         "id": "checkout-not-by-branch",
         "kind": "workspace_command",
-        "command": "! grep -qE \"refs/pull/\\\\{0\\\\}/head\" .github/workflows/assistant.yml",
+        "command": "! grep -qE 'ref:[^#]*(refs/pull/\\{0\\}/head|refs/heads/|refs/tags/|github\\.ref|github\\.head_ref)' .github/workflows/assistant.yml && grep -qE 'ref:[^#]*(steps\\.[A-Za-z0-9_-]+\\.outputs|needs\\.[A-Za-z0-9_-]+\\.outputs|\\.head\\.sha|env\\.[A-Za-z0-9_]*[Ss][Hh][Aa])' .github/workflows/assistant.yml",
         "source": "references/agentic-workflows.md: resolve the head to a commit SHA and check that out"
       },
       {

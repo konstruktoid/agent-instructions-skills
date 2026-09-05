@@ -511,8 +511,11 @@ through `--jq` and back into the loop, `github-actions-security/SKILL.md:249` re
 output, `ansible-verification-loop/SKILL.md:136` reads `ansible-lint` output and `:163` reads a
 detached `molecule` run's log.
 
-**What the agent does.** It reads the output as findings to act on. No skill in the repository
-states that tool output is data rather than instruction.
+**What the agent does.** It reads the output as findings to act on. Five of the eight skills tell
+the agent to read command output as data rather than instruction in their discovery step; the
+other three say nothing. Either way the line is a probabilistic mitigation, not a trust boundary:
+it may steer the model but nothing stops crafted output from being read as an instruction, so the
+path stays open.
 
 **Blast radius.** Steering of the fix loop, at the privilege the skill implies. Lower yield than
 3.1, and much harder to notice, because tool output is the one thing a reviewer of the session
