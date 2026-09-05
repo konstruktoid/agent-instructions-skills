@@ -43,6 +43,10 @@ Not covered:
 - The content of workflow files, which `skills/github/github-actions-security/SKILL.md` covers.
 - Application code, which the language-specific instructions and skills cover.
 - Provisioning of infrastructure outside GitHub, including the cloud roles a workflow assumes.
+- The configuration that steers an agent inside a project, meaning `CLAUDE.md`, `AGENTS.md`,
+  skills, hooks, and subagent definitions, which
+  `instructions/agent_configuration_instructions.md` covers. The argument is the same one this
+  document makes, applied to a different mechanism.
 
 ## The Repository Baseline
 

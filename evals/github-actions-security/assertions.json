@@ -618,6 +618,128 @@
         "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
         "source": "task prompt: explain in the README how action updates are handled"
       }
+    ],
+    "gas-07-agent-workflow": [
+      {
+        "id": "actionlint-clean",
+        "kind": "workspace_command",
+        "command": "actionlint",
+        "source": "SKILL.md checklist: actionlint clean"
+      },
+      {
+        "id": "zizmor-clean",
+        "kind": "workspace_command",
+        "command": "zizmor --no-progress -q .",
+        "source": "SKILL.md checklist: zizmor clean"
+      },
+      {
+        "id": "actionlint-actually-run",
+        "kind": "bash_regex",
+        "pattern": "actionlint",
+        "source": "SKILL.md Verify: never declare a workflow change done from the edit alone"
+      },
+      {
+        "id": "zizmor-actually-run",
+        "kind": "bash_regex",
+        "pattern": "zizmor",
+        "source": "SKILL.md Verify: zizmor is the security audit step"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "command": "{ actionlint && zizmor --no-progress -q .; } || { grep -qiE 'actionlint|zizmor' ../final-response.md && grep -qE ':[0-9]+|\\b[a-z-]+\\b.*(finding|error|warning)' ../final-response.md; }",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output"
+      },
+      {
+        "id": "workflow-level-permissions-empty",
+        "kind": "workspace_command",
+        "command": "for f in .github/workflows/*.y*ml; do grep -qE '^permissions: \\{\\}' \"$f\" || exit 1; done",
+        "source": "SKILL.md baseline: permissions: {} at workflow level"
+      },
+      {
+        "id": "every-job-has-timeout",
+        "kind": "workspace_command",
+        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "source": "SKILL.md baseline: set timeout-minutes on every job"
+      },
+      {
+        "id": "actions-pinned-by-sha",
+        "kind": "workspace_command",
+        "command": "! grep -rhoE 'uses: *[A-Za-z0-9._-]+/[^@ ]+@[^ ]+' --include='*.yml' --include='*.yaml' . | grep -qvE '@[0-9a-f]{40}$'",
+        "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA"
+      },
+      {
+        "id": "pins-carry-version-comment",
+        "kind": "workspace_command",
+        "command": "! grep -rnE 'uses: *[A-Za-z0-9._-]+/[^@]+@[0-9a-f]{40} *$' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: with the version in a trailing comment"
+      },
+      {
+        "id": "sha-resolved-not-recalled",
+        "kind": "bash_regex",
+        "pattern": "gh api|releases/latest|/commits/|pinact|ratchet",
+        "source": "SKILL.md: never write a SHA from memory, ask the source repository"
+      },
+      {
+        "id": "checkout-does-not-persist-credentials",
+        "kind": "workspace_command",
+        "command": "! grep -rq 'actions/checkout@' .github/ || grep -rq 'persist-credentials: false' .github/",
+        "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout"
+      },
+      {
+        "id": "no-event-data-in-run-block",
+        "kind": "workspace_command",
+        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
+      },
+      {
+        "id": "actor-gate-on-the-job",
+        "kind": "workspace_command",
+        "command": "awk '/^  assistant:/{f=1} f&&/^    steps:/{f=0} f' .github/workflows/assistant.yml | grep -qE '^    if:' && awk '/^  assistant:/{f=1} f&&/^    steps:/{f=0} f' .github/workflows/assistant.yml | grep -qE 'author_association|collaborators/[^ ]+/permission|needs\\.[A-Za-z0-9_-]+\\.outputs'",
+        "source": "references/agentic-workflows.md: gate on the actor before the agent step runs, in a job-level if"
+      },
+      {
+        "id": "no-write-all",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'permissions:[[:space:]]*write-all' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: grant scopes on the single job that needs them"
+      },
+      {
+        "id": "no-id-token",
+        "kind": "workspace_command",
+        "command": "! grep -qE '^[[:space:]]*id-token:[[:space:]]*write' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: never grant id-token: write"
+      },
+      {
+        "id": "checkout-not-by-branch",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'ref:[^#]*(refs/pull/\\{0\\}/head|refs/heads/|refs/tags/|github\\.ref|github\\.head_ref)' .github/workflows/assistant.yml && grep -qE 'ref:[^#]*(steps\\.[A-Za-z0-9_-]+\\.outputs|needs\\.[A-Za-z0-9_-]+\\.outputs|\\.head\\.sha|env\\.[A-Za-z0-9_]*[Ss][Hh][Aa])' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: resolve the head to a commit SHA and check that out"
+      },
+      {
+        "id": "persist-credentials-false",
+        "kind": "workspace_command",
+        "command": "grep -qE 'persist-credentials:[[:space:]]*false' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: set persist-credentials: false on the checkout"
+      },
+      {
+        "id": "comment-body-not-interpolated",
+        "kind": "workspace_command",
+        "command": "! grep -qE '^\\s*\\$\\{\\{\\s*github\\.event\\.comment\\.body\\s*\\}\\}\\s*$' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: pass event data as an action input or through env:"
+      },
+      {
+        "id": "comment-trigger-created-only",
+        "kind": "workspace_command",
+        "command": "grep -qE 'types:[[:space:]]*\\[[[:space:]]*created[[:space:]]*\\]' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: issue_comment scoped to types: [created], not edited"
+      },
+      {
+        "id": "comment-on-pull-request-only",
+        "kind": "workspace_command",
+        "command": "grep -qE 'github\\.event\\.issue\\.pull_request' .github/workflows/assistant.yml",
+        "source": "references/agentic-workflows.md: distinguish a pull request comment from an issue comment"
+      }
     ]
   }
 }

@@ -3,13 +3,14 @@
   "notes": [
     "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
     "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
-    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to.",
+    "gas-t01 was a release-workflow prompt until the description gained a clause about workflows that run an AI coding agent. The suite is fixed at five in-scope prompts, so covering the new clause meant replacing one rather than adding one, and the earlier prompt's result stands only in the stamp that measured it."
   ],
   "prompts": [
     {
       "id": "gas-t01",
       "expect": "trigger",
-      "prompt": "Add a release workflow that publishes the package to npm when a version tag is pushed."
+      "prompt": "Our assistant workflow runs an AI coding agent when someone comments on a pull request. Check whether it hands the agent more token, tools, or network than it needs."
     },
     {
       "id": "gas-t02",

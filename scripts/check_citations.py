@@ -16,18 +16,22 @@ A cited path resolves as a repository path, or as a unique path suffix among tra
 because the documents abbreviate. Eval fixtures and results are left out of that index, since a
 fixture ships its own `lint.yml` and would make every citation of the real one ambiguous.
 
-Three things go unchecked, which is most of them. A bare continuation, `` `:21` `` after a path
-named earlier, belongs to whichever file the sentence last named, which is a question about
-English; only its ordering within a range is checked. A path suffix matching more than one
-tracked file, such as a bare `SKILL.md`, names no single target. And a citation pointing at the
-wrong non-blank line with no quote beside it carries nothing that says where it was meant to
-point. The first two are counted in the summary rather than passed over in silence.
+A bare continuation, `` `:21` `` after a path named earlier, is held to the same things. It
+inherits the file the section heading, the table row, or the sentence before it named, in that
+order of authority inside a row, where naming another file in one cell does not change what the
+row is about. Where a document breaks that rule the continuation resolves to the wrong file and
+is reported, which is the correction: the fix is to name the file. A path suffix matching more
+than one tracked file, such as a bare `SKILL.md`, resolves to none and fails for the same reason.
+
+What still goes unchecked is a citation pointing at the wrong non-blank line with no quote
+beside it, which carries nothing that says where it was meant to point.
 
 An edit that moves a cited line is mechanical to repair, so `--renumber` repairs it: it reads
 the working tree against `HEAD`, maps every cited target's old line numbers to its new ones, and
-rewrites the citations that moved. It refuses to run while a citing document has uncommitted
-changes of its own, since the mapping runs from `HEAD` and a number already corrected by hand
-reads the same as one that never moved, so rewriting it would shift it twice.
+rewrites the citations that moved, continuations included. It refuses to run while a citing
+document has uncommitted changes of its own, since the mapping runs from `HEAD` and a number
+already corrected by hand reads the same as one that never moved, so rewriting it would shift it
+twice.
 
 Run it from anywhere; it reports on the checkout it lives in and needs only the standard
 library:
@@ -70,8 +74,19 @@ NOT_A_TARGET = re.compile(r"^evals/[^/]+/(?:fixtures|results)/")
 # The lookbehind excludes a longer path's tail; the extension excludes versions and digests.
 CITATION = re.compile(r"(?<![\w/-])([\w.-]+(?:/[\w.-]+)*\.[a-z]{2,5}):(\d+)\b")
 
-# Not checked, but it ends the quote search: a following quote belongs to it, not to this.
+# A continuation of the file the sentence last named. It also ends the quote search, so a
+# following quote belongs to it rather than to the citation before it.
 BARE_CITATION = re.compile(r"`:\d+`")
+
+BARE_NUMBER = re.compile(r":(\d+)")
+
+# A heading that is nothing but a backticked path opens a section about that file, so a
+# continuation inside it belongs to that file rather than to whatever a sentence named last.
+HEADING_PATH = re.compile(r"^#{1,6}\s+`([^`]+)`\s*$", re.MULTILINE)
+
+# A table row whose first cell is nothing but a backticked path is a row about that file, so
+# the bare citations in its other cells belong to it.
+ROW_PATH = re.compile(r"^\|\s*`([^`]+)`\s*\|", re.MULTILINE)
 
 # A range end or further line extends the citation before it, so a following quote covers all.
 CONTINUATION = re.compile(r"^`?(?:\s*[-,]\s*`:\d+`)+\s*")
@@ -80,6 +95,10 @@ CONTINUATION = re.compile(r"^`?(?:\s*[-,]\s*`:\d+`)+\s*")
 RANGE_END = re.compile(r"^`?-`:(\d+)`")
 
 # The minimum length ignores quoted single words, which are terms rather than cited passages.
+# A backticked path with no line number, which a sentence can name between a citation and a
+# quote belonging to that path rather than to the citation.
+PATH_MENTION = re.compile(r"`[^`]*\.\w{2,10}`")
+
 QUOTED = re.compile(r'"([^"]{24,})"')
 QUOTE_LOOKAHEAD = 400
 QUOTE_MUST_START_WITHIN = 120
@@ -136,7 +155,86 @@ def quote_after(text: str, offset: int) -> str | None:
     preceding = window[: quoted.start()]
     if CITATION.search(preceding) or BARE_CITATION.search(preceding):
         return None
+    # A cited passage does not quote a citation, so a span holding one is a mispaired quote mark:
+    # the closing mark of one phrase read together with the opening mark of a later one.
+    if CITATION.search(quoted.group(1)) or BARE_CITATION.search(quoted.group(1)):
+        return None
+    # A file named between the citation and the quote takes the quote with it, which is how a
+    # sentence cites one file and then quotes a second one it names without a line.
+    if PATH_MENTION.search(preceding):
+        return None
     return collapse(quoted.group(1)).rstrip(".")
+
+
+def owner_offsets(text: str, tracked: list[str]) -> list[tuple[int, str, str]]:
+    """Return every offset that sets the file a later continuation inherits, in document order.
+
+    The third field is the kind. A `heading` whose whole text is one backticked path opens a
+    section about that file and governs every continuation under it. A `row` whose first cell is
+    one backticked path is the subject its other cells are read against, and governs only while
+    the continuation is inside that row. A `citation` names a file mid-sentence, which sets the
+    subject in running prose but not inside a row, where naming another file in one cell does not
+    change what the rest of the row is about.
+    """
+    owners: list[tuple[int, str, str]] = []
+    for pattern, kind in ((HEADING_PATH, "heading"), (ROW_PATH, "row"), (CITATION, "citation")):
+        for match in pattern.finditer(text):
+            matches = candidates(match.group(1), tracked)
+            if len(matches) == 1:
+                owners.append((match.end(), matches[0], kind))
+    owners.sort()
+    return owners
+
+
+def owner_before(owners: list[tuple[int, str, str]], offset: int, *, in_row: bool) -> str | None:
+    """Return the file a continuation at `offset` inherits, None when nothing named one.
+
+    A heading subject always counts. A row subject counts only while the continuation is inside a
+    row, so it does not leak into the prose after the table. A citation counts only outside a row,
+    since a citation of another file in one cell does not capture the row. Elsewhere the nearest
+    owner of a counting kind wins, which is the rule the prose follows: a continuation belongs to
+    whichever file the sentence last named. Where a document breaks that rule the continuation
+    resolves to the wrong file and is reported, which is the correction, since the fix is to name
+    the file.
+    """
+    found: str | None = None
+    for end, path, kind in owners:
+        if end > offset:
+            break
+        if kind == "heading" or (kind == "row" and in_row) or (kind == "citation" and not in_row):
+            found = path
+    return found
+
+
+def range_end_spans(text: str) -> list[tuple[int, int]]:
+    """Return the span of every bare citation already read as a full citation's range end."""
+    spans: list[tuple[int, int]] = []
+    for match in CITATION.finditer(text):
+        end = RANGE_END.match(text[match.end() :])
+        if end is not None:
+            spans.append((match.end(), match.end() + end.end()))
+    return spans
+
+
+def continuations(text: str, tracked: list[str]) -> list[tuple[re.Match[str], int, str | None]]:
+    """Return each bare continuation with its number and the file it inherits, in document order.
+
+    A range end is left out: the full citation that opens it already carries it.
+    """
+    consumed = range_end_spans(text)
+    owners = owner_offsets(text, tracked)
+    found: list[tuple[re.Match[str], int, str | None]] = []
+    for match in BARE_CITATION.finditer(text):
+        if any(start <= match.start() < stop for start, stop in consumed):
+            continue
+        digits = BARE_NUMBER.search(match.group(0))
+        if digits is None:
+            continue
+        line_start = text.rfind("\n", 0, match.start()) + 1
+        in_row = text[line_start:].lstrip().startswith("|")
+        owner = owner_before(owners, match.start(), in_row=in_row)
+        found.append((match, int(digits.group(1)), owner))
+    return found
 
 
 def check_citation(cited: str, number: int, target: Path) -> str | None:
@@ -319,8 +417,66 @@ def renumber_document(doc: Path, maps: dict[str, dict[int, int]], tracked: list[
 
     if moved:
         pieces.append(text[cursor:])
-        doc.write_text("".join(pieces), encoding="utf-8")
+        text = "".join(pieces)
+
+    text, continuation_moves = renumber_continuations(doc, text, maps, tracked)
+    moved += continuation_moves
+    if moved:
+        doc.write_text(text, encoding="utf-8")
     return moved
+
+
+def renumber_continuations(
+    doc: Path, text: str, maps: dict[str, dict[int, int]], tracked: list[str]
+) -> tuple[str, list[str]]:
+    """Rewrite the bare continuations whose inherited file moved, returning a line for each.
+
+    A continuation carries no path, so the pass over full citations cannot see it. It inherits
+    the file named by the heading, the table row, or the sentence before it, which is the rule
+    the check applies, and without this a continuation is left behind whenever its target moves.
+
+    The rewritten text is returned rather than written, so one document is written once.
+    """
+    moved: list[str] = []
+    pieces: list[str] = []
+    cursor = 0
+    for match, number, owner in continuations(text, tracked):
+        mapping = maps.get(owner) if owner is not None else None
+        if mapping is None or mapping.get(number, number) == number:
+            continue
+        line = text.count("\n", 0, match.start()) + 1
+        replacement = f"`:{mapping[number]}`"
+        moved.append(
+            f"{doc.relative_to(REPO_ROOT)}:{line}: {match.group(0)} -> {replacement} "
+            f"(continuation of {owner})"
+        )
+        pieces.append(text[cursor : match.start()])
+        pieces.append(replacement)
+        cursor = match.end()
+    if not moved:
+        return text, moved
+    pieces.append(text[cursor:])
+    return "".join(pieces), moved
+
+
+def cited_targets(docs: list[Path], tracked: list[str]) -> set[str]:
+    """Return every tracked file the documents cite, by full citation or by continuation.
+
+    A continuation's inherited file is included too: one whose target is named only in a heading
+    or a table subject has no full citation to seed a map, so without it `renumber_continuations`
+    would leave that continuation behind when its target moves.
+    """
+    paths: set[str] = set()
+    for doc in docs:
+        text = doc.read_text(encoding="utf-8")
+        for match in CITATION.finditer(text):
+            matches = candidates(match.group(1), tracked)
+            if len(matches) == 1:
+                paths.add(matches[0])
+        for _, _, owner in continuations(text, tracked):
+            if owner is not None:
+                paths.add(owner)
+    return paths
 
 
 def renumber(docs: list[Path], tracked: list[str]) -> int:
@@ -339,14 +495,7 @@ def renumber(docs: list[Path], tracked: list[str]) -> int:
         print("commit them, or correct the remaining citations by hand", file=sys.stderr)
         return 1
 
-    cited_paths = set()
-    for doc in docs:
-        text = doc.read_text(encoding="utf-8")
-        for match in CITATION.finditer(text):
-            matches = candidates(match.group(1), tracked)
-            if len(matches) == 1:
-                cited_paths.add(matches[0])
-
+    cited_paths = cited_targets(docs, tracked)
     maps = {path: line_map(path) for path in sorted(cited_paths)}
     maps = {path: mapping for path, mapping in maps.items() if mapping is not None}
     if not maps:
@@ -389,7 +538,10 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
 
         matches = candidates(cited, tracked)
         if len(matches) != 1:
-            tally["skipped"] += 1
+            failures.append(
+                f"{doc.relative_to(REPO_ROOT)}:{line}: {cited}:{number} names "
+                f"{len(matches)} tracked files, so it resolves to none; write the path out"
+            )
             continue
         target = REPO_ROOT / matches[0]
         failure = check_citation(cited, number, target)
@@ -404,7 +556,36 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
         if failure is not None:
             failures.append(f"{doc.relative_to(REPO_ROOT)}:{line}: {failure}")
 
+    failures += check_continuations(doc, text, tracked, tally)
     return failures, tally
+
+
+def check_continuations(doc: Path, text: str, tracked: list[str], tally: Counter[str]) -> list[str]:
+    """Return the failures the bare continuations in one document carry.
+
+    A continuation inherits the file the sentence last named, so a failure here is either a
+    number that drifted or a sentence that named a different file last than it meant. Both are
+    corrections a reader has to make, which is why neither is passed over.
+    """
+    failures: list[str] = []
+    for match, number, owner in continuations(text, tracked):
+        if owner is None:
+            tally["orphaned"] += 1
+            continue
+        tally["continuations"] += 1
+        target = REPO_ROOT / owner
+        failure = check_citation(owner, number, target)
+        if failure is None:
+            quote = quote_after(text, match.end())
+            if quote is not None:
+                tally["quoted"] += 1
+                failure = check_quote(owner, number, target, quote)
+        if failure is not None:
+            line = text.count("\n", 0, match.start()) + 1
+            failures.append(
+                f"{doc.relative_to(REPO_ROOT)}:{line}: continuation `:{number}` of {failure}"
+            )
+    return failures
 
 
 def main() -> int:
@@ -440,9 +621,10 @@ def main() -> int:
         print(failure, file=sys.stderr)
 
     tally = (
-        f"{counts['checked']} citation(s) across {len(docs)} document(s) resolve to one file "
-        f"and name a line that exists and is not blank; {counts['quoted']} of those also carry "
-        f"the text quoted beside them; {counts['skipped']} resolve to no single file, unchecked"
+        f"{counts['checked']} citation(s) naming a path and {counts['continuations']} bare "
+        f"continuation(s), across {len(docs)} document(s), resolve to one file and name a line "
+        f"that exists and is not blank; {counts['quoted']} of them also carry the text quoted "
+        f"beside them; {counts['orphaned']} continuation(s) name no file before them, unchecked"
     )
     if failures:
         print(f"\n{len(failures)} citation(s) do not hold; {tally}", file=sys.stderr)

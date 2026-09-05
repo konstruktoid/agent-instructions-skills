@@ -55,7 +55,7 @@ The statement below is what
 asks every publisher of agent-facing content to provide, so that a reader can compare the claim
 against the files.
 
-**What ships.** Eight skills under `skills/`, five documents under `instructions/`, five agent
+**What ships.** Eight skills under `skills/`, six documents under `instructions/`, five agent
 templates under `agent-templates/`, and the reference files each skill loads on demand. There are
 no session hooks, no MCP server definitions, no slash commands, no installable subagents, and no
 `.claude/settings.json`; `scripts/check_skills.py` fails the build when any of those appears at
