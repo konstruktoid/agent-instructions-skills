@@ -47,7 +47,7 @@
       {
         "id": "every-job-has-timeout",
         "kind": "workspace_command",
-        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/^jobs:/{j=1;next} j&&/^  [A-Za-z0-9_-]+:/{if(n&&!t)exit 1;n=1;t=0;next} j&&/^    timeout-minutes:/{t=1} j&&/^[^ #]/{j=0} END{exit (n&&!t)?1:0}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: set timeout-minutes on every job"
       },
       {
@@ -77,7 +77,7 @@
       {
         "id": "no-event-data-in-run-block",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/(run|script):[^#]*\\$\\{\\{[[:space:]]*github\\.event/{exit 1} /^[[:space:]]*(-[[:space:]]+)?(run|script):[[:space:]]*[|>][+-]?[[:space:]]*$/{match($0,/^[[:space:]]*(-[[:space:]]+)?/);bi=RLENGTH;ib=1;next} ib&&/^[[:space:]]*$/{next} ib{match($0,/^[[:space:]]*/);if(RLENGTH<=bi){ib=0} else if($0 ~ /\\$\\{\\{[[:space:]]*github\\.event/){exit 1}}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
       },
       {
@@ -145,7 +145,7 @@
       {
         "id": "every-job-has-timeout",
         "kind": "workspace_command",
-        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/^jobs:/{j=1;next} j&&/^  [A-Za-z0-9_-]+:/{if(n&&!t)exit 1;n=1;t=0;next} j&&/^    timeout-minutes:/{t=1} j&&/^[^ #]/{j=0} END{exit (n&&!t)?1:0}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: set timeout-minutes on every job"
       },
       {
@@ -175,7 +175,7 @@
       {
         "id": "no-event-data-in-run-block",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/(run|script):[^#]*\\$\\{\\{[[:space:]]*github\\.event/{exit 1} /^[[:space:]]*(-[[:space:]]+)?(run|script):[[:space:]]*[|>][+-]?[[:space:]]*$/{match($0,/^[[:space:]]*(-[[:space:]]+)?/);bi=RLENGTH;ib=1;next} ib&&/^[[:space:]]*$/{next} ib{match($0,/^[[:space:]]*/);if(RLENGTH<=bi){ib=0} else if($0 ~ /\\$\\{\\{[[:space:]]*github\\.event/){exit 1}}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
       },
       {
@@ -249,7 +249,7 @@
       {
         "id": "every-job-has-timeout",
         "kind": "workspace_command",
-        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/^jobs:/{j=1;next} j&&/^  [A-Za-z0-9_-]+:/{if(n&&!t)exit 1;n=1;t=0;next} j&&/^    timeout-minutes:/{t=1} j&&/^[^ #]/{j=0} END{exit (n&&!t)?1:0}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: set timeout-minutes on every job"
       },
       {
@@ -279,7 +279,7 @@
       {
         "id": "no-event-data-in-run-block",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/(run|script):[^#]*\\$\\{\\{[[:space:]]*github\\.event/{exit 1} /^[[:space:]]*(-[[:space:]]+)?(run|script):[[:space:]]*[|>][+-]?[[:space:]]*$/{match($0,/^[[:space:]]*(-[[:space:]]+)?/);bi=RLENGTH;ib=1;next} ib&&/^[[:space:]]*$/{next} ib{match($0,/^[[:space:]]*/);if(RLENGTH<=bi){ib=0} else if($0 ~ /\\$\\{\\{[[:space:]]*github\\.event/){exit 1}}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
       },
       {
@@ -365,7 +365,7 @@
       {
         "id": "every-job-has-timeout",
         "kind": "workspace_command",
-        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/^jobs:/{j=1;next} j&&/^  [A-Za-z0-9_-]+:/{if(n&&!t)exit 1;n=1;t=0;next} j&&/^    timeout-minutes:/{t=1} j&&/^[^ #]/{j=0} END{exit (n&&!t)?1:0}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: set timeout-minutes on every job"
       },
       {
@@ -395,7 +395,7 @@
       {
         "id": "no-event-data-in-run-block",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/(run|script):[^#]*\\$\\{\\{[[:space:]]*github\\.event/{exit 1} /^[[:space:]]*(-[[:space:]]+)?(run|script):[[:space:]]*[|>][+-]?[[:space:]]*$/{match($0,/^[[:space:]]*(-[[:space:]]+)?/);bi=RLENGTH;ib=1;next} ib&&/^[[:space:]]*$/{next} ib{match($0,/^[[:space:]]*/);if(RLENGTH<=bi){ib=0} else if($0 ~ /\\$\\{\\{[[:space:]]*github\\.event/){exit 1}}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
       },
       {
@@ -555,7 +555,7 @@
       {
         "id": "every-job-has-timeout",
         "kind": "workspace_command",
-        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/^jobs:/{j=1;next} j&&/^  [A-Za-z0-9_-]+:/{if(n&&!t)exit 1;n=1;t=0;next} j&&/^    timeout-minutes:/{t=1} j&&/^[^ #]/{j=0} END{exit (n&&!t)?1:0}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: set timeout-minutes on every job"
       },
       {
@@ -585,7 +585,7 @@
       {
         "id": "no-event-data-in-run-block",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/(run|script):[^#]*\\$\\{\\{[[:space:]]*github\\.event/{exit 1} /^[[:space:]]*(-[[:space:]]+)?(run|script):[[:space:]]*[|>][+-]?[[:space:]]*$/{match($0,/^[[:space:]]*(-[[:space:]]+)?/);bi=RLENGTH;ib=1;next} ib&&/^[[:space:]]*$/{next} ib{match($0,/^[[:space:]]*/);if(RLENGTH<=bi){ib=0} else if($0 ~ /\\$\\{\\{[[:space:]]*github\\.event/){exit 1}}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
       },
       {
@@ -659,7 +659,7 @@
       {
         "id": "every-job-has-timeout",
         "kind": "workspace_command",
-        "command": "test \"$(cat .github/workflows/*.y*ml | grep -c 'runs-on:')\" -le \"$(cat .github/workflows/*.y*ml | grep -c 'timeout-minutes:')\"",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/^jobs:/{j=1;next} j&&/^  [A-Za-z0-9_-]+:/{if(n&&!t)exit 1;n=1;t=0;next} j&&/^    timeout-minutes:/{t=1} j&&/^[^ #]/{j=0} END{exit (n&&!t)?1:0}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: set timeout-minutes on every job"
       },
       {
@@ -689,7 +689,7 @@
       {
         "id": "no-event-data-in-run-block",
         "kind": "workspace_command",
-        "command": "! grep -rnE '(run|script):.*\\$\\{\\{ *github\\.event' --include='*.yml' --include='*.yaml' .",
+        "command": "for f in .github/workflows/*.y*ml; do awk '/(run|script):[^#]*\\$\\{\\{[[:space:]]*github\\.event/{exit 1} /^[[:space:]]*(-[[:space:]]+)?(run|script):[[:space:]]*[|>][+-]?[[:space:]]*$/{match($0,/^[[:space:]]*(-[[:space:]]+)?/);bi=RLENGTH;ib=1;next} ib&&/^[[:space:]]*$/{next} ib{match($0,/^[[:space:]]*/);if(RLENGTH<=bi){ib=0} else if($0 ~ /\\$\\{\\{[[:space:]]*github\\.event/){exit 1}}' \"$f\" || exit 1; done",
         "source": "SKILL.md baseline: never interpolate untrusted event data into a run block"
       },
       {
@@ -731,13 +731,13 @@
       {
         "id": "comment-trigger-created-only",
         "kind": "workspace_command",
-        "command": "grep -qE 'types:[[:space:]]*\\[[[:space:]]*created[[:space:]]*\\]' .github/workflows/assistant.yml",
+        "command": "awk '/^on:/{o=1} o&&/^  issue_comment:/{c=1;next} c&&/^  [A-Za-z]/{c=0} c' .github/workflows/assistant.yml | grep -qE 'types:[[:space:]]*\\[[[:space:]]*created[[:space:]]*\\]'",
         "source": "references/agentic-workflows.md: issue_comment scoped to types: [created], not edited"
       },
       {
         "id": "comment-on-pull-request-only",
         "kind": "workspace_command",
-        "command": "grep -qE 'github\\.event\\.issue\\.pull_request' .github/workflows/assistant.yml",
+        "command": "awk '/^  assistant:/{f=1} f&&/^    steps:/{f=0} f' .github/workflows/assistant.yml | grep -qE 'github\\.event\\.issue\\.pull_request'",
         "source": "references/agentic-workflows.md: distinguish a pull request comment from an issue comment"
       }
     ]

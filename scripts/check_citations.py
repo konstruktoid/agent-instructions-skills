@@ -186,22 +186,29 @@ def owner_offsets(text: str, tracked: list[str]) -> list[tuple[int, str, str]]:
     return owners
 
 
-def owner_before(owners: list[tuple[int, str, str]], offset: int, *, in_row: bool) -> str | None:
+def owner_before(
+    owners: list[tuple[int, str, str]], offset: int, *, in_row: bool, row_start: int = 0
+) -> str | None:
     """Return the file a continuation at `offset` inherits, None when nothing named one.
 
-    A heading subject always counts. A row subject counts only while the continuation is inside a
-    row, so it does not leak into the prose after the table. A citation counts only outside a row,
-    since a citation of another file in one cell does not capture the row. Elsewhere the nearest
-    owner of a counting kind wins, which is the rule the prose follows: a continuation belongs to
-    whichever file the sentence last named. Where a document breaks that rule the continuation
-    resolves to the wrong file and is reported, which is the correction, since the fix is to name
-    the file.
+    A heading subject always counts. A row subject counts only while the continuation is inside the
+    same row, so it neither leaks into the prose after the table nor into a later row that names no
+    file of its own; `row_start` is the offset of the continuation's own line and a row subject set
+    before it is ignored. A citation counts only outside a row, since a citation of another file in
+    one cell does not capture the row. Elsewhere the nearest owner of a counting kind wins, which
+    is the rule the prose follows: a continuation belongs to whichever file the sentence last
+    named. Where a document breaks that rule the continuation resolves to the wrong file and is
+    reported, which is the correction, since the fix is to name the file.
     """
     found: str | None = None
     for end, path, kind in owners:
         if end > offset:
             break
-        if kind == "heading" or (kind == "row" and in_row) or (kind == "citation" and not in_row):
+        if (
+            kind == "heading"
+            or (kind == "row" and in_row and end >= row_start)
+            or (kind == "citation" and not in_row)
+        ):
             found = path
     return found
 
@@ -232,7 +239,7 @@ def continuations(text: str, tracked: list[str]) -> list[tuple[re.Match[str], in
             continue
         line_start = text.rfind("\n", 0, match.start()) + 1
         in_row = text[line_start:].lstrip().startswith("|")
-        owner = owner_before(owners, match.start(), in_row=in_row)
+        owner = owner_before(owners, match.start(), in_row=in_row, row_start=line_start)
         found.append((match, int(digits.group(1)), owner))
     return found
 
