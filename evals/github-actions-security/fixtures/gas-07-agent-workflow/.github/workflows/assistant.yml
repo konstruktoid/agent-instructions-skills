@@ -1,0 +1,27 @@
+---
+name: assistant
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions: write-all
+
+jobs:
+  assistant:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.issue.number && format('refs/pull/{0}/head', github.event.issue.number) }}
+
+      - name: Run the assistant
+        uses: acme/coding-agent@v1
+        with:
+          prompt: |
+            A maintainer asked for help in this comment:
+            ${{ github.event.comment.body }}
+            Read the repository, make the change, and push it.
+        env:
+          MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

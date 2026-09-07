@@ -116,6 +116,9 @@ anything, is not an attempt.
 Never weaken a test, mark it `xfail`, or skip it to get a green run. If a test is wrong, fix the
 test and say why it was wrong.
 
+No hook enforces that rule here. `instructions/agent_configuration_instructions.md` covers
+which rules need a mechanism rather than prose alone, and where one belongs.
+
 ## Verification checklist
 
 - [ ] Existing test layout and conventions read before writing, and matched
@@ -138,5 +141,7 @@ installed copy.
 
 - `instructions/python_coding_instructions.md`: the `ruff`/`ty` baseline, which applies to test
   code as well.
+- `instructions/agent_configuration_instructions.md`: choosing between an instruction and a hook,
+  for the rules above that must hold every time rather than most of the time.
 - `skills/python/python-secure-coding/SKILL.md`: for security-relevant changes, whose rejection
   and failure paths need coverage.

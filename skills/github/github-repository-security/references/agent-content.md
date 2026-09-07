@@ -102,6 +102,10 @@ language was the gap.
 
 ## Reviewing hooks, commands, and scripts
 
+This section covers content submitted by someone else. For authoring a project's own hooks, and
+for deciding which rules need one rather than a line of prose, see
+`instructions/agent_configuration_instructions.md`.
+
 - A session hook runs without the user asking. Read every command it runs, and treat any read of a
   credential path or any outbound connection as a finding to justify before merging.
 - A script shipped with the content executes with the user's access. Apply the language skill that

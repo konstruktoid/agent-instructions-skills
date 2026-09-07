@@ -38,6 +38,7 @@ Current instructions documents:
 | `written_language_instructions.md` | Formal, concise, precise written style for any prose output. |
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 | `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
+| `agent_configuration_instructions.md` | Choosing between a project instructions file, a skill, a hook, and a subagent, writing each, and changing one without losing the behavior it was written for. |
 
 ### skills/
 
@@ -63,7 +64,7 @@ Current skills:
 | `ansible-verification-loop` | `skills/ansible/ansible-verification-loop/SKILL.md` | Reviewing or modifying Ansible roles and collections, verified through the repository's own lint/test loop, and keeping the local state a test run leaves behind out of both the repository and the built collection artifact. |
 | `bash-secure-scripting` | `skills/bash/bash-secure-scripting/SKILL.md` | The `shellcheck`/`bash -n` baseline from `bash_coding_instructions.md`, extended with the stability and security properties a linter cannot verify: strict-mode semantics, cleanup on every exit path, untrusted input and injection, `PATH` and environment control, temporary files, and credentials, run through a bounded verify-fix loop. |
 | `bash-testing` | `skills/bash/bash-testing/SKILL.md` | Adding or updating coverage for a shell change: discovering and matching the repository's existing framework (bats-core, shunit2, or plain scripts), making a script testable, covering exit codes and failure paths, and running the suite through a bounded verify-fix loop. |
-| `github-actions-security` | `skills/github/github-actions-security/SKILL.md` | Authoring and reviewing GitHub Actions workflows and actions: least-privilege `GITHUB_TOKEN` permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe triggers and runners, and structures that scale across repositories, run through a bounded verify-fix loop with `actionlint` and `zizmor`. |
+| `github-actions-security` | `skills/github/github-actions-security/SKILL.md` | Authoring and reviewing GitHub Actions workflows and actions: least-privilege `GITHUB_TOKEN` permissions, dependencies pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe triggers and runners, workflows that run an AI coding agent, and structures that scale across repositories, run through a bounded verify-fix loop with `actionlint` and `zizmor`. |
 | `github-organization-governance` | `skills/github/github-organization-governance/SKILL.md` | Configuring and reviewing the settings that span repositories: member privileges and base permissions, authentication and provisioning, app and token policy, the actions and runner policy, organization rulesets targeted by custom properties, and audit evidence, run through a bounded verify-fix loop that reads the applied state back and measures coverage across the fleet. |
 | `github-repository-security` | `skills/github/github-repository-security/SKILL.md` | Configuring and reviewing one repository: rulesets and review requirements, secret and code scanning, dependency alerts, access and deploy keys, tag and release protection, and the agent-facing content a repository ships, run through a bounded verify-fix loop that reads the applied state back rather than trusting the API response. |
 | `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
@@ -375,20 +376,23 @@ no measurement of what either skill changes.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness: two defined tasks, `avl-06-autofix-cosmetics` and `gas-06-blocked-egress`, have
+is staleness: three defined tasks, `avl-06-autofix-cosmetics`, `gas-06-blocked-egress` and
+`gas-07-agent-workflow`, have
 never been graded in any stamp, four of the six stamps predate a change to the skill they
 measured, and the newest stamp, `ansible-verification-loop`'s 2026-08-20-repeat, was measured
 against a modified working tree, so the source it graded is in no commit and the run cannot be
-reproduced from the repository until it is repeated from a clean checkout. No skill's
-`description` has changed since the stamp that measured its routing, so the routing column still
-describes the descriptions as they stand.
+reproduced from the repository until it is repeated from a clean checkout. One skill's
+`description` has changed since the stamp that measured its routing: `github-actions-security`
+gained a clause covering workflows that run an AI coding agent, so its 9/10 is a measurement of
+the description as it stood on 2026-07-27 and its probes test nothing in the added clause. Every
+other row's routing column still describes the description as it stands.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
 | `ansible-verification-loop` | 2026-08-20-repeat | +6 over 1 task | 1.2x | 10/10 (2026-07-25) | Three runs per condition on `avl-07-artifact-hygiene` alone, 15/16 in all three with-skill runs against 9 to 10 in the baseline, so the ranges do not overlap. Two of its assertions were corrected after the single-run 2026-08-20 stamp but before these six runs, which makes this stamp a measurement of checks fixed in advance rather than after the fact; both stamps and that reasoning are in [evals/ansible-verification-loop/README.md](evals/ansible-verification-loop/README.md). The stamp was measured against an uncommitted tree. Earlier stamps: 2026-07-28-isolation measured +1 over `avl-03` at 1.8x, and 2026-07-25 measured +6 over 5 tasks at 2.2x with `avl-05` classified truncated rather than graded. `avl-06-autofix-cosmetics` has never been graded in any stamp. |
 | `bash-secure-scripting` | 2026-08-14 | +9 over 4 tasks | 3.5x | 9/10 | One run per condition, so variance is uncontrolled. `bss-t09` is out of scope and routed in. |
 | `bash-testing` | 2026-08-14 | +1 over 4 tasks | 2.1x | 7/10 | Two fixtures pass fully in both conditions and cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
-| `github-actions-security` | 2026-07-28 | +29 over 4 comparable tasks | 2.4x | 9/10 (2026-07-27) | Three runs per condition. `gas-05-dependabot-pinning` aborted in all three with-skill runs and has no comparable measurement, and `gas-02` is marked *no reliable difference*. `gas-06-blocked-egress` has never been graded in any stamp. `gas-t06` is out of scope and routed in on all 3 repetitions. |
+| `github-actions-security` | 2026-07-28 | +29 over 4 comparable tasks | 2.4x | 9/10 (2026-07-27) | Three runs per condition. `gas-05-dependabot-pinning` aborted in all three with-skill runs and has no comparable measurement, and `gas-02` is marked *no reliable difference*. `gas-06-blocked-egress` has never been graded in any stamp. `gas-07-agent-workflow` was added with the clause about workflows that run an AI coding agent and has never been graded either, and `gas-t01` was replaced by a probe for that clause, so the routing score above measures a probe set the suite no longer holds. `gas-t06` is out of scope and routed in on all 3 repetitions. |
 | `python-secure-coding` | 2026-07-28, marked for regeneration | +4 over 5 tasks | 1.7x | 10/10 (2026-07-25) | Only `psc-02` has a delta not marked *no reliable difference*, and on `psc-03`, `psc-04` and `psc-05` the with-skill condition failed the same security assertions as the baseline. The fixtures were anchored for `ty` on 2026-08-17, which this stamp predates; see [evals/python-secure-coding/README.md](evals/python-secure-coding/README.md). |
 | `python-testing` | 2026-07-28 | +1 over 5 tasks | 1.4x | 9/10 (2026-07-25) | Four of five deltas are zero or marked *no reliable difference*, at $2.07 per net assertion gained. |
 
@@ -498,14 +502,22 @@ that a range such as `` `path:12`-`:15` `` ends after it starts, and, where the 
 quotes the source, that the quoted passage is near the line named. A
 cited path resolves as a repository path or as a unique path suffix among tracked files, since the
 documents abbreviate; eval fixtures are left out of that index, because a fixture ships its own
-`lint.yml` and would make every citation of the real one ambiguous. A bare continuation such as
-`` `:21` `` is not checked, because which file it belongs to is a question about the sentence
-rather than about the text, and the count of those is printed so the coverage is visible. It needs
-no third-party package.
+`lint.yml` and would make every citation of the real one ambiguous. A suffix matching more than
+one tracked file, such as a bare `SKILL.md`, resolves to none and fails, since a citation nothing
+can resolve is where drift hides.
+
+A bare continuation such as `` `:21` `` is held to the same checks. It inherits the file named by
+the section heading, by the table row it sits in, or by the sentence before it, and inside a row
+the row's own subject wins, because naming another file in one cell does not change what the row
+is about. Where a document breaks that rule the continuation resolves to the wrong file and is
+reported, which is the correction: the fix is to name the file. This matters more than the count
+suggests, since continuations outnumber the citations that name a path. It needs no third-party
+package.
 
 Repairing a moved citation is mechanical, so `--renumber` does it: the script diffs each cited
 file against `HEAD`, maps the old line numbers to the new ones, and rewrites the citations that
-moved, printing each one. It refuses to run when a citing document itself has uncommitted changes,
+moved, continuations included, printing each one. It refuses to run when a citing document
+itself has uncommitted changes,
 because the mapping runs from `HEAD` and a number already corrected by hand reads the same as one
 that never moved, so rewriting it would shift it twice. Commit the prose first, or finish the
 remaining citations by hand. Where a citation quotes its source, a failure names the line the
@@ -541,7 +553,7 @@ installing these skills is the reader that statement is written for.
 ## Releases
 
 Consumers install from a tag, so a release is a tag rather than a branch state. The rule this
-repository publishes at `skills/github/github-repository-security/references/agent-content.md:121`
+repository publishes at `skills/github/github-repository-security/references/agent-content.md:125`
 applies to itself: release from a tag, and make the tag protected and immutable.
 
 A release is cut in this order:

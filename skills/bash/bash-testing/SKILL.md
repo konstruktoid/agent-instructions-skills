@@ -169,6 +169,9 @@ anything, is not an attempt.
 Never weaken a test, skip it, or delete an assertion to get a green run. If a test is wrong, fix
 the test and say why it was wrong.
 
+No hook enforces that rule here. `instructions/agent_configuration_instructions.md` covers
+which rules need a mechanism rather than prose alone, and where one belongs.
+
 ## Verification checklist
 
 - [ ] Existing test layout, framework, and conventions read before writing, and matched
@@ -195,6 +198,8 @@ installed copy.
 
 - `instructions/bash_coding_instructions.md`: the `shellcheck`, `bash -n`, and formatter baseline,
   which applies to test code as well.
+- `instructions/agent_configuration_instructions.md`: choosing between an instruction and a hook,
+  for the rules above that must hold every time rather than most of the time.
 - `skills/bash/bash-secure-scripting/SKILL.md`: for security-relevant changes, whose rejection,
   cleanup, and failure paths need coverage.
 - bats-core, [documentation](https://bats-core.readthedocs.io/) and the

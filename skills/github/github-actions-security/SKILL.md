@@ -1,6 +1,6 @@
 ---
 name: github-actions-security
-description: Authors, reviews, and hardens GitHub Actions workflows, reusable workflows, and composite actions with least-privilege GITHUB_TOKEN permissions, action references pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe trigger and runner choices, and a structure that scales across many repositories, verified with actionlint and zizmor in a bounded loop. Use when creating or editing anything under .github/workflows/, an action.yml or action.yaml, or a dependabot.yml covering actions, and when reviewing workflow permissions, secrets, OIDC, action pinning or versions, triggers such as pull_request_target or workflow_run, self-hosted runners, caching, or organization-wide workflow governance.
+description: Authors, reviews, and hardens GitHub Actions workflows, reusable workflows, and composite actions with least-privilege GITHUB_TOKEN permissions, action references pinned by commit SHA to the latest published release, injection-safe handling of untrusted event data, safe trigger and runner choices, and a structure that scales across many repositories, verified with actionlint and zizmor in a bounded loop. Use when creating or editing anything under .github/workflows/, an action.yml or action.yaml, or a dependabot.yml covering actions, and when reviewing workflow permissions, secrets, OIDC, action pinning or versions, triggers such as pull_request_target or workflow_run, self-hosted runners, caching, or organization-wide workflow governance, and when a workflow runs an AI coding agent, covering the trigger that starts it and the token, tools, and network it holds.
 capabilities:
   tools:
     - Bash
@@ -51,6 +51,8 @@ production code, not configuration.
   runner labels, caching, or concurrency in a workflow.
 - Editing `.github/dependabot.yml` for the `github-actions` ecosystem.
 - Designing workflow structure for an organization: shared workflows, action allowlists, rulesets.
+- Adding or reviewing a workflow that runs an AI coding agent, including the trigger that starts
+  it and the token, tools, and network it is given.
 
 ## When NOT to use this
 
@@ -211,6 +213,8 @@ For secrets, environments, and OIDC claims, read
 | A workflow repeated across repositories, or a new reusable workflow | [references/scalability.md](references/scalability.md) |
 | Matrices, concurrency, path filters, job graphs, runtime or cost | [references/scalability.md](references/scalability.md) |
 | Organization or enterprise policy, rulesets, CODEOWNERS | [references/scalability.md](references/scalability.md) |
+| A step that invokes an AI coding agent, or a `pull_request_target` or comment-driven job that runs one | [references/agentic-workflows.md](references/agentic-workflows.md) |
+| An agent's tool allowlist, its token identity, or a prompt built from repository or event content | [references/agentic-workflows.md](references/agentic-workflows.md) |
 
 If the change matches nothing in the table, the baseline and the verification checklist still apply.
 
@@ -331,6 +335,9 @@ suppression to reach a clean run.
   control and how to diagnose a connection it blocked, and granting a job access to a device.
 - [references/scalability.md](references/scalability.md): reusable workflows, composite actions,
   cost and runtime controls, and organization-wide governance.
+- [references/agentic-workflows.md](references/agentic-workflows.md): workflows that run an AI
+  coding agent, covering the actor gate, token identity, tool and egress limits, and the
+  difference between script injection and instruction injection.
 
 Prose in this skill and its reference files follows
 `instructions/written_language_instructions.md`. That path is relative to this library's root; when
