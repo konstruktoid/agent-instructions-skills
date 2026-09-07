@@ -39,6 +39,7 @@ Current instructions documents:
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 | `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
 | `agent_configuration_instructions.md` | Choosing between a project instructions file, a skill, a hook, and a subagent, writing each, and changing one without losing the behavior it was written for. |
+| `terraform_coding_instructions.md` | Passing `terraform fmt`, `terraform validate`, and `tflint` cleanly, plus the state, secret, version-pinning, and layout judgment those tools cannot enforce. |
 
 ### skills/
 
@@ -69,6 +70,8 @@ Current skills:
 | `github-repository-security` | `skills/github/github-repository-security/SKILL.md` | Configuring and reviewing one repository: rulesets and review requirements, secret and code scanning, dependency alerts, access and deploy keys, tag and release protection, and the agent-facing content a repository ships, run through a bounded verify-fix loop that reads the applied state back rather than trusting the API response. |
 | `python-secure-coding` | `skills/python/python-secure-coding/SKILL.md` | The `ruff`/`ty` baseline from `python_coding_instructions.md`, extended with Python-specific security best practices aligned to the OWASP Top 10:2025 (input handling, deserialization, secrets, subprocess/SQL/crypto usage, SSRF, dependency hygiene), run through a bounded verify-fix loop. |
 | `python-testing` | `skills/python/python-testing/SKILL.md` | Adding or updating pytest coverage for a Python change: discovering and matching the repository's existing test layout, deciding when a test is required, and running the suite through a bounded verify-fix loop. |
+| `terraform-secure-iac` | `skills/terraform/terraform-secure-iac/SKILL.md` | The `fmt`/`validate`/`tflint` baseline from `terraform_coding_instructions.md`, extended with the properties no linter verifies: state and secret exposure, least-privilege execution identity, provider and module supply chain, sensitive markings, and policy-as-code, run through a bounded verify-fix loop with a configuration scanner. |
+| `terraform-testing` | `skills/terraform/terraform-testing/SKILL.md` | Adding or updating coverage for a Terraform change: discovering and matching the repository's existing approach (native `terraform test`, Terratest, or plan-and-policy assertions), deciding when a test is required, covering the failure path, and running the suite through a bounded verify-fix loop. |
 
 ### agent-templates/
 
@@ -113,7 +116,8 @@ Current templates:
 | `python-security-reviewer.md` | `skills/python/python-secure-coding` | Needs `Bash` for `ruff` and `ty`. Consider pinning a strong model. |
 | `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
 | `workflow-security-reviewer.md` | `skills/github/github-actions-security` | Needs `Bash` for `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA. Consider pinning a strong model. |
-| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the five. Consider pinning a strong model. |
+| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the six. Consider pinning a strong model. |
+| `terraform-security-reviewer.md` | `skills/terraform/terraform-secure-iac` | Needs `Bash` for `terraform fmt`, `terraform validate`, `tflint`, and the repository's configuration scanner. Does not run `terraform apply`. Consider pinning a strong model. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
 auto-discovers an `agents/` directory at a plugin's root, and every plugin here is sourced
@@ -132,7 +136,7 @@ of which keeps a single upstream copy that can be updated in place.
 
 ### Skills, as a Claude Code plugin
 
-This repository is its own plugin marketplace. The skills are grouped into four plugins so a
+This repository is its own plugin marketplace. The skills are grouped into five plugins so a
 project installs only what it needs:
 
 | Plugin | Skills |
@@ -141,6 +145,7 @@ project installs only what it needs:
 | `bash-standards` | `bash-secure-scripting`, `bash-testing` |
 | `ansible-standards` | `ansible-verification-loop` |
 | `github-standards` | `github-actions-security`, `github-repository-security`, `github-organization-governance` |
+| `terraform-standards` | `terraform-secure-iac`, `terraform-testing` |
 
 From inside Claude Code, in the consuming project. Pin to a release tag:
 
@@ -345,9 +350,10 @@ output, or that its `description` routes the right tasks to it. Two measurements
   skill's own Verify and Verification checklist sections. Every task runs twice against an
   identical fixture copy, once with the skill available and once without. The only difference
   between the two runs is a single-skill plugin passed with `--plugin-dir`, so a delta is
-  attributable to the skill. Six of the eight skills have a suite.
+  attributable to the skill. Six of the ten skills have a suite.
   `github-repository-security` and `github-organization-governance` have none, because a task
-  for either acts on a live GitHub organization rather than on a fixture directory;
+  for either acts on a live GitHub organization rather than on a fixture directory, and
+  `terraform-secure-iac` and `terraform-testing` have none yet;
   `scripts/check_evals.py` reports each of them as unmeasured.
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
@@ -365,12 +371,13 @@ improvement, the results file says so. See [evals/README.md](evals/README.md) fo
 conditions are isolated, what an assertion may and may not be, and the limitations that apply
 to every number in there.
 
-Six of the eight skills define both evals and have results committed. The table records the
+Six of the ten skills define both evals and have results committed. The table records the
 latest stamp for each of those, what it measured, and the limitation that keeps that number
 from standing as a general claim about the skill. `github-repository-security` and
 `github-organization-governance` have neither eval yet: both act on live GitHub settings, so
 a task eval needs a fixture that stands in for an organization, and until that exists there is
-no measurement of what either skill changes.
+no measurement of what either skill changes. `terraform-secure-iac` and `terraform-testing`
+have neither eval yet either; a suite for each is a follow-up.
 
 `scripts/check_evals.py` holds the six suites to the structure described here, and separates
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
@@ -560,7 +567,7 @@ A release is cut in this order:
 
 1. Set the same `version` on every plugin entry in `.claude-plugin/marketplace.json`. It is
    `MAJOR.MINOR.PATCH` without the `v`, and `scripts/check_skills.py` fails the build when an
-   entry is missing one, when one is malformed, or when the four entries disagree. One repository
+   entry is missing one, when one is malformed, or when the entries disagree. One repository
    at one tag is one version.
 2. Merge that change through a pull request, like any other.
 3. Tag the merge commit `v<version>` and push the tag.

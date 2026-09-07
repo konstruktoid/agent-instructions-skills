@@ -18,6 +18,12 @@ ruleset is applied. Each carries a **Landed** note with what shipped and what it
 buy. Controls 4 and 5 shipped differently from how they are proposed below, for reasons recorded in
 their notes.
 
+**Update, after the audit.** A `terraform-standards` plugin has since been added, with two skills
+and one agent template. No control below changes: the two new skills were written to carry the
+control-7 data-handling paragraph and the control-9 `capabilities` block. Clauses scoped to a
+control's landing ("in all eight skills") keep their count, since that is what the control
+touched; the standalone count of reference files is now thirty-five.
+
 ## Contents
 
 - The ranking
@@ -93,7 +99,7 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:436` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:443` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:136`. The prose at
 `github-actions-security/SKILL.md:226`-`:230` was rewritten to state the reason where the
 command is, rather than as a rule the
@@ -102,7 +108,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:428` documents it as something to type.
+no job for it. `README.md:435` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -131,7 +137,7 @@ count this as a control against 1.1. Count it as the place a check against 1.1 w
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:421` was updated from four jobs to five.
+clean. `README.md:428` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -252,11 +258,11 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:148` gives
+- **The documented install is pinned first.** `README.md:153` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
-  is kept below it at `:158`, labeled as tracking the default branch. This is the half of the
+  is kept below it at `:163`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:203` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:208` gives `"ref": "v0.1.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
@@ -269,7 +275,7 @@ while only one of them is fixed.
   the `creation` rule from `:125` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:559` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:566` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -421,7 +427,7 @@ prose, which is the medium of the entire threat.
 | 4, moving ref | None directly. It becomes the input to control 10, which is where it pays out |
 
 **Where it fails open.** Any capability written in prose. Any reference file, if the check reads
-only `SKILL.md`; there are thirty of them and they hold most of the commands. Any commit that
+only `SKILL.md`; there are thirty-five of them and they hold most of the commands. Any commit that
 edits the block and the body together. And the ordinary drift case, where the block becomes a field
 people fill in without meaning it, which is the fate of most declarations that nothing verifies.
 
@@ -523,7 +529,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:148` now leads with the pinned form and `README.md:203` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:153` now leads with the pinned form and `README.md:208` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
 
 ## Recommended order of implementation
 
@@ -531,7 +537,7 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:436` carry the
+   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:443` carry the
    digest from `lint.yml:136`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:543`. Attack path 1.3 is closed.
