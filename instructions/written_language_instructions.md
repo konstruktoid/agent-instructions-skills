@@ -59,12 +59,19 @@ markers of machine-generated text, so avoiding them keeps the output from readin
 generated.
 
 - Em dashes (`—`). Use a colon, a comma, or a separate sentence instead.
+- En dashes (`–`) as sentence punctuation, and a doubled hyphen (`--` or `––`) used as a
+  dash. These are the substitutes a writer reaches for after removing an em dash.
+  Automated pull request gates flag all three in a title or description as unproofread
+  machine output. Rewrite the sentence instead. An en dash inside a numeric or range
+  reference, such as `2–4` or `S105`–`S107`, is correct and stays.
 - Arrow symbols (`→`) in prose. Write the relation out, for example "maps to" or
   "results in". This restriction applies to prose only: arrows remain acceptable in
   diagrams, mapping tables, code, and command output, where they carry meaning that
   prose would not convey as clearly.
 - Decorative punctuation or symbols.
-- Emojis.
+- Emojis, in any position, including a commit message, a pull request title, and a pull
+  request description. Pull request gates flag a title or body carrying more than two or
+  three emojis, and some treat a single decorative emoji as a machine-output marker.
 - Excessive exclamation marks.
 - Multiple punctuation marks (for example, `!!` or `???`).
 
@@ -124,6 +131,26 @@ fact, mechanism, consequence, or measurement specific to that subject.
 "The integration improved efficiency" applies to any integration. "The integration reduced deploy
 time from 40 minutes to 4" applies only to this one. Apply the same test to a claim of
 importance, replacing "the tool significantly improves review quality" with the measured result.
+
+## Commit messages and pull request descriptions
+
+Automated pull request quality gates score this text with a set of heuristics separate from the
+rest of a repository's prose. The rules above already satisfy most of them. The following are
+specific to that context.
+
+- State why the change was made, not only what changed. A description that restates the diff, for
+  example "this pull request adds a retry loop and updates the config schema", carries no
+  information the reviewer cannot read from the diff, and a gate reads a body that never gives a
+  reason as machine output. Name the cause, the constraint, or the decision.
+- Keep a commit message body within about 500 characters and a pull request description within
+  about 2,500 characters. Gates treat length past these points as generated verbosity. The
+  conciseness rules above reach the same result: remove anything the reader can get from the diff.
+- Do not enumerate more than a few file paths or function names in a description. A dense list of
+  code references reads as a generated change log. State the change and let the diff carry the
+  file list.
+- A gate that rejects a short or absent pull request description conflicts with the guidance to
+  omit a body the title already covers. Where such a gate is in force, add one sentence of
+  rationale rather than padding the body to clear a length threshold.
 
 ## Word Choice
 
@@ -246,7 +273,9 @@ Before producing the final output, verify that:
 
 - The tone is formal and professional.
 - The language is objective and precise.
-- No em dashes (`—`) are present.
+- No em dashes (`—`) are present, no en dash (`–`) is used as sentence punctuation, and no
+  doubled hyphen (`--` or `––`) is used as a dash. An en dash in a numeric or identifier range
+  is retained.
 - No arrow symbols (`→`) are present in prose. Arrows inside diagrams, mapping tables,
   code, or command output are acceptable.
 - No conversational fillers remain.
@@ -268,3 +297,6 @@ Before producing the final output, verify that:
 - Grammar and punctuation are correct.
 - Terminology is consistent.
 - The document is concise, clear, and easy to read.
+- For a commit message or pull request description: it states why the change was made rather than
+  restating the diff, stays within the length thresholds, carries no emoji, and does not list more
+  than a few code references.
