@@ -266,7 +266,7 @@ while only one of them is fixed.
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all four, and `check_plugin_versions` at `scripts/check_skills.py:569` fails the
+  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:569` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`

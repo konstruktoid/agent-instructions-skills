@@ -17,7 +17,9 @@ infrastructure on the next run.
 - Enable state locking so two runs cannot write concurrently. Where the backend needs a separate
   lock table or lease mechanism, configure it; a missing lock corrupts state under concurrency.
 - Keep the backend configuration in a `backend` block or a `-backend-config` file that is under
-  review, not passed ad hoc on the command line.
+  review, not passed ad hoc on the command line. Put only non-secret metadata there, meaning the
+  bucket, key, region, and table names. Supply backend credentials through environment variables
+  or the backend's default credential chain, never in a reviewed file.
 
 ## State as a secret store
 
@@ -37,9 +39,11 @@ infrastructure on the next run.
   domain. A single bad apply can reach everything in it.
 - Split configuration into smaller roots along ownership and rate-of-change boundaries. Wire them
   together through published module outputs or a `terraform_remote_state` data source.
-- A `terraform_remote_state` read exposes the whole referenced state to the reading configuration.
-  Prefer narrow, explicit outputs, or a dedicated data store for shared values, over reading
-  another team's state wholesale.
+- A `terraform_remote_state` data source exposes only the other configuration's root module
+  outputs to Terraform expressions, but reading them requires the caller to have read access to
+  the complete state snapshot, which may hold every secret in it. Prefer narrow, explicit
+  outputs, or a dedicated data store for shared values, over granting a reader access to a whole
+  team's state.
 
 ## Migrations
 

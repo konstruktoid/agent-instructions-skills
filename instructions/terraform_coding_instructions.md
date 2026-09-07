@@ -59,8 +59,9 @@ Two skills build on this document and are worth applying alongside it:
   or a `*.tfplan` file. A plan file can contain secret values in cleartext.
 - Setting `version` inside a `provider` block. It is deprecated; the constraint belongs in
   `required_providers`.
-- Sourcing a module from a branch or an unpinned Git reference. Pin to a release tag or a commit
-  SHA, and for a registry module add a `version` constraint.
+- Sourcing a module from a branch or an unpinned Git reference. Pin to a commit SHA, or to a
+  release tag the source repository protects against being moved, and for a registry module set
+  an exact `version`. Use HTTPS or SSH transport, with no credentials in the URL.
 - Using `terraform.workspace` to switch between environments where the repository separates
   environments by directory and backend key. Match the pattern already in the repository.
 - Reaching for a `local-exec` or `remote-exec` provisioner where a resource, a data source, or a
@@ -105,8 +106,11 @@ judgment because no static check settles them:
 
 - **Whether state will hold a secret.** Many resources and data sources write attribute values to
   state in cleartext. Marking a variable or output `sensitive` hides it from CLI output, not from
-  the state file. Keep the secret in an external manager and read it at apply time, or use an
-  ephemeral resource or a write-only argument where the provider supports one.
+  the state file. A data source that reads a secret from an external manager still lands the
+  retrieved value in state; reading at apply time only shortens its validity window. To keep the
+  value out of state and plan files, use an ephemeral resource, a write-only argument, or a
+  provider reference that does not return the secret; otherwise treat the state and plan files as
+  secret material.
 - **Whether the plan was read.** The output of `terraform plan` is the review artifact for a
   change. A resource shown as replaced, a `-/+` line, or a changed argument the diff does not
   explain is a finding, not a detail to pass over.
@@ -140,8 +144,9 @@ Before considering a Terraform change complete, verify that:
 - `tflint` passes on every file touched, with no new suppressions.
 - `required_version` is set, every provider in `required_providers` carries a version constraint,
   and `.terraform.lock.hcl` is committed and updated for every platform CI uses.
-- Every module `source` names a registry version, a tag, or a commit SHA, never a branch or an
-  unpinned reference.
+- Every module `source` names an exact registry version, a commit SHA, or a protected release
+  tag, never a range, a branch, a movable tag, or an unpinned reference, and a remote source uses
+  HTTPS or SSH with no credentials in the URL.
 - No `*.tfstate`, `.terraform/` directory, provider binary, plan file, or `*.tfvars` with real
   values is staged.
 - Every variable has a `type` and a `description`; every secret input and every secret-derived

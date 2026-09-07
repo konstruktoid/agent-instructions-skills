@@ -18,7 +18,11 @@ plan and apply logs. A control that covers one does not cover the others.
 - Assume every attribute a resource or data source returns is stored in state in cleartext. See
   [state.md](state.md).
 - Where the provider offers an ephemeral resource, a write-only argument, or an ephemeral input
-  variable, use it so the value is never persisted to state or to a plan file.
+  variable, use it so the value is never persisted to state or to a plan file. These need recent
+  versions: ephemeral resources and variables from Terraform 1.10, provider write-only arguments
+  from Terraform 1.11, and OpenTofu only from its own equivalent releases. On an older target,
+  fall back to keeping the secret in an external manager and protecting the state and plan files
+  as secret material.
 - Where a secret must be generated, prefer a dedicated secret manager resource that keeps the
   value in the manager over a provider resource that returns it into state.
 - A data source that reads a secret from a manager still places the retrieved value in state.
@@ -38,7 +42,10 @@ plan and apply logs. A control that covers one does not cover the others.
 ## Sensitive markings
 
 - `sensitive = true` on a variable propagates: an expression that uses it becomes sensitive, and
-  Terraform errors if a sensitive value reaches a place that would print it, such as a resource
-  argument the provider logs.
-- Do not remove a `sensitive` marking to quiet that error. Find where the value is being exposed
-  and stop the exposure.
+  Terraform errors if a sensitive value reaches an output or another position it would print
+  without the marking carried through.
+- Propagation and redaction are Terraform-CLI-scoped. They do not reach a provider's own debug
+  logs, a `-json` plan consumed by other tooling, or the logs of an external secret manager the
+  configuration calls. Those channels need their own controls.
+- Do not remove a `sensitive` marking to quiet the propagation error. Find where the value is
+  being exposed and stop the exposure.

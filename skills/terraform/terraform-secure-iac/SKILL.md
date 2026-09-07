@@ -12,7 +12,10 @@ capabilities:
   shell:
     - checkov
     - git
+    - make
+    - pre-commit
     - terraform
+    - terrascan
     - tflint
     - tfsec
     - trivy
@@ -100,13 +103,21 @@ In short:
 - Do not weaken `.tflint.hcl`, a scanner baseline, or a policy as a first response to a failing
   check.
 
-Two points matter specifically for security:
+Three points matter specifically for security:
 
 - **Configuration scanning.** Where the repository configures a scanner (`tfsec`, `trivy config`,
   `checkov`, `terrascan`), run it and treat a pass as a floor, not proof. Where it configures
   none, the reference files below carry the checks a scanner would make.
 - **Suppressions.** Never disable a `tflint` rule or a scanner check repository-wide to silence
   one instance. Suppress narrowly, at the resource or the line, with a one-line justification.
+- **`init` and `validate` run outside code.** `terraform init`, `-backend=false` included,
+  downloads provider plugins that execute as native binaries and modules from whatever `source`
+  the configuration names, and `terraform validate` invokes those plugins. On a repository whose
+  contents are not yet trusted, run the loop with no sensitive credentials in the environment,
+  with outbound access restricted to the provider and module sources the configuration
+  legitimately needs, and with ambient Git and SSH credentials cleared so a module `source`
+  cannot use them. Where that isolation is not available, make the trust decision explicitly
+  before running any command.
 
 ## Verify
 
@@ -117,8 +128,12 @@ point where one exists, so it uses the configured versions and options:
 - `terraform init -backend=false` then `terraform validate`, clean.
 - `tflint` with the repository's configuration, no new suppressions.
 - The repository's configuration scanner, if one is configured, with no new suppressed findings.
-- Where credentials for a non-production target are available, `terraform plan -out` and a read of
-  the saved plan. Where they are not, say so; do not apply to obtain a plan.
+- Where read-only credentials for a non-production target are available, run a backend-enabled
+  `terraform init` in a disposable workspace, then `terraform plan -out` to a path outside the
+  repository, and read the saved plan. Treat that file as sensitive: it can carry prior state and
+  secret values, so delete it after inspection. Where those credentials or a usable backend are
+  not available, say so; do not apply to obtain a plan, and do not run `plan` with write
+  credentials.
 - If any command ran with `-write` or `--fix`, or any formatter ran, read its `git diff` before
   continuing and revert any hunk the change does not explain.
 
@@ -147,14 +162,16 @@ changing anything, is not an attempt.
 - [ ] No secret value is written to state that an external manager or an ephemeral resource could
       hold instead; `sensitive` is not treated as state encryption
 - [ ] Remote state has a backend with encryption at rest, access control, locking, and versioning;
-      no state file or plan file is committed
+      no state file or plan file is committed or left in the working tree; a reviewed `backend`
+      block or `-backend-config` file holds only non-secret metadata
 - [ ] Every variable carrying a secret and every secret-derived output is marked `sensitive`
 - [ ] The identity `apply` runs as holds only the permissions the configuration needs; `plan` uses
       read-only credentials where the workflow separates them; credentials are short-lived where
       the platform supports it
-- [ ] Every module and provider `source` is pinned to a version, tag, or commit; the provider
-      `source` address names the expected namespace; `.terraform.lock.hcl` is committed and
-      records every platform CI uses
+- [ ] Every module and provider `source` is pinned to an exact version or a commit SHA, or to a
+      tag protected against being moved; a remote module `source` uses HTTPS or SSH transport with
+      no credentials in the URL; the provider `source` address names the expected namespace;
+      `.terraform.lock.hcl` is committed and records every platform CI uses
 - [ ] Policy-as-code checks, where the repository has them, pass locally before the change is
       proposed
 - [ ] Nothing committed carries user or system information: no real account identifiers,

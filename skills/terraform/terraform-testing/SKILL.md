@@ -12,6 +12,8 @@ capabilities:
   shell:
     - git
     - go
+    - make
+    - pre-commit
     - terraform
     - tflint
   paths:
@@ -64,7 +66,9 @@ of imposing one project's structure on another.
      CI.
 3. Match whatever is there. Do not add a second framework alongside an existing one. Where there
    is nothing, prefer native `terraform test` for a module, since it needs no extra language or
-   dependency.
+   dependency, but only where the module's `required_version` and the Terraform version CI runs
+   both resolve to 1.6 or later, or to 1.7 or later if the test uses `mock_provider`. Below that,
+   use a plan-and-policy approach or Terratest instead.
 4. Decide what the test should assert: the new output's value, the resource attribute the change
    sets, a `validation` block rejecting a bad input and accepting a good one, or the plan
    containing or omitting a given action. Cover the failure path, not only the passing one.
@@ -76,16 +80,20 @@ of imposing one project's structure on another.
 
 The `fmt`/`validate`/`tflint` baseline is defined in
 `instructions/terraform_coding_instructions.md`. Read that file rather than relying on a summary.
-Test files are configuration: `terraform fmt` and `tflint` apply to `.tftest.hcl` files, and Go
-test files are held to the repository's Go tooling.
+Test files are configuration: run `terraform fmt` over `.tftest.hcl` files. Run `tflint` over the
+module roots; point it at `.tftest.hcl` files only where the pinned `tflint` version processes
+them, since it does not read Terraform test files on every version. Go test files are held to the
+repository's Go tooling.
 
 - A native `terraform test` run executes a real `plan`, and for a `run` block with
   `command = apply` a real `apply` against real infrastructure, unless the `run` block sets
   `command = plan` or a mock provider is configured. Prefer `command = plan` and provider mocks
   for a unit-style test; reserve `apply` runs for an integration suite that has a target to create
   in and destroy after.
-- Terratest always creates and destroys real infrastructure. It belongs in an integration suite
-  with its own credentials and a cleanup guarantee, not in a fast pre-merge check.
+- Terratest that calls `terraform.InitAndApply` creates and destroys real infrastructure and
+  belongs in an integration suite with its own credentials and a cleanup guarantee. Terratest
+  also has plan-only helpers such as `terraform.InitAndPlan` that provision nothing; those can
+  run in a fast pre-merge check where their provider and network needs are met.
 
 ## Verify
 
@@ -95,7 +103,8 @@ Never declare the change done from the edit alone:
   the CI step) and confirm it passes.
 - Run the new test with the change under test reverted and confirm it fails, so it is testing what
   it claims to.
-- Run `terraform fmt -check` and `tflint` over any `.tftest.hcl` files added.
+- Run `terraform fmt -check` over any `.tftest.hcl` files added, and `tflint` over the module
+  roots.
 - Confirm the test creates nothing that outlives it: an `apply` run has a matching teardown, and
   no state or plan file is left in the tree.
 
@@ -105,6 +114,10 @@ One **attempt** is one full fix-and-rerun cycle: apply fixes for the failures fr
 run, then rerun the suite to completion. Reading output, or re-reading a file without changing
 anything, is not an attempt.
 
+- Wrap each attempt in a timeout, since `terraform test` has no built-in time bound on a run or a
+  `run` block. Use the repository's own timeout where its test entry point sets one, otherwise an
+  external one such as `timeout`. On a timeout, run the teardown before the next attempt and
+  before applying the stop-and-report rules below.
 - Baseline the loop at 3 attempts.
 - Continue past 3 only while making measurable progress, meaning each cycle ends with strictly
   fewer failures than the one before it.
@@ -123,7 +136,7 @@ anything, is not an attempt.
 - [ ] The new test fails when the change under test is reverted
 - [ ] The test matches the repository's existing framework and file layout; no second framework
       was introduced
-- [ ] `.tftest.hcl` files pass `terraform fmt -check` and `tflint`
+- [ ] `.tftest.hcl` files pass `terraform fmt -check`; `tflint` is clean on the module roots
 - [ ] No test creates infrastructure that outlives it; every `apply` run has a teardown
 - [ ] No state file, plan file, or `.terraform/` directory is left in the working tree
 - [ ] If no test was added, the reason is stated

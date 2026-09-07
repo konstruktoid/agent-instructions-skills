@@ -9,9 +9,13 @@ and both need the pinning and review a code dependency gets.
 - Pin every provider in `required_providers` with a `version` constraint and a full `source`
   address including the namespace, for example `hashicorp/aws`. A bare provider name or a wrong
   namespace can resolve to a different publisher.
-- Pin every module `source`. For a registry module, add a `version` constraint. For a Git module,
-  append `?ref=` with a release tag or a commit SHA, never a branch name and never an omitted
-  ref.
+- Pin every module `source` to an immutable revision. For a registry module, set an exact
+  `version`, not a range: a range can resolve to a newer module on the next `init`. For a Git
+  module, append `?ref=` with a full commit SHA, or with a release tag that the source repository
+  protects against being moved; never a branch name, a plain movable tag, or an omitted ref.
+- Use HTTPS or SSH transport for a remote module `source`. Terraform also accepts `http` and
+  `ftp` Git URLs, which a `ref` pin does not make safe. Put no credentials in the URL, and keep
+  remote module hosts to a known set.
 - Set `required_version` for Terraform itself.
 
 ## The dependency lock file

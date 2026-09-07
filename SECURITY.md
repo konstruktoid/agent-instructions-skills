@@ -88,6 +88,10 @@ has configured, `pre-commit` hooks included.
 - A Python package index, through `uvx` resolving `zizmor` at run time.
 - Provider and module registries, through `terraform init` and `terraform test` resolving
   providers and modules, and a Go module proxy, through `go test` building a Terratest suite.
+  Where a `terraform test` `run` block or a Terratest case applies, creates, or destroys real
+  infrastructure, it also reaches the cloud-provider APIs and other endpoints the target
+  repository's own configuration names; that egress is determined by that repository, not by this
+  content.
 - `docs.github.com`, through the instruction in `github-repository-security` and
   `github-organization-governance` to check the current REST documentation where an endpoint
   fails or a field is absent. That one is a fetch written in prose rather than a command, which
