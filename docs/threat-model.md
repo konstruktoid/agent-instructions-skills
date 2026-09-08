@@ -83,7 +83,7 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 `skills/github/github-organization-governance/SKILL.md:282`,
 `skills/github/github-repository-security/SKILL.md:290`,
 `skills/python/python-secure-coding/SKILL.md:163`, `skills/python/python-testing/SKILL.md:139`,
-`skills/terraform/terraform-secure-iac/SKILL.md:168`, `skills/terraform/terraform-testing/SKILL.md:134`.
+`skills/terraform/terraform-secure-iac/SKILL.md:168`, `skills/terraform/terraform-testing/SKILL.md:138`.
 
 #### `skills/ansible/ansible-verification-loop/SKILL.md`
 

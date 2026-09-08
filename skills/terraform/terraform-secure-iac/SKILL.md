@@ -113,11 +113,12 @@ Three points matter specifically for security:
 - **`init` and `validate` run outside code.** `terraform init`, `-backend=false` included,
   downloads provider plugins that execute as native binaries and modules from whatever `source`
   the configuration names, and `terraform validate` invokes those plugins. On a repository whose
-  contents are not yet trusted, run the loop with no sensitive credentials in the environment,
-  with outbound access restricted to the provider and module sources the configuration
-  legitimately needs, and with ambient Git and SSH credentials cleared so a module `source`
-  cannot use them. Where that isolation is not available, make the trust decision explicitly
-  before running any command.
+  contents are not yet trusted, run the loop in a sandbox: no sensitive credentials in the
+  environment, outbound access restricted to the provider and module sources the configuration
+  legitimately needs, ambient Git and SSH credentials cleared so a module `source` cannot use
+  them, and filesystem access confined to the working tree so a plugin cannot read credentials
+  or other files elsewhere on the runner. Where that isolation is not available, review the
+  configuration statically and do not run `init` or `validate`.
 
 ## Verify
 

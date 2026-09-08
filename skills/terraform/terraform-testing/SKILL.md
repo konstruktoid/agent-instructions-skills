@@ -16,6 +16,7 @@ capabilities:
     - pre-commit
     - terraform
     - tflint
+    - timeout
   paths:
     - "${CLAUDE_PLUGIN_ROOT}/instructions/"
     - "the target repository working tree"
@@ -90,10 +91,13 @@ repository's Go tooling.
   `command = plan` or a mock provider is configured. Prefer `command = plan` and provider mocks
   for a unit-style test; reserve `apply` runs for an integration suite that has a target to create
   in and destroy after.
-- Terratest that calls `terraform.InitAndApply` creates and destroys real infrastructure and
-  belongs in an integration suite with its own credentials and a cleanup guarantee. Terratest
-  also has plan-only helpers such as `terraform.InitAndPlan` that provision nothing; those can
-  run in a fast pre-merge check where their provider and network needs are met.
+- Terratest that calls `terraform.InitAndApply` creates and destroys real infrastructure. Run it
+  only in an integration suite, against a non-production target, with explicit approval, with
+  least-privilege short-lived credentials of its own, and with a deferred `terraform.Destroy` so
+  it tears down on every exit path. Where those controls are not all in place, use a plan-only
+  helper such as `terraform.InitAndPlan`, which provisions nothing and can run in a fast
+  pre-merge check where its provider and network needs are met. A review agent does not run
+  applies at all.
 
 ## Verify
 

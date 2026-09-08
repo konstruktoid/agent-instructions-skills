@@ -58,10 +58,11 @@ verify loop. This file adds only the scope below.
   credentials.
 - `terraform init` still downloads provider plugins that run as native binaries and modules from
   the configuration's `source` addresses, and `terraform validate` executes those plugins. On a
-  repository not already trusted, run the verify loop with no sensitive credentials in the
-  environment, with outbound access held to the registries the configuration needs, and with
-  ambient Git and SSH credentials cleared; where that is not available, say the loop was not run
-  and review the configuration statically.
+  repository not already trusted, run the verify loop in a sandbox: no sensitive credentials in
+  the environment, outbound access held to the registries the configuration needs, ambient Git
+  and SSH credentials cleared, and filesystem access confined to the working tree so a plugin
+  cannot read files elsewhere on the runner. Where that is not available, say the loop was not
+  run and review the configuration statically.
 - Treat a backend block, a secret or credential value, an IAM object, the credentials `apply`
   runs as, a module `source`, and a `sensitive` marking as high-sensitivity, whatever the
   repository's own documentation says.
