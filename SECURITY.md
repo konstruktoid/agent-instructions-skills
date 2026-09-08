@@ -55,7 +55,7 @@ The statement below is what
 asks every publisher of agent-facing content to provide, so that a reader can compare the claim
 against the files.
 
-**What ships.** Eight skills under `skills/`, six documents under `instructions/`, five agent
+**What ships.** Ten skills under `skills/`, seven documents under `instructions/`, six agent
 templates under `agent-templates/`, and the reference files each skill loads on demand. There are
 no session hooks, no MCP server definitions, no slash commands, no installable subagents, and no
 `.claude/settings.json`; `scripts/check_skills.py` fails the build when any of those appears at
@@ -74,9 +74,10 @@ such files out of a commit and out of a log, never as something to open.
 
 **Runs.** The target repository's own entry points, plus these by name: `ansible-lint`,
 `molecule`, `ansible-test`, `ansible-galaxy`, `shellcheck`, `bash -n`, `shfmt`, `bats`, `pytest`,
-`ruff`, `ty`, `pre-commit`, `actionlint`, `zizmor`, OpenSSF Scorecard, `gh`, `git`, and `docker`.
-A skill that runs the target repository's own entry point runs whatever that repository has
-configured, `pre-commit` hooks included.
+`ruff`, `ty`, `pre-commit`, `actionlint`, `zizmor`, OpenSSF Scorecard, `terraform`, `terragrunt`,
+`terraform-docs`, `tflint`, `tfsec`, `trivy`, `checkov`, `terrascan`, `go`, `gh`, `git`, and
+`docker`. A skill that runs the target repository's own entry point runs whatever that repository
+has configured, `pre-commit` hooks included.
 
 **Sends.** Only what those commands send:
 
@@ -85,6 +86,12 @@ configured, `pre-commit` hooks included.
   digest, and of the OpenSSF Scorecard image on `gcr.io`, which `github-repository-security`
   asks to be resolved to a current release and pinned by digest before it runs.
 - A Python package index, through `uvx` resolving `zizmor` at run time.
+- Provider and module registries, through `terraform init` and `terraform test` resolving
+  providers and modules, and a Go module proxy, through `go test` building a Terratest suite.
+  Where a `terraform test` `run` block or a Terratest case applies, creates, or destroys real
+  infrastructure, it also reaches the cloud-provider APIs and other endpoints the target
+  repository's own configuration names; that egress is determined by that repository, not by this
+  content.
 - `docs.github.com`, through the instruction in `github-repository-security` and
   `github-organization-governance` to check the current REST documentation where an endpoint
   fails or a field is absent. That one is a fetch written in prose rather than a command, which

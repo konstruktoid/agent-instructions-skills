@@ -49,6 +49,17 @@
         "./skills/github/github-organization-governance",
         "./skills/github/github-repository-security"
       ]
+    },
+    {
+      "name": "terraform-standards",
+      "source": "./",
+      "strict": false,
+      "version": "0.1.0",
+      "description": "Terraform authoring standards: configuration that passes fmt, validate, and tflint, keeps state and secrets out of version control, runs under a least-privilege execution identity, pins its providers and modules with a committed lock file, and is checked by policy-as-code, plus test coverage that matches the target repository's existing approach. Each skill runs a bounded verify-fix loop with configuration scanning and reports unresolved findings rather than declaring success unverified.",
+      "skills": [
+        "./skills/terraform/terraform-secure-iac",
+        "./skills/terraform/terraform-testing"
+      ]
     }
   ]
 }

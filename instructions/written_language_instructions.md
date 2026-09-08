@@ -5,7 +5,7 @@
 Produce text that is formal, professional, precise, and concise. Prioritize clarity, accuracy,
 and readability over stylistic variation.
 
-Four skills build on this document and are worth applying alongside it. All of them write prose
+Six skills build on this document and are worth applying alongside it. All of them write prose
 into a repository rather than reporting only to a reader:
 
 - `skills/github/github-actions-security/SKILL.md` applies these rules to workflow comments and to
@@ -16,6 +16,10 @@ into a repository rather than reporting only to a reader:
   description, and the statement of what a repository's agent-facing content reads and sends.
 - `skills/github/github-organization-governance/SKILL.md` applies them to policy pages, the
   control-to-evidence mapping, and the recorded reason for an exception.
+- `skills/terraform/terraform-secure-iac/SKILL.md` applies them to module `README.md` files and to
+  input variable and output descriptions.
+- `skills/terraform/terraform-testing/SKILL.md` applies them to test names and to any `README.md`
+  note on how to run a module's test suite.
 
 The rules below govern text the writer is producing. For text written by another author, the
 `prose-editor` agent template states the additional constraints that apply to an editor: the
