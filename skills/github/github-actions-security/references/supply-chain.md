@@ -95,6 +95,13 @@ A pinned action can still fetch mutable content at run time. Before trusting one
 Reusable workflows are third-party dependencies with the same properties. Pin
 `uses: org/repo/.github/workflows/x.yml@<sha>` the same way.
 
+OpenSSF Scorecard's Pinned-Dependencies check scores the whole repository, not only workflow
+`uses:` lines. It reads Dockerfile `FROM` lines, package manifests and their lock files, and
+`curl` or `wget` downloads in shipped scripts, and scores the fraction pinned to a hash. A full
+semantic version for a Go module counts as pinned; everything else needs a digest or a committed
+lock file. A repository chasing that check pins its base images by `sha256`, commits every lock
+file, and checksum-verifies scripted downloads, alongside the action pinning above.
+
 ## Choosing an action at all
 
 The safest action is the one not added. A three-line `run:` step often replaces a dependency that
@@ -178,6 +185,10 @@ steps:
 Verify with `gh attestation verify <file> --repo <owner>/<repo>`. An attestation is only meaningful
 if consumers verify it, so document the verification command alongside the release.
 
+Attaching the provenance file (`*.intoto.jsonl`) to the GitHub release also satisfies the top tier
+of OpenSSF Scorecard's Signed-Releases check, which reads release assets for a signature or a SLSA
+provenance file on each of the last five releases.
+
 ## Checklist
 
 - [ ] Every `uses:` reference pinned to a full 40-character SHA with a version comment
@@ -188,6 +199,8 @@ if consumers verify it, so document the verification command alongside the relea
       recorded in the pull request description
 - [ ] Composite actions, Docker base images, and install scripts inside a pinned action checked for
       mutable references
+- [ ] Where an external pinning check is the target, Dockerfile `FROM` lines pinned by digest, lock
+      files committed for every ecosystem, and scripted downloads checksum-verified
 - [ ] New actions justified: readable source, maintained, correct name, minimal alternative
       considered
 - [ ] Dependabot configured for `github-actions` with a cooldown, and its pull requests reviewed

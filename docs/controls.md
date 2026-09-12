@@ -87,7 +87,7 @@ learns why the root is special. `docs` was added to the allowlist to admit this 
 
 As audited, `skills/github/github-actions-security/SKILL.md` ran `rhysd/actionlint:1.7.12` with
 `$PWD` bind-mounted read-write, a few lines below its own instruction to pin by digest, while
-`lint.yml:136` already carried the digest.
+`lint.yml:147` already carried the digest.
 
 **What it stops.** Attack path 3.5.
 
@@ -100,7 +100,7 @@ is not a hash.
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
 **Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:443` now
-carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:136`. The prose at
+carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:147`. The prose at
 `github-actions-security/SKILL.md:226`-`:230` was rewritten to state the reason where the
 command is, rather than as a rule the
 command beneath it broke.
@@ -120,8 +120,9 @@ fields; it does not care what the command does.
 **Where it fails open.** Immediately, against any grader command that is structurally valid. Do not
 count this as a control against 1.1. Count it as the place a check against 1.1 would go.
 
-**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:86`-`:110`, running
-`python3 scripts/check_evals.py` at `:105`. Three choices in it:
+**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:86`-`:121`, running
+`python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`). Three choices in
+it:
 
 - **No uv setup.** The script imports only the standard library and shells out to `git` and
   `bash`, both of which the runner image provides, so the job is a checkout and a command.
@@ -130,10 +131,13 @@ count this as a control against 1.1. Count it as the place a check against 1.1 w
   failed git lookup to an empty string, which reads as "nothing changed". A shallow checkout
   would report every suite fresh without having compared anything, which is worse than not
   running it.
-- **Not `--strict`.** Staleness is a statement about when a measurement was last taken, and a
-  pull request that does not touch a skill cannot fix it. Six suites currently report ten
-  staleness findings, so `--strict` would fail every pull request for a reason none of them
-  caused. The structural half is what blocks.
+- **`--strict` only when the diff itself is what went stale** (`:116`-`:118`). Staleness is a
+  statement about when a measurement was last taken, and a pull request that does not touch a
+  skill cannot fix it, so an unconditional `--strict` would fail every pull request for a reason
+  none of them caused. A change under `skills/`, or to an eval's own `tasks.json` or
+  `assertions.json`, is the one case where the contributor causing the staleness can also resolve
+  it before merge, so that diff shape runs `--strict`; everything else runs the structural-only
+  form, which is what blocks regardless.
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
@@ -271,8 +275,8 @@ while only one of them is fixed.
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
   targets `refs/tags/v*`, blocks `deletion` and `non_fast_forward`, and lists no bypass actors,
-  which is what `references/rulesets.md:123` asks for and where `:48` says to keep it. It omits
-  the `creation` rule from `:125` deliberately: with one account and no bypass actors, that rule
+  which is what `references/rulesets.md:144` asks for and where `:49` says to keep it. It omits
+  the `creation` rule from `:146` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
   `README.md:566` documents the release order and the `gh api` call that applies the ruleset.
@@ -517,7 +521,7 @@ ref is not a meaningful construct.
 
 **Recommendation.** Deprioritize until control 6 exists. Once there are tags and something is
 published, `gh attestation verify` becomes available to consumers, which
-`github-actions-security/references/supply-chain.md:178` already teaches them to run. Adopt it then,
+`github-actions-security/references/supply-chain.md:185` already teaches them to run. Adopt it then,
 and describe it in the release notes as what it is: proof of origin, not proof of safety.
 
 ## The four controls the brief asks to evaluate
@@ -538,7 +542,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
    `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:443` carry the
-   digest from `lint.yml:136`.
+   digest from `lint.yml:147`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:543`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
