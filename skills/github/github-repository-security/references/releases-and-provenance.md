@@ -12,6 +12,7 @@ cut from, or establishing that an artifact came from the source it claims.
 - Immutable releases
 - Signing commits and tags
 - Build provenance and attestations
+- Signed releases and packaging as an external check
 - What a consumer can verify
 - Checklist
 
@@ -87,6 +88,26 @@ verifies the source repository and workflow rather than trusting the file name. 
 attestation nobody verifies still helps, since it makes verification possible later without
 republishing.
 
+## Signed releases and packaging as an external check
+
+OpenSSF Scorecard grades two release properties from outside the repository, and both return -1,
+meaning the check could not run, until the repository has published its first GitHub release. The
+first release cut from the protected tag turns both into a real score.
+
+- **Signed-Releases** reaches 8 when every one of the last five releases carries a signature asset,
+  matched by extension: `*.sig`, `*.asc`, `*.minisig`, `*.sigstore.json`, and similar. It reaches
+  10 when every release carries a SLSA provenance file, `*.intoto.jsonl`. The provenance from
+  `actions/attest-build-provenance` satisfies the top tier: write the returned file into the
+  release assets in the publishing job.
+- **Packaging** is satisfied by a workflow that publishes to a package registry: a language hub
+  through a recognized publish action, or GitHub Packages. A repository publishing to a non-code
+  hub, such as an Ansible role importing to Ansible Galaxy on a tag push, is recognized by that
+  publish step. Keep the step in the release workflow rather than a manual process, since the
+  check reads the workflow.
+
+Neither raises a score on its own until releases exist and recur, so a repository that never tags
+a release scores nothing on either however well the publishing job is written.
+
 ## What a consumer can verify
 
 State in the repository's own documentation which of these a consumer can check, since a claim
@@ -112,4 +133,9 @@ behind it is advice the repository does not honor.
 - [ ] Immutable releases enabled where the platform supports it
 - [ ] Release tags signed, and commit signing required where adoption allows
 - [ ] An attestation generated and published with each artifact
+- [ ] At least one release published, so the external signed-release and packaging checks can run
+- [ ] Each of the last five releases carries a signature asset, or a `*.intoto.jsonl` provenance
+      file for the full external score
+- [ ] A publish step in the release workflow sends the package to a registry the external
+      packaging check recognizes
 - [ ] The repository documents what a consumer can verify, and every claim in it is checkable

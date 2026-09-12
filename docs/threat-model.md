@@ -81,7 +81,7 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 `skills/bash/bash-secure-scripting/SKILL.md:329`, `skills/bash/bash-testing/SKILL.md:196`,
 `skills/github/github-actions-security/SKILL.md:344`,
 `skills/github/github-organization-governance/SKILL.md:282`,
-`skills/github/github-repository-security/SKILL.md:290`,
+`skills/github/github-repository-security/SKILL.md:299`,
 `skills/python/python-secure-coding/SKILL.md:163`, `skills/python/python-testing/SKILL.md:139`,
 `skills/terraform/terraform-secure-iac/SKILL.md:168`, `skills/terraform/terraform-testing/SKILL.md:138`.
 
@@ -164,11 +164,11 @@ The highest-egress skill in the repository.
 | Field | Value |
 |---|---|
 | Trigger | `:3`, on creating or hardening a repository, rulesets, branch protection, visibility, collaborator access, scanning, `SECURITY.md`, `CODEOWNERS`, environments, deploy keys, or release and tag protection |
-| Tools implied | Read, Edit, Bash. Implied credentials: a GitHub token with **administrative** rights on the target repository. `:121`-`:134` read `security_and_analysis`, rulesets, direct collaborators, deploy keys, Actions permissions and environments; `references/rulesets.md:52` writes a ruleset with `gh api --method POST`. This is the widest permission any skill in the repository implies |
-| Shell | Yes. The `gh api` and `gh ruleset list` block at `:121`-`:134`; `gh api repos/OWNER/REPO --jq .security_and_analysis` and `gh api repos/OWNER/REPO/rulesets/RULESET_ID` (`:193`, `:194`); `gh ruleset check --default --repo OWNER/REPO` (`:201`); OpenSSF Scorecard, resolved to its current release and pinned by digest in automated use (`:202`-`:206`); a credential scanner over history (`:208`); `actionlint` and `zizmor` for any workflow touched (`:211`); `gh api --method POST repos/OWNER/REPO/rulesets --input ruleset.json` (`references/rulesets.md:52`) |
-| Reads | `CONTRIBUTING.md`, `SECURITY.md`, `CLAUDE.md`, `AGENTS.md` (`:71`); a `ruleset.json` committed to the tree (`:155`); the repository's full commit history during a secret scan (`:208`) |
+| Tools implied | Read, Edit, Bash. Implied credentials: a GitHub token with **administrative** rights on the target repository. `:121`-`:134` read `security_and_analysis`, rulesets, direct collaborators, deploy keys, Actions permissions and environments; `references/rulesets.md:53` writes a ruleset with `gh api --method POST`. This is the widest permission any skill in the repository implies |
+| Shell | Yes. The `gh api` and `gh ruleset list` block at `:121`-`:134`; `gh api repos/OWNER/REPO --jq .security_and_analysis` and `gh api repos/OWNER/REPO/rulesets/RULESET_ID` (`:194`, `:195`); `gh ruleset check --default --repo OWNER/REPO` (`:202`); OpenSSF Scorecard, resolved to its current release and pinned by digest in automated use (`:203`-`:207`); a credential scanner over history (`:209`); `actionlint` and `zizmor` for any workflow touched (`:212`); `gh api --method POST repos/OWNER/REPO/rulesets --input ruleset.json` (`references/rulesets.md:53`) |
+| Reads | `CONTRIBUTING.md`, `SECURITY.md`, `CLAUDE.md`, `AGENTS.md` (`:71`); a `ruleset.json` committed to the tree (`:155`); the repository's full commit history during a secret scan (`:209`) |
 | Writes outside the repository root | None instructed |
-| Network egress | Yes. `api.github.com` for every `gh` call above. A container registry for the Scorecard image (`:205`). `:141` instructs checking "the current REST documentation" where a call fails, which implies a fetch of `docs.github.com`; the mechanism is not named, so the tool used is UNKNOWN |
+| Network egress | Yes. `api.github.com` for every `gh` call above. A container registry for the Scorecard image (`:206`). `:141` instructs checking "the current REST documentation" where a call fails, which implies a fetch of `docs.github.com`; the mechanism is not named, so the tool used is UNKNOWN |
 | Reads content it did not author | Yes. The target repository's own documentation (`:71`), every API response including ruleset descriptions and collaborator metadata (`:121`-`:134`), and, through `references/agent-content.md`, third-party skills, hooks, commands and MCP definitions submitted for review |
 
 #### `skills/github/github-organization-governance/SKILL.md`
@@ -232,9 +232,9 @@ no file in the repository defines it.
 
 | Path | Trigger | Permissions | Shell | Paths | Egress | Untrusted input |
 |---|---|---|---|---|---|---|
-| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:68`, `:91`, `:117`, `:153`). `persist-credentials: false` on every checkout (`:27`, `:73`, `:96`, `:122`, `:158`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:80`-`:84`); `python3 scripts/check_evals.py` (`:110`); `docker run` of `rhysd/actionlint` pinned by digest (`:135`-`:136`); `uvx "zizmor@1.29.0"` over `.github/` (`:146`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:146`); `docker run` pulls the actionlint image (`:135`). Actions are pinned by SHA (`:25`, `:33`, `:165`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:145`) |
+| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:68`, `:91`, `:128`, `:164`). `persist-credentials: false` on every checkout (`:27`, `:73`, `:96`, `:133`, `:169`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:80`-`:84`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`); `docker run` of `rhysd/actionlint` pinned by digest (`:146`-`:147`); `uvx "zizmor@1.29.0"` over `.github/` (`:157`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:157`); `docker run` pulls the actionlint image (`:146`). Actions are pinned by SHA (`:25`, `:33`, `:176`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:156`) |
 | `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:835`, `:79`, `:81`, `:70`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:110`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:435`) | Read-only | None | `evals/` | None | Eval suite files |
+| `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:435`) | Read-only | None | `evals/` | None | Eval suite files |
 | `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
 
 ### `evals/run_eval.py`
@@ -302,7 +302,7 @@ whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.
 From there the attacker has the credential that authenticates the maintainer's Claude Code, and
 write access to the working tree of a repository whose default branch reaches every consumer at
 their next update. As audited, nothing in CI inspected the file first, because
-`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:110`,
+`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:112`,
 which changes nothing about this path: the checks there are structural, and a grader command that
 is structurally valid is exactly the one this path uses.
 
@@ -441,7 +441,7 @@ mechanism present.
    every consumer's machine.
 2. **A line in `skills/github/github-repository-security/`**. That skill's implied credential is a
    GitHub token with repository admin (`github-repository-security/SKILL.md:121`-`:134`,
-   `references/rulesets.md:52`), and its
+   `references/rulesets.md:53`), and its
    legitimate instructions already include writing rulesets, reading collaborators and reading
    deploy keys. An added instruction to widen a bypass actor, or to grant a collaborator, is
    camouflaged by everything around it.
@@ -556,7 +556,7 @@ for trust boundary, and the file does not distinguish the two cases.
 **File abused.** `skills/github/github-actions-security/SKILL.md`, at the command that bind-mounts
 `$PWD` read-write into a container that was pinned by **tag**. The same file said, a few lines
 above, to pin the container by digest when it runs in CI, and this repository's own
-`lint.yml:136` did exactly that.
+`lint.yml:147` did exactly that.
 
 **What the agent does.** Runs the image and mounts the consumer's working tree into it.
 
@@ -564,7 +564,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:239`-`:241` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:136`, and `README.md:443` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:147`, and `README.md:443` was changed
 with it. The surrounding text at `:226`-`:230` states the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
 "zizmor@1.29.0"` at `github-actions-security/SKILL.md:249`, which still resolves a package
@@ -590,7 +590,7 @@ unpinned form kept below and labeled as tracking the default branch (`:163`). Th
 `version`, and `scripts/check_skills.py:569` fails the build when one is missing, malformed, or
 disagrees with the others. `README.md:566` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
-`references/agent-content.md:125` and `references/rulesets.md:48` require.
+`references/agent-content.md:125` and `references/rulesets.md:49` require.
 
 **Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0` in
 `README.md:153` names a reference that resolves and that cannot be deleted or moved. Read back,

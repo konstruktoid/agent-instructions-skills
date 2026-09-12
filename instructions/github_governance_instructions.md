@@ -73,7 +73,9 @@ Every repository, whatever else the change touches:
 - The default workflow token is read-only, and the actions a workflow may call are restricted to
   an allowlist.
 - Releases are published from a protected tag by a workflow that authenticates with OIDC, not from
-  a moving branch and not with a long-lived token held as a secret.
+  a moving branch and not with a long-lived token held as a secret. The published artifact carries
+  a signature or a SLSA provenance file, and a workflow step publishes the package to its registry
+  rather than a person publishing it by hand.
 - Deploy keys are read-only, or the write access is stated and time-bounded.
 - A repository that is no longer maintained is archived rather than deleted, so its history stays
   auditable.
@@ -183,9 +185,16 @@ anyone collecting it.
 | Credentials are managed and rotated | Environment secrets, OIDC, secret scanning | Rotation record, secret scanning alert history |
 | Vulnerabilities are found and remediated | Code scanning, dependency alerts, stated thresholds | Alert history with time to remediation |
 | Configuration changes are traceable | Organization rulesets, audit log streaming | Audit log entries retained for the required period |
+| The configured controls are visible and in force from outside | OpenSSF Scorecard run on a schedule | Scorecard result history, with a grade per check |
 
 State which framework a control is claimed against. A control that satisfies an internal standard
 and no external one is still worth having, and saying so keeps the mapping honest.
+
+OpenSSF Scorecard is not a compliance framework, but it grades several of the controls above from
+outside the repository, so a scheduled run is a low-cost check that a mechanism is in force rather
+than only configured. The `github-repository-security` skill maps each Scorecard check to the
+mechanism that satisfies it, including the tier thresholds that award partial credit and the
+checks, such as project age and contributor spread, that configuration cannot move.
 
 ## Quality Checklist
 

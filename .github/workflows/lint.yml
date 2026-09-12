@@ -101,13 +101,24 @@ jobs:
           # would therefore report every suite as fresh without having compared anything.
           fetch-depth: 0
       # No uv setup: the script is standard library only, and it needs git and bash, which
-      # the runner image already provides. Not --strict, because staleness is a statement
-      # about when a measurement was last taken and a pull request that does not touch a
-      # skill cannot fix it; a structural error in a suite is the part that has to block.
-      # The structural checks are also the slot a grader-command check belongs in, which
-      # docs/controls.md records as still open.
+      # the runner image already provides. Not unconditionally --strict, because staleness
+      # is a statement about when a measurement was last taken and a pull request that does
+      # not touch a skill cannot fix it; a structural error in a suite is the part that has
+      # to block regardless. --strict does apply when the diff itself is what went stale:
+      # a change under skills/, or to an eval's own tasks.json or assertions.json, is the
+      # one case where the contributor causing the staleness can also resolve it before
+      # merge. The structural checks are also the slot a grader-command check belongs in,
+      # which docs/controls.md records as still open.
       - name: Check eval suites
-        run: python3 scripts/check_evals.py
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if git diff --name-only "${BASE_SHA:-origin/main}...HEAD" \
+              | grep -qE '^(skills/|evals/[^/]+/(tasks|assertions)\.json$)'; then
+            python3 scripts/check_evals.py --strict
+          else
+            python3 scripts/check_evals.py
+          fi
 
   actions:
     name: Workflows

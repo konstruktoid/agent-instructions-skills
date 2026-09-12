@@ -178,6 +178,7 @@ a rotation is required for anything found.
 | Signed commits, signed tags, attestations, trusted publishing | [references/releases-and-provenance.md](references/releases-and-provenance.md) |
 | Skills, hooks, slash commands, MCP servers, or plugin manifests in the tree | [references/agent-content.md](references/agent-content.md) |
 | A repository that publishes agent instructions others install | [references/agent-content.md](references/agent-content.md) |
+| An OpenSSF Scorecard grade, a low individual check, or a target stated as the score | [references/scorecard.md](references/scorecard.md) |
 
 If the change matches nothing in the table, the baseline and the verification checklist still
 apply.
@@ -209,7 +210,10 @@ Never declare a configuration change done from the API response alone. Run, in t
    grades branch protection, code review, token permissions, pinned dependencies, dangerous
    workflow patterns, and the presence of a security policy, from outside the repository's own
    claims. Resolve its current release rather than recalling a version, pin the container by
-   digest in any automated use, and record which version ran.
+   digest in any automated use, and record which version ran. When a check scores low or the
+   task is stated as raising the grade, map each check to the mechanism that satisfies it and
+   the tier thresholds that award partial credit with
+   [references/scorecard.md](references/scorecard.md).
 
 4. **Scan the history for credentials** before any visibility change, and after any finding that
    suggests one was committed. Use the scanner the repository already has where there is one.
@@ -261,6 +265,8 @@ it once, name the field, and state which interface can set it.
 - [ ] Default workflow token read-only, and the allowed actions restricted
 - [ ] Releases cut from a protected tag by a workflow using OIDC, with no long-lived publishing
       token stored as a secret
+- [ ] Where an OpenSSF Scorecard grade is the target, each low check mapped to its mechanism per
+      `references/scorecard.md`, and the checks configuration cannot move reported as such
 - [ ] Access is the smallest role that allows the work, held through teams, with deploy keys
       read-only unless the write need is stated
 - [ ] Every bypass actor named, with a reason, an owner, and a written procedure
@@ -283,6 +289,9 @@ it once, name the field, and state which interface can set it.
   immutable releases, trusted publishing with OIDC, signing, and attestations.
 - [references/agent-content.md](references/agent-content.md): reviewing skills, hooks, commands,
   and MCP server definitions a repository ships, and the repository controls that protect them.
+- [references/scorecard.md](references/scorecard.md): the OpenSSF Scorecard checks mapped to the
+  mechanism that satisfies each, the Branch-Protection tier ladder, and the checks configuration
+  cannot move.
 
 The baseline this skill enforces is stated in `instructions/github_governance_instructions.md`, and
 the prose it writes into a repository follows `instructions/written_language_instructions.md`.
