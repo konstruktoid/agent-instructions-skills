@@ -1,0 +1,88 @@
+{
+  "task": "avl-03-banner-quoting",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-09-13T23:27:21.386062+00:00",
+    "seconds": 100.0
+  },
+  "skills_used": [
+    "eval-ansible-verification-loop:ansible-verification-loop"
+  ],
+  "num_turns": 25,
+  "cost_usd": 0.3148558,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": false,
+      "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "country-code-quoted",
+      "kind": "workspace_command",
+      "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "country-code-not-bare",
+      "kind": "workspace_command",
+      "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gateway-ports-unambiguous",
+      "kind": "workspace_command",
+      "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-rendered-in-template",
+      "kind": "workspace_command",
+      "source": "task prompt: render both in the template",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: document both in the README",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "quoting-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md References: justifying why a value must stay quoted",
+      "passed": true,
+      "evidence": "match: 'boolean'"
+    }
+  ],
+  "passed": 7,
+  "total": 9
+}

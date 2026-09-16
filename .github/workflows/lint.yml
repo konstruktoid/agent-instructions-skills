@@ -111,7 +111,7 @@ jobs:
       # which docs/controls.md records as still open.
       - name: Check eval suites
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           if git diff --name-only "${BASE_SHA:-origin/main}...HEAD" \
               | grep -qE '^(skills/|evals/[^/]+/(tasks|assertions)\.json$)'; then

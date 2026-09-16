@@ -40,7 +40,7 @@ repository with a token that can read repository administration, and record whic
 gh api repos/ossf/scorecard/releases/latest --jq .tag_name
 SCORECARD_TAG=$(gh api repos/ossf/scorecard/releases/latest --jq .tag_name)
 docker run --rm -e GITHUB_TOKEN \
-  "gcr.io/openssf/scorecard:${SCORECARD_TAG}" \
+  "ghcr.io/ossf/scorecard:${SCORECARD_TAG}" \
   --repo="github.com/OWNER/REPO" --show-details
 ```
 
@@ -55,7 +55,7 @@ on a schedule and lags a configuration change by up to a week.
 | Branch-Protection | Default-branch ruleset, review rules, admin inclusion | [rulesets.md](rulesets.md) | Force-push and deletion blocked, pull request required, status check required, two reviewers, code-owner review, stale dismissal, no administrator bypass |
 | Code-Review | Enforced approvals with no bypass merges | [rulesets.md](rulesets.md) | Approval recorded on recent changesets, or a merger distinct from the committer |
 | Token-Permissions | `permissions: {}` at workflow level, job-scoped writes | github-actions-security supply-chain.md | Read-only top-level token, write scopes only at job level |
-| Pinned-Dependencies | SHA-pinned actions, digest-pinned images, committed lock files | [supply-chain.md](../../github-actions-security/references/supply-chain.md) | Hashes rather than mutable tags across workflows, Dockerfiles, and package manifests |
+| Pinned-Dependencies | SHA-pinned actions, digest-pinned images, checksum-verified downloads | [supply-chain.md](../../github-actions-security/references/supply-chain.md) | Hashes rather than mutable tags across workflows, Dockerfiles, and scripted downloads |
 | Dangerous-Workflow | No fork code under `pull_request_target`, no script injection | github-actions-security untrusted-input.md | Absence of untrusted checkout and untrusted interpolation into `run:` |
 | Dependency-Update-Tool | Dependabot or Renovate configuration | [scanning-and-response.md](scanning-and-response.md) | A recognized update-tool config file |
 | SAST | CodeQL in a workflow, or a SAST app on recent pull requests | [scanning-and-response.md](scanning-and-response.md) | `github/codeql-action` in a workflow, or CodeQL and SonarCloud results |
@@ -75,22 +75,24 @@ on a schedule and lags a configuration change by up to a week.
 
 Scorecard scores this check in cumulative tiers. Each tier is worth reaching because the points
 are additive and the higher tiers are single ruleset fields, not a different class of work. The
-rules below are ruleset rules on the default branch; see [rulesets.md](rulesets.md) for the JSON.
+rules below are ruleset rules on the default branch and on any release branch; see
+[rulesets.md](rulesets.md) for the JSON.
 
 | Tier | Score | Rules it adds |
 |---|---|---|
 | 1 | 3 | Block force pushes, block branch deletion |
-| 2 | 6 | Require a pull request before merging, require the branch up to date, require approval of the most recent reviewable push, and apply all of this to administrators |
+| 2 | 6 | Require a pull request before merging, require at least one approving review, require the branch up to date, require approval of the most recent reviewable push, and apply all of this to administrators |
 | 3 | 8 | Require at least one status check to pass before merging |
 | 4 | 9 | Require at least two approving reviews, require review from code owners |
 | 5 | 10 | Dismiss stale approvals when new commits are pushed, and include administrators in the review requirement rather than granting them a bypass |
 
 Two ruleset details decide whether tier 2 and tier 5 register:
 
-- **No bypass actor on the default-branch ruleset.** Scorecard reads an administrator bypass as
-  the protection not applying to administrators, which caps the check below tier 5. Where a
-  single-maintainer repository needs a bypass to merge at all, that is a deliberate exception with
-  the cost stated: the check will not reach 10.
+- **No bypass actor on the default-branch or release-branch ruleset.** Scorecard treats the
+  enforcement setting as false whenever a rule defines a bypass actor of any kind, administrator,
+  team, or app, which caps the check below tier 5. Where a single-maintainer repository needs a
+  bypass to merge at all, that is a deliberate exception with the cost stated: the check will not
+  reach 10.
 - **The ruleset is `active`, not `evaluate`.** An evaluate-mode ruleset blocks nothing and scores
   nothing.
 
@@ -111,33 +113,40 @@ heaviest deduction in the check.
 
 ## Signed-Releases and Packaging need real releases
 
-Both checks return -1 when the repository has published no GitHub release. The first release
-raises them from "could not run" into a real score, so cut releases from the protected tag as
-[releases-and-provenance.md](releases-and-provenance.md) describes.
-
-- **Signed-Releases reaches 8** when every one of the last five releases carries a signature asset
-  (`*.sig`, `*.asc`, `*.minisig`, `*.sigstore.json`, and similar), and **10** when every release
-  carries a SLSA provenance file (`*.intoto.jsonl`). Generate the provenance in the publishing job
-  with `actions/attest-build-provenance` and attach the returned file to the release.
-- **Packaging** is satisfied by a workflow that publishes to a package registry: a language hub
-  such as PyPI, npm, or crates.io through a recognized publish action, or GitHub Packages. For a
-  repository that ships to a non-code hub, such as an Ansible role publishing to Ansible Galaxy,
-  the galaxy import step on a tag push is what the check recognizes. Keep the publishing job
-  separate from any job that builds or tests contributed code.
+- **Signed-Releases returns -1** when the repository has published no GitHub release. The first
+  release raises it from "could not run" into a real score, so cut releases from the protected tag
+  as [releases-and-provenance.md](releases-and-provenance.md) describes. It **reaches 8** when
+  every one of the last five releases carries a signature asset (`*.sig`, `*.asc`, `*.minisig`,
+  `*.sigstore.json`, and similar), and **10** when every release carries a SLSA provenance file
+  (`*.intoto.jsonl`). Generate the provenance in the publishing job with
+  `actions/attest-build-provenance`, rename the returned bundle so its filename ends in
+  `.intoto.jsonl` (the action's `bundle-path` output is not named that by default), and attach the
+  renamed file to the release.
+- **Packaging** reads workflow files and successful workflow runs, not release data, so it does
+  not require a published release to score. It is satisfied by a workflow that publishes to a
+  package registry: a language hub such as PyPI, npm, or crates.io through a recognized publish
+  action, or GitHub Packages. Scorecard's publish-action matcher has no pattern for Ansible Galaxy
+  or an `ansible-galaxy` command, so a repository publishing there should verify the Packaging
+  result rather than assume it is recognized. Keep the publishing job separate from any job that
+  builds or tests contributed code.
 
 ## Pinned-Dependencies covers the whole tree
 
-Scorecard's pinning check is not limited to `uses:` lines. It reads every dependency declaration
-it can find and scores the fraction pinned to a hash or a full version:
+Scorecard's pinning check is not limited to `uses:` lines. It reads Dockerfiles, shell scripts, and
+GitHub workflows used during build or release, and scores the fraction pinned to a hash or a full
+version:
 
 - **GitHub Actions**: pinned only by a full 40-character commit SHA. A tag is unpinned.
 - **Container images**: `FROM image@sha256:...` in every Dockerfile the repository ships, including
   those inside composite actions.
-- **Package manifests**: a committed lock file (`package-lock.json`, `uv.lock`, `poetry.lock`,
-  `Gemfile.lock`, `go.sum`) so the resolved versions are recorded. A full semantic version for a
-  Go module counts as pinned without a separate hash.
 - **Scripted downloads**: a `curl` or `wget` in a workflow `run:` block or a shipped script that
   pipes a remote file into a shell, or installs from a release URL, without verifying a checksum.
+
+Committed lock files (`package-lock.json`, `uv.lock`, `poetry.lock`, `Gemfile.lock`, `go.sum`) are
+good practice for reproducible builds, but Scorecard's detector does not read them as pinning
+evidence outside of build/release scripts it already scans; commit them for the ecosystems that
+support them regardless of whether they move this check. A full semantic version for a Go module
+counts as pinned without a separate hash.
 
 See [supply-chain.md](../../github-actions-security/references/supply-chain.md) for the pinning
 procedure and the tools that apply it across a repository.

@@ -1,0 +1,1 @@
+Changed files: `.github/workflows/ci.yml` (added tag trigger + `release` job gated on `needs: build` and `refs/tags/v*`), `README.md` (rewrote release section). Not committing per your instructions — let me know if you want that done.

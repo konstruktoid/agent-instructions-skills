@@ -90,23 +90,27 @@ republishing.
 
 ## Signed releases and packaging as an external check
 
-OpenSSF Scorecard grades two release properties from outside the repository, and both return -1,
-meaning the check could not run, until the repository has published its first GitHub release. The
-first release cut from the protected tag turns both into a real score.
+OpenSSF Scorecard grades two release properties from outside the repository.
 
-- **Signed-Releases** reaches 8 when every one of the last five releases carries a signature asset,
+- **Signed-Releases** returns -1, meaning the check could not run, until the repository has
+  published its first GitHub release. The first release cut from the protected tag turns it into a
+  real score. It reaches 8 when every one of the last five releases carries a signature asset,
   matched by extension: `*.sig`, `*.asc`, `*.minisig`, `*.sigstore.json`, and similar. It reaches
   10 when every release carries a SLSA provenance file, `*.intoto.jsonl`. The provenance from
-  `actions/attest-build-provenance` satisfies the top tier: write the returned file into the
+  `actions/attest-build-provenance` satisfies the top tier: its `bundle-path` output is not named
+  `*.intoto.jsonl` by default, so rename the file to that extension before writing it into the
   release assets in the publishing job.
-- **Packaging** is satisfied by a workflow that publishes to a package registry: a language hub
-  through a recognized publish action, or GitHub Packages. A repository publishing to a non-code
-  hub, such as an Ansible role importing to Ansible Galaxy on a tag push, is recognized by that
-  publish step. Keep the step in the release workflow rather than a manual process, since the
-  check reads the workflow.
+- **Packaging** reads workflow files and successful workflow runs rather than release data, so it
+  does not need a published release to score, and does not recur the way Signed-Releases does. It
+  is satisfied by a workflow that publishes to a package registry: a language hub through a
+  recognized publish action, or GitHub Packages. Scorecard's publish-action matcher has no pattern
+  for Ansible Galaxy or an `ansible-galaxy` command; a repository publishing there should verify
+  the Packaging result directly rather than assume the check recognizes that step, unless a
+  specific Scorecard version documents adding it. Keep the publish step in the release workflow
+  rather than a manual process, since the check reads the workflow.
 
-Neither raises a score on its own until releases exist and recur, so a repository that never tags
-a release scores nothing on either however well the publishing job is written.
+A repository that never tags a release scores nothing on Signed-Releases however well the
+publishing job is written.
 
 ## What a consumer can verify
 
@@ -133,7 +137,7 @@ behind it is advice the repository does not honor.
 - [ ] Immutable releases enabled where the platform supports it
 - [ ] Release tags signed, and commit signing required where adoption allows
 - [ ] An attestation generated and published with each artifact
-- [ ] At least one release published, so the external signed-release and packaging checks can run
+- [ ] At least one release published, so the external Signed-Releases check can run
 - [ ] Each of the last five releases carries a signature asset, or a `*.intoto.jsonl` provenance
       file for the full external score
 - [ ] A publish step in the release workflow sends the package to a registry the external

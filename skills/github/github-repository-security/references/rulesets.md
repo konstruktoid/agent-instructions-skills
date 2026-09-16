@@ -110,20 +110,21 @@ such as SOC 2, PCI DSS, HIPAA, or FedRAMP. Add:
 
 OpenSSF Scorecard grades branch protection in cumulative tiers, and the difference between a
 mid-range and a full score is a set of named ruleset fields rather than a different class of
-work. Apply these to the default-branch ruleset when the target is the Scorecard grade:
+work. Apply these to the default-branch ruleset and to any release branch's ruleset when the
+target is the Scorecard grade, or record that no release branches exist:
 
 | Tier | Score | Rules it adds |
 |---|---|---|
 | 1 | 3 | Block force pushes, block deletion |
-| 2 | 6 | Require a pull request, require the branch up to date, require approval of the most recent reviewable push, and apply all of it to administrators |
+| 2 | 6 | Require a pull request, require at least one approving review, require the branch up to date, require approval of the most recent reviewable push, and apply all of it to administrators |
 | 3 | 8 | Require at least one status check to pass |
 | 4 | 9 | Require at least two approving reviews, require code owner review |
 | 5 | 10 | Dismiss stale approvals on a new push, and include administrators in the review requirement rather than granting a bypass |
 
-An administrator bypass actor on this ruleset caps the check below tier 5, since Scorecard reads
-it as the protection not applying to administrators. A single-maintainer repository that needs a
-bypass to merge accepts that cap as a stated exception. A ruleset in `evaluate` mode blocks
-nothing and scores nothing. See
+Any bypass actor on this ruleset, whatever type it is, administrator, team, or app, caps the check
+below tier 5, since Scorecard treats the enforcement setting as false whenever a rule defines a
+bypass actor of any kind. A single-maintainer repository that needs a bypass to merge accepts that
+cap as a stated exception. A ruleset in `evaluate` mode blocks nothing and scores nothing. See
 [references/scorecard.md](scorecard.md) for the other checks and how they read repository history.
 
 ## Push rules

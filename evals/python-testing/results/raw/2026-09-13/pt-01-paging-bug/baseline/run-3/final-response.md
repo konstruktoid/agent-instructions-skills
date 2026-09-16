@@ -1,0 +1,3 @@
+Fixed `src/paging/slicing.py:10`: `end` was capped at `len(items) - 1` instead of `len(items)`, so the last item was excluded from every page and unreachable entirely. Changed to `min(start + per_page, len(items))`. Python slicing already returns `[]` for `start` past the sequence end, so out-of-range pages don't raise.
+
+Only `src/paging/slicing.py` changed. `pytest` passes (8/8). `ruff` and `ty` both fail, but identically on `main` before my change — `ruff` on a pre-existing unsorted import in `tests/test_slicing.py`, `ty` because it resolves "first-party code" from the outer git repo root rather than this nested workspace, so neither failure is related to this fix.

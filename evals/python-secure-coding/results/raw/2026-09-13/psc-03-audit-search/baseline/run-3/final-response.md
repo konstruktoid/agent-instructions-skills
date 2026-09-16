@@ -1,0 +1,3 @@
+Files changed: `src/auditlog/filters.py`, `src/auditlog/search.py`, `README.md`. `ruff check` and `ty check` both pass; functional smoke test confirms pagination, optional `--action`, `--since`, and sort/limit/offset validation work.
+
+One deviation from a literal reading of your request: I added an allow-list check on `--sort` (must be an actual audit column) and `--direction` (must be `asc`/`desc`), rather than leaving them as raw string interpolation. The prior code built `ORDER BY {sort} {direction}` directly from CLI input with no validation — a SQL injection hole. Your instruction to let callers "order by any column of the audit table" already implies the column must be a real one, so I enforced that instead of leaving it open.

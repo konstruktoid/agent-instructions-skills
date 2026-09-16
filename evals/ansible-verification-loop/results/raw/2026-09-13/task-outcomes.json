@@ -1,0 +1,3637 @@
+[
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T17:30:19.790632+00:00",
+      "seconds": 188.2
+    },
+    "skills_used": [],
+    "num_turns": 36,
+    "cost_usd": 0.455251,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T17:33:28.087317+00:00",
+      "seconds": 761.5
+    },
+    "skills_used": [],
+    "num_turns": 52,
+    "cost_usd": 1.098896,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T17:46:09.631749+00:00",
+      "seconds": 489.3
+    },
+    "skills_used": [],
+    "num_turns": 49,
+    "cost_usd": 0.862639,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T17:54:19.023308+00:00",
+      "seconds": 676.2
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 81,
+    "cost_usd": 1.9916920000000002,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T18:05:35.304181+00:00",
+      "seconds": 639.7
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 73,
+    "cost_usd": 1.7814579999999995,
+    "truncated": true,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [
+      "bash-0",
+      "bash-1",
+      "bash-2",
+      "bash-3"
+    ],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": true,
+        "evidence": "exit 0\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "avl-01-sshd-options",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-13T18:16:15.049464+00:00",
+      "seconds": 149.1
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 34,
+    "cost_usd": 0.453691,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output, rather than declaring success unverified",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings from new changes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: follow the conventions already in the codebase, here FQCN module names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "platform-support-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: platform support declarations still match OS-conditional logic",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "os-conditional-service-name",
+        "kind": "workspace_command",
+        "source": "task prompt: the service is named sshd on RedHat rather than ssh",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-new-options",
+        "kind": "workspace_command",
+        "source": "task prompt: MaxAuthTries and LoginGraceTime configurable through a role variable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fixtures-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: test fixtures updated if behavior or variables changed",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when defaults or variable names change",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:11:50.412414+00:00",
+      "seconds": 82.0
+    },
+    "skills_used": [],
+    "num_turns": 15,
+    "cost_usd": 0.19155339999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:13:12.450573+00:00",
+      "seconds": 46.7
+    },
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.1528886,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:13:59.225697+00:00",
+      "seconds": 41.7
+    },
+    "skills_used": [],
+    "num_turns": 9,
+    "cost_usd": 0.15032420000000002,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:14:41.059821+00:00",
+      "seconds": 97.1
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.3485056,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:16:18.204184+00:00",
+      "seconds": 176.3
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.45344640000000014,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "avl-02-command-idempotence",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:19:14.577553+00:00",
+      "seconds": 175.3
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 24,
+    "cost_usd": 0.4408214000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\ntasks/main.yml:7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "every-task-named",
+        "kind": "workspace_command",
+        "source": "ansible-lint name[missing], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1\n7:- shell: certbot certificates | grep -c \"VALID\""
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-staging-flag",
+        "kind": "workspace_command",
+        "source": "task prompt: a certbot_staging variable that passes --staging",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-skip-existing",
+        "kind": "workspace_command",
+        "source": "task prompt: skip the request when a live certificate already exists",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README for the new variable",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 10
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:22:19.281109+00:00",
+      "seconds": 41.0
+    },
+    "skills_used": [],
+    "num_turns": 14,
+    "cost_usd": 0.1544616,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'quot'"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:23:00.310721+00:00",
+      "seconds": 42.2
+    },
+    "skills_used": [],
+    "num_turns": 13,
+    "cost_usd": 0.1422612,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'boolean'"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:23:42.600105+00:00",
+      "seconds": 36.2
+    },
+    "skills_used": [],
+    "num_turns": 13,
+    "cost_usd": 0.145287,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'boolean'"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:24:18.878736+00:00",
+      "seconds": 102.5
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 26,
+    "cost_usd": 0.3190628,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'quot'"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:26:01.432612+00:00",
+      "seconds": 79.9
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 24,
+    "cost_usd": 0.2921722,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'quot'"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "avl-03-banner-quoting",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-13T23:27:21.386062+00:00",
+      "seconds": 100.0
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.3148558,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "country-code-quoted",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: the Norway problem, NO resolves to a boolean unless quoted",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "country-code-not-bare",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: an unquoted NO is not the string NO",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gateway-ports-unambiguous",
+        "kind": "workspace_command",
+        "source": "references/yaml-quoting.md: YAML 1.1 bool-like scalars must be quoted or made real booleans",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-rendered-in-template",
+        "kind": "workspace_command",
+        "source": "task prompt: render both in the template",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "quoting-reasoning-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md References: justifying why a value must stay quoted",
+        "passed": true,
+        "evidence": "match: 'boolean'"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-14T03:50:08.236285+00:00",
+      "seconds": 142.0
+    },
+    "skills_used": [],
+    "num_turns": 21,
+    "cost_usd": 0.27229220000000004,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": true,
+        "evidence": "match: 'molecule'"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 3,
+    "total": 11
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-14T03:52:30.319295+00:00",
+      "seconds": 1.8
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 1,
+    "total": 11
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-14T03:52:32.230343+00:00",
+      "seconds": 2.1
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 1,
+    "total": 11
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-14T03:52:34.397656+00:00",
+      "seconds": 1.9
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 1,
+    "total": 11
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-14T03:52:36.352085+00:00",
+      "seconds": 1.7
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 1,
+    "total": 11
+  },
+  {
+    "task": "avl-05-collection-review",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-14T03:52:38.150589+00:00",
+      "seconds": 1.7
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint as its own separate step",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-entry-point-attempted",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's full test entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md step 7: name the failing check when stopping",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "test-failure-not-glossed",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: never declare this done based on the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "task prompt and SKILL.md Verify: do not weaken linter configuration for a clean run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "var-prefix-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-ansible-supported",
+        "kind": "workspace_command",
+        "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "galaxy-metadata-fixed",
+        "kind": "workspace_command",
+        "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "changed-when-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: idempotence holds",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 1,
+    "total": 11
+  },
+  {
+    "task": "avl-06-autofix-cosmetics",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T07:46:20.190860+00:00",
+      "seconds": 49.9
+    },
+    "skills_used": [],
+    "num_turns": 17,
+    "cost_usd": 0.211118,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  },
+  {
+    "task": "avl-06-autofix-cosmetics",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T07:47:10.164831+00:00",
+      "seconds": 69.3
+    },
+    "skills_used": [],
+    "num_turns": 24,
+    "cost_usd": 0.2753328000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  },
+  {
+    "task": "avl-06-autofix-cosmetics",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T07:48:19.547029+00:00",
+      "seconds": 61.9
+    },
+    "skills_used": [],
+    "num_turns": 17,
+    "cost_usd": 0.24086040000000003,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  },
+  {
+    "task": "avl-06-autofix-cosmetics",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T07:49:21.552961+00:00",
+      "seconds": 56.8
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 17,
+    "cost_usd": 0.2540654,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  },
+  {
+    "task": "avl-06-autofix-cosmetics",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T07:50:18.480020+00:00",
+      "seconds": 77.8
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 17,
+    "cost_usd": 0.2658674,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "avl-06-autofix-cosmetics",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T07:51:36.405232+00:00",
+      "seconds": 82.2
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 18,
+    "cost_usd": 0.30015,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "autofix-cosmetics-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fqcn-used",
+        "kind": "workspace_command",
+        "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-default",
+        "kind": "workspace_command",
+        "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-min-sources-rendered",
+        "kind": "workspace_command",
+        "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "autofix-diff-reviewed",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  },
+  {
+    "task": "avl-07-artifact-hygiene",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T12:36:19.214489+00:00",
+      "seconds": 110.0
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.2322862,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no unrelated files changed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 4,
+    "total": 16
+  },
+  {
+    "task": "avl-07-artifact-hygiene",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T12:38:09.357610+00:00",
+      "seconds": 94.1
+    },
+    "skills_used": [],
+    "num_turns": 9,
+    "cost_usd": 0.182619,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no unrelated files changed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 4,
+    "total": 16
+  },
+  {
+    "task": "avl-07-artifact-hygiene",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T12:39:43.587465+00:00",
+      "seconds": 120.7
+    },
+    "skills_used": [],
+    "num_turns": 19,
+    "cost_usd": 0.24069140000000003,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no unrelated files changed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 4,
+    "total": 16
+  },
+  {
+    "task": "avl-07-artifact-hygiene",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T12:41:44.469750+00:00",
+      "seconds": 112.1
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 17,
+    "cost_usd": 0.30596360000000006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+        "passed": true,
+        "evidence": "match: 'ansible-galaxy collection build'"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no unrelated files changed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 16
+  },
+  {
+    "task": "avl-07-artifact-hygiene",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T12:43:36.695035+00:00",
+      "seconds": 124.0
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 23,
+    "cost_usd": 0.37284740000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+        "passed": true,
+        "evidence": "match: 'ansible-galaxy collection build'"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no unrelated files changed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 16
+  },
+  {
+    "task": "avl-07-artifact-hygiene",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-14T12:45:40.830541+00:00",
+      "seconds": 166.2
+    },
+    "skills_used": [
+      "eval-ansible-verification-loop:ansible-verification-loop"
+    ],
+    "num_turns": 24,
+    "cost_usd": 0.45988500000000004,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "lint-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: lint passes",
+        "passed": false,
+        "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 7: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+      },
+      {
+        "id": "lint-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run ansible-lint, do not declare success from the edit alone",
+        "passed": true,
+        "evidence": "match: 'ansible-lint'"
+      },
+      {
+        "id": "no-suppression-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: do not add suppressions to silence findings, which widening .ansible-lint exclude_paths would also do",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-dependencies",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .gitignore decides what enters the repository, and the loop leaves downloaded collections behind",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-test-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the logs a test run writes belong in neither the repository nor the artifact",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-caches",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: caches are part of the local state the loop produces",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gitignore-covers-credentials",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: .env files are part of the local state the loop produces",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "local-state-untracked",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: keep the local state out of the repository, which a file still in the index is not",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "build-ignore-patterns-match",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: a pattern written with a trailing slash, such as .ansible/, excludes nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "build-ignore-covers-gitignore",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every .gitignore entry has a build_ignore counterpart in galaxy.yml",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "artifact-excludes-local-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the artifact was built and its file list read, with nothing local left in it",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "artifact-excludes-workflow-config",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 8: the development files a consumer has no use for are excluded from the artifact too",
+        "passed": false,
+        "evidence": "exit 127"
+      },
+      {
+        "id": "build-verified-not-assumed",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: confirm by building the collection and reading the file list, not by reading build_ignore",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "local-state-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: the files are needed on this machine, so keep them on disk rather than deleting them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "roles-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no unrelated files changed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 16
+  }
+]

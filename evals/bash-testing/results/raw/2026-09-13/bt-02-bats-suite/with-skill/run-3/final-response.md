@@ -1,0 +1,1 @@
+bats-core isn't installed anywhere on this machine. Installing a package requires your approval per the CLAUDE.md privileged-command rule — want me to install `bats` (e.g. via apt or npm), or would you rather I verify some other way?

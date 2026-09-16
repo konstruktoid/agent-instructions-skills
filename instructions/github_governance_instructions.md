@@ -74,8 +74,8 @@ Every repository, whatever else the change touches:
   an allowlist.
 - Releases are published from a protected tag by a workflow that authenticates with OIDC, not from
   a moving branch and not with a long-lived token held as a secret. The published artifact carries
-  a signature or a SLSA provenance file, and a workflow step publishes the package to its registry
-  rather than a person publishing it by hand.
+  a signature or a SLSA provenance file. Where the repository produces a package, a workflow step
+  publishes it to its registry rather than a person publishing it by hand.
 - Deploy keys are read-only, or the write access is stated and time-bounded.
 - A repository that is no longer maintained is archived rather than deleted, so its history stays
   auditable.

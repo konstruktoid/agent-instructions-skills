@@ -1,0 +1,9 @@
+**Files changed:** `sbin/provision-user.sh`, `README.md`.
+
+Added `--from-file FILE` (one account per non-blank line, batch continues past a failed/existing account) and `--shell SHELL` (validated as an absolute, executable path), plus a per-account summary line. Since the skill mandates the security baseline on any script touched, I also hardened what was already broken here: `set -Eeuo pipefail` + traps, username allowlist validation (closes the SQL-injection path in the `CREATE USER` statement), `/dev/urandom`-based password generation instead of `$RANDOM`, the DB admin password moved from a `-p` argv flag into a `mktemp`'d, trap-cleaned `--defaults-extra-file` (previously visible to any local user via `ps`), removed the plaintext password from `/var/log/provision.log`, and fixed `db.conf` sourcing to resolve from the script's own directory rather than the caller's cwd (it would have failed under the cron invocation in `etc/cron.d/provision`, which uses an absolute script path).
+
+Verified: `shellcheck -x -P SCRIPTDIR` and `bash -n` both clean; ran the script against stubbed `useradd`/`chpasswd`/`mysql`/`id` in a disposable temp tree covering the happy path, `--from-file` with a mix of new/existing/blank entries, and four failure paths (missing file, invalid shell, invalid username, conflicting flags) — correct exit codes, no password in the log, and no leftover temp files. Did not run real `useradd`/`mysql` against this host, since that would mutate real system/database state.
+
+One thing outside this diff worth flagging: `etc/cron.d/provision` still does `$(cat /var/lib/provisioning/next)` unquoted, which is word-splitting/glob-unsafe — I didn't touch it since it wasn't part of the request, but it's the same class of bug.
+
+Suggest `/clear` before starting unrelated work.

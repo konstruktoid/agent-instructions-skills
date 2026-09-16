@@ -1,0 +1,3 @@
+Files changed: `bin/report.sh`, `test/report.bats`.
+
+`bin/report.sh` now accepts `--json` (before or after the file argument), emitting `{"total":N,"passed":N,"failed":N}` instead of the text line; text output is unchanged when `--json` is absent. Added four bats cases covering JSON output in both flag positions and the usage-error path with `--json`. Verified with a throwaway bats-core clone in `/tmp` (removed after) since bats isn't installed on this machine — `make test` will fail with `bats: No such file or directory` until it's installed; let me know if you want it installed properly (apt or npm) rather than reverified ad hoc next time.

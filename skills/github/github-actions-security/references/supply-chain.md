@@ -96,11 +96,13 @@ Reusable workflows are third-party dependencies with the same properties. Pin
 `uses: org/repo/.github/workflows/x.yml@<sha>` the same way.
 
 OpenSSF Scorecard's Pinned-Dependencies check scores the whole repository, not only workflow
-`uses:` lines. It reads Dockerfile `FROM` lines, package manifests and their lock files, and
-`curl` or `wget` downloads in shipped scripts, and scores the fraction pinned to a hash. A full
-semantic version for a Go module counts as pinned; everything else needs a digest or a committed
-lock file. A repository chasing that check pins its base images by `sha256`, commits every lock
-file, and checksum-verifies scripted downloads, alongside the action pinning above.
+`uses:` lines. It reads Dockerfile `FROM` lines and `curl` or `wget` downloads in shipped scripts,
+in addition to the workflow `uses:` lines above, and scores the fraction pinned to a hash. A full
+semantic version for a Go module counts as pinned; everything else needs a digest. Package
+manifests and their lock files are not part of what this check reads, but commit them for every
+ecosystem that supports them regardless, since they are what makes a build reproducible. A
+repository chasing that check pins its base images by `sha256` and checksum-verifies scripted
+downloads, alongside the action pinning above.
 
 ## Choosing an action at all
 
@@ -199,8 +201,9 @@ provenance file on each of the last five releases.
       recorded in the pull request description
 - [ ] Composite actions, Docker base images, and install scripts inside a pinned action checked for
       mutable references
-- [ ] Where an external pinning check is the target, Dockerfile `FROM` lines pinned by digest, lock
-      files committed for every ecosystem, and scripted downloads checksum-verified
+- [ ] Where an external pinning check is the target, Dockerfile `FROM` lines pinned by digest and
+      scripted downloads checksum-verified; lock files committed for every ecosystem regardless,
+      since the check does not read them
 - [ ] New actions justified: readable source, maintained, correct name, minimal alternative
       considered
 - [ ] Dependabot configured for `github-actions` with a cooldown, and its pull requests reviewed

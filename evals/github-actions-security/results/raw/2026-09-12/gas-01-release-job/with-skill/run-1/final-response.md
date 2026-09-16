@@ -1,0 +1,11 @@
+Both `actionlint` and `zizmor` pass cleanly except for one informational, deliberately-accepted finding.
+
+**Design:** Single workflow (`ci.yml`) now triggers on push to `main`, pull requests, and pushes of tags matching `v*`. The `build` job runs on all three triggers. The new `release` job uses `needs: build` and `if: startsWith(github.ref, 'refs/tags/v')`, so it only executes after `build` passes and only on a tag push. It builds the package, publishes with `npm publish` authenticated via `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}`, then creates the GitHub release via the pre-installed `gh` CLI (`gh release create`) authenticated with the job's own `contents: write` `GITHUB_TOKEN` — no extra third-party action needed for that step.
+
+**Security baseline applied:** `permissions: {}` at workflow level with per-job grants (`contents: read` for build, `contents: write` + comment for release), both third-party actions (`actions/checkout`, `actions/setup-node`) pinned to freshly-resolved commit SHAs with version comments, `persist-credentials: false` on both checkouts, `timeout-minutes: 10` on both jobs, `package-manager-cache: false` on `setup-node` to close the cache-poisoning finding zizmor raised, and no interpolation of untrusted event data in any `run:` block.
+
+**Deliberate exception:** zizmor's one remaining finding is informational — it recommends npm OIDC trusted publishing over a static `NPM_TOKEN`. You explicitly asked for `NPM_TOKEN`-based publishing, so I kept it and documented the reason in a comment above the publish step (`ci.yml:70-71`).
+
+**Verification gap I won't close without your say-so:** actionlint and zizmor confirm the workflow is structurally sound, but I have not exercised the release job on a real runner — doing so would require pushing an actual `v*` tag, which would run `npm publish` against the real npm registry using your real `NPM_TOKEN` and create a real GitHub release. That's a live, hard-to-reverse action, so I did not attempt it. If you want it behaviorally verified, tell me and I'll walk through it deliberately (e.g., a throwaway version bump/tag) rather than doing it unprompted.
+
+Files changed: `.github/workflows/ci.yml`, `README.md`.

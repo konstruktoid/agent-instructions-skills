@@ -1,0 +1,93 @@
+{
+  "task": "avl-06-autofix-cosmetics",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-09-14T07:46:20.190860+00:00",
+    "seconds": 49.9
+  },
+  "skills_used": [],
+  "num_turns": 17,
+  "cost_usd": 0.211118,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": false,
+      "evidence": "exit 127\n/bin/sh: 1: ansible-lint: not found"
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\n/bin/sh: 1: ansible-lint: not found"
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "autofix-cosmetics-preserved",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: read the git diff of any --fix run and revert hunks the change does not explain; ansible-lint --fix deletes the blank line after a flow-style value without any rule firing",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fqcn-used",
+      "kind": "workspace_command",
+      "source": "ansible-lint fqcn[action-core], a finding present in the fixture",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-suppression-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: do not add suppressions to silence findings",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-min-sources-default",
+      "kind": "workspace_command",
+      "source": "task prompt: an ntp_client_min_sources variable defaulting to 2",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-min-sources-rendered",
+      "kind": "workspace_command",
+      "source": "task prompt: rendered into the configuration as a minsources line, so naming the variable in a comment or on another directive does not count",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 5: update all relevant documentation when a variable is added, which means the README gains the variable rather than merely being touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "autofix-diff-reviewed",
+      "kind": "final_regex",
+      "source": "SKILL.md Verify: auto-fix output needs the same review as a hand edit, so the report has to tie the --fix run to what its diff did",
+      "passed": false,
+      "evidence": "no match"
+    }
+  ],
+  "passed": 7,
+  "total": 10
+}

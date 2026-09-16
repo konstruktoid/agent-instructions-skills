@@ -275,8 +275,8 @@ while only one of them is fixed.
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
   targets `refs/tags/v*`, blocks `deletion` and `non_fast_forward`, and lists no bypass actors,
-  which is what `references/rulesets.md:144` asks for and where `:49` says to keep it. It omits
-  the `creation` rule from `:146` deliberately: with one account and no bypass actors, that rule
+  which is what `references/rulesets.md:145` asks for and where `:49` says to keep it. It omits
+  the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
   `README.md:566` documents the release order and the `gh api` call that applies the ruleset.
@@ -521,7 +521,7 @@ ref is not a meaningful construct.
 
 **Recommendation.** Deprioritize until control 6 exists. Once there are tags and something is
 published, `gh attestation verify` becomes available to consumers, which
-`github-actions-security/references/supply-chain.md:185` already teaches them to run. Adopt it then,
+`github-actions-security/references/supply-chain.md:187` already teaches them to run. Adopt it then,
 and describe it in the release notes as what it is: proof of origin, not proof of safety.
 
 ## The four controls the brief asks to evaluate

@@ -1,0 +1,1 @@
+Done. Changed files: `tasks/main.yml`, `defaults/main.yml`, `templates/chrony.conf.j2`, `README.md`. Lint is clean under the `production` profile (`ansible-lint .` → 0 failures, 0 warnings). `ntp_client_min_sources` defaults to `2`, renders as `minsources 2` in the template, and is documented in the README table.

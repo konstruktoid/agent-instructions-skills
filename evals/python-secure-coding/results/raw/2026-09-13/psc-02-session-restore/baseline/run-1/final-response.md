@@ -1,0 +1,3 @@
+Files changed: `src/sessionsvc/store.py`, `README.md`. `ruff check` and `ty check` both pass; manual exercise confirms fresh sessions restore, expired ones raise `ValueError`, and `purge_expired()` (called from `load_session`) removes expired cache entries.
+
+Unrelated to this task but worth flagging: `load_session` still does `pickle.loads` on a client-supplied blob and `read_overrides` still calls bare `eval()` on stored text — both are arbitrary-code-execution vectors, pre-existing and out of scope for the TTL change you asked for, but they undermine the point of adding expiry if the deserialization itself is exploitable before the TTL check even runs. Worth a separate fix.
