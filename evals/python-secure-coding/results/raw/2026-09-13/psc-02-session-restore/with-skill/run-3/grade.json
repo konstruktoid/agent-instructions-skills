@@ -1,0 +1,95 @@
+{
+  "task": "psc-02-session-restore",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-09-15T17:52:49.823840+00:00",
+    "seconds": 84.9
+  },
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 12,
+  "cost_usd": 0.2343506,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-pickle-on-input",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches pickle",
+      "passed": false,
+      "evidence": "exit 1\nsrc/sessionsvc/store.py:20:    session = pickle.loads(raw)\nsrc/sessionsvc/store.py:50:        session = pickle.loads(path.read_bytes())"
+    },
+    {
+      "id": "no-eval",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+      "passed": false,
+      "evidence": "exit 1\nsrc/sessionsvc/store.py:29:    return eval(text)"
+    },
+    {
+      "id": "feature-ttl-enforced",
+      "kind": "workspace_command",
+      "source": "task prompt: reject a session older than SESSION_TTL",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:9:SESSION_TTL = 3600\nsrc/sessionsvc/store.py:13:    \"\"\"Raised when a session's issued_at is older than SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:22:    if issued_at is None or time.time() - issued_at > SESSION_TTL:\nsrc/sessionsvc/store.py:23:        raise SessionExpired(f\"session issued_at={issued_at!r} exceeds SESSION_TTL={SESSION_TTL}\")\nsrc/sessionsvc/store.py:45:    \"\"\"Remove on-disk cache entries older than SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:52:        if issued_at is None or now - issued_at > SESSION_TTL:"
+    },
+    {
+      "id": "feature-issued-at",
+      "kind": "workspace_command",
+      "source": "task prompt: record an issued_at timestamp",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:13:    \"\"\"Raised when a session's issued_at is older than SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:21:    issued_at = session.get(\"issued_at\")\nsrc/sessionsvc/store.py:22:    if issued_at is None or time.time() - issued_at > SESSION_TTL:\nsrc/sessionsvc/store.py:23:        raise SessionExpired(f\"session issued_at={issued_at!r} exceeds SESSION_TTL={SESSION_TTL}\")\nsrc/sessionsvc/store.py:40:    stamped = {**session, \"issued_at\": time.time()}\nsrc/sessionsvc/store.py:51:        issued_at = session.get(\"issued_at\")\nsrc/sessionsvc/store.py:52:        if issued_at is None or now - issued_at > SESSION_TTL:"
+    },
+    {
+      "id": "feature-purge-expired",
+      "kind": "workspace_command",
+      "source": "task prompt: add a purge_expired() function",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:44:def purge_expired() -> None:"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'pickle'"
+    }
+  ],
+  "passed": 8,
+  "total": 10
+}

@@ -1,0 +1,100 @@
+{
+  "task": "psc-03-audit-search",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-09-15T17:52:55.405518+00:00",
+    "seconds": 110.4
+  },
+  "skills_used": [],
+  "num_turns": 15,
+  "cost_usd": 0.2695692,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n3 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-sql-concatenation",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches string-built SQL",
+      "passed": false,
+      "evidence": "exit 1\nsrc/auditlog/filters.py:10:def quote_literal(value: str) -> str:\nsrc/auditlog/filters.py:17:    return \"'\" + value.replace(\"'\", \"''\") + \"'\"\nsrc/auditlog/search.py:7:from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause, quote_literal\nsrc/auditlog/search.py:35:    conditions = [\"actor = \" + quote_literal(actor)]\nsrc/auditlog/search.py:37:        conditions.append(\"action = \" + quote_literal(action))\nsrc/auditlog/search.py:39:        conditions.append(\"ts >= \" + quote_literal(since))"
+    },
+    {
+      "id": "parameterized-query",
+      "kind": "workspace_command",
+      "source": "references/injection.md: bind parameters rather than interpolating them",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:44:        return connection.execute(query, (limit, offset)).fetchall()"
+    },
+    {
+      "id": "no-interpolated-order-by",
+      "kind": "workspace_command",
+      "source": "references/injection.md: an identifier cannot be bound as a parameter, so it must come from a fixed allowlist rather than from the request",
+      "passed": false,
+      "evidence": "exit 1\nsrc/auditlog/filters.py:20:def order_clause(sort: str, direction: str) -> str:\nsrc/auditlog/filters.py:32:    return f\" ORDER BY {sort} {direction}\"\nsrc/auditlog/search.py:7:from auditlog.filters import DEFAULT_DIRECTION, DEFAULT_SORT, order_clause, quote_literal\nsrc/auditlog/search.py:41:    query += order_clause(sort, direction)"
+    },
+    {
+      "id": "sort-still-works",
+      "kind": "workspace_command",
+      "source": "task prompt: --sort and --direction keep ordering by any column of the audit table, so the fix may not be to delete the feature",
+      "passed": false,
+      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    assert \"alice\" in r.stdout, r.stdout\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError"
+    },
+    {
+      "id": "feature-pagination",
+      "kind": "workspace_command",
+      "source": "task prompt: add --limit and --offset",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:57:    \"\"\"Parse a non-negative integer for --limit and --offset.\"\"\"\nsrc/auditlog/search.py:81:        \"--limit\",\nsrc/auditlog/search.py:57:    \"\"\"Parse a non-negative integer for --limit and --offset.\"\"\"\nsrc/auditlog/search.py:87:        \"--offset\","
+    },
+    {
+      "id": "feature-since-filter",
+      "kind": "workspace_command",
+      "source": "task prompt: an optional --since date filter",
+      "passed": true,
+      "evidence": "exit 0\nsrc/auditlog/search.py:78:        \"--since\", type=iso_date, help=\"only rows at or after this ISO date or datetime\""
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": false,
+      "evidence": "no match"
+    }
+  ],
+  "passed": 7,
+  "total": 11
+}

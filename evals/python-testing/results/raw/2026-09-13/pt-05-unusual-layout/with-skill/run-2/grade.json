@@ -1,0 +1,121 @@
+{
+  "task": "pt-05-unusual-layout",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 1,
+    "timed_out": false,
+    "started": "2026-09-16T03:52:44.870892+00:00",
+    "seconds": 1.9
+  },
+  "skills_used": [],
+  "num_turns": 1,
+  "cost_usd": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": true,
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+      "passed": true,
+      "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's own entry point",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "suite-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+      "passed": true,
+      "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+    },
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0\n6 files already formatted"
+    },
+    {
+      "id": "no-test-weakened",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-parallel-test-tree",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "check-added-in-existing-location",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "existing-naming-convention-matched",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-checks-added-to-the-stale-directory",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: add running_balance to the ledger package",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "behaviour-correct",
+      "kind": "workspace_command",
+      "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+      "passed": false,
+      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/with-skill/run-2/workspace/src/ledger/__init__.py)"
+    },
+    {
+      "id": "added-checks-fail-when-the-feature-breaks",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+      "passed": false,
+      "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+    }
+  ],
+  "passed": 9,
+  "total": 14
+}

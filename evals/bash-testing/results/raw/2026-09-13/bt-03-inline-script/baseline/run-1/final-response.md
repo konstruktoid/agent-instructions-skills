@@ -1,0 +1,1 @@
+Files changed: `bin/mkuser-config.sh` (rejects empty `--name` with exit 64), `bin/mkuser-config_test.sh` (new, covers the rejection), `README.md` (dropped the now-stale "only lib/ is covered" note). `make test` passes both suites.

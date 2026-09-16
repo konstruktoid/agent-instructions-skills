@@ -1,0 +1,11 @@
+YAML parses. Changes to `.github/workflows/assistant.yml`:
+
+**Fixed:**
+- `permissions: write-all` → scoped to `contents: write` + `pull-requests: write`. `write-all` gave the token admin-level write on issues, actions, packages, deployments, security-events — none of which the agent needs, and any leak of that token (e.g. via a prompt-injected agent action) would have handed an attacker far more than push access.
+- Added a job-level `if:` gate: only runs when the comment is on a pull request, the commenter's `author_association` is `OWNER`/`MEMBER`/`COLLABORATOR`, and the comment contains `/assistant`. As written, the workflow triggered on *any* comment from *any* GitHub user on a public repo — that's an unauthenticated remote-code-execution trigger with push access. Pick your own trigger phrase if `/assistant` doesn't fit.
+- Added a fork check step that queries the PR via `gh api` and aborts if `head.repo.full_name` isn't this repo. Without it, a maintainer commenting on a PR opened from a fork would cause the workflow to check out attacker-controlled code and hand it to an agent holding `GH_TOKEN` and `MODEL_API_KEY` — the classic "pwn request" pattern. This is the one I'd push back on hardest if you want to relax it: it means the assistant won't work on external contributors' PRs at all, only same-repo branches.
+
+**Not fixed, flagged instead of guessed:**
+- `acme/coding-agent@v1` and `actions/checkout@v5` are pinned to tags, not commit SHAs. Tags are mutable; standard hardening is to pin third-party (and ideally first-party) actions to a full commit SHA. I don't have network access in this session to look up the current SHAs — check with `gh api repos/actions/checkout/git/refs/tags/v5` and the equivalent for `acme/coding-agent` before you ship this.
+
+**Residual risk I can't engineer away:** even with the fork check, the agent still reads repository content (README, code comments, etc.) as part of "read the repository, make the change" — a same-repo branch could still contain adversarial text aimed at the agent. That's inherent to giving an LLM agent push access and isn't something the workflow file alone can close; the permission scoping above limits the blast radius if it happens.

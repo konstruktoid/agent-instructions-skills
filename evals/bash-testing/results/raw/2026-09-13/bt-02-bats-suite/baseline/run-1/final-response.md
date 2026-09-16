@@ -1,0 +1,1 @@
+bats isn't installed and installing it requires your approval (package install is a privileged command). Want me to install it (e.g. `apt-get install bats` or via git clone of bats-core), or would you rather I verify the logic manually instead?

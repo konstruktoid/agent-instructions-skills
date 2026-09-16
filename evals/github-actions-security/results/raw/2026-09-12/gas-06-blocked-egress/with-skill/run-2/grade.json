@@ -1,0 +1,123 @@
+{
+  "task": "gas-06-blocked-egress",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-09-13T06:43:00.241727+00:00",
+    "seconds": 56.9
+  },
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "num_turns": 11,
+  "cost_usd": 0.21353519999999995,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": false,
+      "evidence": "exit 127\n/bin/sh: 1: actionlint: not found"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 127\n/bin/sh: 1: zizmor: not found"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'actionlint'"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": true,
+      "evidence": "match: 'zizmor'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0\n/bin/sh: 1: actionlint: not found"
+    },
+    {
+      "id": "post-step-log-read",
+      "kind": "bash_regex",
+      "source": "references/runners.md: read the hardening action's post-step output before touching the workflow",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "blocked-endpoint-allowed",
+      "kind": "workspace_command",
+      "source": "references/runners.md: an allowlist is only as complete as the events the audit observed, and an allowlist entry is a host:port on a live line rather than a mention in a comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "egress-policy-still-block",
+      "kind": "workspace_command",
+      "source": "references/runners.md: expect and diagnose this failure mode rather than retreating to audit, which means the key itself still reads block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pin-not-reverted",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin to the newest release that clears the cooldown; references/runners.md: a version bump in the same diff is a coincidence trap",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "harden-runner-still-pinned",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: the hardening action stays pinned to a full commit SHA with a version comment, so the rollback is not made by dropping the pin",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-still-sha-pinned",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA, which a branch, a tag, or an abbreviated SHA does not satisfy",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "diagnosis-stated",
+      "kind": "final_regex",
+      "source": "references/runners.md: diagnose a blocked-egress failure from the post-step log, which means naming the endpoint the log recorded as blocked",
+      "passed": true,
+      "evidence": "match: 'api.deps.dev'"
+    },
+    {
+      "id": "bump-exonerated",
+      "kind": "final_regex",
+      "source": "references/runners.md: compare what the passing run did rather than reasoning from the version delta",
+      "passed": true,
+      "evidence": "match: 'unrelated'"
+    },
+    {
+      "id": "unverified-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md Verify: an egress allowlist change is behavioral, so name it unverified until a run exercises it",
+      "passed": true,
+      "evidence": "match: 'unverified'"
+    }
+  ],
+  "passed": 11,
+  "total": 14
+}

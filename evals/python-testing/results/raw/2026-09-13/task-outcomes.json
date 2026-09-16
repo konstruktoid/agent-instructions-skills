@@ -1,0 +1,3434 @@
+[
+  {
+    "task": "pt-01-paging-bug",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T22:59:51.996324+00:00",
+      "seconds": 37.7
+    },
+    "skills_used": [],
+    "num_turns": 9,
+    "cost_usd": 0.1399742,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_slicing.py:3:1\n  |\n1 |   \"\"\"Tests for paging.slicing.\"\"\"\n2 |\n3 | / import pytest\n4 | | from paging import page_count, page_slice\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from paging import page_count, page_slice\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix",
+        "passed": false,
+        "evidence": "exit 1\n........                                                                 [100%]\n8 passed in 0.02s"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 12
+  },
+  {
+    "task": "pt-01-paging-bug",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T22:59:52.004489+00:00",
+      "seconds": 59.4
+    },
+    "skills_used": [],
+    "num_turns": 16,
+    "cost_usd": 0.2455298,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix",
+        "passed": false,
+        "evidence": "exit 1\n........                                                                 [100%]\n8 passed in 0.02s"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 12
+  },
+  {
+    "task": "pt-01-paging-bug",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T22:59:52.007302+00:00",
+      "seconds": 33.7
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.1741306,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n........                                                                 [100%]\n8 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_slicing.py:3:1\n  |\n1 |   \"\"\"Tests for paging.slicing.\"\"\"\n2 |\n3 | / import pytest\n4 | | from paging import page_count, page_slice\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from paging import page_count, page_slice\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix",
+        "passed": false,
+        "evidence": "exit 1\n........                                                                 [100%]\n8 passed in 0.02s"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 12
+  },
+  {
+    "task": "pt-01-paging-bug",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T22:59:51.998695+00:00",
+      "seconds": 116.9
+    },
+    "skills_used": [
+      "eval-python-testing:python-testing"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.3661231999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix",
+        "passed": true,
+        "evidence": "exit 0\n...FF......                                                              [100%]\n=================================== FAILURES ===================================\n__________ test_page_slice_returns_the_requested_page[3-2-expected3] ___________\n\nletters = ['a', 'b', 'c', 'd', 'e', 'f'], page = 3, per_page = 2\nexpected = ['e', 'f']\n\n    @pytest.mark.parametrize(\n        (\"page\", \"per_page\", \"expected\"),\n        [\n            (1, 2, [\"a\", \"b\"]),\n            (2, 2, [\"c\", \"d\"]),\n            (1, 3, [\"a\", \"b\", \"c\"]),\n            (3, 2, [\"e\", \"f\"]),\n        ],\n    )\n    def test_page_slice_returns_the_requested_page(letters, page, per_page, expected):\n        \"\"\"A page in the middle of the sequence holds per_page items.\"\"\"\n>       assert page_slice(letters, page, per_page) == expected\nE       AssertionError: assert ['e'] == ['e', 'f']\nE         \nE         Right contains one more item: 'f'\nE         Use -v to get more diff\n\n../../../../workspace/tests/test_slicing.py:19: AssertionError\n____________________ test_page_slice_includes_the_last_item ____________________\n\nletters = ['a', 'b', 'c', 'd', 'e', 'f']\n\n    def test_page_slice_includes_the_last_item(letters):\n        \"\"\"The final item is reachable through the last page.\"\"\"\n        last_page = page_slice(letters, 3, 2)\n>       assert \"f\" in last_page\nE       AssertionError: assert 'f' in ['e']\n\n../../../../workspace/tests/test_slicing.py:25: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_slicing.py::test_page_slice_returns_the_requested_page[3-2-expected3]\nFAILED tests/test_slicing.py::test_page_slice_includes_the_last_item - Assert...\n2 failed, 9 passed in 0.05s"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-01-paging-bug",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:00:26.895466+00:00",
+      "seconds": 91.8
+    },
+    "skills_used": [
+      "eval-python-testing:python-testing"
+    ],
+    "num_turns": 21,
+    "cost_usd": 0.297243,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix",
+        "passed": true,
+        "evidence": "exit 0\n...FF......                                                              [100%]\n=================================== FAILURES ===================================\n__________ test_page_slice_returns_the_requested_page[3-2-expected3] ___________\n\nletters = ['a', 'b', 'c', 'd', 'e', 'f'], page = 3, per_page = 2\nexpected = ['e', 'f']\n\n    @pytest.mark.parametrize(\n        (\"page\", \"per_page\", \"expected\"),\n        [\n            (1, 2, [\"a\", \"b\"]),\n            (2, 2, [\"c\", \"d\"]),\n            (1, 3, [\"a\", \"b\", \"c\"]),\n            (3, 2, [\"e\", \"f\"]),\n        ],\n    )\n    def test_page_slice_returns_the_requested_page(letters, page, per_page, expected):\n        \"\"\"A page in the middle of the sequence holds per_page items.\"\"\"\n>       assert page_slice(letters, page, per_page) == expected\nE       AssertionError: assert ['e'] == ['e', 'f']\nE         \nE         Right contains one more item: 'f'\nE         Use -v to get more diff\n\n../../../../workspace/tests/test_slicing.py:19: AssertionError\n___________ test_page_slice_includes_the_last_item_on_the_final_page ___________\n\nletters = ['a', 'b', 'c', 'd', 'e', 'f']\n\n    def test_page_slice_includes_the_last_item_on_the_final_page(letters):\n        \"\"\"The final page holds the last item even when it doesn't fill the page.\"\"\"\n>       assert page_slice(letters, 2, 4) == [\"e\", \"f\"]\nE       AssertionError: assert ['e'] == ['e', 'f']\nE         \nE         Right contains one more item: 'f'\nE         Use -v to get more diff\n\n../../../../workspace/tests/test_slicing.py:24: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_slicing.py::test_page_slice_returns_the_requested_page[3-2-expected3]\nFAILED tests/test_slicing.py::test_page_slice_includes_the_last_item_on_the_final_page\n2 failed, 9 passed in 0.04s"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-01-paging-bug",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:00:30.847078+00:00",
+      "seconds": 99.6
+    },
+    "skills_used": [
+      "eval-python-testing:python-testing"
+    ],
+    "num_turns": 22,
+    "cost_usd": 0.32172580000000006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_slicing.py:3:1\n  |\n1 |   \"\"\"Tests for paging.slicing.\"\"\"\n2 |\n3 | / import pytest\n4 | | from paging import page_count, page_slice\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from paging import page_count, page_slice\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "regression-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-fix",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: for a bug fix, the test was confirmed to fail without the fix",
+        "passed": true,
+        "evidence": "exit 0\n..F.F......                                                              [100%]\n=================================== FAILURES ===================================\n__________ test_page_slice_returns_the_requested_page[3-2-expected2] ___________\n\nletters = ['a', 'b', 'c', 'd', 'e', 'f'], page = 3, per_page = 2\nexpected = ['e', 'f']\n\n    @pytest.mark.parametrize(\n        (\"page\", \"per_page\", \"expected\"),\n        [\n            (1, 2, [\"a\", \"b\"]),\n            (2, 2, [\"c\", \"d\"]),\n            (3, 2, [\"e\", \"f\"]),\n            (1, 3, [\"a\", \"b\", \"c\"]),\n        ],\n    )\n    def test_page_slice_returns_the_requested_page(letters, page, per_page, expected):\n        \"\"\"A page in the middle of the sequence holds per_page items.\"\"\"\n>       assert page_slice(letters, page, per_page) == expected\nE       AssertionError: assert ['e'] == ['e', 'f']\nE         \nE         Right contains one more item: 'f'\nE         Use -v to get more diff\n\n../../../../workspace/tests/test_slicing.py:18: AssertionError\n________________ test_page_slice_covers_every_item_exactly_once ________________\n\nletters = ['a', 'b', 'c', 'd', 'e', 'f']\n\n    def test_page_slice_covers_every_item_exactly_once(letters):\n        \"\"\"Paging through the whole sequence reconstructs it with no gaps or repeats.\"\"\"\n        per_page = 2\n        total_pages = page_count(len(letters), per_page)\n        pages = [page_slice(letters, page, per_page) for page in range(1, total_pages + 1)]\n>       assert [item for page in pages for item in page] == letters\nE       AssertionError: assert ['a', 'b', 'c', 'd', 'e'] == ['a', 'b', 'c', 'd', 'e', 'f']\nE         \nE         Right contains one more item: 'f'\nE         Use -v to get more diff\n\n../../../../workspace/tests/test_slicing.py:26: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_slicing.py::test_page_slice_returns_the_requested_page[3-2-expected2]\nFAILED tests/test_slicing.py::test_page_slice_covers_every_item_exactly_once\n2 failed, 9 passed in 0.04s"
+      },
+      {
+        "id": "existing-style-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 3: match the existing naming, fixture, and assertion conventions",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "bug-actually-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: every item appears on exactly one page, a page past the end is empty",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 12
+  },
+  {
+    "task": "pt-02-business-days",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:00:52.619944+00:00",
+      "seconds": 65.6
+    },
+    "skills_used": [],
+    "num_turns": 19,
+    "cost_usd": 0.22800779999999995,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n.........                                                                [100%]\n9 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n.........                                                                [100%]\n9 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a new public interface requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add business_days_between to the tempo package",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "source": "task prompt: export it the way the package exports its other helpers",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "pt-02-business-days",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:01:50.122446+00:00",
+      "seconds": 84.0
+    },
+    "skills_used": [],
+    "num_turns": 19,
+    "cost_usd": 0.24960980000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n...........                                                              [100%]\n11 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a new public interface requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add business_days_between to the tempo package",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "source": "task prompt: export it the way the package exports its other helpers",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "pt-02-business-days",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:01:59.075339+00:00",
+      "seconds": 141.5
+    },
+    "skills_used": [],
+    "num_turns": 27,
+    "cost_usd": 0.4449328000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n......                                                                   [100%]\n6 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n......                                                                   [100%]\n6 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a new public interface requires a test",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add business_days_between to the tempo package",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "source": "task prompt: export it the way the package exports its other helpers",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 12,
+    "total": 14
+  },
+  {
+    "task": "pt-02-business-days",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:02:00.013463+00:00",
+      "seconds": 179.9
+    },
+    "skills_used": [
+      "eval-python-testing:python-testing"
+    ],
+    "num_turns": 30,
+    "cost_usd": 0.48310139999999996,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n.............                                                            [100%]\n13 passed in 0.03s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n.............                                                            [100%]\n13 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a new public interface requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add business_days_between to the tempo package",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "source": "task prompt: export it the way the package exports its other helpers",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "pt-02-business-days",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:02:11.695658+00:00",
+      "seconds": 128.0
+    },
+    "skills_used": [
+      "eval-python-testing:python-testing"
+    ],
+    "num_turns": 29,
+    "cost_usd": 0.47622840000000016,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n.............                                                            [100%]\n13 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n.............                                                            [100%]\n13 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a new public interface requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add business_days_between to the tempo package",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "source": "task prompt: export it the way the package exports its other helpers",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "pt-02-business-days",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:03:14.911645+00:00",
+      "seconds": 172.1
+    },
+    "skills_used": [
+      "eval-python-testing:python-testing"
+    ],
+    "num_turns": 35,
+    "cost_usd": 0.6357241999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n............                                                             [100%]\n12 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n............                                                             [100%]\n12 passed in 0.02s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-new-interface",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a new public interface requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add business_days_between to the tempo package",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-exported",
+        "kind": "workspace_command",
+        "source": "task prompt: export it the way the package exports its other helpers",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: working days from start up to but not including end, holidays excluded, 0 when end precedes start",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-holiday-helper-fixed",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: read the code the change depends on rather than trusting its docstring; is_holiday compares a date against a list of ISO strings and never matches",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "holiday-behaviour-covered-by-a-test",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test that pins the corrected behaviour",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "pt-03-retry-refactor",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:04:20.536041+00:00",
+      "seconds": 78.6
+    },
+    "skills_used": [],
+    "num_turns": 18,
+    "cost_usd": 0.24275339999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: extract the loop into _with_retries",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'refactor'"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: observable behaviour must not change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-03-retry-refactor",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:04:21.414530+00:00",
+      "seconds": 39.5
+    },
+    "skills_used": [],
+    "num_turns": 9,
+    "cost_usd": 0.14338800000000002,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_client.py:3:1\n  |\n1 |   \"\"\"Tests for fetcher.client.\"\"\"\n2 |\n3 | / import pytest\n4 | | from fetcher import Client\n5 | | from fetcher.client import TransportError\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from fetcher import Client\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: extract the loop into _with_retries",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: observable behaviour must not change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 12
+  },
+  {
+    "task": "pt-03-retry-refactor",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:05:00.686706+00:00",
+      "seconds": 23.2
+    },
+    "skills_used": [],
+    "num_turns": 8,
+    "cost_usd": 0.1168244,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_client.py:3:1\n  |\n1 |   \"\"\"Tests for fetcher.client.\"\"\"\n2 |\n3 | / import pytest\n4 | | from fetcher import Client\n5 | | from fetcher.client import TransportError\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from fetcher import Client\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: extract the loop into _with_retries",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'Refactor'"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: observable behaviour must not change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-03-retry-refactor",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:05:01.846149+00:00",
+      "seconds": 29.4
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.1718182,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_client.py:3:1\n  |\n1 |   \"\"\"Tests for fetcher.client.\"\"\"\n2 |\n3 | / import pytest\n4 | | from fetcher import Client\n5 | | from fetcher.client import TransportError\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from fetcher import Client\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: extract the loop into _with_retries",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'existing test'"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: observable behaviour must not change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-03-retry-refactor",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:05:24.824702+00:00",
+      "seconds": 59.9
+    },
+    "skills_used": [],
+    "num_turns": 13,
+    "cost_usd": 0.2001092,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": false,
+        "evidence": "exit 1\nI001 [*] Import block is un-sorted or un-formatted\n --> tests/test_client.py:3:1\n  |\n1 |   \"\"\"Tests for fetcher.client.\"\"\"\n2 |\n3 | / import pytest\n4 | | from fetcher import Client\n5 | | from fetcher.client import TransportError\n  | |_________________________________________^\n  |\nhelp: Organize imports\n  |\n3 | import pytest\n4 +\n5 | from fetcher import Client\n  |\n\nFound 1 error.\n[*] 1 fixable with the `--fix` option."
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: extract the loop into _with_retries",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'Existing test'"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: observable behaviour must not change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-03-retry-refactor",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T23:05:32.166723+00:00",
+      "seconds": 88.9
+    },
+    "skills_used": [],
+    "num_turns": 14,
+    "cost_usd": 0.2785056,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": true,
+        "evidence": "match: 'pytest'"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n....                                                                     [100%]\n4 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n4 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "refactor-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: extract the loop into _with_retries",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-tests-unchanged",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: for a refactor, existing tests must pass unchanged, and that is the evidence",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "absence-of-new-test-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md step 2: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'Refactor'"
+      },
+      {
+        "id": "behaviour-preserved",
+        "kind": "workspace_command",
+        "source": "task prompt: observable behaviour must not change",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "pt-04-upload-validation",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:51:57.412410+00:00",
+      "seconds": 36.4
+    },
+    "skills_used": [],
+    "num_turns": 11,
+    "cost_usd": 0.1747768,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+        "passed": false,
+        "evidence": "exit 1\naccepted ../etc/passwd.pdf"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: the stored name should be the filename lowercased",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from uploads import validate_upload; assert validate_upload('Report.PDF', 10)=='report.pdf'\n                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "source": "task prompt: a distinct message naming the rule that failed",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 8, in <module>\n    assert len(seen) == 4, seen\n           ^^^^^^^^^^^^^^\nAssertionError: {'upload is too large'}"
+      }
+    ],
+    "passed": 7,
+    "total": 13
+  },
+  {
+    "task": "pt-04-upload-validation",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:51:57.428009+00:00",
+      "seconds": 41.0
+    },
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.18056740000000002,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: the stored name should be the filename lowercased",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "source": "task prompt: a distinct message naming the rule that failed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 13
+  },
+  {
+    "task": "pt-04-upload-validation",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:51:57.416595+00:00",
+      "seconds": 40.5
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.1805942,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: the stored name should be the filename lowercased",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "source": "task prompt: a distinct message naming the rule that failed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 13
+  },
+  {
+    "task": "pt-04-upload-validation",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:51:57.424730+00:00",
+      "seconds": 39.1
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.1911066,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: the stored name should be the filename lowercased",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "source": "task prompt: a distinct message naming the rule that failed",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 13
+  },
+  {
+    "task": "pt-04-upload-validation",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:36.436486+00:00",
+      "seconds": 2.2
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+        "passed": false,
+        "evidence": "exit 1\naccepted ../etc/passwd.pdf"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: the stored name should be the filename lowercased",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from uploads import validate_upload; assert validate_upload('Report.PDF', 10)=='report.pdf'\n                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "source": "task prompt: a distinct message naming the rule that failed",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 8, in <module>\n    assert len(seen) == 4, seen\n           ^^^^^^^^^^^^^^\nAssertionError: {'upload is too large'}"
+      }
+    ],
+    "passed": 7,
+    "total": 13
+  },
+  {
+    "task": "pt-04-upload-validation",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:38.885536+00:00",
+      "seconds": 1.9
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n5 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-paths-tested",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires tests including the rejection and failure paths",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "extension-allowlist-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: the extension must be one of .pdf, .png or .csv",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "traversal-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: reject rather than repair a path separator of either kind or a leading dot, and reject an extension outside the allowlist",
+        "passed": false,
+        "evidence": "exit 1\naccepted ../etc/passwd.pdf"
+      },
+      {
+        "id": "lowercasing-applied",
+        "kind": "workspace_command",
+        "source": "task prompt: the stored name should be the filename lowercased",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from uploads import validate_upload; assert validate_upload('Report.PDF', 10)=='report.pdf'\n                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      {
+        "id": "rejection-messages-name-the-rule",
+        "kind": "workspace_command",
+        "source": "task prompt: a distinct message naming the rule that failed",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 8, in <module>\n    assert len(seen) == 4, seen\n           ^^^^^^^^^^^^^^\nAssertionError: {'upload is too large'}"
+      }
+    ],
+    "passed": 7,
+    "total": 13
+  },
+  {
+    "task": "pt-05-unusual-layout",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:40.252186+00:00",
+      "seconds": 1.9
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n6 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-checks-added-to-the-stale-directory",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add running_balance to the ledger package",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/baseline/run-1/workspace/src/ledger/__init__.py)"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+        "passed": false,
+        "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "pt-05-unusual-layout",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:41.120720+00:00",
+      "seconds": 2.2
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n6 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-checks-added-to-the-stale-directory",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add running_balance to the ledger package",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/baseline/run-2/workspace/src/ledger/__init__.py)"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+        "passed": false,
+        "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "pt-05-unusual-layout",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:42.284060+00:00",
+      "seconds": 2.0
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n6 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-checks-added-to-the-stale-directory",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add running_balance to the ledger package",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/baseline/run-3/workspace/src/ledger/__init__.py)"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+        "passed": false,
+        "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "pt-05-unusual-layout",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:43.022103+00:00",
+      "seconds": 2.0
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n6 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-checks-added-to-the-stale-directory",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add running_balance to the ledger package",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/with-skill/run-1/workspace/src/ledger/__init__.py)"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+        "passed": false,
+        "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "pt-05-unusual-layout",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:44.870892+00:00",
+      "seconds": 1.9
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n6 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-checks-added-to-the-stale-directory",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add running_balance to the ledger package",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/with-skill/run-2/workspace/src/ledger/__init__.py)"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+        "passed": false,
+        "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "pt-05-unusual-layout",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 1,
+      "timed_out": false,
+      "started": "2026-09-16T03:52:45.942532+00:00",
+      "seconds": 1.8
+    },
+    "skills_used": [],
+    "num_turns": 1,
+    "cost_usd": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": true,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new tests",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.02s"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's own entry point",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "suite-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: name the failing test and include its output when stopping",
+        "passed": true,
+        "evidence": "exit 0\n..                                                                       [100%]\n2 passed in 0.01s"
+      },
+      {
+        "id": "ruff-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\nAll checks passed!"
+      },
+      {
+        "id": "format-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: ruff format --check clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0\n6 files already formatted"
+      },
+      {
+        "id": "no-test-weakened",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no test weakened, skipped, or marked xfail to obtain a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test framework or mocking library introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-parallel-test-tree",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no new test directory introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-added-in-existing-location",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root and match it, rather than assuming a structure",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "existing-naming-convention-matched",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: note the naming pattern, configured here as check_* in pyproject.toml",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-checks-added-to-the-stale-directory",
+        "kind": "workspace_command",
+        "source": "SKILL.md step 1: find the test root the repository actually collects; tests/ is left over and pyproject.toml's testpaths excludes it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-implemented",
+        "kind": "workspace_command",
+        "source": "task prompt: add running_balance to the ledger package",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "behaviour-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/with-skill/run-3/workspace/src/ledger/__init__.py)"
+      },
+      {
+        "id": "added-checks-fail-when-the-feature-breaks",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: a check that cannot fail is not coverage; _helpers.check_values prints a mismatch instead of raising",
+        "passed": false,
+        "evidence": "exit 1\n..                                                                       [100%]\n2 passed in 0.01s"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  }
+]

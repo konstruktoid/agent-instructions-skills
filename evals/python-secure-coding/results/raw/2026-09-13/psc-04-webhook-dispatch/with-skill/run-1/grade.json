@@ -1,0 +1,109 @@
+{
+  "task": "psc-04-webhook-dispatch",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-09-15T22:55:20.690082+00:00",
+    "seconds": 97.5
+  },
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 15,
+  "cost_usd": 0.29981340000000006,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "ssrf-validation-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-hardcoded-secret",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not hardcoded",
+      "passed": false,
+      "evidence": "exit 1\nsrc/webhooks/dispatch.py:13:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+    },
+    {
+      "id": "no-secret-logged",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not logged",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "constant-time-comparison",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-random-for-identifiers",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+      "passed": false,
+      "evidence": "exit 1\nsrc/webhooks/dispatch.py:23:    return str(random.randint(10**11, 10**12))"
+    },
+    {
+      "id": "feature-timeout",
+      "kind": "workspace_command",
+      "source": "task prompt: a per-request timeout of 5 seconds",
+      "passed": true,
+      "evidence": "exit 0\nsrc/webhooks/dispatch.py:64:    with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:\nsrc/webhooks/dispatch.py:71:    A 5xx response or a connection/timeout error is retried up to\nsrc/webhooks/dispatch.py:90:            # Covers URLError (DNS/connection failures) and socket timeouts, both retryable."
+    },
+    {
+      "id": "feature-retry-backoff",
+      "kind": "workspace_command",
+      "source": "task prompt: retry up to 3 times with exponential backoff",
+      "passed": true,
+      "evidence": "exit 0\nsrc/webhooks/dispatch.py:16:# One initial attempt plus up to 3 retries.\nsrc/webhooks/dispatch.py:69:    \"\"\"POST a payload to a subscriber endpoint, retrying transient failures.\nsrc/webhooks/dispatch.py:73:    as final and raised immediately without retrying.\nsrc/webhooks/dispatch.py:90:            # Covers URLError (DNS/connection failures) and socket timeouts, both retryable.\nsrc/webhooks/dispatch.py:18:BACKOFF_BASE_SECONDS = 1.0\nsrc/webhooks/dispatch.py:72:    MAX_ATTEMPTS times with exponential backoff. A 4xx response is treated\nsrc/webhooks/dispatch.py:97:            time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt_number - 1)))"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": false,
+      "evidence": "no match"
+    }
+  ],
+  "passed": 7,
+  "total": 12
+}

@@ -1,0 +1,6 @@
+**Changes:**
+- `.github/dependabot.yml` (new) — weekly `github-actions` ecosystem updates, grouped into one PR under `github-actions`, with a 7-day cooldown.
+- `.github/workflows/ci.yml`, `.github/workflows/codeql.yml` — action references switched from mutable tags to full commit SHAs with version comments (`actions/checkout@...#v7.0.1`, `astral-sh/setup-uv@...#v10.1.0`, `github/codeql-action/{init,analyze}@...#v4.38.0`), so Dependabot can update the SHA+comment pair going forward.
+- `README.md` — new "Action updates" section explaining the pin-and-comment convention and the weekly grouped Dependabot PR.
+
+**Verify:** `actionlint` clean (exit 0). `zizmor --persona=pedantic` (pinned v1.29.0, `GH_TOKEN` set): started at 4 findings, fixed the `dependabot-cooldown` one by adding `cooldown.default-days: 7`; 3 low-severity `help`-level findings remain (missing workflow-level `concurrency` in both `ci.yml` and `codeql.yml`, and an undocumented `security-events: write` comment in `codeql.yml`). These are pre-existing conditions in files I only touched for pinning, not something introduced by this change, and outside the requested scope (Dependabot config, pinning consistency, README) — flagging rather than fixing. Say the word if you want those addressed too.

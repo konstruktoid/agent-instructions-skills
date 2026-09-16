@@ -1,0 +1,2930 @@
+[
+  {
+    "task": "bss-01-log-archive",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:56:47.674141+00:00",
+      "seconds": 65.6
+    },
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.17956619999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself on a representative input",
+        "passed": true,
+        "evidence": "match: 'archive-logs.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "source": "task prompt: several service names in a single invocation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --keep-days N option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 14
+  },
+  {
+    "task": "bss-01-log-archive",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:56:47.675612+00:00",
+      "seconds": 67.0
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.19538859999999997,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself on a representative input",
+        "passed": true,
+        "evidence": "match: 'archive-logs.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "source": "task prompt: several service names in a single invocation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --keep-days N option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 14
+  },
+  {
+    "task": "bss-01-log-archive",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:56:47.666748+00:00",
+      "seconds": 63.9
+    },
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.1868084,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself on a representative input",
+        "passed": true,
+        "evidence": "match: 'archive-logs.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "source": "task prompt: several service names in a single invocation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --keep-days N option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "bss-01-log-archive",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:56:47.665787+00:00",
+      "seconds": 215.7
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 20,
+    "cost_usd": 0.688558,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself on a representative input",
+        "passed": true,
+        "evidence": "match: 'archive-logs.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "source": "task prompt: several service names in a single invocation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --keep-days N option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "bss-01-log-archive",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:57:51.785894+00:00",
+      "seconds": 151.5
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 30,
+    "cost_usd": 0.6402907999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself on a representative input",
+        "passed": true,
+        "evidence": "match: 'archive-logs.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "source": "task prompt: several service names in a single invocation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --keep-days N option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "bss-01-log-archive",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:57:53.544118+00:00",
+      "seconds": 118.3
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 16,
+    "cost_usd": 0.4167852,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself on a representative input",
+        "passed": true,
+        "evidence": "match: 'archive-logs.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "temp-created-with-mktemp",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: create temporary files and directories with mktemp",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-predictable-temp-name",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: a hand-built name such as /tmp/build.$$ is predictable",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cleanup-trap-installed",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: remove temporary files from a trap installed at creation time",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "service-name-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-multiple-services",
+        "kind": "workspace_command",
+        "source": "task prompt: several service names in a single invocation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-keep-days-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --keep-days N option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "bss-02-deploy-notify",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:57:54.947201+00:00",
+      "seconds": 77.6
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.21459660000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 27:\n. etc/services.conf\n  ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\n\nIn bin/notify-deploy.sh line 42:\n  ssh \"$REMOTE_HOST\" \"$REMOTE_CMD\"\n                      ^---------^ SC2029 (info): Note that, unescaped, this expands on the client side.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ...\n  https://www.shellcheck.net/wiki/SC2029 -- Note that, unescaped, this expand..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 27:\n. etc/services.conf\n  ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\n\nIn bin/notify-deploy.sh line 42:\n  ssh \"$REMOTE_HOST\" \"$REMOTE_CMD\"\n                      ^---------^ SC2029 (info): Note that, unescaped, this expands on the client side.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ...\n  https://www.shellcheck.net/wiki/SC2029 -- Note that, unescaped, this expand..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: never pass untrusted data to eval",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "source": "task prompt: a short release note passed as a third argument",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run flag",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 13
+  },
+  {
+    "task": "bss-02-deploy-notify",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:59:12.752950+00:00",
+      "seconds": 67.2
+    },
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.17732380000000003,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 28:\n. etc/services.conf\n  ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\n\nIn bin/notify-deploy.sh line 49:\nssh \"$REMOTE_HOST\" \"$REMOTE_CMD\"\n                    ^---------^ SC2029 (info): Note that, unescaped, this expands on the client side.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ...\n  https://www.shellcheck.net/wiki/SC2029 -- Note that, unescaped, this expand..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 28:\n. etc/services.conf\n  ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\n\nIn bin/notify-deploy.sh line 49:\nssh \"$REMOTE_HOST\" \"$REMOTE_CMD\"\n                    ^---------^ SC2029 (info): Note that, unescaped, this expands on the client side.\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ...\n  https://www.shellcheck.net/wiki/SC2029 -- Note that, unescaped, this expand..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: never pass untrusted data to eval",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "source": "task prompt: a short release note passed as a third argument",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run flag",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 13
+  },
+  {
+    "task": "bss-02-deploy-notify",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T07:59:52.218481+00:00",
+      "seconds": 48.8
+    },
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.1440006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 23:\n. etc/services.conf\n  ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\n\nIn bin/notify-deploy.sh line 52:\n  ssh $REMOTE_HOST \"$REMOTE_CMD\"\n                    ^---------^ SC2029 (info): Note that, unescaped, this expands on the client side.\n\n\nIn bin/notify-deploy.sh line 55:\n    -d \"{\\\"text\\\": \\\"$MESSAGE\\\"}\" $SLACK_URL\n                                  ^--------^ SC2086 (info): Double quote to prevent globbing and word splitting.\n\nDid you mean:\n    -d \"{\\\"text\\\": \\\"$MESSAGE\\\"}\" \"$SLACK_URL\"\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ...\n  https://www.shellcheck.net/wiki/SC2029 -- Note that, unescaped, this expand...\n  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 23:\n. etc/services.conf\n  ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\n\nIn bin/notify-deploy.sh line 52:\n  ssh $REMOTE_HOST \"$REMOTE_CMD\"\n                    ^---------^ SC2029 (info): Note that, unescaped, this expands on the client side.\n\n\nIn bin/notify-deploy.sh line 55:\n    -d \"{\\\"text\\\": \\\"$MESSAGE\\\"}\" $SLACK_URL\n                                  ^--------^ SC2086 (info): Double quote to prevent globbing and word splitting.\n\nDid you mean:\n    -d \"{\\\"text\\\": \\\"$MESSAGE\\\"}\" \"$SLACK_URL\"\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ...\n  https://www.shellcheck.net/wiki/SC2029 -- Note that, unescaped, this expand...\n  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: never pass untrusted data to eval",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "source": "task prompt: a short release note passed as a third argument",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run flag",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 5,
+    "total": 13
+  },
+  {
+    "task": "bss-02-deploy-notify",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:00:20.127076+00:00",
+      "seconds": 135.7
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 15,
+    "cost_usd": 0.30745920000000004,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 42:\n  . \"${SERVICES_CONF}\"\n    ^----------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 42:\n  . \"${SERVICES_CONF}\"\n    ^----------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: never pass untrusted data to eval",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "source": "task prompt: a short release note passed as a third argument",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run flag",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 13
+  },
+  {
+    "task": "bss-02-deploy-notify",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:00:23.742546+00:00",
+      "seconds": 167.2
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 22,
+    "cost_usd": 0.5204061999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 77:\n  . etc/services.conf\n    ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn bin/notify-deploy.sh line 77:\n  . etc/services.conf\n    ^---------------^ SC1091 (info): Not following: etc/services.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/services.conf ..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: never pass untrusted data to eval",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "source": "task prompt: a short release note passed as a third argument",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run flag",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 13
+  },
+  {
+    "task": "bss-02-deploy-notify",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:00:23.769843+00:00",
+      "seconds": 164.7
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 25,
+    "cost_usd": 0.598359,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-eval",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: never pass untrusted data to eval",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-payload-built-with-a-tool",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: JSON is built with jq --arg, never string concatenation",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-hand-built-json-payload",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: never concatenate data into a string another parser reads",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "remote-command-not-a-built-string",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: an ssh remote command string is parsed by the remote login shell",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-release-note",
+        "kind": "workspace_command",
+        "source": "task prompt: a short release note passed as a third argument",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run flag",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: document both in the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 13
+  },
+  {
+    "task": "bss-03-provision-user",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:00:41.197243+00:00",
+      "seconds": 156.1
+    },
+    "skills_used": [],
+    "num_turns": 14,
+    "cost_usd": 0.35005580000000003,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 6:\n. etc/db.conf\n  ^---------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 6:\n. etc/db.conf\n  ^---------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: every user on the host can read a credential from ps",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a secret must never appear in a log",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --from-file option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --shell option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 6,
+    "total": 15
+  },
+  {
+    "task": "bss-03-provision-user",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:02:36.015557+00:00",
+      "seconds": 110.7
+    },
+    "skills_used": [],
+    "num_turns": 13,
+    "cost_usd": 0.2629862,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 5:\n. etc/db.conf\n  ^---------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\n\nIn sbin/provision-user.sh line 5:\n. etc/db.conf\n  ^---------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: every user on the host can read a credential from ps",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a secret must never appear in a log",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --from-file option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --shell option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 15
+  },
+  {
+    "task": "bss-03-provision-user",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:03:08.816505+00:00",
+      "seconds": 111.6
+    },
+    "skills_used": [],
+    "num_turns": 14,
+    "cost_usd": 0.2933496,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 5:\n. etc/db.conf\n  ^---------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0\n\nIn sbin/provision-user.sh line 5:\n. etc/db.conf\n  ^---------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: every user on the host can read a credential from ps",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a secret must never appear in a log",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --from-file option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --shell option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 15
+  },
+  {
+    "task": "bss-03-provision-user",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:03:11.154096+00:00",
+      "seconds": 241.5
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 20,
+    "cost_usd": 0.578024,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 162:\n  source \"${DB_CONF}\"\n         ^----------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 162:\n  source \"${DB_CONF}\"\n         ^----------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: every user on the host can read a credential from ps",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a secret must never appear in a log",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --from-file option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --shell option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 15
+  },
+  {
+    "task": "bss-03-provision-user",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:03:17.541342+00:00",
+      "seconds": 230.9
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 23,
+    "cost_usd": 0.6207488000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 20:\n. \"${SCRIPT_DIR}/../etc/db.conf\"\n  ^----------------------------^ SC1091 (info): Not following: ../etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: ../etc/db.conf was..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 20:\n. \"${SCRIPT_DIR}/../etc/db.conf\"\n  ^----------------------------^ SC1091 (info): Not following: ../etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: ../etc/db.conf was..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: every user on the host can read a credential from ps",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a secret must never appear in a log",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --from-file option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --shell option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 15
+  },
+  {
+    "task": "bss-03-provision-user",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:04:26.984439+00:00",
+      "seconds": 125.0
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 16,
+    "cost_usd": 0.35102999999999995,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 20:\n. \"${DB_CONF}\"\n  ^----------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": false,
+        "evidence": "exit 1\n\nIn sbin/provision-user.sh line 20:\n. \"${DB_CONF}\"\n  ^----------^ SC1091 (info): Not following: etc/db.conf was not specified as input (see shellcheck -x).\n\nFor more information:\n  https://www.shellcheck.net/wiki/SC1091 -- Not following: etc/db.conf was no..."
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-random-for-secrets",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: never $RANDOM, a 15-bit value from a predictable generator",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "csprng-used",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: use /dev/urandom or openssl rand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-in-argv",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: every user on the host can read a credential from ps",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-not-logged",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: a secret must never appear in a log",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "path-set-explicitly",
+        "kind": "workspace_command",
+        "source": "references/environment.md: a script that runs privileged or from cron sets its own PATH",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sourced-config-checked",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: confirm ownership and mode before a privileged script sources a file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "input-validated",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: validate input against an allowlist pattern at the boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-from-file",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --from-file option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-shell-option",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --shell option",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 15
+  },
+  {
+    "task": "bss-04-workspace-cleanup",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:05:00.673576+00:00",
+      "seconds": 55.7
+    },
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.16529920000000003,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location",
+        "passed": true,
+        "evidence": "match: 'clean-workspaces.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: pass -- before every path operand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "source": "task prompt: take the root and the threshold as arguments",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 14
+  },
+  {
+    "task": "bss-04-workspace-cleanup",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:05:56.596812+00:00",
+      "seconds": 55.9
+    },
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.15999539999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location",
+        "passed": true,
+        "evidence": "match: 'clean-workspaces.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: pass -- before every path operand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "source": "task prompt: take the root and the threshold as arguments",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "bss-04-workspace-cleanup",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:06:32.276122+00:00",
+      "seconds": 26.4
+    },
+    "skills_used": [],
+    "num_turns": 8,
+    "cost_usd": 0.1213144,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location",
+        "passed": true,
+        "evidence": "match: 'clean-workspaces.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: pass -- before every path operand",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "source": "task prompt: take the root and the threshold as arguments",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 14
+  },
+  {
+    "task": "bss-04-workspace-cleanup",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:06:52.683396+00:00",
+      "seconds": 87.6
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 13,
+    "cost_usd": 0.25890799999999997,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location",
+        "passed": true,
+        "evidence": "match: 'clean-workspaces.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: pass -- before every path operand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "source": "task prompt: take the root and the threshold as arguments",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 14
+  },
+  {
+    "task": "bss-04-workspace-cleanup",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:06:58.841680+00:00",
+      "seconds": 113.6
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 18,
+    "cost_usd": 0.4067828,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location",
+        "passed": true,
+        "evidence": "match: 'clean-workspaces.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: pass -- before every path operand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "source": "task prompt: take the root and the threshold as arguments",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "bss-04-workspace-cleanup",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-09-15T08:07:08.858717+00:00",
+      "seconds": 118.0
+    },
+    "skills_used": [
+      "eval-bash-secure-scripting:bash-secure-scripting"
+    ],
+    "num_turns": 16,
+    "cost_usd": 0.33645120000000006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "assertions": [
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bash-syntax-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: bash -n clean on every script touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: never declare a shell change done from the edit alone",
+        "passed": true,
+        "evidence": "match: 'shellcheck'"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the script itself, in a disposable location",
+        "passed": true,
+        "evidence": "match: 'clean-workspaces.sh'"
+      },
+      {
+        "id": "verify-clean-or-reported",
+        "kind": "workspace_command",
+        "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "strict-mode-set",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: start in strict mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-ls-parsing",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: never iterate over $(ls)",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "traversal-handles-any-filename",
+        "kind": "workspace_command",
+        "source": "references/untrusted-input.md: assume filenames contain anything but / and NUL",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "cd-guarded",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: cd can fail, and the commands after it then run somewhere else",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "destructive-path-guarded",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: destructive operations guarded by ${dir:?} plus an allowlisted parent or a mktemp -d directory",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "end-of-options-used",
+        "kind": "workspace_command",
+        "source": "references/filesystem.md: pass -- before every path operand",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-arguments",
+        "kind": "workspace_command",
+        "source": "task prompt: take the root and the threshold as arguments",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-dry-run",
+        "kind": "workspace_command",
+        "source": "task prompt: add a --dry-run mode",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  }
+]

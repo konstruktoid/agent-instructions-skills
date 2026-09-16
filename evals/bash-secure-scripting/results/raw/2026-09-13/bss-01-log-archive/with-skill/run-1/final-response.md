@@ -1,0 +1,3 @@
+Workspace is clean — only the two intended files changed, `archives/` still has just `.gitkeep`.
+
+Changes: `bin/archive-logs.sh` (rewritten: accepts multiple service names, `--keep-days N` pruning, one-line summary, strict mode, trap-based cleanup and signal handling, allowlist validation of service names, explicit error checks) and `README.md` (documents the new usage). Verified with `shellcheck` (clean), `bash -n` (clean), and live runs covering multi-service success, invalid service name, missing log dir mixed with a valid service, no-args usage error, invalid `--keep-days`, pruning of stale archives, and SIGTERM mid-run (exits 143, no leftover temp directories). `shfmt` isn't installed on this host, so formatting wasn't checked against it.

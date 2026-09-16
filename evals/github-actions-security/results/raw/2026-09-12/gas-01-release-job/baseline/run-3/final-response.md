@@ -1,0 +1,1 @@
+Files changed: `.github/workflows/ci.yml` (added `release` job gated on `v*` tags, needs `build`, publishes to npm via `NPM_TOKEN`, creates a GitHub release with `gh release create`) and `README.md` (updated Releasing section). YAML validated with `python3 -c "import yaml; yaml.safe_load(...)"`.
