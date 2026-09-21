@@ -7,7 +7,8 @@ description: Reviews and modifies Python source against security practices that 
 # is acceptable here.
 model: inherit
 # Set before use. Bash is required: the verify loop runs ruff and ty through the
-# repository's package manager. Drop Edit for a review-only agent. Add WebFetch
+# repository's package manager. For an independent second pass instead of
+# dropping Edit here, use the paired python-security-verifier.md. Add WebFetch
 # only if advisory lookups are part of the work.
 tools: Read, Grep, Glob, Edit, Bash
 # Left unset, and check_skills.py fails a template that sets it. Setting `memory:` gives
