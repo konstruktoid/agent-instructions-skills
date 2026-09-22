@@ -231,9 +231,14 @@ reviews and edits, and a verifier that checks the fixer's result without trustin
 - Give the verifier call only the diff, or the changed file paths, and the original request or
   acceptance criteria. Withhold the fixer's summary and reasoning; passing them anchors the second
   pass into agreeing with the first instead of rederiving its own conclusion.
-- Drop `Edit` from the verifier's `tools`, as a mechanical guarantee rather than an instruction it
-  could ignore. A verifier that can write can "fix" what it finds, which collapses the
-  independence the split was meant to provide.
+- Drop `Edit` from the verifier's `tools`, as a mechanical restriction rather than an instruction
+  it could ignore. This removes the direct edit affordance, but it is not a complete read-only
+  guarantee: a verifier that keeps `Bash` can still write through it. Where the host cannot
+  isolate writes, confine any command that could write to a disposable workspace, and prefer a
+  check over the write it would otherwise perform, such as `terraform fmt -check -diff` in place
+  of an in-place format, with `terraform init -backend=false` run only in that workspace. A
+  verifier that writes real edits, instead of confined command output, can "fix" what it finds,
+  which collapses the independence the split was meant to provide.
 - Have the verifier re-run every check the fixer's procedure requires, from its own clean context,
   rather than reading the fixer's reported result as evidence.
 - Treat a verifier finding as blocking. Route it to a fresh fixer invocation, not the context that
