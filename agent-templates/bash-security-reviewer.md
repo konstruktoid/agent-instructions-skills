@@ -8,8 +8,9 @@ description: Reviews and modifies Bash scripts, sourced shell libraries, and she
 model: inherit
 # Set before use. Bash is required, and it is the widest grant in this file: the
 # verify loop runs shellcheck, bash -n, the repository's formatter, and the
-# script under review itself, including one failure path. Drop Edit for a
-# review-only agent, and read the scope below before granting Bash at all.
+# script under review itself, including one failure path. For an independent
+# second pass instead of dropping Edit here, use the paired
+# bash-security-verifier.md, and read the scope below before granting Bash at all.
 tools: Read, Grep, Glob, Edit, Bash
 # Left unset, and check_skills.py fails a template that sets it. Setting `memory:`
 # gives this agent a directory it carries between runs, and grants Read, Write and

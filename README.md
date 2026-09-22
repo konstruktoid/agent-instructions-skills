@@ -116,8 +116,12 @@ Current templates:
 | `python-security-reviewer.md` | `skills/python/python-secure-coding` | Needs `Bash` for `ruff` and `ty`. Consider pinning a strong model. |
 | `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
 | `workflow-security-reviewer.md` | `skills/github/github-actions-security` | Needs `Bash` for `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA. Consider pinning a strong model. |
-| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the six. Consider pinning a strong model. |
+| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the ten. Consider pinning a strong model. |
 | `terraform-security-reviewer.md` | `skills/terraform/terraform-secure-iac` | Needs `Bash` for `terraform fmt`, `terraform validate`, `tflint`, and the repository's configuration scanner. Does not run `terraform apply`. Consider pinning a strong model. |
+| `python-security-verifier.md` | `skills/python/python-secure-coding` | Independently checks `python-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
+| `bash-security-verifier.md` | `skills/bash/bash-secure-scripting` | Independently checks `bash-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
+| `terraform-security-verifier.md` | `skills/terraform/terraform-secure-iac` | Independently checks `terraform-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
+| `workflow-security-verifier.md` | `skills/github/github-actions-security` | Independently checks `workflow-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
 auto-discovers an `agents/` directory at a plugin's root, and every plugin here is sourced
@@ -330,6 +334,10 @@ the outcome the mechanisms above exist to avoid.
   broad tool access, and carries nothing between runs. Memory stays out of the defaults because
   enabling it grants `Read`, `Write`, and `Edit` beside the allowlist rather than within it, which
   is a widening no reader of the `tools:` line would see.
+- Where a review's cost of a false "clean" justifies a second, independent pass, add a paired
+  verifier template alongside the fixer rather than trusting the fixer's self-report. See
+  "Splitting a Fixer from a Verifier" in `instructions/agent_configuration_instructions.md` for the
+  pattern, and the four `*-security-verifier.md` templates for a worked example.
   State in frontmatter comments what to consider changing and why, for example pinning a stronger
   model for a review-heavy agent, or adding `Bash` only because the verify loop needs it.
 - A template aimed at a cheaper model needs its verification spelled out rather than assumed. Keep

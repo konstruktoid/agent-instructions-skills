@@ -220,6 +220,34 @@ A subagent definition can also carry its own `hooks`, and so can a skill, which 
 before reading the four mechanisms above as four separate files: the deterministic layer can ship
 inside either of the advisory ones.
 
+### Splitting a Fixer from a Verifier
+
+Where the cost of a false "clean" from a review justifies a second, independent pass, split the
+work into two subagent definitions rather than trusting one agent's self-report: a fixer that
+reviews and edits, and a verifier that checks the fixer's result without trusting what it reported.
+
+- Invoke the two as separate Task calls, never as one shared context asked to play both roles. A
+  fixer that also checks its own fix is the single point of failure this split exists to remove.
+- Give the verifier call only the diff, or the changed file paths, and the original request or
+  acceptance criteria. Withhold the fixer's summary and reasoning; passing them anchors the second
+  pass into agreeing with the first instead of rederiving its own conclusion.
+- Drop `Edit` from the verifier's `tools`, as a mechanical restriction rather than an instruction
+  it could ignore. This removes the direct edit affordance, but it is not a complete read-only
+  guarantee: a verifier that keeps `Bash` can still write through it. Where the host cannot
+  isolate writes, confine any command that could write to a disposable workspace, and prefer a
+  check over the write it would otherwise perform, such as `terraform fmt -check -diff` in place
+  of an in-place format, with `terraform init -backend=false` run only in that workspace. A
+  verifier that writes real edits, instead of confined command output, can "fix" what it finds,
+  which collapses the independence the split was meant to provide.
+- Have the verifier re-run every check the fixer's procedure requires, from its own clean context,
+  rather than reading the fixer's reported result as evidence.
+- Treat a verifier finding as blocking. Route it to a fresh fixer invocation, not the context that
+  already reported done, and stop only once a verifier pass reports clear.
+
+`agent-templates/python-security-verifier.md`, `bash-security-verifier.md`,
+`terraform-security-verifier.md`, and `workflow-security-verifier.md` apply this pattern against
+their paired `*-security-reviewer.md` fixer.
+
 The `agent-templates/` directory in this library holds copies to start from, and `README.md`
 states why they are copied and edited rather than installed. Every template ships `model: inherit`
 deliberately, as a neutral default that pins nothing on whoever copies it, which is the one case

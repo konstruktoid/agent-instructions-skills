@@ -108,7 +108,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:435` documents it as something to type.
+no job for it. `README.md:443` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -141,7 +141,7 @@ it:
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:428` was updated from four jobs to five.
+clean. `README.md:436` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -262,11 +262,11 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:153` gives
+- **The documented install is pinned first.** `README.md:157` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
-  is kept below it at `:163`, labeled as tracking the default branch. This is the half of the
+  is kept below it at `:167`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:208` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:212` gives `"ref": "v0.1.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
@@ -279,7 +279,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:566` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:574` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -533,7 +533,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:153` now leads with the pinned form and `README.md:208` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:157` now leads with the pinned form and `README.md:212` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
 
 ## Recommended order of implementation
 

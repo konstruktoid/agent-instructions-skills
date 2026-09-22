@@ -7,8 +7,9 @@ description: Reviews and modifies GitHub Actions workflows, reusable workflows, 
 # is acceptable here.
 model: inherit
 # Set before use. Bash is required: the verify loop runs actionlint and zizmor,
-# and resolving an action's SHA reads the source repository through `gh`. Drop
-# Edit for a review-only agent. Add WebFetch only if release notes the API does
+# and resolving an action's SHA reads the source repository through `gh`. For an
+# independent second pass instead of dropping Edit here, use the paired
+# workflow-security-verifier.md. Add WebFetch only if release notes the API does
 # not carry are part of the work.
 tools: Read, Grep, Glob, Edit, Bash
 # Left unset, and check_skills.py fails a template that sets it. Setting `memory:`

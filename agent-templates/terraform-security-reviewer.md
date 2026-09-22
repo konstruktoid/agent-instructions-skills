@@ -8,7 +8,8 @@ description: Reviews and modifies Terraform configuration, modules, backend bloc
 model: inherit
 # Set before use. Bash is required for the verify loop: terraform fmt, terraform
 # init -backend=false, terraform validate, tflint, and the repository's
-# configuration scanner. Drop Edit for a review-only agent. This agent does not
+# configuration scanner. For an independent second pass instead of dropping
+# Edit here, use the paired terraform-security-verifier.md. This agent does not
 # run terraform apply; read the scope below before widening Bash.
 tools: Read, Grep, Glob, Edit, Bash
 # Left unset, and check_skills.py fails a template that sets it. Setting `memory:`
