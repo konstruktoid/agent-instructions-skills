@@ -112,9 +112,10 @@ one project's layout.
    `galaxy.yml` decides what enters the tarball `ansible-galaxy collection build` writes. The
    build never reads `.gitignore`, so it packages untracked local state unless a `build_ignore`
    pattern excludes it, and a pattern written with a trailing slash, such as `.ansible/`, excludes
-   nothing. Give every `.gitignore` entry a `build_ignore` counterpart, add the tracked
-   development files a consumer has no use for to `build_ignore` as well, and confirm the result
-   by building the collection and reading the file list rather than by reading the configuration.
+   nothing. Give every `.gitignore` exclusion pattern a `build_ignore` counterpart. Comments and `!`
+   negations have no counterpart; resolve negations by narrowing the positive pattern. Also add the
+   tracked development files a consumer has no use for to `build_ignore`, and confirm the result by
+   building the collection and reading the file list rather than by reading the configuration.
    See [references/artifact-hygiene.md](references/artifact-hygiene.md).
 9. Report any issues found during verification, with detailed reproduction steps and relevant
    logs/output. Ansible output is unusually rich in machine detail: play recaps and `--diff` output
@@ -151,26 +152,32 @@ one project's layout.
   verifies in containers/VMs across the platforms the role/collection claims to support, including
   an idempotence check.
 - A full cycle can run for tens of minutes, long enough to outlive the process the agent starts it
-  from. Detach it so the run does not depend on whatever is watching it, and poll for a sentinel
-  file rather than for the watcher:
+  from. Detach it so the run does not depend on whatever is watching it, bound it with a deadline so
+  a hung run cannot run forever, and poll for a sentinel file rather than for the watcher:
 
   ```sh
   run_dir="$(mktemp -d -t ansible-verify-XXXXXXXX)"
   setsid bash -c "<test entry point> > \"${run_dir}/run.log\" 2>&1; echo \$? > \"${run_dir}/run.done\"" \
     < /dev/null > /dev/null 2>&1 &
+  run_pgid=$!
   ```
 
-  Poll `${run_dir}/run.done` and read `${run_dir}/run.log`. The directory has to come from
-  `mktemp -d` rather than from the working directory, because a run started from inside the
-  repository would otherwise write both files into the tree the same step checks for leftovers.
+  `setsid` makes `run_pgid` the process group leader for everything the run spawns, so
+  `kill -TERM -- "-${run_pgid}"` (and `kill -KILL -- "-${run_pgid}"` if it survives a short grace
+  period) reaches the whole group, not just the shell. Poll `${run_dir}/run.done` against a
+  deadline sized to the test entry point's own documented runtime with headroom, and read
+  `${run_dir}/run.log`. The directory has to come from `mktemp -d` rather than from the working
+  directory, because a run started from inside the repository would otherwise write both files into
+  the tree the same step checks for leftovers. If the deadline passes without `run.done`, kill the
+  process group, treat the attempt as failed, and count it against the attempt budget in step 7
+  before relaunching — a blind relaunch spends the full cycle again and risks two runs racing on
+  the same containers or VMs.
 
   The poller dying is not the run dying. When a watcher is killed, look for the still-running
   process and for the sentinel before relaunching anything. The name template is what makes that
   possible after `${run_dir}` is lost with the shell that held it: a replacement watcher finds the
   run by globbing `ansible-verify-*` under the temporary directory, and takes the newest match
-  with no `run.done` in it as a run still going. A blind relaunch spends the full cycle
-  again and risks two runs racing on the same containers or VMs. This decides whether the loop's
-  attempt budget is spent on real findings or on lost runs. Keep the log and sentinel out of the
+  with no `run.done` in it as a run still going. Keep the log and sentinel out of the
   repository, and remember the log carries the machine detail described in step 9.
 - If invoking `molecule test` / `ansible-test` directly instead of through the repo's wrapper,
   perform first what the wrapper would otherwise have performed: install `requirements.yml`, and
@@ -186,17 +193,28 @@ one project's layout.
   since `build_ignore` is independent of `.gitignore`:
 
   ```sh
+  set -euo pipefail
+  rm -f ./*.tar.gz
   ansible-galaxy collection build --force
   out="$(mktemp -d)"
-  tar -tzf <namespace>-<name>-<version>.tar.gz | grep -v '/$' | sort > "${out}/artifact"
+  archives=(./*.tar.gz)
+  [ "${#archives[@]}" -eq 1 ] && [ -e "${archives[0]}" ]
+  tar -tzf "${archives[0]}" | grep -v '/$' | sort > "${out}/artifact"
   git ls-files | sort > "${out}/tracked"
   comm -23 "${out}/artifact" "${out}/tracked"
   ```
 
-  Apart from the generated `MANIFEST.json` and `FILES.json`, every line that prints is local state
-  a `build_ignore` pattern failed to exclude, and a pattern written with a trailing slash is the
-  usual cause. Keep the comparison files outside the collection root and remove the tarball
-  afterwards. See [references/artifact-hygiene.md](references/artifact-hygiene.md).
+  `set -euo pipefail`, the pre-build cleanup, and the exactly-one-archive check make this fail
+  closed: a failed build, a missing archive, or a stale leftover tarball no longer lets the
+  pipeline compare an empty or stale list and report a clean result. Apart from the generated
+  `MANIFEST.json` and `FILES.json`, every line `comm -23` prints is local state a `build_ignore`
+  pattern failed to exclude, and a pattern written with a trailing slash is the usual cause.
+
+  That comparison only catches untracked state; a tracked development file that reached the
+  artifact despite a `build_ignore` entry is tracked by git and so won't appear in it. Also read
+  the full `${out}/artifact` listing for the tracked-development-file categories in
+  [references/artifact-hygiene.md](references/artifact-hygiene.md) and confirm none of them made
+  it in. Keep the comparison files outside the collection root and remove the tarball afterwards.
 
 ## Verification checklist
 
@@ -224,9 +242,9 @@ Never declare this done based on the edit alone. Confirm each of the following:
       attachments, and `no_log: true` set on any task that handles one
 - [ ] Nothing the test run produced is left untracked and unignored: downloaded collections, logs,
       sentinels, caches, virtualenvs, and `.env` files all covered by `.gitignore`
-- [ ] Every `.gitignore` entry has a `build_ignore` counterpart in `galaxy.yml`, written without a
-      trailing slash so it matches, and the development files a consumer has no use for are
-      excluded there too
+- [ ] Every `.gitignore` exclusion pattern has a `build_ignore` counterpart in `galaxy.yml`, written
+      without a trailing slash so it matches; comments and `!` negations are handled by narrowing
+      positive patterns, and the development files a consumer has no use for are excluded there too
 - [ ] For a collection, the artifact was built and its file list read: nothing untracked in it
       beyond `MANIFEST.json` and `FILES.json`, confirmed by comparison against `git ls-files`
       rather than by reading `build_ignore`
