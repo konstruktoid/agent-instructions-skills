@@ -170,7 +170,7 @@ one project's layout.
   directory, because a run started from inside the repository would otherwise write both files into
   the tree the same step checks for leftovers. If the deadline passes without `run.done`, kill the
   process group, treat the attempt as failed, and count it against the attempt budget in step 7
-  before relaunching — a blind relaunch spends the full cycle again and risks two runs racing on
+  before relaunching. A blind relaunch spends the full cycle again and risks two runs racing on
   the same containers or VMs.
 
   The poller dying is not the run dying. When a watcher is killed, look for the still-running
