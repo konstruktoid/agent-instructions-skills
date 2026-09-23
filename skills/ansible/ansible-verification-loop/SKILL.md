@@ -157,14 +157,18 @@ one project's layout.
 
   ```sh
   run_dir="$(mktemp -d -t ansible-verify-XXXXXXXX)"
-  setsid bash -c "<test entry point> > \"${run_dir}/run.log\" 2>&1; echo \$? > \"${run_dir}/run.done\"" \
+  setsid bash -c "echo \$\$ > \"${run_dir}/run.pgid\"; <test entry point> > \"${run_dir}/run.log\" 2>&1; echo \$? > \"${run_dir}/run.done\"" \
     < /dev/null > /dev/null 2>&1 &
-  run_pgid=$!
+  while [ ! -s "${run_dir}/run.pgid" ]; do sleep 0.1; done
+  run_pgid="$(cat "${run_dir}/run.pgid")"
   ```
 
-  `setsid` makes `run_pgid` the process group leader for everything the run spawns, so
-  `kill -TERM -- "-${run_pgid}"` (and `kill -KILL -- "-${run_pgid}"` if it survives a short grace
-  period) reaches the whole group, not just the shell. Poll `${run_dir}/run.done` against a
+  Read the group id from `run.pgid`, written by `$$` from inside the new session, rather than from
+  `$!` on the `setsid` launcher: `setsid` forks before calling `setsid()` when it is already a
+  process-group leader, and when that happens `$!` names the launcher, not the process that actually
+  becomes the group leader. `setsid` makes that leader's pgid the process group for everything the
+  run spawns, so `kill -TERM -- "-${run_pgid}"` (and `kill -KILL -- "-${run_pgid}"` if it survives a
+  short grace period) reaches the whole group, not just the shell. Poll `${run_dir}/run.done` against a
   deadline sized to the test entry point's own documented runtime with headroom, and read
   `${run_dir}/run.log`. The directory has to come from `mktemp -d` rather than from the working
   directory, because a run started from inside the repository would otherwise write both files into
@@ -194,27 +198,31 @@ one project's layout.
 
   ```sh
   set -euo pipefail
-  rm -f ./*.tar.gz
-  ansible-galaxy collection build --force
   out="$(mktemp -d)"
-  archives=(./*.tar.gz)
-  [ "${#archives[@]}" -eq 1 ] && [ -e "${archives[0]}" ]
+  ansible-galaxy collection build --force --output-path "${out}"
+  archives=("${out}"/*.tar.gz)
+  if [ "${#archives[@]}" -ne 1 ] || [ ! -e "${archives[0]}" ]; then
+    echo "expected exactly one built archive in ${out}, found ${#archives[@]}" >&2
+    exit 1
+  fi
   tar -tzf "${archives[0]}" | grep -v '/$' | sort > "${out}/artifact"
   git ls-files | sort > "${out}/tracked"
   comm -23 "${out}/artifact" "${out}/tracked"
   ```
 
-  `set -euo pipefail`, the pre-build cleanup, and the exactly-one-archive check make this fail
-  closed: a failed build, a missing archive, or a stale leftover tarball no longer lets the
-  pipeline compare an empty or stale list and report a clean result. Apart from the generated
-  `MANIFEST.json` and `FILES.json`, every line `comm -23` prints is local state a `build_ignore`
-  pattern failed to exclude, and a pattern written with a trailing slash is the usual cause.
+  `set -euo pipefail`, building into a scratch directory rather than the collection root, and the
+  explicit exactly-one-archive check make this fail closed: a failed build, a missing archive, or
+  more than one archive stops the pipeline instead of letting it compare an empty or wrong list and
+  report a clean result. Apart from the generated `MANIFEST.json` and `FILES.json`, every line
+  `comm -23` prints is local state a `build_ignore` pattern failed to exclude, and a pattern written
+  with a trailing slash is the usual cause.
 
   That comparison only catches untracked state; a tracked development file that reached the
   artifact despite a `build_ignore` entry is tracked by git and so won't appear in it. Also read
   the full `${out}/artifact` listing for the tracked-development-file categories in
   [references/artifact-hygiene.md](references/artifact-hygiene.md) and confirm none of them made
-  it in. Keep the comparison files outside the collection root and remove the tarball afterwards.
+  it in. Building into `${out}` already keeps the archive and comparison files outside the
+  collection root; remove `${out}` when done.
 
 ## Verification checklist
 
