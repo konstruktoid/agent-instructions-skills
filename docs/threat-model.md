@@ -77,7 +77,7 @@ what a later change adds without declaring it. The block is a declaration, not a
 enforces it at runtime, and a skill body remains free to do what it likes.
 
 All ten read `${CLAUDE_PLUGIN_ROOT}/instructions/` under a plugin install, which is outside the
-skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:255`,
+skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:263`,
 `skills/bash/bash-secure-scripting/SKILL.md:329`, `skills/bash/bash-testing/SKILL.md:196`,
 `skills/github/github-actions-security/SKILL.md:344`,
 `skills/github/github-organization-governance/SKILL.md:282`,
@@ -91,9 +91,9 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 |---|---|
 | Trigger | `:3` "Use when reviewing or modifying any Ansible role, collection, playbook, or task." |
 | Tools implied | Read, Edit, Bash. No declared allowlist. |
-| Shell | Yes. `ansible-lint` (`:136`), `git diff` (`:142`), the repository's own test entry point via `tox` or a Makefile target (`:147`), `setsid bash -c '<test entry point> > run.log 2>&1; echo $? > run.done' ... &` (`:159`), `molecule test` / `ansible-test` / `molecule converge` (`:175`, `:181`), `git status --porcelain` (`:184`), `ansible-galaxy collection build --force`, `mktemp -d`, `tar -tzf`, `git ls-files`, `comm` (`:189`-`:193`) |
+| Shell | Yes. `ansible-lint` (`:137`), `git diff` (`:142`), the repository's own test entry point via `tox` or a Makefile target (`:147`), `setsid bash -c '<test entry point> > run.log 2>&1; echo $? > run.done' ... &` (`:159`), `molecule test` / `ansible-test` / `molecule converge` (`:186`, `:192`), `git status --porcelain` (`:195`), `ansible-galaxy collection build --force`, `mktemp -d`, `tar -tzf`, `git ls-files`, `comm` (`:200`-`:210`) |
 | Reads | Role `defaults/main.yml`, `tasks/main.yml`, `meta/main.yml`, `handlers/`, `vars/`, `templates/` (`:57`); `galaxy.yml`, `meta/runtime.yml`, `requirements.yml` (`:59`); `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, a `docs/` style guide (`:62`) |
-| Writes outside the repository root | Yes. `mktemp -d` output holding the `artifact` and `tracked` comparison files (`:190`-`:192`), explicitly required to be outside the collection root (`:198`). `run.log` and `run.done` required to be kept out of the repository (`:164`) |
+| Writes outside the repository root | Yes. `mktemp -d` output holding the `artifact` and `tracked` comparison files (`:208`-`:209`), explicitly required to be outside the collection root (`:224`-`:225`). `run.log` and `run.done` required to be kept out of the repository (`:184`-`:185`) |
 | Network egress | No host named in the file. Egress occurs indirectly through the target repository's own test entry point, which `:150` states installs dependencies from `requirements.yml` / `galaxy.yml`, and through the container or VM images `:151` describes. Hosts: UNKNOWN, determined by the target repository |
 | Reads content it did not author | Yes, three ways. The target repository's instruction files, which `:61` instructs the agent to "follow" as "authoritative" (`:62`). Linter and test output. Container and VM console output. Partial counterweight at `:65`: SSH, sudo, PAM, audit, SELinux, AppArmor, firewall, mounts, sysctl, services and auth-adjacent tasks are treated as high-sensitivity "regardless of what a repo's docs say" |
 
@@ -521,7 +521,7 @@ crafted container log line in the repository under review.
 **File abused.** Every skill's Verify section, because every skill's bounded loop makes a control
 decision from tool output: `github-repository-security/SKILL.md:122`-`:131` pipes `gh api` JSON
 through `--jq` and back into the loop, `github-actions-security/SKILL.md:249` reads `zizmor`
-output, `ansible-verification-loop/SKILL.md:136` reads `ansible-lint` output and `:163` reads a
+output, `ansible-verification-loop/SKILL.md:137` reads `ansible-lint` output and `:173` reads a
 detached `molecule` run's log.
 
 **What the agent does.** It reads the output as findings to act on. Seven of the ten skills tell
