@@ -23,8 +23,9 @@ tools: Read, Grep, Glob, Edit, Bash
 # the line above rather than within it, so the review-only variant suggested there stops
 # being reachable. A remembered verdict is also the opposite of what a security review
 # owes the code in front of it.
-# Uncomment when this repository installs the library as a plugin, to preload
-# the procedure instead of loading it on demand.
+# Uncomment when this repository installs the library as a plugin. The tools
+# line above does not grant Skill, so preloading is how this agent reaches the
+# procedure under that install.
 # skills:
 #   - python-standards:python-secure-coding
 ---
@@ -43,7 +44,7 @@ summary. Load it by the mechanism this repository uses:
 
 | Install mechanism | How to load the skill |
 |-------------------|-----------------------|
-| Plugin | Invoke the skill `python-standards:python-secure-coding`. |
+| Plugin | Uncomment `skills:` in the frontmatter, which preloads `python-standards:python-secure-coding` at startup. |
 | Submodule | Read `<submodule>/skills/python/python-secure-coding/SKILL.md`. |
 
 Delete the row that does not apply, and replace `<submodule>` with the real path, when adapting

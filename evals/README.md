@@ -28,6 +28,7 @@ evals/
     fixtures/<task-id>/  The starting repository for one task
     results/<date>.md    The rendered results
     results/raw/<date>/  Transcripts, workspaces, and per-run grades
+  agents/<template>/     A suite for one agent template, described below
 ```
 
 ## How a task eval works
@@ -52,6 +53,35 @@ run is therefore the tool list rather than the permission mode: `TASK_TOOLS` in
 attacker-shaped input by construction, since every one of them plants the flaw its eval
 measures, and the allowlist keeps a run that reads one from reaching the rest of the tool
 surface. Pass `--all-tools` to measure a task against every tool the CLI offers instead.
+
+## Agent-template suites
+
+A skill suite asks whether a skill changes what an agent produces. An agent-template suite under
+`evals/agents/<template>/` asks whether a template holds the rule it was written for, and its
+two conditions differ in the invocation rather than in what is installed. The first,
+`python-security-verifier`, measures the rule "Splitting a Fixer from a Verifier" in
+`instructions/agent_configuration_instructions.md` states: that a verifier given the fixer's
+summary is anchored into agreeing with it. Its `anchored` condition passes that summary, its
+`blind` condition withholds it, and the delta is `blind` minus `anchored`.
+
+A task names a fixture, which is the repository before the fix, and a `patch` under
+`patches/<task-id>.patch`, which is the fix. `run_eval.py agent-tasks` copies the fixture,
+installs the template adapted as README.md tells a consuming project to adapt it for a submodule
+install, commits, applies the patch as the fixer's own commit, and runs `claude -p --agent
+<template>` with the template's `tools:` line as the allowlist. `$EVAL_BASE_SHA` is the fixer's
+commit, so a grader asking what the run changed sees only what the verifier did.
+
+```sh
+python3 evals/run_eval.py agent-tasks --template python-security-verifier --runs 3
+python3 evals/run_eval.py report --skill agents/python-security-verifier
+```
+
+`report`, `regrade` and `snapshot` take the suite as `--skill agents/<template>`. The grader
+review gate applies unchanged, since the suite's `assertions.json` and `run_eval.py` are the
+files it compares. `scripts/check_evals.py` holds these suites to the same structural rules, with
+a `request` and a `fixer_summary` in place of a prompt and no routing probes, and reports a suite
+that has never been run as unmeasured rather than failing it, since only a paid run can render
+the results file. It reports every template with no suite the same way.
 
 ## Running them
 

@@ -21,8 +21,9 @@ tools: Read, Grep, Glob, Edit, Bash
 # this agent a directory it carries between runs, and grants Read, Write and Edit beside
 # the line above rather than within it, so the review-only variant suggested there stops
 # being reachable. Weigh that against a skill whose verify loop asks for a fresh read.
-# Uncomment when this repository installs the library as a plugin, to preload
-# the procedure instead of loading it on demand.
+# Uncomment when this repository installs the library as a plugin. The tools
+# line above does not grant Skill, so preloading is how this agent reaches the
+# procedure under that install.
 # skills:
 #   - ansible-standards:ansible-verification-loop
 ---
@@ -41,7 +42,7 @@ summary. Load it by the mechanism this repository uses:
 
 | Install mechanism | How to load the skill |
 |-------------------|-----------------------|
-| Plugin | Invoke the skill `ansible-standards:ansible-verification-loop`. |
+| Plugin | Uncomment `skills:` in the frontmatter, which preloads `ansible-standards:ansible-verification-loop` at startup. |
 | Submodule | Read `<submodule>/skills/ansible/ansible-verification-loop/SKILL.md`. |
 
 Delete the row that does not apply, and replace `<submodule>` with the real path, when adapting

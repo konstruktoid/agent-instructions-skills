@@ -22,8 +22,9 @@ tools: Read, Grep, Glob, Bash
 # this agent a directory it carries between runs, and grants Read, Write and Edit beside
 # the line above rather than within it, so the read-only guarantee below stops holding.
 # A remembered SHA is also the one thing this skill rules out by name.
-# Uncomment when this repository installs the library as a plugin, to preload
-# the procedure instead of loading it on demand.
+# Uncomment when this repository installs the library as a plugin. The tools
+# line above does not grant Skill, so preloading is how this agent reaches the
+# procedure under that install.
 # skills:
 #   - github-standards:github-actions-security
 # Blocks the write tools even after a later edit to `tools:` or `memory:` grants
@@ -59,7 +60,7 @@ summary. Load it by the mechanism this repository uses:
 
 | Install mechanism | How to load the skill |
 |-------------------|-----------------------|
-| Plugin | Invoke the skill `github-standards:github-actions-security`. |
+| Plugin | Uncomment `skills:` in the frontmatter, which preloads `github-standards:github-actions-security` at startup. |
 | Submodule | Read `<submodule>/skills/github/github-actions-security/SKILL.md`. |
 
 Delete the row that does not apply, and replace `<submodule>` with the real path, when adapting

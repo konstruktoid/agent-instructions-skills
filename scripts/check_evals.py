@@ -36,6 +36,13 @@ fix for each is a paid re-run rather than an edit:
   measured at all. Either way it graded source that no commit is known to hold, so the
   measurement cannot be reproduced and the revision comparison above cannot certify it.
 
+Every evals/agents/<template>/ suite measures an agent template rather than a skill, and is
+held to the same rules with three differences: the specification files are `tasks.json` and
+`assertions.json` and name the template, each task carries the fixer's `patch` under
+`patches/<task-id>.patch`, a `request` and a `fixer_summary` in place of a prompt, and a suite
+with no rendered results file yet is reported as unmeasured rather than failed. A template
+with no suite is reported the same way.
+
 It reports on the checkout it lives in and can be run from anywhere:
 
     python3 scripts/check_evals.py           # structural errors fail, the rest is reported
@@ -67,8 +74,14 @@ EVALS_DIR = Path("evals")
 
 SKILL_GLOB = "skills/*/*/SKILL.md"
 
-# Directories under evals/ that are harness material rather than a suite.
-NOT_A_SUITE = {"probe-sandbox", "__pycache__"}
+# Directories under evals/ that are harness material rather than a suite. `agents` holds
+# the agent-template suites, which are checked on their own terms below.
+AGENTS_DIR = "agents"
+NOT_A_SUITE = {"probe-sandbox", "__pycache__", AGENTS_DIR}
+
+AGENT_TEMPLATE_GLOB = "agent-templates/*.md"
+AGENT_SPEC_FILES = ("tasks.json", "assertions.json")
+AGENT_TASK_FIELDS = ("id", "title", "fixture", "patch", "request", "fixer_summary")
 
 SPEC_FILES = ("tasks.json", "assertions.json", "trigger-eval.json")
 
@@ -306,11 +319,11 @@ def rendered_stamps(suite: Path) -> list[str]:
 REVISION_REQUIRED_FROM = "2026-08-20"
 
 
-def check_results(suite: Path, errors: list[str]) -> None:
+def check_results(suite: Path, errors: list[str], *, require_rendered: bool = True) -> None:
     """Check that the suite is documented and that every graded stamp was rendered."""
     if not (suite / "README.md").is_file():
         errors.append("no README.md stating what the suite measures")
-    if not rendered_stamps(suite):
+    if require_rendered and not rendered_stamps(suite):
         errors.append("results/: no rendered results file")
 
     raw = suite / "results" / "raw"
@@ -439,10 +452,23 @@ def contains(revision: str, ancestor: str) -> bool:
     return result.returncode == 0
 
 
-def check_freshness(suite: Path, skill_dir: Path | None, stale: list[str]) -> None:
-    """Report a stamp older than the skill or the specification it was measured against."""
+def check_freshness(
+    suite: Path,
+    skill_dir: Path | None,
+    stale: list[str],
+    subject: tuple[str, list[Path]] | None = None,
+) -> None:
+    """Report a stamp older than the skill or the specification it was measured against.
+
+    `subject` replaces the skill as the thing measured, for an agent-template suite, whose
+    run depends on the template and on the skill the template reads.
+    """
     stamps = rendered_stamps(suite)
-    if not stamps or skill_dir is None:
+    if subject is None:
+        if skill_dir is None:
+            return
+        subject = ("the skill", [skill_dir])
+    if not stamps:
         return
     latest = stamps[-1]
     measured, dirty = stamp_revision(suite, latest)
@@ -470,7 +496,7 @@ def check_freshness(suite: Path, skill_dir: Path | None, stale: list[str]) -> No
         )
 
     for label, paths in (
-        ("the skill", [skill_dir]),
+        subject,
         ("the specification", [suite / "tasks.json", suite / "assertions.json"]),
     ):
         changed_revision, changed = last_commit([path for path in paths if path.exists()])
@@ -539,6 +565,90 @@ def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[s
     return errors, stale
 
 
+def check_agent_tasks(suite: Path, tasks: list[dict[str, Any]], errors: list[str]) -> None:
+    """Check an agent suite's tasks: count, fields, and the fixture and patch each starts from."""
+    ids = [task.get("id") for task in tasks]
+    if len(set(ids)) != len(ids):
+        errors.append("tasks.json: duplicate task ids")
+    if not MIN_TASKS <= len(tasks) <= MAX_TASKS:
+        errors.append(
+            f"tasks.json: {len(tasks)} tasks, evals/README.md states {MIN_TASKS} to {MAX_TASKS}"
+        )
+    for task in tasks:
+        task_id = task.get("id", "<unnamed>")
+        missing = [field for field in AGENT_TASK_FIELDS if not task.get(field)]
+        if missing:
+            errors.append(f"tasks.json {task_id}: missing {', '.join(missing)}")
+        for field, expected, exists in (
+            ("fixture", f"fixtures/{task_id}", Path.is_dir),
+            ("patch", f"patches/{task_id}.patch", Path.is_file),
+        ):
+            if task.get(field) != expected:
+                errors.append(
+                    f"tasks.json {task_id}: {field} is {task.get(field)!r}, expected {expected!r}"
+                )
+            elif not exists(suite / expected):
+                errors.append(f"tasks.json {task_id}: {expected} does not exist")
+
+    referenced = {task.get("fixture") for task in tasks} | {task.get("patch") for task in tasks}
+    for directory, pattern in (("fixtures", "*/"), ("patches", "*.patch")):
+        errors.extend(
+            f"{directory}/{path.name}: referenced by no task, so nothing runs against it"
+            for path in sorted((suite / directory).glob(pattern))
+            if f"{directory}/{path.name}" not in referenced
+        )
+
+
+def template_skill(template: Path) -> Path | None:
+    """Return the skill directory a template's submodule row names, when it names one."""
+    found = re.search(
+        r"`<submodule>/(skills/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+)/SKILL\.md`",
+        template.read_text(encoding="utf-8"),
+    )
+    return REPO_ROOT / found.group(1) if found else None
+
+
+def check_agent_suite(suite: Path, templates: dict[str, Path]) -> tuple[list[str], list[str]]:
+    """Check one agent-template suite, returning its structural errors and its findings."""
+    errors: list[str] = []
+    stale: list[str] = []
+    template = templates.get(suite.name)
+    if template is None:
+        errors.append("no agent-templates/<name>.md matches this suite directory")
+
+    docs: dict[str, dict[str, Any]] = {}
+    for name in AGENT_SPEC_FILES:
+        doc = load_json(suite / name, errors)
+        if doc is None:
+            return errors, stale
+        if doc.get("template") != suite.name:
+            errors.append(f"{name}: 'template' is {doc.get('template')!r}, expected {suite.name!r}")
+        if not doc.get("notes"):
+            errors.append(f"{name}: no 'notes' block explaining what the suite measures")
+        docs[name] = doc
+
+    tasks = scalar_fields(
+        object_entries(docs["tasks.json"].get("tasks", []), "tasks.json 'tasks'", errors),
+        AGENT_TASK_FIELDS,
+        "tasks.json 'tasks'",
+        errors,
+    )
+    task_ids = [task.get("id", "<unnamed>") for task in tasks]
+    check_agent_tasks(suite, tasks, errors)
+    check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
+    # A rendered results file needs a paid run, so its absence is the unmeasured finding
+    # main() reports, as for a skill with no suite, rather than a structural error.
+    check_results(suite, errors, require_rendered=False)
+    if not rendered_stamps(suite):
+        return errors, stale
+    check_coverage(suite, task_ids, stale)
+    if template is not None:
+        skill = template_skill(template)
+        paths = [template] + ([skill] if skill is not None else [])
+        check_freshness(suite, None, stale, ("the template or the skill it reads", paths))
+    return errors, stale
+
+
 def main() -> int:
     """Check every eval suite and report structural errors and staleness separately."""
     # stdout is block-buffered when it is not a terminal, and stderr is line-buffered
@@ -566,10 +676,18 @@ def main() -> int:
         print(f"error: no suites found under {EVALS_DIR}/", file=sys.stderr)
         return 1
 
+    templates = {path.stem: path for path in sorted(REPO_ROOT.glob(AGENT_TEMPLATE_GLOB))}
+    agents_root = REPO_ROOT / EVALS_DIR / AGENTS_DIR
+    agent_suites = sorted(
+        path for path in (agents_root.iterdir() if agents_root.is_dir() else []) if path.is_dir()
+    )
+    checks = [(suite, check_suite(suite, skills)) for suite in suites] + [
+        (suite, check_agent_suite(suite, templates)) for suite in agent_suites
+    ]
+
     failed = 0
     stale_total: list[str] = []
-    for suite in suites:
-        errors, stale = check_suite(suite, skills)
+    for suite, (errors, stale) in checks:
         relative = suite.relative_to(REPO_ROOT)
         if errors:
             failed += 1
@@ -583,26 +701,40 @@ def main() -> int:
     # it is reported on the same footing rather than a quieter one, and --strict fails on it.
     # It is not a structural error because check_results requires a rendered results file,
     # which only a paid run produces.
-    unmeasured = [
-        f"{EVALS_DIR}/{skill}: no suite, so nothing measures this skill"
-        for skill in sorted(set(skills) - {suite.name for suite in suites})
-    ]
+    unmeasured = (
+        [
+            f"{EVALS_DIR}/{skill}: no suite, so nothing measures this skill"
+            for skill in sorted(set(skills) - {suite.name for suite in suites})
+        ]
+        + [
+            f"{EVALS_DIR}/{AGENTS_DIR}/{template}: no suite, so nothing measures this template"
+            for template in sorted(set(templates) - {suite.name for suite in agent_suites})
+        ]
+        + [
+            f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this template"
+            for suite in agent_suites
+            if not rendered_stamps(suite)
+        ]
+    )
     for finding in unmeasured:
         print(f"unmeasured: {finding}", file=sys.stderr)
 
     for finding in stale_total:
         print(f"stale: {finding}", file=sys.stderr)
 
-    counts = f"{len(unmeasured)} unmeasured skill(s), {len(stale_total)} staleness finding(s)"
+    counts = (
+        f"{len(unmeasured)} unmeasured skill(s) or template(s), "
+        f"{len(stale_total)} staleness finding(s)"
+    )
     if failed or (args.strict and (unmeasured or stale_total)):
         strict_only = "; --strict fails on the findings above" if not failed else ""
         print(
-            f"\n{failed} of {len(suites)} suite(s) failed, {counts}{strict_only}",
+            f"\n{failed} of {len(checks)} suite(s) failed, {counts}{strict_only}",
             file=sys.stderr,
         )
         return 1
 
-    print(f"\nall {len(suites)} suite(s) passed, {counts}")
+    print(f"\nall {len(checks)} suite(s) passed, {counts}")
     return 0
 
 

@@ -1,0 +1,33 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index e3ac0fc..1f2f8b7 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -13,6 +13,7 @@ target-version = "py311"
+ 
+ [tool.ruff.lint]
+ select = ["E", "F", "W", "I", "S"]
++ignore = ["S602"]
+ 
+ # ty resolves a project by walking up for the nearest pyproject.toml carrying a `[tool.ty]`
+ # section, and a graded workspace is nested under the repository's own results tree. This
+diff --git a/src/thumbjob/render.py b/src/thumbjob/render.py
+index 60770c0..3fed830 100644
+--- a/src/thumbjob/render.py
++++ b/src/thumbjob/render.py
+@@ -1,5 +1,6 @@
+ """Render thumbnails by calling ImageMagick."""
+ 
++import shlex
+ import subprocess
+ from pathlib import Path
+ 
+@@ -7,5 +8,8 @@ from pathlib import Path
+ def make_thumbnail(source: Path, size: int) -> Path:
+     """Write a square thumbnail beside source and return its path."""
+     target = source.with_suffix(".thumb.png")
+-    subprocess.run(f"convert {source} -resize {size}x{size} {target}", shell=True, check=True)
++    quoted_source = shlex.quote(str(source))
++    quoted_target = shlex.quote(str(target))
++    command = f"convert {quoted_source} -resize {size}x{size} {quoted_target}"
++    subprocess.run(command, shell=True, check=True)
+     return target

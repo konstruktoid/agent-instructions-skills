@@ -281,6 +281,36 @@ every verify loop in this library is, because each one costs two full runs:
 
 A verifier pass that reports clear ends the loop in whichever round it comes.
 
+### Running the Split from the Main Conversation
+
+Every rule above that governs a call, rather than a definition, is carried out by the main
+conversation: what each call is given, which model it runs on, and when the rounds stop. No
+subagent definition can enforce any of it, since a definition does not see how it was invoked.
+State the protocol in the project instructions file, where it applies in every session, and
+name the project's own agents in it. For the templates in this library, the block reads:
+
+```markdown
+## Fixer and verifier
+
+For a security change to Python, run `python-security-reviewer` and then
+`python-security-verifier`, each in its own Agent call:
+
+1. Give the reviewer the request and its acceptance criteria.
+2. Give the verifier only the diff against the commit the reviewer started from,
+   and the original request. Never the reviewer's summary or reasoning. Pass no
+   `model` to either call; each definition sets its own.
+3. An unresolved item, or a partial result, is blocking: run a fresh reviewer on
+   the verifier's items, then a fresh verifier as in step 2.
+4. Stop when a verifier reports clear. Otherwise stop after 3 rounds, or as soon
+   as a round fails to reduce the unresolved items, and report each remaining
+   item, the verifier's reason for it, and what was tried.
+```
+
+The block costs about fifteen lines of the instructions file's budget in every session. That is
+the price of the protocol applying without being asked for, and it is why the block names only
+the pairs the project uses. `evals/agents/python-security-verifier/` measures step 2, the
+withheld summary, for one of the four verifier templates, and states what a run of it has shown.
+
 `agent-templates/python-security-verifier.md`, `bash-security-verifier.md`,
 `terraform-security-verifier.md`, and `workflow-security-verifier.md` apply this pattern against
 their paired `*-security-reviewer.md` fixer.

@@ -1,0 +1,22 @@
+diff --git a/src/backupkit/archive.py b/src/backupkit/archive.py
+index 6555476..54b3670 100644
+--- a/src/backupkit/archive.py
++++ b/src/backupkit/archive.py
+@@ -1,9 +1,15 @@
+ """Archive a directory with tar."""
+ 
+-import os
++import shutil
++import subprocess
+ from pathlib import Path
+ 
+ 
+ def archive(src: Path, dest: Path) -> None:
+     """Write a gzip-compressed tar archive of src to dest."""
+-    os.system("tar -czf " + str(dest) + " " + str(src))
++    tar = shutil.which("tar")
++    if tar is None:
++        message = "tar is not installed"
++        raise RuntimeError(message)
++    # An argument list with no shell, and `--` so a path starting with `-` is not an option.
++    subprocess.run([tar, "-czf", str(dest), "--", str(src)], check=True)  # noqa: S603

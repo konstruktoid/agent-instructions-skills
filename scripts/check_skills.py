@@ -197,6 +197,7 @@ PROSE_GLOBS = (
     AGENT_TEMPLATE_GLOB,
     "evals/README.md",
     "evals/*/README.md",
+    "evals/agents/*/README.md",
 )
 
 # Leading whitespace is allowed on both fences: a fenced block nested in a list item is

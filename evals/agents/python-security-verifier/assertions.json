@@ -1,0 +1,162 @@
+{
+  "template": "python-security-verifier",
+  "notes": [
+    "Every assertion is a command run in the finished workspace or a regex over the run transcript. None asks for a judgment.",
+    "$EVAL_BASE_SHA is the fixer's commit, not the fixture baseline, so a diff against it shows only what the verifier changed.",
+    "The verdict line is requested in the prompt identically in both conditions, so it cannot bias the comparison, and it is what makes the verdict gradable by regex."
+  ],
+  "tasks": {
+    "pv-01-residual-injection": [
+      {
+        "id": "verdict-unresolved",
+        "kind": "final_regex",
+        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*$",
+        "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
+      },
+      {
+        "id": "reran-ruff",
+        "kind": "bash_regex",
+        "pattern": "ruff\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence"
+      },
+      {
+        "id": "reran-ty",
+        "kind": "bash_regex",
+        "pattern": "\\bty\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ty independently"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "no-new-source-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg')\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "names-residual-query",
+        "kind": "final_regex",
+        "pattern": "list_users|ORDER BY",
+        "source": "agent-templates/python-security-verifier.md Scope: confirm the fix addresses the class of issue the request named, not only the specific line"
+      }
+    ],
+    "pv-02-repo-wide-suppression": [
+      {
+        "id": "verdict-unresolved",
+        "kind": "final_regex",
+        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*$",
+        "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
+      },
+      {
+        "id": "reran-ruff",
+        "kind": "bash_regex",
+        "pattern": "ruff\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence"
+      },
+      {
+        "id": "reran-ty",
+        "kind": "bash_regex",
+        "pattern": "\\bty\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ty independently"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "no-new-source-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg')\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "names-repo-wide-ignore",
+        "kind": "final_regex",
+        "pattern": "pyproject|repository-wide|repo-wide|ignore\\s*=",
+        "source": "agent-templates/python-security-verifier.md Scope: confirm no S rule was disabled repository-wide to reach a clean run"
+      },
+      {
+        "id": "names-shell-true",
+        "kind": "final_regex",
+        "pattern": "shell\\s*=\\s*True",
+        "source": "skills/python/python-secure-coding/references/injection.md: pass an argument list, never a shell string"
+      }
+    ],
+    "pv-03-unsafe-loader": [
+      {
+        "id": "verdict-unresolved",
+        "kind": "final_regex",
+        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*$",
+        "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
+      },
+      {
+        "id": "reran-ruff",
+        "kind": "bash_regex",
+        "pattern": "ruff\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence"
+      },
+      {
+        "id": "reran-ty",
+        "kind": "bash_regex",
+        "pattern": "\\bty\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ty independently"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "no-new-source-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg')\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "names-safe-loader",
+        "kind": "final_regex",
+        "pattern": "S506|safe_load|SafeLoader",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence"
+      }
+    ],
+    "pv-04-sound-fix": [
+      {
+        "id": "verdict-clear",
+        "kind": "final_regex",
+        "pattern": "^\\W*VERDICT:\\s*CLEAR\\W*$",
+        "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
+      },
+      {
+        "id": "reran-ruff",
+        "kind": "bash_regex",
+        "pattern": "ruff\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence"
+      },
+      {
+        "id": "reran-ty",
+        "kind": "bash_regex",
+        "pattern": "\\bty\\s+check",
+        "source": "agent-templates/python-security-verifier.md Scope: re-run ty independently"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      },
+      {
+        "id": "no-new-source-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg')\"",
+        "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds"
+      }
+    ]
+  }
+}

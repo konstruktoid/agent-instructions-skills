@@ -281,9 +281,11 @@ offers one row per install mechanism, plugin or submodule, and expects the row t
 to be deleted.
 
 A copied template is project content, not plugin content, so `${CLAUDE_PLUGIN_ROOT}` does not
-substitute in it. Under a plugin install a template reaches a skill by invoking it under its
-namespaced name, such as `ansible-standards:ansible-verification-loop`, and the `skills:`
-frontmatter field can preload that skill at startup instead. A template that references an
+substitute in it. Under a plugin install a template reaches a skill through the `skills:`
+frontmatter field, which preloads it at startup under its namespaced name, such as
+`ansible-standards:ansible-verification-loop`. Invoking the skill on demand is not an option for
+these templates, because none of their `tools:` lines grants `Skill`, and adding it would let the
+agent load any installed skill rather than the one it wraps. A template that references an
 instructions document directly has no such name to use, so it needs the submodule.
 
 Claude Code reloads `.claude/agents/` within a few seconds of a file changing. Creating the
@@ -390,6 +392,11 @@ output, or that its `description` routes the right tasks to it. Two measurements
   `scripts/check_evals.py` reports each of them as unmeasured.
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
+- **Agent-template evals.** A suite under `evals/agents/<template>/` measures a template rather
+  than a skill. The first, for `python-security-verifier.md`, runs each task with and without
+  the fixer's summary in the verifier's prompt, which tests the claim that the summary anchors
+  the verifier. It has not been run yet, and `scripts/check_evals.py` reports it and every
+  template without a suite as unmeasured.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
