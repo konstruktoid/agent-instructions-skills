@@ -3,9 +3,16 @@ name: terraform-security-reviewer
 description: Reviews and modifies Terraform configuration, modules, backend blocks, and provider blocks against state and secret exposure, least-privilege execution identity, provider and module supply chain, sensitive variables and outputs, and policy-as-code enforcement, verified with terraform fmt, terraform validate, tflint, and the repository's configuration scanner, in a separate context. Use when a Terraform change is large enough that its lint and scan output would crowd the main conversation, or when a review turns on state handling, secrets, execution credentials, module sources, or version pinning.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Security review benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required for the verify loop: terraform fmt, terraform
 # init -backend=false, terraform validate, tflint, and the repository's
 # configuration scanner. For an independent second pass instead of dropping
@@ -21,6 +28,15 @@ tools: Read, Grep, Glob, Edit, Bash
 # the procedure instead of loading it on demand.
 # skills:
 #   - terraform-standards:terraform-secure-iac
+# Copy hooks/deny-terraform-subcommands.sh to .claude/hooks/ beside this file. It
+# blocks the terraform and tofu subcommands named after it, fails closed, and states
+# what its match misses; the Scope rule below still covers those.
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/deny-terraform-subcommands.sh apply destroy'
 ---
 
 # terraform-security-reviewer

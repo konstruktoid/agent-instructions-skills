@@ -86,14 +86,20 @@ runs there. Copy one into the consuming project's `.claude/agents/` and edit it.
 it. Divergence between the copy and this library is the intended outcome, which is the opposite of
 the rule for `instructions/` and `skills/`.
 
-Three frontmatter fields are left for whoever copies a template to decide:
+Four frontmatter fields are left for whoever copies a template to decide:
 
 - `model:`. Every template ships `model: inherit`, so a fresh copy pins no model of its own and
   runs on whatever the main conversation uses. Pin a stronger model for review-heavy agents, or a
-  cheaper one for agents that apply a fixed checklist.
+  cheaper one for agents that apply a fixed checklist. Pin an alias such as `opus`, which follows
+  the current release, rather than a full model ID, which goes stale at the next one. `effort:`
+  is left unset beside it and follows the session; the review and verifier templates state when
+  to raise it.
 - `tools:`. Every template ships the smallest allowlist its work needs. Widen or narrow it against
   what the project trusts the agent to do. Frontmatter comments in each template state what to
   consider changing and why.
+- `maxTurns:`. Every template ships one, as a bound the harness enforces when the procedure's own
+  attempt limit fails to stop a loop. Output past it returns marked partial. Raise it for a large
+  repository rather than removing it.
 - `memory:`. No template ships it, so a fresh copy keeps nothing between runs. Setting it to
   `user`, `project`, or `local` gives the agent a memory directory whose `MEMORY.md` is read into
   its system prompt at startup and written to as it works. Read the caveat before setting it:
@@ -103,6 +109,12 @@ Three frontmatter fields are left for whoever copies a template to decide:
   prompt of every later run for everyone working in that repository. `scripts/check_skills.py`
   fails a template that ships the field, so the decision is made in the copy rather than
   inherited from here.
+
+Some templates also carry `hooks:`, for the rules their prose states as absolutes. Every verifier
+blocks `Edit`, `Write`, and `NotebookEdit` with an inline `PreToolUse` command, so it stays
+read-only after a copy widens `tools:` or enables `memory:`. The two Terraform templates block
+`terraform apply` and `destroy`, and the verifier also `plan`, through
+`agent-templates/hooks/deny-terraform-subcommands.sh`, which is copied with them and fails closed.
 
 Each template is a thin wrapper. Its system prompt names the instructions document or skill that
 holds the substance and points at it by path, rather than restating it. What the agent file adds
@@ -117,10 +129,10 @@ Current templates:
 | `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
 | `workflow-security-reviewer.md` | `skills/github/github-actions-security` | Needs `Bash` for `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA. Consider pinning a strong model. |
 | `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the ten. Consider pinning a strong model. |
-| `terraform-security-reviewer.md` | `skills/terraform/terraform-secure-iac` | Needs `Bash` for `terraform fmt`, `terraform validate`, `tflint`, and the repository's configuration scanner. Does not run `terraform apply`. Consider pinning a strong model. |
+| `terraform-security-reviewer.md` | `skills/terraform/terraform-secure-iac` | Needs `Bash` for `terraform fmt`, `terraform validate`, `tflint`, and the repository's configuration scanner. A hook blocks `terraform apply` and `destroy`. Consider pinning a strong model. |
 | `python-security-verifier.md` | `skills/python/python-secure-coding` | Independently checks `python-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
 | `bash-security-verifier.md` | `skills/bash/bash-secure-scripting` | Independently checks `bash-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
-| `terraform-security-verifier.md` | `skills/terraform/terraform-secure-iac` | Independently checks `terraform-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
+| `terraform-security-verifier.md` | `skills/terraform/terraform-secure-iac` | Independently checks `terraform-security-reviewer.md`'s result in a fresh context. No `Edit`. A hook blocks `terraform apply`, `destroy`, and `plan`. Consider pinning a strong model. |
 | `workflow-security-verifier.md` | `skills/github/github-actions-security` | Independently checks `workflow-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
@@ -256,6 +268,13 @@ mkdir -p .claude/agents
 cp .agent-standards/agent-templates/prose-editor.md .claude/agents/prose-editor.md
 ```
 
+A template whose `hooks:` names a script under `.claude/hooks/` needs that script copied too:
+
+```sh
+mkdir -p .claude/hooks
+cp .agent-standards/agent-templates/hooks/deny-terraform-subcommands.sh .claude/hooks/
+```
+
 Then edit the copy: set `model:` and `tools:`, remove the frontmatter comments once the choices
 are made, and resolve the reference the system prompt points at. A template that wraps a skill
 offers one row per install mechanism, plugin or submodule, and expects the row that does not apply
@@ -330,14 +349,20 @@ the outcome the mechanisms above exist to avoid.
   it by path rather than restating it. What belongs in the agent file is routing and policy:
   scope, and what the agent reports back to the main conversation.
 - Ship agent templates with neutral defaults: `model: inherit`, the smallest `tools:` allowlist
-  the work needs, and no `memory:` field, so copying one pins no model on the consumer, grants no
-  broad tool access, and carries nothing between runs. Memory stays out of the defaults because
-  enabling it grants `Read`, `Write`, and `Edit` beside the allowlist rather than within it, which
-  is a widening no reader of the `tools:` line would see.
+  the work needs, a `maxTurns:` bound, and no `memory:` field, so copying one pins no model on
+  the consumer, grants no broad tool access, and carries nothing between runs. Memory stays out
+  of the defaults because enabling it grants `Read`, `Write`, and `Edit` beside the allowlist
+  rather than within it, which is a widening no reader of the `tools:` line would see.
 - Where a review's cost of a false "clean" justifies a second, independent pass, add a paired
   verifier template alongside the fixer rather than trusting the fixer's self-report. See
   "Splitting a Fixer from a Verifier" in `instructions/agent_configuration_instructions.md` for the
-  pattern, and the four `*-security-verifier.md` templates for a worked example.
+  pattern, and the four `*-security-verifier.md` templates for a worked example. Name the file
+  `<name>-verifier.md`, grant it no write tool, and give it the `PreToolUse` hook the existing
+  verifiers carry; `scripts/check_skills.py` fails a verifier that lacks either.
+- Put a script a template's hook runs in `agent-templates/hooks/`, reference it from the template
+  as `"$CLAUDE_PROJECT_DIR"/.claude/hooks/<script>`, and hold it to
+  `instructions/bash_coding_instructions.md`. Make it fail closed, since a hook that allows on an
+  internal error enforces nothing.
   State in frontmatter comments what to consider changing and why, for example pinning a stronger
   model for a review-heavy agent, or adding `Bash` only because the verify loop needs it.
 - A template aimed at a cheaper model needs its verification spelled out rather than assumed. Keep
@@ -464,10 +489,14 @@ the bounded verify loop in the shared wording described above. It applies the sa
 to each `agent-templates/*.md`, with `name` matching the file name, and adds the neutral defaults a
 template must ship with: `model` is `inherit`, `tools` is a non-empty allowlist, and `memory` is
 absent, since a template that set it would grant `Read`, `Write`, and `Edit` past the allowlist
-beside it. It then checks `.claude-plugin/marketplace.json`: it must parse, every listed path must
-hold a `SKILL.md`, and every skill in the repository must be listed by exactly one plugin. It fails
-if an `agents/` directory has appeared at the repository root, which would ship the agent templates
-as installable subagents. It verifies the cross-references this library maintains by hand: a
+beside it. A template must also set a positive `maxTurns`, must not set `permissionMode:
+bypassPermissions` or grant `Agent` or `Task`, and may name only hook scripts that ship,
+executable, in `agent-templates/hooks/`. A `*-verifier.md` template must grant none of `Edit`,
+`Write`, and `NotebookEdit`, and must carry a `PreToolUse` hook blocking all three. It then checks
+`.claude-plugin/marketplace.json`: it must parse, every listed path must hold a `SKILL.md`, and
+every skill in the repository must be listed by exactly one plugin. It fails if an `agents/`
+directory has appeared at the repository root, which would ship the agent templates as installable
+subagents. It verifies the cross-references this library maintains by hand: a
 `SKILL.md` may not name an `instructions/*.md` that does not exist, an `instructions/*.md` may not
 name a `skills/*/*/SKILL.md` that does not exist, and a skill that names an instructions document
 must be named back by it, which is the bidirectional rule stated above. It requires every

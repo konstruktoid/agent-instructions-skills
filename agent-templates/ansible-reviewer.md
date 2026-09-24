@@ -3,9 +3,16 @@ name: ansible-reviewer
 description: Reviews and modifies Ansible roles, collections, playbooks, and tasks in a separate context, and verifies the change through the target repository's own lint and test loop. Use when an Ansible change is large enough that its lint and test output would crowd the main conversation.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Review work benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required: the verify loop runs ansible-lint and the
 # repository's own test entry point. Drop Edit for a review-only agent. Add
 # WebFetch only if the work needs module documentation the repository lacks.

@@ -6,6 +6,13 @@ description: Independently verifies a Terraform change already reviewed and fixe
 # capable as the paired terraform-security-reviewer: a weaker verifier
 # rubber-stamps a stronger fixer's work instead of catching what it missed.
 model: inherit
+# `effort:` is left unset, so it follows the session. Keep it no lower than the
+# paired reviewer's: the same model at a lower effort is a weaker verifier. The
+# invoking conversation can still override the model per call, which "Splitting a
+# Fixer from a Verifier" in agent_configuration_instructions.md covers.
+# Set before use. A hard bound on agentic turns. Output past it returns marked
+# partial, and a partial verdict is unresolved, never clear.
+maxTurns: 40
 # No Edit, deliberately: a verifier that can write can "fix" what it finds,
 # which collapses the independence this template exists for. Bash is required
 # to re-run terraform fmt, terraform validate, tflint, and the repository's
@@ -21,6 +28,22 @@ tools: Read, Grep, Glob, Bash
 # the procedure instead of loading it on demand.
 # skills:
 #   - terraform-standards:terraform-secure-iac
+# Blocks the write tools even after a later edit to `tools:` or `memory:` grants
+# them, so the read-only property survives the copy being widened. The command reads
+# no input, so it has no error path that could let a write through.
+# Copy hooks/deny-terraform-subcommands.sh to .claude/hooks/ beside this file. It
+# blocks the terraform and tofu subcommands named after it, fails closed, and states
+# what its match misses; the Scope rule below still covers those.
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: "echo 'This verifier is read-only: report the finding instead of fixing it.' >&2; exit 2"
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/deny-terraform-subcommands.sh apply destroy plan'
 ---
 
 # terraform-security-verifier

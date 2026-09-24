@@ -198,7 +198,7 @@ A subagent gets its own context window, system prompt, model, and tool allowlist
 one when its output would crowd the main conversation, when it should run on a different model
 than the session, or when it should hold fewer tools than the session does.
 
-Five frontmatter fields carry the policy, and each is a decision the project makes rather than a
+Six frontmatter fields carry the policy, and each is a decision the project makes rather than a
 default it inherits:
 
 - `permissionMode`, which decides whether use of the allowed tools prompts a person. A subagent
@@ -210,7 +210,16 @@ default it inherits:
   first. A reviewing agent that cannot write is a different control from one that is asked not to.
 - `model`, set explicitly. Leaving it unset does not reliably mean the session's model, because a
   configured default for subagents is consulted before the main conversation's, so cost and
-  capability become accidental rather than chosen.
+  capability become accidental rather than chosen. Prefer an alias such as `opus`, which follows
+  the current release, over a full model ID, which holds one release and goes stale at the next.
+  The definition is not the last word here either: a `model` passed with the invocation takes
+  precedence over it, and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` overrides every subagent's `model`.
+- `effort`, which follows the session when unset. It is a second axis of capability beside the
+  model: the same model at a lower effort reads less deeply, and models ship different defaults,
+  so a model change can lower the effort a subagent runs at without any edit to its definition.
+- `maxTurns`, a hard bound on agentic turns that the harness enforces rather than the model. Past
+  it, the output returns marked partial. It is a backstop for a loop whose own attempt limit failed
+  to stop it, not a replacement for that limit, and a partial result is not a finished one.
 - `memory`, absent unless the project has decided otherwise. Enabling it adds `Read`, `Write` and
   `Edit` beside the allowlist rather than within it, so a review-only agent regains the ability to
   edit. Under project scope the directory is meant to be committed, which puts text the model
@@ -218,7 +227,10 @@ default it inherits:
 
 A subagent definition can also carry its own `hooks`, and so can a skill, which is worth knowing
 before reading the four mechanisms above as four separate files: the deterministic layer can ship
-inside either of the advisory ones.
+inside either of the advisory ones. A hook in a definition runs only while that subagent is active,
+which makes it the place for a rule that binds one kind of work rather than the whole session.
+`agent-templates/terraform-security-reviewer.md` uses one to block `terraform apply`, a rule its
+prose states and nothing else enforced.
 
 ### Splitting a Fixer from a Verifier
 
@@ -226,8 +238,9 @@ Where the cost of a false "clean" from a review justifies a second, independent 
 work into two subagent definitions rather than trusting one agent's self-report: a fixer that
 reviews and edits, and a verifier that checks the fixer's result without trusting what it reported.
 
-- Invoke the two as separate Task calls, never as one shared context asked to play both roles. A
-  fixer that also checks its own fix is the single point of failure this split exists to remove.
+- Invoke the two as separate `Agent` tool calls, never as one shared context asked to play both
+  roles. The tool was named `Task` before Claude Code 2.1.63 and still accepts that name. A fixer
+  that also checks its own fix is the single point of failure this split exists to remove.
 - Give the verifier call only the diff, or the changed file paths, and the original request or
   acceptance criteria. Withhold the fixer's summary and reasoning; passing them anchors the second
   pass into agreeing with the first instead of rederiving its own conclusion.
@@ -238,11 +251,35 @@ reviews and edits, and a verifier that checks the fixer's result without trustin
   check over the write it would otherwise perform, such as `terraform fmt -check -diff` in place
   of an in-place format, with `terraform init -backend=false` run only in that workspace. A
   verifier that writes real edits, instead of confined command output, can "fix" what it finds,
-  which collapses the independence the split was meant to provide.
+  which collapses the independence the split was meant to provide. `isolation: worktree` is not
+  that workspace: the worktree branches from the default branch, so it holds none of the fixer's
+  uncommitted change, and a verifier run there checks code the fixer never touched.
+- Back the dropped tool with a `PreToolUse` hook in the verifier's definition that blocks `Edit`,
+  `Write`, and `NotebookEdit`. The allowlist stops holding the moment a copy widens `tools` or
+  enables `memory`; the hook still blocks.
+- Give the verifier a model and effort no weaker than the fixer's, at the call as well as in the
+  definition. Three things put a verifier below its fixer while its definition says otherwise: a
+  `model` passed with the invocation, `CLAUDE_CODE_SUBAGENT_MODEL_FORCE`, and a lower `effort` on
+  the same model. A weaker verifier rubber-stamps a stronger fixer's work instead of catching what
+  it missed.
 - Have the verifier re-run every check the fixer's procedure requires, from its own clean context,
   rather than reading the fixer's reported result as evidence.
-- Treat a verifier finding as blocking. Route it to a fresh fixer invocation, not the context that
-  already reported done, and stop only once a verifier pass reports clear.
+- Treat a verifier finding as blocking, and a partial verdict returned at `maxTurns` as
+  unresolved rather than clear. Route either to a fresh fixer invocation, not the context that
+  already reported done.
+
+One round is one fixer invocation followed by one verifier pass. The rounds are bounded the way
+every verify loop in this library is, because each one costs two full runs:
+
+- Baseline the loop at 3 rounds.
+- Continue past 3 only while making measurable progress, meaning each round ends with strictly
+  fewer unresolved verifier items than the one before it.
+- Stop early, before 3 rounds, if the loop is oscillating: the same items recur, the count stops
+  dropping, or a fix for one item reintroduces another.
+- When stopping for either reason, report to the user rather than proceeding or silently giving
+  up. Name each unresolved item, include the verifier's reason for it, and state what was tried.
+
+A verifier pass that reports clear ends the loop in whichever round it comes.
 
 `agent-templates/python-security-verifier.md`, `bash-security-verifier.md`,
 `terraform-security-verifier.md`, and `workflow-security-verifier.md` apply this pattern against
@@ -304,8 +341,10 @@ Before finalizing a configuration change, verify that:
 - Hook code that parses input or reaches the network was held to
   `instructions/bash_coding_instructions.md` and the shell security skill.
 - Each subagent definition sets `model` explicitly, carries the smallest tool allowlist its work
-  needs, does not set `bypassPermissions`, and sets `memory` only where the widened access and
-  the committed directory were intended.
+  needs, sets `maxTurns`, does not set `bypassPermissions`, and sets `memory` only where the
+  widened access and the committed directory were intended.
+- Each verifier definition grants no write tool, carries a `PreToolUse` hook that blocks them, and
+  is invoked with a model and effort no weaker than its fixer's, within a bounded number of rounds.
 - The change was measured against recorded tasks, or its lack of measurement was stated.
 - Approval for the change rests with a person, through a mechanism rather than an instruction.
 - The prose rule that a new hook enforces is still present, so the reason survives beside the

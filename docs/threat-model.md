@@ -49,14 +49,14 @@ no match for any of the following, and the repository root holds none of them:
 | Session hooks (`hooks/hooks.json`) | Not tracked; not present at the repository root |
 | MCP server definitions (`.mcp.json`) | Not tracked; not present at the repository root |
 | Slash commands (`commands/`) | Not tracked; not present at the repository root |
-| Installable subagents (`agents/`) | Not present, and `scripts/check_skills.py:543` fails the build if it appears |
-| Committed `.claude/settings.json` | Not tracked. `README.md:193` tells a *consumer* to commit one, in the consumer's repository |
+| Installable subagents (`agents/`) | Not present, and `scripts/check_skills.py:682` fails the build if it appears |
+| Committed `.claude/settings.json` | Not tracked. `README.md:205` tells a *consumer* to commit one, in the consumer's repository |
 
 As audited, `scripts/check_skills.py` blocked exactly one of the four auto-discovered plugin
 directories and left the other three unguarded. That gap was attack path 1.3.
 
-**Landed.** `check_plugin_root` at `scripts/check_skills.py:543` now fails on any repository-root
-entry that is not on the allowlist at `:104`, skipping only the local-only names at `:127` that
+**Landed.** `check_plugin_root` at `scripts/check_skills.py:682` now fails on any repository-root
+entry that is not on the allowlist at `:107`, skipping only the local-only names at `:130` that
 `.gitignore` already excludes. All four auto-discovered names fail, and so does a name a future
 release of Claude Code begins discovering, because the check names what is allowed rather than what
 is forbidden.
@@ -65,13 +65,13 @@ is forbidden.
 
 As audited, all eight skills carried frontmatter with `name` and `description` only. None
 declared a tools field, an allowed-tools field, or any permission scope: `check_skill` at
-`scripts/check_skills.py:460` validated `name`, `description`, the verify-loop wording and the body
-length, and never read a capability field. `check_tools` at `scripts/check_skills.py:390` existed
-but was called only from `check_agent_template` (`scripts/check_skills.py:531`). So for every row
+`scripts/check_skills.py:596` validated `name`, `description`, the verify-loop wording and the body
+length, and never read a capability field. `check_tools` at `scripts/check_skills.py:418` existed
+but was called only from `check_agent_template` (`scripts/check_skills.py:667`). So for every row
 below, the tools column states what the body implies.
 
 **Landed.** Control 9 gives every skill a `capabilities` block declaring `tools`, `shell`, `paths`
-and `egress`, whose shape `check_capabilities` at `scripts/check_skills.py:418` enforces. The rows
+and `egress`, whose shape `check_capabilities` at `scripts/check_skills.py:554` enforces. The rows
 below are the evidence those blocks were written from, and `scripts/check_capabilities.py` reports
 what a later change adds without declaring it. The block is a declaration, not a sandbox: nothing
 enforces it at runtime, and a skill body remains free to do what it likes.
@@ -187,7 +187,7 @@ The highest-egress skill in the repository.
 
 Thirty-five files under `skills/*/*/references/`, loaded on demand through each skill's triage
 table. They carry the commands cited above. They are held to the same prose and Contents-list
-checks as a `SKILL.md` (`scripts/check_skills.py:164`, `:677`) and to no capability check at all.
+checks as a `SKILL.md` (`scripts/check_skills.py:192`, `:816`) and to no capability check at all.
 
 ### Agent templates
 
@@ -196,15 +196,15 @@ states they are templates, not installable agents.
 
 | Path | Trigger | Tools declared | Shell | Egress |
 |---|---|---|---|---|
-| `agent-templates/ansible-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:12`) | Yes, through Bash, for `ansible-lint` and the target repository's test entry point (`:9`) | None. `:11` names `WebFetch` as an addition to make deliberately |
-| `agent-templates/python-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:12`) | Yes, through Bash, for `ruff` and `ty` (`:9`) | None. `:10` names `WebFetch` as an addition to make deliberately |
-| `agent-templates/prose-editor.md` | `:3` | `Read, Edit` (`:12`) | No. `:11` states that adding Bash means accepting that it executes commands | None |
-| `agent-templates/workflow-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:13`) | Yes, through Bash, for `actionlint` and `zizmor` (`:9`) | Yes, and the only template that states egress of its own, though not by hostname. `:9`-`:10` names `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA; `:62`-`:64` states what each reaches, the container run that mounts the tree, the package index `zizmor` resolves from, and the GitHub API, and requires the summary to say when a check ran without `GH_TOKEN` |
-| `agent-templates/bash-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:13`) | Yes, and wider than the others: `shellcheck`, `bash -n`, the repository's formatter, and the script under review itself (`:9`-`:12`), bounded at `:53`-`:57` to a disposable location with a report-instead-of-run rule for a destructive script | No host named in the file. Egress occurs indirectly through the script under review, which `:53` has this agent run: hosts UNKNOWN, determined by that script |
-| `agent-templates/terraform-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:13`) | Yes, through Bash, for `terraform fmt`, `terraform init -backend=false`, `terraform validate`, `tflint`, and the repository's configuration scanner (`:9`-`:12`). `:54`-`:56` bars `terraform apply` and limits `terraform plan` to a non-production target with read-only credentials that already exist | No host named in the file. `terraform init` downloads provider plugins and modules from whatever registries and `source` URLs the configuration names, independently of the plan restriction, which is why `:59`-`:64` adds a no-credentials, egress-restricted environment for the loop. Any `terraform plan` reaches the same sources and is additionally bounded by `:54`-`:56` as above |
+| `agent-templates/ansible-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:19`) | Yes, through Bash, for `ansible-lint` and the target repository's test entry point (`:16`) | None. `:18` names `WebFetch` as an addition to make deliberately |
+| `agent-templates/python-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:19`) | Yes, through Bash, for `ruff` and `ty` (`:16`) | None. `:17` names `WebFetch` as an addition to make deliberately |
+| `agent-templates/prose-editor.md` | `:3` | `Read, Edit` (`:15`) | No. `:14` states that adding Bash means accepting that it executes commands | None |
+| `agent-templates/workflow-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:20`) | Yes, through Bash, for `actionlint` and `zizmor` (`:16`) | Yes, and the only template that states egress of its own, though not by hostname. `:16`-`:17` names `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA; `:69`-`:71` states what each reaches, the container run that mounts the tree, the package index `zizmor` resolves from, and the GitHub API, and requires the summary to say when a check ran without `GH_TOKEN` |
+| `agent-templates/bash-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:20`) | Yes, and wider than the others: `shellcheck`, `bash -n`, the repository's formatter, and the script under review itself (`:16`-`:19`), bounded at `:60`-`:64` to a disposable location with a report-instead-of-run rule for a destructive script | No host named in the file. Egress occurs indirectly through the script under review, which `:60` has this agent run: hosts UNKNOWN, determined by that script |
+| `agent-templates/terraform-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:20`) | Yes, through Bash, for `terraform fmt`, `terraform init -backend=false`, `terraform validate`, `tflint`, and the repository's configuration scanner (`:16`-`:19`). `:70`-`:72` bars `terraform apply` and limits `terraform plan` to a non-production target with read-only credentials that already exist | No host named in the file. `terraform init` downloads provider plugins and modules from whatever registries and `source` URLs the configuration names, independently of the plan restriction, which is why `:75`-`:80` adds a no-credentials, egress-restricted environment for the loop. Any `terraform plan` reaches the same sources and is additionally bounded by `:70`-`:72` as above |
 
-All six set `model: inherit`, enforced at `scripts/check_skills.py:524`. The tools field is
-enforced non-empty at `scripts/check_skills.py:390`.
+All six set `model: inherit`, enforced at `scripts/check_skills.py:660`. The tools field is
+enforced non-empty at `scripts/check_skills.py:418`.
 
 The tools column above states what the `tools:` line declares, which is the whole tool surface
 only while no template carries a `memory:` field. Claude Code grants a subagent with persistent
@@ -212,13 +212,13 @@ memory the Read, Write and Edit tools so that it can maintain its own memory fil
 `tools:` holds, so the field would widen every row here without changing the line the row cites,
 and under `project` scope it would add a committed directory of model-authored text that each
 later session loads as system prompt. No template sets it and
-`scripts/check_skills.py:533` fails one that does, which is what keeps this column complete.
+`scripts/check_skills.py:669` fails one that does, which is what keeps this column complete.
 
 ### Instructions documents
 
-Seven files under `instructions/`. `README.md:220` states no tool auto-discovers them. They carry
-no shell invocation of their own and no egress. Under the submodule install at `README.md:227`
-they are referenced directly from a consumer's `CLAUDE.md` (`README.md:233`-`:235`), which loads
+Seven files under `instructions/`. `README.md:232` states no tool auto-discovers them. They carry
+no shell invocation of their own and no egress. Under the submodule install at `README.md:239`
+they are referenced directly from a consumer's `CLAUDE.md` (`README.md:245`-`:247`), which loads
 them into every session rather than on demand.
 
 ### Marketplace manifest
@@ -233,8 +233,8 @@ no file in the repository defines it.
 | Path | Trigger | Permissions | Shell | Paths | Egress | Untrusted input |
 |---|---|---|---|---|---|---|
 | `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:68`, `:91`, `:128`, `:164`). `persist-credentials: false` on every checkout (`:27`, `:73`, `:96`, `:133`, `:169`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:80`-`:84`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`); `docker run` of `rhysd/actionlint` pinned by digest (`:146`-`:147`); `uvx "zizmor@1.29.0"` over `.github/` (`:157`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:157`); `docker run` pulls the actionlint image (`:146`). Actions are pinned by SHA (`:25`, `:33`, `:176`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:156`) |
-| `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:835`, `:79`, `:81`, `:70`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:443`) | Read-only | None | `evals/` | None | Eval suite files |
+| `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:974`, `:82`, `:84`, `:73`) | None | The files under check |
+| `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:468`) | Read-only | None | `evals/` | None | Eval suite files |
 | `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
 
 ### `evals/run_eval.py`
@@ -361,7 +361,7 @@ repository root, plausibly framed as tooling for the repository's own developmen
 
 **File abused.** `.claude-plugin/marketplace.json:11`, `:21`, `:31`, `:40`, which set
 `"source": "./"` so the plugin root is the repository root, combined with the packaging check as
-audited, which blocked `agents/` and nothing else. `README.md:127` explains the `agents/` rule
+audited, which blocked `agents/` and nothing else. `README.md:139` explains the `agents/` rule
 exactly, and stops there.
 
 **What happens.** On the next `/plugin update`, the consumer's Claude Code discovers the new
@@ -374,8 +374,8 @@ project does not control (`references/agent-content.md:118`). This is the keyv p
 `.claude/settings.json` persistence move, reached through a normal pull request rather than
 through a compromised publish. The only control standing in the way was one human reading the diff.
 
-**Landed.** `check_plugin_root` at `scripts/check_skills.py:543` fails on any repository-root entry
-outside the allowlist at `:104`. A pull request adding `hooks/`, `commands/`, `.mcp.json` or
+**Landed.** `check_plugin_root` at `scripts/check_skills.py:682` fails on any repository-root entry
+outside the allowlist at `:107`. A pull request adding `hooks/`, `commands/`, `.mcp.json` or
 `agents/` now fails the check that `.github/workflows/lint.yml:47` runs on every pull request.
 Verified by planting `hooks/` and `.mcp.json` at the root: both were reported, and the run exited
 non-zero. The path is closed for auto-discovered content at the root, and untouched for anything
@@ -386,10 +386,10 @@ written as prose inside `skills/`, which is attack path 1.4.
 **Entry point.** A pull request editing any `skills/**/SKILL.md` or `skills/**/references/*.md`.
 
 **File abused.** Any of the forty-five. `scripts/check_skills.py` checks the name matches the
-directory (`check_skills.py:484`), the description shape (`:486`), the capability block's shape
-(`:487`), the
-verify-loop wording (`:488`), the body length (`:490`), cross-references (`:646`), prose markers
-(`:695`) and Contents lists (`:737`).
+directory (`check_skills.py:620`), the description shape (`:622`), the capability block's shape
+(`:623`), the
+verify-loop wording (`:624`), the body length (`:626`), cross-references (`:785`), prose markers
+(`:834`) and Contents lists (`:876`).
 None of that reads intent, and the repository says so in its own words at
 `references/agent-content.md:42`: "there is no automated defense at all and they read as
 documentation".
@@ -414,7 +414,7 @@ consumes event text. Recorded so a future workflow addition is understood as ope
 #### 2.1 There is no release to forge, because the branch is the release
 
 The attacker does not need to cut anything. No tag exists, no plugin entry declares a `version`,
-and `README.md:158`-`:159` states plainly that without the `@<tag>` suffix "the marketplace tracks the
+and `README.md:170`-`:171` states plainly that without the `@<tag>` suffix "the marketplace tracks the
 default branch, and every commit pushed here reaches the project at its next update, reviewed by
 nobody on the consuming side". Pushing to `main` **is** publishing.
 
@@ -446,7 +446,7 @@ mechanism present.
    deploy keys. An added instruction to widen a bypass actor, or to grant a collaborator, is
    camouflaged by everything around it.
 3. **A line in `instructions/*.md`**. Under the submodule install these are referenced directly
-   from the consumer's `CLAUDE.md` (`README.md:233`), so they load into every session
+   from the consumer's `CLAUDE.md` (`README.md:245`), so they load into every session
    unconditionally rather than when a skill triggers.
 4. **A changed pin in `skills/github/github-actions-security/SKILL.md:239` or `:249`**, pointing
    the container or the `uvx` package at an attacker-controlled name. Consumers run these
@@ -564,8 +564,8 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:239`-`:241` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:147`, and `README.md:443` was changed
-with it. The surrounding text at `:226`-`:230` states the reason at the command rather than as a
+`rhysd/actionlint` by the digest already carried at `lint.yml:147`, and `README.md:468` was changed
+with it. The surrounding text at `:238`-`:242` states the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
 "zizmor@1.29.0"` at `github-actions-security/SKILL.md:249`, which still resolves a package
 name from an index at run time: a
@@ -581,19 +581,19 @@ form, and gave the update pair with no ref either.
 setting offered `"ref": "<branch-or-tag>"` as the way to pin and stated that a marketplace source
 "accepts a branch or tag, not a commit SHA". No tag existed in the repository, so the only
 available pin was a branch, which is itself moving. The single mechanism that pinned an exact
-commit was the submodule at `README.md:227`, presented as the route for the instructions documents
+commit was the submodule at `README.md:239`, presented as the route for the instructions documents
 and for non-plugin setups rather than as the way to obtain skills.
 
-**Landed on the repository side.** `README.md:157` now gives the pinned form first, with the
-unpinned form kept below and labeled as tracking the default branch (`:167`). The team setting at
-`:212` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
-`version`, and `scripts/check_skills.py:569` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:574` documents the release order, and
+**Landed on the repository side.** `README.md:169` now gives the pinned form first, with the
+unpinned form kept below and labeled as tracking the default branch (`:179`). The team setting at
+`:224` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
+`version`, and `scripts/check_skills.py:708` fails the build when one is missing, malformed, or
+disagrees with the others. `README.md:603` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
 **Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0` in
-`README.md:157` names a reference that resolves and that cannot be deleted or moved. Read back,
+`README.md:169` names a reference that resolves and that cannot be deleted or moved. Read back,
 the ruleset blocks `deletion` and `non_fast_forward` on `refs/tags/v*` with no bypass actors. This
 path is closed for a consumer who pins. It stays open for one who installs the unpinned
 marketplace form, since that still tracks the default branch.

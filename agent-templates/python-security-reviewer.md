@@ -3,9 +3,16 @@ name: python-security-reviewer
 description: Reviews and modifies Python source against security practices that static analysis does not fully cover, layered on the ruff and ty quality gate, in a separate context. Use when a Python change touches user input, deserialization, subprocess or shell calls, query construction, templating, cryptography, secrets, or access control.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Security review benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required: the verify loop runs ruff and ty through the
 # repository's package manager. For an independent second pass instead of
 # dropping Edit here, use the paired python-security-verifier.md. Add WebFetch

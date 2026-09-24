@@ -3,9 +3,16 @@ name: workflow-security-reviewer
 description: Reviews and modifies GitHub Actions workflows, reusable workflows, and composite actions against least-privilege token scopes, dependencies pinned by commit SHA, injection-safe handling of untrusted event data, and safe trigger and runner choices, verified with actionlint and zizmor, in a separate context. Use when a workflow change is large enough that its lint and audit output would crowd the main conversation, or when a review turns on permissions, secrets, OIDC, action pinning, a trigger such as pull_request_target or workflow_run, or a self-hosted runner.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Security review benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required: the verify loop runs actionlint and zizmor,
 # and resolving an action's SHA reads the source repository through `gh`. For an
 # independent second pass instead of dropping Edit here, use the paired

@@ -3,9 +3,16 @@ name: bash-security-reviewer
 description: Reviews and modifies Bash scripts, sourced shell libraries, and shell embedded in CI steps, container entrypoints, systemd units, and git hooks against strict-mode semantics, cleanup on every exit path, injection-safe handling of untrusted input and filenames, PATH and environment control, temporary files, and credential handling, verified with shellcheck and bash -n, in a separate context. Use when a shell change is large enough that its lint and run output would crowd the main conversation, or when a review turns on quoting, eval, traps, privilege, or secrets in shell code.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Security review benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required, and it is the widest grant in this file: the
 # verify loop runs shellcheck, bash -n, the repository's formatter, and the
 # script under review itself, including one failure path. For an independent

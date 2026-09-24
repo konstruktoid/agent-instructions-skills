@@ -6,6 +6,9 @@ description: Edits prose to a formal, concise, and precise standard, removing co
 # text and is a reasonable candidate for a cheaper model: pin `haiku` when the
 # cost of the main conversation's model is not warranted.
 model: inherit
+# Set before use. A hard bound on agentic turns, as a backstop for the verify loop
+# below. Output past it returns marked partial.
+maxTurns: 20
 # Set before use. Deliberately narrow: this agent reads and rewrites text and
 # needs nothing else. Add Grep and Glob when it must find the files itself. Add
 # Bash only to run a Markdown linter, and accept that it then executes commands.

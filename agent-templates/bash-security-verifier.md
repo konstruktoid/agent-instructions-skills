@@ -6,6 +6,13 @@ description: Independently verifies a Bash change already reviewed and fixed by 
 # capable as the paired bash-security-reviewer: a weaker verifier rubber-stamps
 # a stronger fixer's work instead of catching what it missed.
 model: inherit
+# `effort:` is left unset, so it follows the session. Keep it no lower than the
+# paired reviewer's: the same model at a lower effort is a weaker verifier. The
+# invoking conversation can still override the model per call, which "Splitting a
+# Fixer from a Verifier" in agent_configuration_instructions.md covers.
+# Set before use. A hard bound on agentic turns. Output past it returns marked
+# partial, and a partial verdict is unresolved, never clear.
+maxTurns: 40
 # No Edit, deliberately: a verifier that can write can "fix" what it finds,
 # which collapses the independence this template exists for. Bash is required
 # to re-run shellcheck, bash -n, and the script under review itself, rather
@@ -20,6 +27,15 @@ tools: Read, Grep, Glob, Bash
 # the procedure instead of loading it on demand.
 # skills:
 #   - bash-standards:bash-secure-scripting
+# Blocks the write tools even after a later edit to `tools:` or `memory:` grants
+# them, so the read-only property survives the copy being widened. The command reads
+# no input, so it has no error path that could let a write through.
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: "echo 'This verifier is read-only: report the finding instead of fixing it.' >&2; exit 2"
 ---
 
 # bash-security-verifier
