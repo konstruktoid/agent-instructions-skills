@@ -168,8 +168,8 @@ one project's layout.
   process-group leader, and when that happens `$!` names the launcher, not the process that actually
   becomes the group leader. `setsid` makes that leader's pgid the process group for everything the
   run spawns, so `kill -TERM -- "-${run_pgid}"` (and `kill -KILL -- "-${run_pgid}"` if it survives a
-  short grace period) reaches the whole group, not just the shell. Poll `${run_dir}/run.done` against a
-  deadline sized to the test entry point's own documented runtime with headroom, and read
+  short grace period) reaches the whole group, not just the shell. Poll `${run_dir}/run.done`
+  against a deadline sized to the test entry point's own documented runtime with headroom, and read
   `${run_dir}/run.log`. The directory has to come from `mktemp -d` rather than from the working
   directory, because a run started from inside the repository would otherwise write both files into
   the tree the same step checks for leftovers. If the deadline passes without `run.done`, kill the
