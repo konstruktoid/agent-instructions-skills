@@ -3,9 +3,16 @@ name: workflow-security-reviewer
 description: Reviews and modifies GitHub Actions workflows, reusable workflows, and composite actions against least-privilege token scopes, dependencies pinned by commit SHA, injection-safe handling of untrusted event data, and safe trigger and runner choices, verified with actionlint and zizmor, in a separate context. Use when a workflow change is large enough that its lint and audit output would crowd the main conversation, or when a review turns on permissions, secrets, OIDC, action pinning, a trigger such as pull_request_target or workflow_run, or a self-hosted runner.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Security review benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required: the verify loop runs actionlint and zizmor,
 # and resolving an action's SHA reads the source repository through `gh`. For an
 # independent second pass instead of dropping Edit here, use the paired
@@ -17,8 +24,9 @@ tools: Read, Grep, Glob, Edit, Bash
 # Edit beside the line above rather than within it, so the review-only variant
 # suggested there stops being reachable. A remembered SHA is also the one thing
 # this skill rules out by name.
-# Uncomment when this repository installs the library as a plugin, to preload
-# the procedure instead of loading it on demand.
+# Uncomment when this repository installs the library as a plugin. The tools
+# line above does not grant Skill, so preloading is how this agent reaches the
+# procedure under that install.
 # skills:
 #   - github-standards:github-actions-security
 ---
@@ -38,7 +46,7 @@ summary. Load it by the mechanism this repository uses:
 
 | Install mechanism | How to load the skill |
 |-------------------|-----------------------|
-| Plugin | Invoke the skill `github-standards:github-actions-security`. |
+| Plugin | Uncomment `skills:` in the frontmatter, which preloads `github-standards:github-actions-security` at startup. |
 | Submodule | Read `<submodule>/skills/github/github-actions-security/SKILL.md`. |
 
 Delete the row that does not apply, and replace `<submodule>` with the real path, when adapting

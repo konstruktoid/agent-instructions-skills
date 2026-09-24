@@ -23,8 +23,11 @@ instructions/written_language_instructions.md.
 For every agent-templates/<name>.md, the rules are the same frontmatter rules with
 `name` matching the file stem, plus the neutral defaults a template must ship with:
 `model: inherit`, an explicit `tools` allowlist, and no `memory` field, since enabling
-memory grants Read, Write and Edit whatever that allowlist holds. It also fails when an entry
-appears
+memory grants Read, Write and Edit whatever that allowlist holds. A template also sets a
+positive `maxTurns`, does not set `permissionMode: bypassPermissions`, does not grant `Agent`
+or `Task`, and names only hook scripts that ship in agent-templates/hooks/. A
+`*-verifier.md` template grants none of Edit, Write and NotebookEdit and carries a PreToolUse
+hook that blocks all three. It also fails when an entry appears
 at the repository root that is not on the packaging allowlist, because the marketplace
 manifest sources every plugin from the root and Claude Code auto-discovers `agents/`,
 `commands/`, `hooks/` and `.mcp.json` at a plugin root, installing what it finds into
@@ -138,6 +141,36 @@ NEUTRAL_MODEL = "inherit"
 # as part of its system prompt.
 MEMORY_FIELD = "memory"
 
+# A template bounds its own run. `maxTurns` is the one limit Claude Code enforces rather than
+# the model: past it the output returns marked partial. The attempt limit in each procedure is
+# advisory, so without this field a loop that fails to stop runs until the session does.
+MAX_TURNS_FIELD = "maxTurns"
+
+# Skips the permission checks that every other field in a template exists to shape.
+FORBIDDEN_PERMISSION_MODE = "bypassPermissions"
+
+# Spawning a subagent from a template hands the work to a definition no template describes.
+# `Task` is the name the `Agent` tool had before Claude Code 2.1.63 and is still accepted.
+SPAWN_TOOLS = frozenset({"Agent", "Task"})
+
+# A verifier that can write can fix what it finds, which is the independence the split in
+# instructions/agent_configuration_instructions.md exists to keep. The tools line is the
+# first control and the PreToolUse hook the second: the hook still blocks after a copy
+# widens `tools:` or enables `memory:`, which grants Read, Write and Edit on its own.
+VERIFIER_SUFFIX = "-verifier"
+WRITE_TOOLS = frozenset({"Edit", "NotebookEdit", "Write"})
+
+# The form a verifier's write-blocking hook takes: a command whose last statement is
+# `exit 2`, the status that blocks a PreToolUse call. A command that exits 0, or any other
+# status, lets the call through while the hook still appears in the frontmatter.
+BLOCKING_COMMAND = re.compile(r"(?:^|[;&|\n])\s*exit\s+2\s*$")
+
+# A template's hook command names a script by the path the copier installs it at, and the
+# script ships beside the templates. A command naming one that does not ship here points
+# the copier at a file that does not exist, and a hook that cannot run enforces nothing.
+TEMPLATE_HOOKS_DIR = Path("agent-templates/hooks")
+HOOK_SCRIPT_REFERENCE = re.compile(r"\.claude/hooks/([A-Za-z0-9_.-]+)")
+
 # The capability block every SKILL.md declares, and the only keys it may hold. The block is
 # checked for shape here and never for truth: the declaration and the body have the same
 # author, so a capability added to both passes. Its value is that a capability change shows
@@ -169,6 +202,7 @@ PROSE_GLOBS = (
     AGENT_TEMPLATE_GLOB,
     "evals/README.md",
     "evals/*/README.md",
+    "evals/agents/*/README.md",
 )
 
 # Leading whitespace is allowed on both fences: a fenced block nested in a list item is
@@ -415,6 +449,115 @@ def check_tools(tools: object, errors: list[str]) -> None:
         errors.append("'tools' must list at least one tool name, with no empty entries")
 
 
+def tool_names(tools: object) -> list[str]:
+    """Return the bare tool names in a tools field, dropping any `Name(arguments)` suffix."""
+    if isinstance(tools, str):
+        entries: list[object] = [entry.strip() for entry in tools.split(",")]
+    elif isinstance(tools, list):
+        entries = tools
+    else:
+        return []
+    return [entry.split("(", 1)[0].strip() for entry in entries if isinstance(entry, str)]
+
+
+def hook_entries(hooks: object, event: str) -> list[tuple[str, list[str]]]:
+    """Return (matcher, commands) for each entry under one hook event, skipping bad shapes."""
+    if not isinstance(hooks, dict):
+        return []
+    entries = hooks.get(event)
+    found: list[tuple[str, list[str]]] = []
+    for entry in entries if isinstance(entries, list) else []:
+        if not isinstance(entry, dict):
+            continue
+        matcher = entry.get("matcher")
+        inner = entry.get("hooks")
+        commands = [
+            hook["command"]
+            for hook in (inner if isinstance(inner, list) else [])
+            if isinstance(hook, dict)
+            and hook.get("type") == "command"
+            and isinstance(hook.get("command"), str)
+        ]
+        if isinstance(matcher, str):
+            found.append((matcher, commands))
+    return found
+
+
+def check_template_policy(
+    repo_root: Path, stem: str, frontmatter: dict[str, object], errors: list[str]
+) -> None:
+    """Check the fields that bound what a template can do beyond its tools allowlist."""
+    max_turns = frontmatter.get(MAX_TURNS_FIELD)
+    if isinstance(max_turns, bool) or not isinstance(max_turns, int) or max_turns < 1:
+        errors.append(
+            f"'{MAX_TURNS_FIELD}' is {max_turns!r}, must be a positive integer so the run "
+            "has a bound the model cannot talk its way past"
+        )
+
+    if frontmatter.get("permissionMode") == FORBIDDEN_PERMISSION_MODE:
+        errors.append(
+            f"'permissionMode' is {FORBIDDEN_PERMISSION_MODE!r}, which skips the permission "
+            "checks the other fields exist to shape"
+        )
+
+    names = tool_names(frontmatter.get("tools"))
+    spawning = sorted(SPAWN_TOOLS.intersection(names))
+    if spawning:
+        errors.append(
+            f"'tools' grants {', '.join(spawning)}, which spawns a subagent no template "
+            "describes; leave orchestration to the invoking conversation"
+        )
+
+    hooks = frontmatter.get("hooks")
+    if hooks is not None and not isinstance(hooks, dict):
+        errors.append(f"'hooks' must be a mapping of event names, got {type(hooks).__name__}")
+
+    if stem.endswith(VERIFIER_SUFFIX):
+        check_verifier(names, hooks, errors)
+    check_hook_scripts(repo_root, hooks, errors)
+
+
+def check_verifier(names: list[str], hooks: object, errors: list[str]) -> None:
+    """Check that a verifier template can neither be granted nor use a write tool."""
+    writing = sorted(WRITE_TOOLS.intersection(names))
+    if writing:
+        errors.append(
+            f"'tools' grants {', '.join(writing)} to a verifier; a verifier that can "
+            "write can fix what it finds, which removes its independence"
+        )
+    guarded = any(
+        set(matcher.split("|")) >= WRITE_TOOLS
+        and any(BLOCKING_COMMAND.search(command) for command in commands)
+        for matcher, commands in hook_entries(hooks, "PreToolUse")
+    )
+    if not guarded:
+        errors.append(
+            "a verifier must carry a PreToolUse hook whose matcher covers "
+            f"{', '.join(sorted(WRITE_TOOLS))} and whose command ends in 'exit 2', so it "
+            "stays read-only after a copy widens 'tools' or enables 'memory'"
+        )
+
+
+def check_hook_scripts(repo_root: Path, hooks: object, errors: list[str]) -> None:
+    """Check that every hook script a template's commands name ships, executable, here."""
+    events = hooks if isinstance(hooks, dict) else {}
+    commands = [
+        command
+        for event in events
+        for _, entry_commands in hook_entries(hooks, str(event))
+        for command in entry_commands
+    ]
+    for script in sorted({s for c in commands for s in HOOK_SCRIPT_REFERENCE.findall(c)}):
+        path = repo_root / TEMPLATE_HOOKS_DIR / script
+        if not path.is_file():
+            errors.append(
+                f"hook command names .claude/hooks/{script}, but "
+                f"{TEMPLATE_HOOKS_DIR}/{script} does not exist to be copied"
+            )
+        elif not path.stat().st_mode & 0o111:
+            errors.append(f"{TEMPLATE_HOOKS_DIR}/{script} is not executable")
+
+
 def check_capabilities(capabilities: object, errors: list[str]) -> None:
     """Check that a skill's capability block has the required shape.
 
@@ -536,6 +679,9 @@ def check_agent_template(template_path: Path) -> list[str]:
             "since enabling memory grants Read, Write and Edit whatever 'tools' allows and the "
             "scope is the copier's decision"
         )
+
+    repo_root = template_path.resolve().parent.parent
+    check_template_policy(repo_root, expected_name, frontmatter, errors)
 
     return errors
 

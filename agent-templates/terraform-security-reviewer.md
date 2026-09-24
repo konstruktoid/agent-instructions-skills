@@ -3,9 +3,16 @@ name: terraform-security-reviewer
 description: Reviews and modifies Terraform configuration, modules, backend blocks, and provider blocks against state and secret exposure, least-privilege execution identity, provider and module supply chain, sensitive variables and outputs, and policy-as-code enforcement, verified with terraform fmt, terraform validate, tflint, and the repository's configuration scanner, in a separate context. Use when a Terraform change is large enough that its lint and scan output would crowd the main conversation, or when a review turns on state handling, secrets, execution credentials, module sources, or version pinning.
 # Set before use. `inherit` pins no model of its own and runs the copy on
 # whatever the main conversation uses. Security review benefits from a stronger
-# model: pin `opus`, or a full model ID such as `claude-opus-5`, once that cost
-# is acceptable here.
+# model: pin the `opus` alias, which follows the current release, once that cost
+# is acceptable here. A full model ID holds one release and goes stale at the
+# next, so write one only to hold a release deliberately.
 model: inherit
+# Left unset, so it follows the session. Effort is a second axis beside the model:
+# the same model at a lower effort reads less deeply, and models ship different
+# defaults. Set `effort: high` or above once that cost is acceptable here.
+# Set before use. A hard bound on agentic turns, as a backstop for a verify loop
+# whose own attempt limit failed to stop it. Output past it returns marked partial.
+maxTurns: 50
 # Set before use. Bash is required for the verify loop: terraform fmt, terraform
 # init -backend=false, terraform validate, tflint, and the repository's
 # configuration scanner. For an independent second pass instead of dropping
@@ -17,10 +24,20 @@ tools: Read, Grep, Glob, Edit, Bash
 # Edit beside the line above rather than within it, so the review-only variant
 # suggested there stops being reachable. A remembered verdict is also the opposite
 # of what a security review owes the code in front of it.
-# Uncomment when this repository installs the library as a plugin, to preload
-# the procedure instead of loading it on demand.
+# Uncomment when this repository installs the library as a plugin. The tools
+# line above does not grant Skill, so preloading is how this agent reaches the
+# procedure under that install.
 # skills:
 #   - terraform-standards:terraform-secure-iac
+# Copy hooks/deny-terraform-subcommands.sh to .claude/hooks/ beside this file. It
+# blocks the terraform and tofu subcommands named after it, fails closed, and states
+# what its match misses; the Scope rule below still covers those.
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: '"$CLAUDE_PROJECT_DIR"/.claude/hooks/deny-terraform-subcommands.sh apply destroy'
 ---
 
 # terraform-security-reviewer
@@ -38,7 +55,7 @@ summary. Load it by the mechanism this repository uses:
 
 | Install mechanism | How to load the skill |
 |-------------------|-----------------------|
-| Plugin | Invoke the skill `terraform-standards:terraform-secure-iac`. |
+| Plugin | Uncomment `skills:` in the frontmatter, which preloads `terraform-standards:terraform-secure-iac` at startup. |
 | Submodule | Read `<submodule>/skills/terraform/terraform-secure-iac/SKILL.md`. |
 
 Delete the row that does not apply, and replace `<submodule>` with the real path, when adapting

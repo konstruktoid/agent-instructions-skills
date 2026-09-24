@@ -1,0 +1,13 @@
+diff --git a/src/userstore/store.py b/src/userstore/store.py
+index dddd6dd..a703a7f 100644
+--- a/src/userstore/store.py
++++ b/src/userstore/store.py
+@@ -7,7 +7,7 @@ BASE_QUERY = "SELECT id, name FROM users"
+ 
+ def find_user(conn: sqlite3.Connection, name: str) -> tuple[int, str] | None:
+     """Return the user with this exact name, or None."""
+-    return conn.execute(f"SELECT id, name FROM users WHERE name = '{name}'").fetchone()
++    return conn.execute(f"{BASE_QUERY} WHERE name = ?", (name,)).fetchone()
+ 
+ 
+ def list_users(conn: sqlite3.Connection, sort: str = "name") -> list[tuple[int, str]]:

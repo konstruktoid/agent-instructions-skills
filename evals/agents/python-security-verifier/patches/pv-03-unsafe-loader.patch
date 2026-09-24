@@ -1,0 +1,10 @@
+diff --git a/src/cfgload/config.py b/src/cfgload/config.py
+index 9c23b16..f02b27c 100644
+--- a/src/cfgload/config.py
++++ b/src/cfgload/config.py
+@@ -8,4 +8,4 @@ import yaml
+ def load_config(path: Path) -> dict[str, object]:
+     """Parse the YAML file at path and return its top-level mapping."""
+     with path.open(encoding="utf-8") as handle:
+-        return yaml.load(handle, Loader=yaml.Loader)
++        return yaml.load(handle, Loader=yaml.FullLoader)

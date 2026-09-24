@@ -1,0 +1,21 @@
+[project]
+name = "thumbjob"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["ruff>=0.16.0", "ty==0.0.63"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "S"]
+
+# ty resolves a project by walking up for the nearest pyproject.toml carrying a `[tool.ty]`
+# section, and a graded workspace is nested under the repository's own results tree. This
+# section anchors it here, the same as in the skill suites' fixtures.
+[tool.ty.environment]
+root = ["src"]
