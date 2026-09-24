@@ -499,7 +499,8 @@ absent, since a template that set it would grant `Read`, `Write`, and `Edit` pas
 beside it. A template must also set a positive `maxTurns`, must not set `permissionMode:
 bypassPermissions` or grant `Agent` or `Task`, and may name only hook scripts that ship,
 executable, in `agent-templates/hooks/`. A `*-verifier.md` template must grant none of `Edit`,
-`Write`, and `NotebookEdit`, and must carry a `PreToolUse` hook blocking all three. It then checks
+`Write`, and `NotebookEdit`, and must carry a `PreToolUse` hook blocking all three with a command
+that ends in `exit 2`. It then checks
 `.claude-plugin/marketplace.json`: it must parse, every listed path must hold a `SKILL.md`, and
 every skill in the repository must be listed by exactly one plugin. It fails if an `agents/`
 directory has appeared at the repository root, which would ship the agent templates as installable

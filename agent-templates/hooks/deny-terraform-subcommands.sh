@@ -40,6 +40,11 @@ main() {
 
   input="$(cat)"
   command="$(jq -er '.tool_input.command // ""' <<<"${input}")"
+  # A backslash-newline continues one command across lines, and grep matches line by
+  # line, so `terraform \` then `apply` on the next line would otherwise pass. Joining
+  # the continuations first makes the match see the command the shell will run.
+  command="${command//$'\\\r\n'/ }"
+  command="${command//$'\\\n'/ }"
 
   for subcommand in "$@"; do
     # Preceded by start of text or anything that cannot continue a word, so

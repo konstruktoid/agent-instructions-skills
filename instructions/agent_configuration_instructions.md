@@ -218,8 +218,9 @@ default it inherits:
   model: the same model at a lower effort reads less deeply, and models ship different defaults,
   so a model change can lower the effort a subagent runs at without any edit to its definition.
 - `maxTurns`, a hard bound on agentic turns that the harness enforces rather than the model. Past
-  it, the output returns marked partial. It is a backstop for a loop whose own attempt limit failed
-  to stop it, not a replacement for that limit, and a partial result is not a finished one.
+  it, Claude Code 2.1.246 and later return the output marked partial; earlier versions stop without
+  the marker. It is a backstop for a loop whose own attempt limit failed to stop it, not a
+  replacement for that limit, and a run that reached it is not a finished one, marked or not.
 - `memory`, absent unless the project has decided otherwise. Enabling it adds `Read`, `Write` and
   `Edit` beside the allowlist rather than within it, so a review-only agent regains the ability to
   edit. Under project scope the directory is meant to be committed, which puts text the model
@@ -264,9 +265,9 @@ reviews and edits, and a verifier that checks the fixer's result without trustin
   it missed.
 - Have the verifier re-run every check the fixer's procedure requires, from its own clean context,
   rather than reading the fixer's reported result as evidence.
-- Treat a verifier finding as blocking, and a partial verdict returned at `maxTurns` as
-  unresolved rather than clear. Route either to a fresh fixer invocation, not the context that
-  already reported done.
+- Treat a verifier finding as blocking, and a verifier run that reached `maxTurns` as unresolved
+  rather than clear, whether or not the Claude Code version in use marks it partial. Route either
+  to a fresh fixer invocation, not the context that already reported done.
 
 One round is one fixer invocation followed by one verifier pass. The rounds are bounded the way
 every verify loop in this library is, because each one costs two full runs:

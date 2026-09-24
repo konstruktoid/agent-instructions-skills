@@ -160,6 +160,11 @@ SPAWN_TOOLS = frozenset({"Agent", "Task"})
 VERIFIER_SUFFIX = "-verifier"
 WRITE_TOOLS = frozenset({"Edit", "NotebookEdit", "Write"})
 
+# The form a verifier's write-blocking hook takes: a command whose last statement is
+# `exit 2`, the status that blocks a PreToolUse call. A command that exits 0, or any other
+# status, lets the call through while the hook still appears in the frontmatter.
+BLOCKING_COMMAND = re.compile(r"(?:^|[;&|\n])\s*exit\s+2\s*$")
+
 # A template's hook command names a script by the path the copier installs it at, and the
 # script ships beside the templates. A command naming one that does not ship here points
 # the copier at a file that does not exist, and a hook that cannot run enforces nothing.
@@ -521,14 +526,15 @@ def check_verifier(names: list[str], hooks: object, errors: list[str]) -> None:
             "write can fix what it finds, which removes its independence"
         )
     guarded = any(
-        commands and set(matcher.split("|")) >= WRITE_TOOLS
+        set(matcher.split("|")) >= WRITE_TOOLS
+        and any(BLOCKING_COMMAND.search(command) for command in commands)
         for matcher, commands in hook_entries(hooks, "PreToolUse")
     )
     if not guarded:
         errors.append(
             "a verifier must carry a PreToolUse hook whose matcher covers "
-            f"{', '.join(sorted(WRITE_TOOLS))}, so it stays read-only after a copy "
-            "widens 'tools' or enables 'memory'"
+            f"{', '.join(sorted(WRITE_TOOLS))} and whose command ends in 'exit 2', so it "
+            "stays read-only after a copy widens 'tools' or enables 'memory'"
         )
 
 

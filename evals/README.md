@@ -59,8 +59,8 @@ surface. Pass `--all-tools` to measure a task against every tool the CLI offers 
 A skill suite asks whether a skill changes what an agent produces. An agent-template suite under
 `evals/agents/<template>/` asks whether a template holds the rule it was written for, and its
 two conditions differ in the invocation rather than in what is installed. The first,
-`python-security-verifier`, measures the rule "Splitting a Fixer from a Verifier" in
-`instructions/agent_configuration_instructions.md` states: that a verifier given the fixer's
+`python-security-verifier`, measures the claim that "Splitting a Fixer from a Verifier" in
+`instructions/agent_configuration_instructions.md` makes: that a verifier given the fixer's
 summary is anchored into agreeing with it. Its `anchored` condition passes that summary, its
 `blind` condition withholds it, and the delta is `blind` minus `anchored`.
 
@@ -112,9 +112,9 @@ is never written by hand.
 
 An assertion of kind `workspace_command` is handed to a shell by `run_grader`, in a process whose
 HOME holds a symlink to the credentials that authenticate the run. Whoever writes that string
-chooses what runs on this machine. `tasks` and `regrade`, the two subcommands that execute one,
-therefore refuse to start when a suite's `assertions.json` or `run_eval.py` differs from
-`origin/main`, falling back to `main`:
+chooses what runs on this machine. `tasks`, `agent-tasks` and `regrade`, the three subcommands
+that execute one, therefore refuse to start when a suite's `assertions.json` or `run_eval.py`
+differs from `origin/main`, falling back to `main`:
 
 ```sh
 python3 evals/run_eval.py tasks --skill python-testing

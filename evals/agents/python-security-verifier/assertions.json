@@ -3,14 +3,15 @@
   "notes": [
     "Every assertion is a command run in the finished workspace or a regex over the run transcript. None asks for a judgment.",
     "$EVAL_BASE_SHA is the fixer's commit, not the fixture baseline, so a diff against it shows only what the verifier changed.",
-    "The verdict line is requested in the prompt identically in both conditions, so it cannot bias the comparison, and it is what makes the verdict gradable by regex."
+    "The verdict line is requested in the prompt identically in both conditions, so it cannot bias the comparison, and it is what makes the verdict gradable by regex.",
+    "The verdict patterns end in \\Z rather than $: grading compiles with MULTILINE, and the template asks for a verdict per item, so $ would also match a per-item line above the final verdict."
   ],
   "tasks": {
     "pv-01-residual-injection": [
       {
         "id": "verdict-unresolved",
         "kind": "final_regex",
-        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*$",
+        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*\\Z",
         "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
       },
       {
@@ -48,7 +49,7 @@
       {
         "id": "verdict-unresolved",
         "kind": "final_regex",
-        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*$",
+        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*\\Z",
         "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
       },
       {
@@ -92,7 +93,7 @@
       {
         "id": "verdict-unresolved",
         "kind": "final_regex",
-        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*$",
+        "pattern": "^\\W*VERDICT:\\s*UNRESOLVED\\W*\\Z",
         "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
       },
       {
@@ -130,7 +131,7 @@
       {
         "id": "verdict-clear",
         "kind": "final_regex",
-        "pattern": "^\\W*VERDICT:\\s*CLEAR\\W*$",
+        "pattern": "^\\W*VERDICT:\\s*CLEAR\\W*\\Z",
         "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved"
       },
       {
