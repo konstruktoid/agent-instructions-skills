@@ -159,8 +159,21 @@ one project's layout.
   run_dir="$(mktemp -d -t ansible-verify-XXXXXXXX)"
   setsid bash -c "echo \$\$ > \"${run_dir}/run.pgid\"; <test entry point> > \"${run_dir}/run.log\" 2>&1; echo \$? > \"${run_dir}/run.done\"" \
     < /dev/null > /dev/null 2>&1 &
-  while [ ! -s "${run_dir}/run.pgid" ]; do sleep 0.1; done
-  run_pgid="$(cat "${run_dir}/run.pgid")"
+  launcher_pid=$!
+  startup_deadline=$(( $(date +%s) + 10 ))
+  while [ ! -s "${run_dir}/run.pgid" ]; do
+    if ! kill -0 "${launcher_pid}" 2>/dev/null; then
+      echo "launcher exited before writing run.pgid" >&2
+      break
+    fi
+    if [ "$(date +%s)" -ge "${startup_deadline}" ]; then
+      echo "timed out waiting for run.pgid" >&2
+      kill -TERM "${launcher_pid}" 2>/dev/null
+      break
+    fi
+    sleep 0.1
+  done
+  run_pgid="$(cat "${run_dir}/run.pgid" 2>/dev/null || true)"
   ```
 
   Read the group id from `run.pgid`, written by `$$` from inside the new session, rather than from
@@ -168,7 +181,13 @@ one project's layout.
   process-group leader, and when that happens `$!` names the launcher, not the process that actually
   becomes the group leader. `setsid` makes that leader's pgid the process group for everything the
   run spawns, so `kill -TERM -- "-${run_pgid}"` (and `kill -KILL -- "-${run_pgid}"` if it survives a
-  short grace period) reaches the whole group, not just the shell. Poll `${run_dir}/run.done`
+  short grace period) reaches the whole group, not just the shell. Bound the wait for `run.pgid`
+  itself: a `setsid` or `bash` that fails to launch never writes the file, and polling it with no
+  deadline hangs the whole verification indefinitely. The startup loop above gives up once the
+  launcher process has exited or a short startup deadline passes, whichever comes first, and treats
+  a still-empty `run_pgid` afterward as a failed attempt rather than proceeding to poll a group that
+  was never created. Only once `run_pgid` is confirmed does the runtime deadline below begin; a slow
+  launcher does not eat into the test entry point's own budget. Poll `${run_dir}/run.done`
   against a deadline sized to the test entry point's own documented runtime with headroom, and read
   `${run_dir}/run.log`. The directory has to come from `mktemp -d` rather than from the working
   directory, because a run started from inside the repository would otherwise write both files into
