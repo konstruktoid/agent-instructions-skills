@@ -162,10 +162,6 @@ one project's layout.
   launcher_pid=$!
   startup_deadline=$(( $(date +%s) + 10 ))
   while [ ! -s "${run_dir}/run.pgid" ]; do
-    if ! kill -0 "${launcher_pid}" 2>/dev/null; then
-      echo "launcher exited before writing run.pgid" >&2
-      break
-    fi
     if [ "$(date +%s)" -ge "${startup_deadline}" ]; then
       echo "timed out waiting for run.pgid" >&2
       kill -TERM "${launcher_pid}" 2>/dev/null
@@ -183,11 +179,14 @@ one project's layout.
   run spawns, so `kill -TERM -- "-${run_pgid}"` (and `kill -KILL -- "-${run_pgid}"` if it survives a
   short grace period) reaches the whole group, not just the shell. Bound the wait for `run.pgid`
   itself: a `setsid` or `bash` that fails to launch never writes the file, and polling it with no
-  deadline hangs the whole verification indefinitely. The startup loop above gives up once the
-  launcher process has exited or a short startup deadline passes, whichever comes first, and treats
-  a still-empty `run_pgid` afterward as a failed attempt rather than proceeding to poll a group that
-  was never created. Only once `run_pgid` is confirmed does the runtime deadline below begin; a slow
-  launcher does not eat into the test entry point's own budget. Poll `${run_dir}/run.done`
+  deadline hangs the whole verification indefinitely. The startup loop above waits only on that
+  deadline, not on whether the launcher process is still alive: `setsid` forks and its parent exits
+  immediately whenever the caller is already a process-group leader, so a launcher that has already
+  exited can be the ordinary sign of a run that just started rather than one that failed. Breaking
+  out on that exit would abandon a test that is still running and let a retry launch a second one
+  alongside it, so only the deadline elapsing counts as a failed attempt. Only once `run_pgid` is
+  confirmed does the runtime deadline below begin; a slow launcher does not eat into the test entry
+  point's own budget. Poll `${run_dir}/run.done`
   against a deadline sized to the test entry point's own documented runtime with headroom, and read
   `${run_dir}/run.log`. The directory has to come from `mktemp -d` rather than from the working
   directory, because a run started from inside the repository would otherwise write both files into
