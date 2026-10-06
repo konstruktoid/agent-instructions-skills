@@ -49,14 +49,14 @@ no match for any of the following, and the repository root holds none of them:
 | Session hooks (`hooks/hooks.json`) | Not tracked; not present at the repository root |
 | MCP server definitions (`.mcp.json`) | Not tracked; not present at the repository root |
 | Slash commands (`commands/`) | Not tracked; not present at the repository root |
-| Installable subagents (`agents/`) | Not present, and `scripts/check_skills.py:689` fails the build if it appears |
+| Installable subagents (`agents/`) | Not present, and `scripts/check_skills.py:712` fails the build if it appears |
 | Committed `.claude/settings.json` | Not tracked. `README.md:205` tells a *consumer* to commit one, in the consumer's repository |
 
 As audited, `scripts/check_skills.py` blocked exactly one of the four auto-discovered plugin
 directories and left the other three unguarded. That gap was attack path 1.3.
 
-**Landed.** `check_plugin_root` at `scripts/check_skills.py:689` now fails on any repository-root
-entry that is not on the allowlist at `:107`, skipping only the local-only names at `:130` that
+**Landed.** `check_plugin_root` at `scripts/check_skills.py:712` now fails on any repository-root
+entry that is not on the allowlist at `:109`, skipping only the local-only names at `:132` that
 `.gitignore` already excludes. All four auto-discovered names fail, and so does a name a future
 release of Claude Code begins discovering, because the check names what is allowed rather than what
 is forbidden.
@@ -65,13 +65,13 @@ is forbidden.
 
 As audited, all eight skills carried frontmatter with `name` and `description` only. None
 declared a tools field, an allowed-tools field, or any permission scope: `check_skill` at
-`scripts/check_skills.py:603` validated `name`, `description`, the verify-loop wording and the body
-length, and never read a capability field. `check_tools` at `scripts/check_skills.py:424` existed
-but was called only from `check_agent_template` (`scripts/check_skills.py:674`). So for every row
+`scripts/check_skills.py:607` validated `name`, `description`, the verify-loop wording and the body
+length, and never read a capability field. `check_tools` at `scripts/check_skills.py:428` existed
+but was called only from `check_agent_template` (`scripts/check_skills.py:678`). So for every row
 below, the tools column states what the body implies.
 
 **Landed.** Control 9 gives every skill a `capabilities` block declaring `tools`, `shell`, `paths`
-and `egress`, whose shape `check_capabilities` at `scripts/check_skills.py:561` enforces. The rows
+and `egress`, whose shape `check_capabilities` at `scripts/check_skills.py:565` enforces. The rows
 below are the evidence those blocks were written from, and `scripts/check_capabilities.py` reports
 what a later change adds without declaring it. The block is a declaration, not a sandbox: nothing
 enforces it at runtime, and a skill body remains free to do what it likes.
@@ -187,7 +187,7 @@ The highest-egress skill in the repository.
 
 Thirty-five files under `skills/*/*/references/`, loaded on demand through each skill's triage
 table. They carry the commands cited above. They are held to the same prose and Contents-list
-checks as a `SKILL.md` (`scripts/check_skills.py:197`, `:823`) and to no capability check at all.
+checks as a `SKILL.md` (`scripts/check_skills.py:201`, `:849`) and to no capability check at all.
 
 ### Agent templates
 
@@ -216,8 +216,8 @@ It parses the tool input with `jq` (`agent-templates/hooks/deny-terraform-subcom
 reaches no network, and fails closed on an internal error. It is copied into a consuming project
 with the template, so it runs with that project's permissions.
 
-All ten set `model: inherit`, enforced at `scripts/check_skills.py:667`. The tools field is
-enforced non-empty at `scripts/check_skills.py:424`.
+All ten set `model: inherit`, enforced at `scripts/check_skills.py:671`. The tools field is
+enforced non-empty at `scripts/check_skills.py:428`.
 
 The tools column above states what the `tools:` line declares, which is the whole tool surface
 only while no template carries a `memory:` field. Claude Code grants a subagent with persistent
@@ -225,7 +225,7 @@ memory the Read, Write and Edit tools so that it can maintain its own memory fil
 `tools:` holds, so the field would widen every row here without changing the line the row cites,
 and under `project` scope it would add a committed directory of model-authored text that each
 later session loads as system prompt. No template sets it and
-`scripts/check_skills.py:676` fails one that does, which is what keeps this column complete.
+`scripts/check_skills.py:680` fails one that does, which is what keeps this column complete.
 
 ### Instructions documents
 
@@ -388,8 +388,8 @@ project does not control (`references/agent-content.md:118`). This is the keyv p
 `.claude/settings.json` persistence move, reached through a normal pull request rather than
 through a compromised publish. The only control standing in the way was one human reading the diff.
 
-**Landed.** `check_plugin_root` at `scripts/check_skills.py:689` fails on any repository-root entry
-outside the allowlist at `:107`. A pull request adding `hooks/`, `commands/`, `.mcp.json` or
+**Landed.** `check_plugin_root` at `scripts/check_skills.py:712` fails on any repository-root entry
+outside the allowlist at `:109`. A pull request adding `hooks/`, `commands/`, `.mcp.json` or
 `agents/` now fails the check that `.github/workflows/lint.yml:47` runs on every pull request.
 Verified by planting `hooks/` and `.mcp.json` at the root: both were reported, and the run exited
 non-zero. The path is closed for auto-discovered content at the root, and untouched for anything
@@ -400,10 +400,10 @@ written as prose inside `skills/`, which is attack path 1.4.
 **Entry point.** A pull request editing any `skills/**/SKILL.md` or `skills/**/references/*.md`.
 
 **File abused.** Any of the forty-five. `scripts/check_skills.py` checks the name matches the
-directory (`check_skills.py:627`), the description shape (`:629`), the capability block's shape
-(`:630`), the
-verify-loop wording (`:631`), the body length (`:633`), cross-references (`:792`), prose markers
-(`:841`) and Contents lists (`:883`).
+directory (`check_skills.py:631`), the description shape (`:633`), the capability block's shape
+(`:634`), the
+verify-loop wording (`:635`), the body length (`:637`), cross-references (`:818`), prose markers
+(`:867`) and Contents lists (`:909`).
 None of that reads intent, and the repository says so in its own words at
 `references/agent-content.md:42`: "there is no automated defense at all and they read as
 documentation".
@@ -601,7 +601,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 **Landed on the repository side.** `README.md:169` now gives the pinned form first, with the
 unpinned form kept below and labeled as tracking the default branch (`:179`). The team setting at
 `:224` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
-`version`, and `scripts/check_skills.py:715` fails the build when one is missing, malformed, or
+`version`, and `scripts/check_skills.py:741` fails the build when one is missing, malformed, or
 disagrees with the others. `README.md:611` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.

@@ -76,9 +76,9 @@ point of choosing that shape. It fails open if someone adds the new name to the 
 understanding it, and it fails open entirely under actor 2, who edits the checker in the same
 commit.
 
-**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:689`.
-It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:107`),
-skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:130`) that `.gitignore` already excludes.
+**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:712`.
+It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:109`),
+skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:132`) that `.gitignore` already excludes.
 Verified against a planted `hooks/` and `.mcp.json`: both were reported and the check exited
 non-zero. The failure message names the reason rather than the rule, so a contributor who hits it
 learns why the root is special. `docs` was added to the allowlist to admit this directory.
@@ -271,7 +271,7 @@ while only one of them is fixed.
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:715` fails the
+  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:741` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
@@ -379,9 +379,9 @@ release to yank and no version for consumers to avoid.
   cloud configuration was checked by searching for those paths, and the statement says what `.env`
   actually appears as, which is a rule about keeping such files out of a commit.
 
-`SECURITY.md` was added to `PLUGIN_ROOT_ALLOWED` (`scripts/check_skills.py:107`), which is control
+`SECURITY.md` was added to `PLUGIN_ROOT_ALLOWED` (`scripts/check_skills.py:109`), which is control
 1 working as intended: a new root entry is a decision rather than an accident. It was also added
-to `PROSE_GLOBS` (`:197`), so the house prose rules apply to it.
+to `PROSE_GLOBS` (`:201`), so the house prose rules apply to it.
 
 The ranking said this stops nothing, and that holds. It creates a channel and a plan where there
 were neither, and the data-access statement is what makes the review at
@@ -403,7 +403,7 @@ looking at three hundred. **It makes a capability change reviewable rather than 
 
 **The hard part is the detector, and it does not work well.** `check_skills.py` already demonstrates
 the ceiling. It enforces the verify loop by exact string comparison against a canonical block
-(`scripts/check_skills.py:298`, `:355`), and the comment at `:294` records why: the wording "had
+(`scripts/check_skills.py:302`, `:359`), and the comment at `:298` records why: the wording "had
 already drifted three ways before this check existed". Paraphrase defeated a check over a fixed
 seven-line paragraph. A capability detector faces the same problem over unbounded prose.
 
@@ -445,8 +445,8 @@ present it to consumers as a guarantee, because it is not one.
 
 - **The block.** Every `SKILL.md` declares `capabilities` with `tools`, `shell`, `paths` and
   `egress`, each a sorted list, one entry per line. `check_capabilities` at
-  `scripts/check_skills.py:561` fails the build when the block is missing, has an unknown key, has
-  a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:184`). Sorting is
+  `scripts/check_skills.py:565` fails the build when the block is missing, has an unknown key, has
+  a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:188`). Sorting is
   not tidiness: it is what makes an added capability one line of diff rather than a reordering.
   The tool allowlist deliberately excludes `WebFetch`, `WebSearch` and `Task`, so adding one is a
   build failure and a conversation rather than a line in a list.
@@ -545,7 +545,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:475` carry the
    digest from `lint.yml:147`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
-   `scripts/check_skills.py:689`. Attack path 1.3 is closed.
+   `scripts/check_skills.py:712`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
@@ -566,7 +566,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    five the control named.
 9. **Control 9**, declared-capability frontmatter, at the low-ambition version described above.
    **Landed**: the block in all eight skills, its shape enforced at
-   `scripts/check_skills.py:561`, and the report-only detector at
+   `scripts/check_skills.py:565`, and the report-only detector at
    `scripts/check_capabilities.py`, wired into `lint.yml:58`.
 10. **Control 10**, capability-diff release notes, generated from 9 between the tags from 6.
 11. **Control 11**, provenance, once there is something to attest. Never with a source-track claim

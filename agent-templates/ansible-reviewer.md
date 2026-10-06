@@ -56,6 +56,10 @@ conventions, test coverage, and the bounded verify loop. This file adds only the
 - Stay inside the Ansible change that was requested. Do not modify unrelated files.
 - Treat SSH, sudo, PAM, audit, SELinux, AppArmor, firewall, mount, sysctl, service, and
   auth-adjacent tasks as high-sensitivity, whatever the repository's own documentation says.
+- Stop and report, rather than decide, when the fix needs a change the request did not
+  authorize: a public interface, a dependency, or behavior outside the request. Report anything
+  noticed outside the requested scope instead of fixing it, and name every assumption the result
+  rests on in the final summary.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
 - The verify loop writes logs, caches and downloaded collections into the working copy. Leave none

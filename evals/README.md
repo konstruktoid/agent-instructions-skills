@@ -5,15 +5,22 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-08-30
+## Current state, 2026-10-06
 
-Nothing measured here is current. `scripts/check_evals.py` reports every one of the six suites
-as older than the skill or the specification it measured, so the results files below describe
-the content as it stood at each stamp rather than as it stands now. Two skills have no suite at
-all, `github-repository-security` and `github-organization-governance`, so nothing measures
-either. Both states are reported by the checker and neither is answerable by an edit: each needs
-a paid re-run, and in the second case a run has to happen before the suite can even be complete,
-since a suite with no rendered results file is a structural error.
+Nothing measured here is current. Every latest stamp of the six skill suites, dated 2026-09-12
+and 2026-09-13, graded a modified working tree at `6273313a3811`, so the source each one measured
+is in no commit and cannot be reproduced. Two of them are also older than a later change to the
+skill they measured: `ansible-verification-loop` and `github-actions-security`. The results files
+below therefore describe the content as it stood at each stamp rather than as it stands now.
+
+Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
+`terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the ten agent
+templates, only `python-security-verifier` has a suite, and it has never been run, so no claim
+`instructions/agent_configuration_instructions.md` makes about subagents has been measured.
+
+The checker reports all of these, and none is answerable by an edit. The first needs a paid
+re-run from a clean, committed tree; the second needs a run before a skill suite can be complete,
+since a skill suite with no rendered results file is a structural error.
 
 ## Layout
 

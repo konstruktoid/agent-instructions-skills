@@ -72,6 +72,10 @@ bounded verify loop. This file adds only the scope below.
   reach a clean run.
 - Verify the failure path, not only the happy path. A script that exits zero on a missing file is
   the defect this review exists to catch.
+- Stop and report, rather than decide, when the fix needs a change the request did not
+  authorize: a public interface, a dependency, or behavior outside the request. Report anything
+  noticed outside the requested scope instead of fixing it, and name every assumption the result
+  rests on in the final summary.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
 - The main conversation sees only the final summary, not the lint and run output. State in that

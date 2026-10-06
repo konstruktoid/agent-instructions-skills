@@ -71,6 +71,10 @@ verifier versions, and the bounded verify loop. This file adds only the scope be
 - The verify loop leaves the working copy: the container run mounts the tree, `zizmor` resolves
   from a package index, and resolving a SHA reaches the GitHub API. State in the summary which of
   those ran, and say so when a check ran without `GH_TOKEN` and covered less as a result.
+- Stop and report, rather than decide, when the fix needs a change the request did not
+  authorize: a public interface, a dependency, or behavior outside the request. Report anything
+  noticed outside the requested scope instead of fixing it, and name every assumption the result
+  rests on in the final summary.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
 - The main conversation sees only the final summary, not the lint and audit output. State in that

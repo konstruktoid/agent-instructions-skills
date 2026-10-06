@@ -45,6 +45,8 @@ from __future__ import annotations
 import io
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -128,6 +130,8 @@ PLUGIN_ROOT_ALLOWED = frozenset(
 # directory. They are skipped rather than allowlisted: none of them is published, and a
 # contributor's virtual environment is not a packaging decision.
 PLUGIN_ROOT_IGNORED = frozenset({".git", ".ruff_cache", ".venv", "__pycache__", "node_modules"})
+
+GIT = shutil.which("git") or "git"
 
 # A template pins no model of its own: it ships the model that follows the main
 # conversation and leaves the choice to whoever copies it.
@@ -686,6 +690,25 @@ def check_agent_template(template_path: Path) -> list[str]:
     return errors
 
 
+def publishable_root_names(repo_root: Path) -> set[str] | None:
+    """Return the root entries holding a file git tracks or could add, or None without git.
+
+    An empty directory, or one holding only ignored files, cannot reach a commit and so
+    cannot ship, which is the state a local `.claude/` left by an agent session is usually in.
+    """
+    # A fixed argument list with no input from the checked files, and no shell involved.
+    result = subprocess.run(  # noqa: S603
+        [GIT, "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return {path.split("/", 1)[0] for path in result.stdout.split("\0") if path}
+
+
 def check_plugin_root(repo_root: Path) -> list[str]:
     """Fail when an entry at the repository root is not on the packaging allowlist.
 
@@ -697,8 +720,11 @@ def check_plugin_root(repo_root: Path) -> list[str]:
     by a future release of Claude Code would too, which is why this reads as an allowlist.
     """
     errors: list[str] = []
+    publishable = publishable_root_names(repo_root)
     for entry in sorted(repo_root.iterdir(), key=lambda path: path.name):
         if entry.name in PLUGIN_ROOT_IGNORED or entry.name in PLUGIN_ROOT_ALLOWED:
+            continue
+        if publishable is not None and entry.name not in publishable:
             continue
         suffix = "/" if entry.is_dir() else ""
         errors.append(

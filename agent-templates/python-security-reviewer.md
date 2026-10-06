@@ -57,8 +57,13 @@ bounded verify loop. This file adds only the scope below.
 ## Scope
 
 - Read every reference file the skill's triage table matches for the change. Read only those.
+- Stay inside the Python change that was requested. Do not modify unrelated files.
 - Do not weaken configuration or add a suppression as a first response to a failing check, and
   never disable an `S` rule repository-wide to silence one instance.
+- Stop and report, rather than decide, when the fix needs a change the request did not
+  authorize: a public interface, a dependency, or behavior outside the request. Report anything
+  noticed outside the requested scope instead of fixing it, and name every assumption the result
+  rests on in the final summary.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
 - The main conversation sees only the final summary, not the tool output. State in that summary
