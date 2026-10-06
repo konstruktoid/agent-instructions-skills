@@ -91,5 +91,6 @@
     }
   ],
   "passed": 5,
-  "total": 10
+  "total": 10,
+  "rate_limited": true
 }

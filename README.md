@@ -423,38 +423,33 @@ have neither eval yet either; a suite for each is a follow-up.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness: three defined tasks, `avl-06-autofix-cosmetics`, `gas-06-blocked-egress` and
-`gas-07-agent-workflow`, have
-never been graded in any stamp, four of the six stamps predate a change to the skill they
-measured, and the newest stamp, `ansible-verification-loop`'s 2026-08-20-repeat, was measured
-against a modified working tree, so the source it graded is in no commit and the run cannot be
-reproduced from the repository until it is repeated from a clean checkout. One skill's
-`description` has changed since the stamp that measured its routing: `github-actions-security`
-gained a clause covering workflows that run an AI coding agent, so its 9/10 is a measurement of
-the description as it stood on 2026-07-27 and its probes test nothing in the added clause. Every
-other row's routing column still describes the description as it stands.
+is staleness. Every latest stamp was measured on 2026-09-12 or 2026-09-13 against a modified
+working tree at `6273313`, so the source it graded is in no commit, and two of them also
+predate a later change to the skill they measured: `ansible-verification-loop` and
+`github-actions-security`. Two further limits apply to the whole row set and are not visible in
+any results file. The runs used a checkout under the operator's home directory, and ten of their
+transcripts, in both conditions, end on wording from the operator's own `~/.claude/CLAUDE.md`, so
+each baseline ran with that guidance rather than with none; `evals/README.md` describes the
+mechanism and the guard `run_eval.py` now applies against it. And all six aborted runs in the
+`ansible-verification-loop` stamp, the one regraded since the harness learned to tell, were
+usage-limit rejections, which measure the account rather than the task.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `ansible-verification-loop` | 2026-08-20-repeat | +6 over 1 task | 1.2x | 10/10 (2026-07-25) | Three runs per condition on `avl-07-artifact-hygiene` alone, 15/16 in all three with-skill runs against 9 to 10 in the baseline, so the ranges do not overlap. Two of its assertions were corrected after the single-run 2026-08-20 stamp but before these six runs, which makes this stamp a measurement of checks fixed in advance rather than after the fact; both stamps and that reasoning are in [evals/ansible-verification-loop/README.md](evals/ansible-verification-loop/README.md). The stamp was measured against an uncommitted tree. Earlier stamps: 2026-07-28-isolation measured +1 over `avl-03` at 1.8x, and 2026-07-25 measured +6 over 5 tasks at 2.2x with `avl-05` classified truncated rather than graded. `avl-06-autofix-cosmetics` has never been graded in any stamp. |
-| `bash-secure-scripting` | 2026-08-14 | +9 over 4 tasks | 3.5x | 9/10 | One run per condition, so variance is uncontrolled. `bss-t09` is out of scope and routed in. |
-| `bash-testing` | 2026-08-14 | +1 over 4 tasks | 2.1x | 7/10 | Two fixtures pass fully in both conditions and cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
-| `github-actions-security` | 2026-07-28 | +29 over 4 comparable tasks | 2.4x | 9/10 (2026-07-27) | Three runs per condition. `gas-05-dependabot-pinning` aborted in all three with-skill runs and has no comparable measurement, and `gas-02` is marked *no reliable difference*. `gas-06-blocked-egress` has never been graded in any stamp. `gas-07-agent-workflow` was added with the clause about workflows that run an AI coding agent and has never been graded either, and `gas-t01` was replaced by a probe for that clause, so the routing score above measures a probe set the suite no longer holds. `gas-t06` is out of scope and routed in on all 3 repetitions. |
-| `python-secure-coding` | 2026-07-28, marked for regeneration | +4 over 5 tasks | 1.7x | 10/10 (2026-07-25) | Only `psc-02` has a delta not marked *no reliable difference*, and on `psc-03`, `psc-04` and `psc-05` the with-skill condition failed the same security assertions as the baseline. The fixtures were anchored for `ty` on 2026-08-17, which this stamp predates; see [evals/python-secure-coding/README.md](evals/python-secure-coding/README.md). |
-| `python-testing` | 2026-07-28 | +1 over 5 tasks | 1.4x | 9/10 (2026-07-25) | Four of five deltas are zero or marked *no reliable difference*, at $2.07 per net assertion gained. |
+| `ansible-verification-loop` | 2026-09-13 | +6 over 5 comparable tasks | 2.1x | 10/10 (2026-07-25) | Three runs per condition. Only `avl-07-artifact-hygiene` separates, 4/16 against 10/16; the other four deltas are zero and marked *no reliable difference*. `avl-05-collection-review` has one graded run, baseline 10/11, and five usage-limit aborts, so it has no comparison. `avl-04-handler-refactor` has three baseline runs and no with-skill run, from a batch that never completed. Predates the skill change of 2026-09-24. Earlier stamps: 2026-08-20-repeat measured +6 on `avl-07` alone in three runs per condition. |
+| `bash-secure-scripting` | 2026-09-13 | +11 over 4 tasks | 2.3x | 9/10 (2026-08-14) | Three runs per condition. Only `bss-03-provision-user` separates (+3); the other three deltas are marked *no reliable difference*. `bss-t09` is out of scope and routed in. |
+| `bash-testing` | 2026-09-13 | -1 over 4 tasks | 1.8x | 7/10 (2026-08-14) | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
+| `github-actions-security` | 2026-09-12 | +42 over 7 tasks | 2.3x | 9/10 (2026-07-27) | Three runs per condition, and every one of the seven deltas separates, including `gas-05`, `gas-06` and `gas-07`, which no earlier stamp graded. Predates the skill change of 2026-09-16. `gas-t01` was replaced by a probe for the agentic-workflow clause after the routing stamp, so the routing score measures a probe set the suite no longer holds; `gas-t06` is out of scope and routed in on all 3 repetitions. |
+| `python-secure-coding` | 2026-09-13 | +6 over 5 tasks | 1.4x | 10/10 (2026-07-25) | Three runs per condition, and every delta is marked *no reliable difference*: the with-skill range overlaps the baseline on all five tasks, and `psc-02` shows no difference at all. |
+| `python-testing` | 2026-09-13 | +3 over 3 comparable tasks | 1.6x | 9/10 (2026-07-25) | `pt-04-upload-validation` and `pt-05-unusual-layout` aborted in all six runs each, so two of five tasks have no measurement in this stamp. Every remaining delta is marked *no reliable difference*, and the skill did not fire on `pt-03`. |
 
 Two limits cut across the whole table. A routing score carried from an earlier stamp than the
 task result was measured against an earlier revision of that skill's `description`, so it does
-not transfer forward on its own. And a task delta is a measurement of the skill revision that
-ran, not of the file as it stands now: editing a skill, its `tasks.json` or its
-`assertions.json` invalidates the stamp above it until the eval is run again. That second limit
-is not hypothetical here. Every row except `ansible-verification-loop` and `bash-testing`
-carries a stamp older than the skill directory it measured, and `github-actions-security` is
-older than its own `tasks.json` and `assertions.json`, both of which gained a task on
-2026-08-17. That cannot be repaired by `regrade`, since it re-runs assertions only where the
-finished workspace survives, and a workspace is gitignored. The `ansible-verification-loop` row
-is the one case where the workspaces were still on disk, which is why its correction could be
-applied by regrading rather than by paying for the runs again.
+not transfer forward on its own; no 2026-09 stamp re-ran the probes. And a task delta is a
+measurement of the skill revision that ran, not of the file as it stands now: editing a skill,
+its `tasks.json` or its `assertions.json` invalidates the stamp above it until the eval is run
+again. That cannot be repaired by `regrade`, since it re-runs assertions only where the finished
+workspace survives, and a workspace is gitignored.
 
 Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
 `evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each
