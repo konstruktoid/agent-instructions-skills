@@ -15,8 +15,10 @@ below therefore describe the content as it stood at each stamp rather than as it
 
 Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
 `terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the ten agent
-templates, only `python-security-verifier` has a suite, and it has never been run, so no claim
-`instructions/agent_configuration_instructions.md` makes about subagents has been measured.
+templates, only `python-security-verifier` has a suite. Its one stamp, 2026-10-06, was measured
+from a clean commit and scored full marks in both conditions on every task, so the claim it tests
+from `instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the
+verifier, is neither shown nor ruled out at the suite's present difficulty.
 
 The checker reports all of these, and none is answerable by an edit. The first needs a paid
 re-run from a clean, committed tree; the second needs a run before a skill suite can be complete,

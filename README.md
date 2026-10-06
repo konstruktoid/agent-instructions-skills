@@ -395,8 +395,9 @@ output, or that its `description` routes the right tasks to it. Two measurements
 - **Agent-template evals.** A suite under `evals/agents/<template>/` measures a template rather
   than a skill. The first, for `python-security-verifier.md`, runs each task with and without
   the fixer's summary in the verifier's prompt, which tests the claim that the summary anchors
-  the verifier. It has not been run yet, and `scripts/check_evals.py` reports it and every
-  template without a suite as unmeasured.
+  the verifier. Its first stamp, 2026-10-06, scored full marks in both conditions on all four
+  tasks, so it neither shows nor rules out that anchoring at its present difficulty.
+  `scripts/check_evals.py` reports every template without a suite as unmeasured.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5

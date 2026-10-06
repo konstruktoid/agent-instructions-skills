@@ -315,8 +315,9 @@ reviews and edits, and a verifier that checks the fixer's result without trustin
   roles. The tool was named `Task` before Claude Code 2.1.63 and still accepts that name. A fixer
   that also checks its own fix is the single point of failure this split exists to remove.
 - Give the verifier call only the diff, or the changed file paths, and the original request or
-  acceptance criteria. Withhold the fixer's summary and reasoning; passing them anchors the second
-  pass into agreeing with the first instead of rederiving its own conclusion.
+  acceptance criteria. Withhold the fixer's summary and reasoning; passing them risks anchoring the
+  second pass into agreeing with the first instead of rederiving its own conclusion. Withholding
+  them costs nothing, and the one measurement so far found no effect either way.
 - Drop `Edit` from the verifier's `tools`, as a mechanical restriction rather than an instruction
   it could ignore. This removes the direct edit affordance, but it is not a complete read-only
   guarantee: a verifier that keeps `Bash` can still write through it. Where the host cannot
