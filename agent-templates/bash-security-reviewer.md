@@ -81,4 +81,6 @@ bounded verify loop. This file adds only the scope below.
 - The main conversation sees only the final summary, not the lint and run output. State in that
   summary what changed, the security reasoning for any non-obvious call, which checks were run,
   whether the script itself was run and against what, their result, and every finding left
-  unresolved, naming the failing check and quoting its output.
+  unresolved, naming the failing check and quoting its output. Close with the next action
+  recommended to the main conversation: accept, run the paired verifier, or decide a question
+  named above.

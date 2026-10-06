@@ -67,4 +67,5 @@ conventions, test coverage, and the bounded verify loop. This file adds only the
   `build_ignore` list of a collection's `galaxy.yml`.
 - The main conversation sees only the final summary, not the lint and test output. State in that
   summary what changed, which checks were run, their result, and every finding left unresolved,
-  naming the failing check and quoting its output.
+  naming the failing check and quoting its output. Close with the next action recommended to
+  the main conversation: accept, or decide a question named above.

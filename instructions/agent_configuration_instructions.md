@@ -265,9 +265,13 @@ conversation holds and the prompt omits does not exist for the subagent.
 - Name in the brief the decisions the subagent returns rather than takes: anything that changes
   an interface, a dependency, the security posture, an external system, cost, or state that
   cannot be restored. A subagent that meets one stops and reports it.
+- Resolve the requirements before the call, or name the ones still open in the brief and ask
+  for them back as questions. A subagent that meets an open requirement picks an answer, and
+  the pick reads in its report like a fact.
 - Ask for a report that separates what was found, what was changed, what was verified and by
-  which command with which result, the assumptions the result rests on, and what remains
-  uncertain. A report that cannot separate these cannot be checked.
+  which command with which result, the assumptions the result rests on, what remains
+  uncertain, and the next action it recommends. A report that cannot separate these cannot be
+  checked, and one without a recommended action leaves the caller to rederive it.
 - Accept the result only after reading the change and running the verification from the main
   conversation. Delegation hands off the execution and keeps the responsibility: a subagent's
   report is a claim about its work, in the same way a fixer's summary is a claim to its verifier.
@@ -286,6 +290,20 @@ conversation holds and the prompt omits does not exist for the subagent.
   answers to reconcile.
 - Treating a subagent that reached `maxTurns`, or returned without the verification its brief
   required, as finished.
+- Delegating to raise the agent count. The measure is whether each piece of work was finished
+  and checked, and an extra subagent adds a brief to write and a report to read.
+
+#### Patterns
+
+Four shapes cover most delegation. Each names who synthesizes, because synthesis is where the
+pieces are reconciled and it stays with the main conversation.
+
+| Pattern | Use when | Shape |
+|---|---|---|
+| Parallel investigation | Questions about one system that do not depend on each other, such as its architecture, its current behavior, and its tests | Read-only subagents, one per question, each returning findings with file and line references; the main conversation synthesizes |
+| Competing approaches | More than one credible design, where comparing working attempts is cheaper than arguing in advance | One subagent per approach, each writing into its own copy of the tree; the main conversation judges by re-running the same checks on each, not by reading each attempt's account of itself |
+| Implementation and review | A false "done" costs more than a second pass | A fixer, then an independent verifier, then a fresh fixer on what the verifier left unresolved, as in [Splitting a Fixer from a Verifier](#splitting-a-fixer-from-a-verifier) |
+| Research and synthesis | An answer assembled from several sources, such as documentation, advisories, and the code | Researchers per source returning claims with citations; a synthesis; then a check of each claim against its cited source, given the citations and not the synthesis's reasoning |
 
 ### Splitting a Fixer from a Verifier
 
@@ -429,7 +447,8 @@ Before finalizing a configuration change, verify that:
   needs, sets `maxTurns`, does not set `bypassPermissions`, and sets `memory` only where the
   widened access and the committed directory were intended.
 - Each delegation instruction the change adds asks for a complete brief, keeps acceptance with
-  the main conversation, and runs subagents in parallel only over disjoint writes.
+  the main conversation, runs subagents in parallel only over disjoint writes, and asks for a
+  report that ends in a recommended next action.
 - Each verifier definition grants no write tool, carries a `PreToolUse` hook that blocks them, and
   is invoked with a model and effort no weaker than its fixer's, within a bounded number of rounds.
 - The change was measured against recorded tasks, or its lack of measurement was stated.
