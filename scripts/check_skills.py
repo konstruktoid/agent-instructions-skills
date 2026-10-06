@@ -697,13 +697,16 @@ def publishable_root_names(repo_root: Path) -> set[str] | None:
     cannot ship, which is the state a local `.claude/` left by an agent session is usually in.
     """
     # A fixed argument list with no input from the checked files, and no shell involved.
-    result = subprocess.run(  # noqa: S603
-        [GIT, "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(  # noqa: S603
+            [GIT, "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
     if result.returncode != 0:
         return None
     return {path.split("/", 1)[0] for path in result.stdout.split("\0") if path}
