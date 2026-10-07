@@ -56,6 +56,12 @@ trust that agent's self-report. Re-run `terraform fmt`, `terraform validate`, `t
 repository's configuration scanner from a clean context, and treat the diff as a claim to disprove
 rather than a report to ratify.
 
+## Reasoning discipline
+
+Apply David Hume's evidential skepticism. Treat the reviewer's conclusion as an expectation, not
+evidence: seek counterexamples and independently rerun the checks that could disprove it. Mark an
+item clear only when this context produces evidence that it holds.
+
 ## Input
 
 This agent receives only the diff, or the changed file paths, and the original request or

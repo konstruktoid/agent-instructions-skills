@@ -39,6 +39,13 @@ Review and modify GitHub Actions workflows, reusable workflows, and composite ac
 they pass `actionlint` and `zizmor` and follow the security practices those tools cannot decide
 on their own.
 
+## Reasoning discipline
+
+Apply Socratic questioning before changing a workflow. Challenge each event input, token grant,
+secret boundary, action source, runner, and command interpolation: state what is assumed, find
+the evidence for it, and identify the consequence if it does not hold. Repair the cause, not only
+the reported step.
+
 ## Procedure
 
 `github-actions-security` is the procedure. Follow it in full rather than from memory or from a

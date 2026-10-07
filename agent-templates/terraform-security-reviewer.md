@@ -48,6 +48,13 @@ Review and modify Terraform so that it passes the repository's `terraform fmt`,
 `terraform validate`, and `tflint` checks and holds the state, secret, execution-identity,
 supply-chain, and policy properties a linter cannot verify on its own.
 
+## Reasoning discipline
+
+Apply Socratic questioning before changing configuration. Challenge each identity, state store,
+input, module source, permission boundary, and failure path: state what is assumed, find the
+evidence for it, and identify the consequence if it does not hold. Repair the cause, not only the
+reported resource.
+
 ## Procedure
 
 `terraform-secure-iac` is the procedure. Follow it in full rather than from memory or from a

@@ -120,6 +120,28 @@ Each template is a thin wrapper. Its system prompt names the instructions docume
 holds the substance and points at it by path, rather than restating it. What the agent file adds
 is routing and policy: which model, which tools, which scope, and what to report back.
 
+### Reasoning disciplines
+
+Each template also states a reasoning discipline that fits its role. These are working methods,
+not appeals to philosophical authority: a template still follows the request, its supplied
+procedure, and the evidence it finds.
+
+| Agent kind | Philosopher | Applied reasoning |
+|------------|-------------|-------------------|
+| Main conversation | Aristotle | Classifies the task, constraints, and evidence, then coordinates delegated work and accepts its result. |
+| Requirements analysis | Socrates | Questions ambiguous terms, assumptions, and contradictions until the request has testable acceptance criteria. |
+| Security review and repair | Socrates | Challenges each trust boundary, input, authorization decision, and failure path before fixing the cause. |
+| Independent verification | David Hume | Treats a fix as an unproven expectation and seeks fresh evidence and counterexamples that could disprove it. |
+| Ansible review | John Stuart Mill | Compares candidate changes by their demonstrated operational consequences, including idempotence and failure behavior. |
+| Prose editing | Ludwig Wittgenstein | Clarifies meaning by examining how terms and requirements are used in their surrounding context. |
+| Evidence synthesis | Immanuel Kant | Separates source facts from inference, and states the conditions and limits of each conclusion. |
+| Competing approaches | Hegel | Lets independent approaches expose their tradeoffs, then has the main conversation reconcile them against the same checks. |
+
+The main conversation and the competing-approaches pattern do not have templates because both
+depend on the full request and on reconciling results from other agents. The
+`requirements-analyst` and `evidence-synthesizer` templates provide the bounded work that those
+two roles can delegate without giving away those decisions.
+
 Current templates:
 
 | Template | Wraps | Notes |
@@ -134,6 +156,8 @@ Current templates:
 | `bash-security-verifier.md` | `skills/bash/bash-secure-scripting` | Independently checks `bash-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
 | `terraform-security-verifier.md` | `skills/terraform/terraform-secure-iac` | Independently checks `terraform-security-reviewer.md`'s result in a fresh context. No `Edit`. A hook blocks `terraform apply`, `destroy`, and `plan`. Consider pinning a strong model. |
 | `workflow-security-verifier.md` | `skills/github/github-actions-security` | Independently checks `workflow-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
+| `requirements-analyst.md` | `instructions/written_language_instructions.md` | Read-only Socratic requirements analysis for an ambiguous or high-impact request. It returns acceptance criteria and unresolved decisions to the main conversation. |
+| `evidence-synthesizer.md` | `instructions/written_language_instructions.md` | Read-only Kantian synthesis of supplied evidence. It separates facts, inferences, conditions, and open questions. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
 auto-discovers an `agents/` directory at a plugin's root, and every plugin here is sourced

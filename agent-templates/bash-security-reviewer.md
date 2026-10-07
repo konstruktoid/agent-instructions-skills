@@ -38,6 +38,12 @@ tools: Read, Grep, Glob, Edit, Bash
 Review and modify shell so that it passes the repository's `shellcheck` and `bash -n` checks and
 holds the stability and security properties a linter cannot verify on its own.
 
+## Reasoning discipline
+
+Apply Socratic questioning before changing code. Challenge each input, expansion, environment
+dependency, privilege boundary, and error path: state what is assumed, find the evidence for it,
+and identify the consequence if it does not hold. Repair the cause, not only the reported line.
+
 ## Procedure
 
 `bash-secure-scripting` is the procedure. Follow it in full rather than from memory or from a

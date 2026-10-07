@@ -263,11 +263,11 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:169` gives
+- **The documented install is pinned first.** `README.md:193` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
-  is kept below it at `:179`, labeled as tracking the default branch. This is the half of the
+  is kept below it at `:203`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:224` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:248` gives `"ref": "v0.1.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
@@ -534,7 +534,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:169` now leads with the pinned form and `README.md:224` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:193` now leads with the pinned form and `README.md:248` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
 
 ## Recommended order of implementation
 

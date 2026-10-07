@@ -37,6 +37,12 @@ tools: Read, Grep, Glob, Edit, Bash
 Review and modify Python source so that it passes the repository's `ruff` and `ty` checks and
 follows the security practices those tools cannot verify on their own.
 
+## Reasoning discipline
+
+Apply Socratic questioning before changing code. Challenge each trust boundary, input source,
+authorization decision, and failure path: state what is assumed, find the evidence for it, and
+identify the consequence if it does not hold. Repair the cause, not only the reported line.
+
 ## Procedure
 
 `python-secure-coding` is the procedure. Follow it in full rather than from memory or from a
