@@ -1,0 +1,624 @@
+[
+  {
+    "id": "psc-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.0854654,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:02.967222+00:00",
+          "seconds": 18.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.0756854,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:02.971310+00:00",
+          "seconds": 15.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.0910024,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:02.972545+00:00",
+          "seconds": 19.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.25215319999999997
+  },
+  {
+    "id": "psc-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.08717240000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:02.964431+00:00",
+          "seconds": 16.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.09339660000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:02.970216+00:00",
+          "seconds": 18.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.0794126,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:18.089081+00:00",
+          "seconds": 14.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.25998160000000003
+  },
+  {
+    "id": "psc-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.11846519999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:19.068491+00:00",
+          "seconds": 28.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.11809239999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:21.284184+00:00",
+          "seconds": 28.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.1282162,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:21.841473+00:00",
+          "seconds": 33.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3647738
+  },
+  {
+    "id": "psc-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.10574420000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:22.639167+00:00",
+          "seconds": 24.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.11479639999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:32.159586+00:00",
+          "seconds": 26.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.1065922,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:46.995149+00:00",
+          "seconds": 26.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3271328
+  },
+  {
+    "id": "psc-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.1332678,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:47.458355+00:00",
+          "seconds": 35.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.113571,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:49.529400+00:00",
+          "seconds": 27.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.113206,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:55.623874+00:00",
+          "seconds": 28.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3600448
+  },
+  {
+    "id": "psc-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.048303200000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:45:58.527535+00:00",
+          "seconds": 9.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.048024399999999995,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:08.375858+00:00",
+          "seconds": 10.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.047269000000000005,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:13.256082+00:00",
+          "seconds": 9.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.14359660000000002
+  },
+  {
+    "id": "psc-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 1,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0566544,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:17.326674+00:00",
+          "seconds": 13.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.06553540000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:18.695210+00:00",
+          "seconds": 14.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t07",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-python-secure-coding:python-secure-coding"
+        ],
+        "cost_usd": 0.07665,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:23.001454+00:00",
+          "seconds": 15.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1988398
+  },
+  {
+    "id": "psc-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.048966199999999994,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:23.416124+00:00",
+          "seconds": 9.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0471182,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:23.709485+00:00",
+          "seconds": 8.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.046076,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:30.414378+00:00",
+          "seconds": 8.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1421604
+  },
+  {
+    "id": "psc-t09",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0567714,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:31.815058+00:00",
+          "seconds": 13.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0581836,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:33.006253+00:00",
+          "seconds": 12.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0567144,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:33.281487+00:00",
+          "seconds": 12.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1716694
+  },
+  {
+    "id": "psc-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "psc-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.038955,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:38.060687+00:00",
+          "seconds": 5.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0440394,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:39.134616+00:00",
+          "seconds": 6.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "psc-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0442594,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-06T20:46:43.436231+00:00",
+          "seconds": 6.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1272538
+  }
+]
