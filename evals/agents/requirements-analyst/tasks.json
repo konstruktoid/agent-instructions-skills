@@ -1,0 +1,44 @@
+{
+  "template": "requirements-analyst",
+  "comparisons": [
+    "template-vs-no-agent"
+  ],
+  "notes": [
+    "Each task is a coding request that has not been acted on. The fixture is the repository it applies to, and the prompt carries the request, an introduction that asks for an analysis and no changes, and a request for a final `OPEN-DECISIONS: <n>` line.",
+    "The comparison is the template against no agent. The treatment installs the adapted template as the session's agent and gives the run the template's own tool allowlist. The control gets the same prompt, the same fixture and the harness's TASK_TOOLS allowlist, and no agent. The allowlist is therefore part of what the treatment measures, and a control that edits a file fails the no-edit assertion for a reason the template removes by construction.",
+    "ra-01, ra-02 and ra-04 each plant one thing a careless read of the request misses. ra-03 is the control: the request is unambiguous and the repository answers every question, so an analyst that always invents an open decision fails it.",
+    "Three runs of four tasks detect only a large effect. A null result is a finding of no detectable effect, not of no effect."
+  ],
+  "brief_intro": "A coding request has been received for the repository in the current directory, and nothing has been done about it yet. Before anyone changes code, analyze it: report what the repository establishes about the current behavior, what the request leaves undecided, and what has to be settled first. Do not change any file.",
+  "final_line_request": "End your report with one line that reads exactly `OPEN-DECISIONS: <n>`, where <n> is the number of decisions that only the requester can make before implementation can start, and 0 when there are none.",
+  "tasks": [
+    {
+      "id": "ra-01-unit-conflict",
+      "title": "README and code disagree on the timeout unit",
+      "fixture": "fixtures/ra-01-unit-conflict",
+      "planted": "README.md documents the --timeout option in seconds, while src/fetchkit/config.py reads TIMEOUT_MS in milliseconds",
+      "request": "Make the timeout configurable and keep existing behaviour."
+    },
+    {
+      "id": "ra-02-public-rename",
+      "title": "Rename of a documented stable function",
+      "fixture": "fixtures/ra-02-public-rename",
+      "planted": "fetch is re-exported in src/userclient/__init__.py and marked stable under semantic versioning in docs/api.md",
+      "request": "Rename `fetch` to `fetch_user`."
+    },
+    {
+      "id": "ra-03-control",
+      "title": "Unambiguous request with a pattern to follow",
+      "fixture": "fixtures/ra-03-control",
+      "planted": "nothing: the control, where the flag, its output, its exit status and its test location are all specified and __version__ already exists",
+      "request": "Add a `--version` flag to src/greeter/cli.py that prints exactly the value of `__version__` from src/greeter/__init__.py followed by a newline and exits with status 0. Add a test for it beside the existing ones in tests/test_cli.py."
+    },
+    {
+      "id": "ra-04-entry-point",
+      "title": "Removal of a function only an entry point references",
+      "fixture": "fixtures/ra-04-entry-point",
+      "planted": "legacy_export has no caller in the Python sources, but pyproject.toml registers it as the `legacy` exporter in the public reportkit.exporters entry-point group",
+      "request": "Delete the unused `legacy_export` function from src/reportkit/export.py."
+    }
+  ]
+}

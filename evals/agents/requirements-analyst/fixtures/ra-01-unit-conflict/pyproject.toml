@@ -1,0 +1,5 @@
+[project]
+name = "fetchkit"
+version = "0.3.0"
+requires-python = ">=3.11"
+dependencies = []

@@ -16,9 +16,21 @@ one draw: tasks report the median with the observed range and flag overlapping
 ranges as no reliable difference, and probes take the majority verdict.
 
 `agent-tasks` measures an agent template rather than a skill. It runs each task in
-`evals/agents/<template>/` with the copied template as the session's agent, in two
-conditions that differ only in whether the prompt also carries the fixer's own summary.
-`report`, `regrade` and `snapshot` take such a suite as `--skill agents/<template>`.
+`evals/agents/<template>/` in two conditions, chosen by `--comparison` from those the suite's
+`tasks.json` declares in `comparisons`, and the first declared is the default:
+
+- `anchored-blind` (the default of a suite that declares none): the copied template is the
+  session's agent in both, and the prompt carries the fixer's own summary in one only.
+- `template-vs-no-agent`: the copied template is the session's agent in one, and no agent is
+  installed in the other, which gets the same prompt, the same fixture and `TASK_TOOLS`.
+- `discipline-ablation`: the copied template is the session's agent in both, and one copy has
+  its `## Reasoning discipline` section removed.
+
+A suite's tasks are either patch tasks, a fixer's change to verify, or brief tasks, a request
+or question with named sources and the suite's own `final_line_request`. A comparison other
+than the default writes under a stamp suffixed `--<comparison>`, so its results never collide
+with the default's. `report`, `regrade` and `snapshot` take such a suite as
+`--skill agents/<template>`, and the stamp, suffix included, selects the comparison.
 
 `report` renders the graded runs as the Markdown table checked in under
 `evals/<skill>/results/`.
@@ -148,16 +160,54 @@ SKILL_ARMS = Arms("baseline", "with-skill", "the skill", "Baseline", "With skill
 # pass into agreeing with the first, so withholding it is the treatment.
 AGENT_ARMS = Arms("anchored", "blind", "withholding the fixer's summary", "Anchored", "Blind")
 
+# The template as the session's agent, against the same prompt with no agent installed.
+TEMPLATE_ARMS = Arms("no-agent", "agent", "the template", "No agent", "Template")
+
+# The template as shipped, against a copy with its `## Reasoning discipline` section removed.
+DISCIPLINE_ARMS = Arms(
+    "without-discipline",
+    "with-discipline",
+    "the reasoning-discipline section",
+    "Without discipline",
+    "With discipline",
+)
+
 CONDITIONS = SKILL_ARMS.names
+
+# The comparisons an agent suite can declare in `tasks.json`. scripts/check_evals.py keeps its
+# own copy of these names and must change with this table.
+AGENT_COMPARISONS = {
+    "anchored-blind": AGENT_ARMS,
+    "template-vs-no-agent": TEMPLATE_ARMS,
+    "discipline-ablation": DISCIPLINE_ARMS,
+}
+DEFAULT_COMPARISON = "anchored-blind"
+
+# Joins a stamp to the comparison it measured when that is not the suite's default.
+COMPARISON_SEPARATOR = "--"
 
 # Agent-template suites live one level down, as `evals/agents/<template>/`, and every
 # subcommand addresses one as `agents/<template>` wherever it takes a skill name.
 AGENT_SUITES_DIR = "agents"
 
 
-def arms_for(suite: str) -> Arms:
-    """Return the conditions the named suite compares."""
-    return AGENT_ARMS if suite.startswith(f"{AGENT_SUITES_DIR}/") else SKILL_ARMS
+def declared_comparisons(suite: str) -> list[str]:
+    """Return the comparisons an agent suite declares, the default first."""
+    declared = load_json(EVALS_DIR / suite / "tasks.json").get("comparisons")
+    return list(declared) if declared else [DEFAULT_COMPARISON]
+
+
+def stamp_comparison(suite: str, stamp: str) -> str:
+    """Return the comparison a stamp of an agent suite measured, from its suffix."""
+    _, separator, named = stamp.partition(COMPARISON_SEPARATOR)
+    return named if separator and named in AGENT_COMPARISONS else declared_comparisons(suite)[0]
+
+
+def arms_for(suite: str, stamp: str = "") -> Arms:
+    """Return the conditions the named suite compares under the given stamp."""
+    if not suite.startswith(f"{AGENT_SUITES_DIR}/"):
+        return SKILL_ARMS
+    return AGENT_COMPARISONS[stamp_comparison(suite, stamp)]
 
 
 # Written as an escape rather than the literal character, which ruff flags as ambiguous.
@@ -993,6 +1043,19 @@ TEMPLATE_ADAPT_NOTE = re.compile(
     r"when adapting\s+this template\.\s*"
 )
 TEMPLATE_TOOLS_LINE = re.compile(r"^tools:\s*(.+)$", re.MULTILINE)
+# A template that wraps only an instructions document names it by path instead of a skill.
+TEMPLATE_INSTRUCTIONS_REF = re.compile(r"`<submodule>/instructions/[A-Za-z0-9_.-]+`")
+# The two wordings of the same note, one trailing a clause and one a sentence of its own.
+TEMPLATE_REPLACE_CLAUSE = re.compile(
+    r",\s*replacing\s+`<submodule>`\s+with\s+the\s+real\s+path\s+when\s+adapting\s+this\s+template\."
+)
+TEMPLATE_REPLACE_SENTENCE = re.compile(
+    r"\s*Replace\s+`<submodule>`\s+with\s+the\s+real\s+path\s+when\s+adapting\s+this\s+template\."
+)
+# The section the discipline ablation removes, up to the next heading of the same level.
+TEMPLATE_DISCIPLINE_SECTION = re.compile(
+    r"^## Reasoning discipline\n.*?(?=^## |\Z)", re.MULTILINE | re.DOTALL
+)
 
 # Asked of the verifier in both conditions, so it cannot bias the comparison. It is what
 # makes the verdict gradable by a regex rather than by a reading of the report.
@@ -1002,11 +1065,13 @@ VERDICT_REQUEST = (
 )
 
 
-def adapt_template(template: str) -> tuple[str, str, str]:
+def adapt_template(template: str, *, discipline: bool = True) -> tuple[str, str | None, str]:
     """Adapt a template the way README.md tells a consuming project to, for a submodule install.
 
-    Returns the adapted text, the wrapped skill's directory relative to the library root, and
-    the tool allowlist its frontmatter grants, as the comma-separated form `--tools` takes.
+    Returns the adapted text, the wrapped skill's directory relative to the library root or
+    None for a template that wraps only an instructions document, and the tool allowlist its
+    frontmatter grants, as the comma-separated form `--tools` takes. `discipline=False`
+    removes the `## Reasoning discipline` section, which is the ablation's control copy.
     """
     source = REPO_ROOT / "agent-templates" / f"{template}.md"
     if not source.is_file():
@@ -1015,27 +1080,37 @@ def adapt_template(template: str) -> tuple[str, str, str]:
     text = source.read_text(encoding="utf-8")
     skill_row = TEMPLATE_SKILL_ROW.search(text)
     tools_line = TEMPLATE_TOOLS_LINE.search(text)
-    if skill_row is None or tools_line is None:
-        message = f"agent-templates/{template}.md names no submodule skill row or no tools line"
+    if (skill_row is None and TEMPLATE_INSTRUCTIONS_REF.search(text) is None) or tools_line is None:
+        message = (
+            f"agent-templates/{template}.md names no submodule skill row, no submodule "
+            "instructions path, or no tools line"
+        )
         raise SystemExit(message)
     adapted = TEMPLATE_ADAPT_NOTE.sub("", TEMPLATE_PLUGIN_ROW.sub("", text))
+    adapted = TEMPLATE_REPLACE_SENTENCE.sub("", TEMPLATE_REPLACE_CLAUSE.sub(".", adapted))
     adapted = adapted.replace("<submodule>", AGENT_STANDARDS_DIR)
+    if not discipline:
+        adapted, removed = TEMPLATE_DISCIPLINE_SECTION.subn("", adapted)
+        if removed != 1:
+            message = f"agent-templates/{template}.md has no `## Reasoning discipline` section"
+            raise SystemExit(message)
     tools = ",".join(entry.strip() for entry in tools_line.group(1).split(","))
-    return adapted, skill_row.group(1), tools
+    return adapted, skill_row.group(1) if skill_row else None, tools
 
 
-def install_agent(workspace: Path, template: str) -> str:
+def install_agent(workspace: Path, template: str, *, discipline: bool = True) -> str:
     """Copy the adapted template and the library it reads into the workspace.
 
     Returns the tool allowlist the template grants. Both land before the fixer's commit, so
     neither appears in the diff a verifier is given or in the one it is graded on.
     """
-    adapted, skill_dir, tools = adapt_template(template)
+    adapted, skill_dir, tools = adapt_template(template, discipline=discipline)
     agents = workspace / ".claude" / "agents"
     agents.mkdir(parents=True, exist_ok=True)
     (agents / f"{template}.md").write_text(adapted, encoding="utf-8")
     standards = workspace / AGENT_STANDARDS_DIR
-    shutil.copytree(REPO_ROOT / skill_dir, standards / skill_dir)
+    if skill_dir is not None:
+        shutil.copytree(REPO_ROOT / skill_dir, standards / skill_dir)
     shutil.copytree(REPO_ROOT / "instructions", standards / "instructions")
     return tools
 
@@ -1053,8 +1128,27 @@ def apply_fixer_patch(workspace: Path, patch: Path, home: Path) -> str:
     return commit_workspace(workspace, home, "fixer change")
 
 
-def agent_prompt(task: dict[str, Any], patch_text: str, condition: str) -> str:
-    """Build the invocation a verifier receives, which is the one thing the conditions vary."""
+class AgentSetup(NamedTuple):
+    """What one condition of an agent comparison changes about a run."""
+
+    installed: bool
+    discipline: bool
+    summary: bool
+
+
+def agent_setup(comparison: str, condition: str) -> AgentSetup:
+    """Return how the named condition of a comparison differs from the template as shipped."""
+    arms = AGENT_COMPARISONS[comparison]
+    treated = condition == arms.treatment
+    if comparison == "template-vs-no-agent":
+        return AgentSetup(installed=treated, discipline=True, summary=False)
+    if comparison == "discipline-ablation":
+        return AgentSetup(installed=True, discipline=treated, summary=False)
+    return AgentSetup(installed=True, discipline=True, summary=not treated)
+
+
+def agent_prompt(task: dict[str, Any], patch_text: str, *, summary: bool) -> str:
+    """Build the invocation a verifier receives, which the anchored-blind comparison varies."""
     parts = [
         TASK_PREAMBLE,
         "Independently verify the fixer's change. The original request to the fixer was:\n\n",
@@ -1062,26 +1156,51 @@ def agent_prompt(task: dict[str, Any], patch_text: str, condition: str) -> str:
         "The change is the last commit in this repository. Its diff:\n\n",
         f"```diff\n{patch_text}```\n\n",
     ]
-    if condition == AGENT_ARMS.control:
+    if summary:
         parts.append(f"The fixer reported:\n\n> {task['fixer_summary']}\n\n")
     parts.append(VERDICT_REQUEST)
+    return "".join(parts)
+
+
+def brief_prompt(task: dict[str, Any], intro: str, final_line_request: str) -> str:
+    """Build the invocation for a brief task: a request or question, its sources, no patch.
+
+    The intro and the final-line request come from the suite, so both conditions get the same
+    words and the final line is gradable by a regex.
+    """
+    label, text = (
+        ("Question", task["question"]) if "question" in task else ("Request", task["request"])
+    )
+    parts = [TASK_PREAMBLE, f"{intro}\n\n", f"{label}:\n\n> {text}\n\n"]
+    if task.get("sources"):
+        listed = "\n".join(f"- `{source}`" for source in task["sources"])
+        parts.append(f"Sources, relative to the repository root:\n\n{listed}\n\n")
+    parts.append(final_line_request)
     return "".join(parts)
 
 
 def run_one_agent_task(job: Job) -> dict[str, Any]:
     """Run and grade one (task, condition) pair of an agent-template suite."""
     task, condition = job["task"], job["condition"]
+    setup = agent_setup(job["comparison"], condition)
     run_dir: Path = job["run_dir"]
     run_dir.mkdir(parents=True, exist_ok=True)
     home = prepare_run_home(run_dir)
     workspace = run_dir / "workspace"
-    prepare_workspace(job["fixture"], workspace, home)
-    tools = install_agent(workspace, job["template"])
-    commit_workspace(workspace, home, "agent install")
-    base_sha = apply_fixer_patch(workspace, job["patch"], home)
+    base_sha = prepare_workspace(job["fixture"], workspace, home)
+    # A no-agent run keeps the tool allowlist every other suite's runs get, and installs nothing.
+    tools = TASK_TOOLS
+    if setup.installed:
+        tools = install_agent(workspace, job["template"], discipline=setup.discipline)
+        base_sha = commit_workspace(workspace, home, "agent install")
+    if job.get("patch") is not None:
+        base_sha = apply_fixer_patch(workspace, job["patch"], home)
+        prompt = agent_prompt(task, job["patch"].read_text(encoding="utf-8"), summary=setup.summary)
+    else:
+        prompt = brief_prompt(task, job["brief_intro"], job["final_line_request"])
 
     command = claude_command(
-        prompt=agent_prompt(task, job["patch"].read_text(encoding="utf-8"), condition),
+        prompt=prompt,
         model=job["model"],
         plugin_dir=None,
         permissions=RunPermissions(tools=tools, mode="bypassPermissions"),
@@ -1089,7 +1208,8 @@ def run_one_agent_task(job: Job) -> dict[str, Any]:
     )
     # Runs the session as the copied template, which is what puts its system prompt, its
     # tool allowlist and its hooks in charge of the run.
-    command += ["--agent", job["template"]]
+    if setup.installed:
+        command += ["--agent", job["template"]]
     timeout = int(task.get("timeout_seconds", RUN_TIMEOUT_SECONDS))
     record = invoke_claude(command, workspace, run_dir / "run.jsonl", home, timeout)
     facts = transcript_facts(run_dir / "run.jsonl")
@@ -1101,11 +1221,13 @@ def run_one_agent_task(job: Job) -> dict[str, Any]:
     outcome = {
         "task": task["id"],
         "condition": condition,
+        "comparison": job["comparison"],
         "run_index": job.get("run_index", 1),
         "model": job["model"],
         "run": record,
-        # The fixer's commit rather than the fixture baseline, so a regrade or a snapshot
-        # diffs against what the verifier was handed rather than against the fixer's work.
+        # The commit the graders diff against: the fixer's for a patch task, so a regrade or a
+        # snapshot shows what the agent changed rather than the fixer's work, and the
+        # workspace as the run started for a brief task.
         "base_sha": base_sha,
         "skills_used": facts["skills_used"],
         "num_turns": facts["num_turns"],
@@ -1413,30 +1535,46 @@ def cmd_tasks(args: argparse.Namespace) -> int:
 
 
 def cmd_agent_tasks(args: argparse.Namespace) -> int:
-    """Run every task of one agent template's suite in both conditions and grade the runs."""
+    """Run every task of one agent template's suite in both conditions of a comparison and grade."""
     suite = f"{AGENT_SUITES_DIR}/{args.template}"
+    declared = declared_comparisons(suite)
+    comparison = args.comparison or declared[0]
+    if comparison not in declared:
+        message = f"{suite} declares comparisons {', '.join(declared)}, not {comparison}"
+        raise SystemExit(message)
     require_reviewed_graders(suite, reviewed=args.graders_reviewed)
     ancestry = require_clean_ancestry(allowed=args.allow_ancestor_instructions)
     suite_dir = EVALS_DIR / suite
-    tasks = load_json(suite_dir / "tasks.json")["tasks"]
+    suite_doc = load_json(suite_dir / "tasks.json")
+    tasks = suite_doc["tasks"]
     assertions = load_json(suite_dir / "assertions.json")["tasks"]
     if args.task:
         tasks = [task for task in tasks if task["id"] in args.task]
+    if comparison == "anchored-blind" and not all(task.get("patch") for task in tasks):
+        message = "anchored-blind withholds a fixer's summary, so it needs patch tasks"
+        raise SystemExit(message)
     stamp = args.stamp or today()
+    # A comparison other than the default gets its own stamp, so its results and its report
+    # sit beside the default's rather than over them.
+    if comparison != declared[0]:
+        stamp = f"{stamp}{COMPARISON_SEPARATOR}{comparison}"
     root = results_root(suite, stamp)
     record_source_revision(root, ancestry)
     # Fails here rather than in every worker when the template cannot be adapted.
-    adapt_template(args.template)
+    adapt_template(args.template, discipline=comparison != "discipline-ablation")
 
     runs = max(1, args.runs)
     jobs = [
         {
             "task": task,
             "condition": condition,
+            "comparison": comparison,
             "model": args.model,
             "template": args.template,
             "fixture": suite_dir / task["fixture"],
-            "patch": suite_dir / task["patch"],
+            "patch": suite_dir / task["patch"] if task.get("patch") else None,
+            "brief_intro": suite_doc.get("brief_intro", ""),
+            "final_line_request": suite_doc.get("final_line_request", ""),
             "assertions": assertions[task["id"]],
             "run_dir": (
                 root / task["id"] / condition
@@ -1446,7 +1584,7 @@ def cmd_agent_tasks(args: argparse.Namespace) -> int:
             "run_index": index,
         }
         for task in tasks
-        for condition in AGENT_ARMS.names
+        for condition in AGENT_COMPARISONS[comparison].names
         for index in range(1, runs + 1)
     ]
     return run_and_record(jobs, run_one_agent_task, args.parallel, root, runs)
@@ -1603,7 +1741,7 @@ def cmd_regrade(args: argparse.Namespace) -> int:
 
     outcomes: list[dict[str, Any]] = []
     for task_dir in sorted(path for path in root.iterdir() if path.name in assertions):
-        for condition in arms_for(args.skill).names:
+        for condition in arms_for(args.skill, args.stamp or today()).names:
             # A single-run stamp keeps the workspace directly under the condition; a
             # multi-run one nests it under run-<n>. Regrade whichever layout is on disk.
             condition_dir = task_dir / condition
@@ -2093,7 +2231,7 @@ def render_report(skill: str, stamp: str) -> str:
         ]
         return "\n".join(lines + trigger_section(skill, stamp))
 
-    arms = arms_for(skill)
+    arms = arms_for(skill, stamp)
     table, total_delta = task_table(by_task, runs_per_condition, arms)
     lines += table
     lines += truncated_section(by_task, arms)
@@ -2215,6 +2353,14 @@ def build_parser() -> argparse.ArgumentParser:
     agent_parser.add_argument("--parallel", type=int, default=4, help="concurrent runs")
     agent_parser.add_argument("--task", action="append", help="run only this task id, repeatable")
     agent_parser.add_argument("--runs", type=int, default=1, help="runs per condition")
+    agent_parser.add_argument(
+        "--comparison",
+        choices=sorted(AGENT_COMPARISONS),
+        default="",
+        help="comparison to run, one the suite declares (default: the first it declares, "
+        "anchored-blind for a suite that declares none); any other writes under "
+        "<stamp>--<comparison>",
+    )
     agent_parser.add_argument(
         "--allow-ancestor-instructions",
         action="store_true",

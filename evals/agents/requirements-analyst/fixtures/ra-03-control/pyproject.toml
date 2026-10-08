@@ -1,0 +1,8 @@
+[project]
+name = "greeter"
+version = "1.4.2"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+greeter = "greeter.cli:main"

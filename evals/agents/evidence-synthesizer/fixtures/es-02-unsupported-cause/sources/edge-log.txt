@@ -1,0 +1,15 @@
+2026-09-02T09:13:58Z resolver checkout-api.internal A NOERROR 1 answer 4ms
+2026-09-02T09:13:58Z tcp      connect 10.4.2.17:443 ok 3ms
+2026-09-02T09:13:58Z tls      handshake 10.4.2.17:443 ok 11ms
+2026-09-02T09:14:02Z resolver checkout-api.internal A NOERROR 1 answer 4ms
+2026-09-02T09:14:02Z tcp      connect 10.4.2.17:443 ok 3ms
+2026-09-02T09:14:02Z tls      handshake 10.4.2.17:443 FAILED alert=certificate_expired
+2026-09-02T09:14:07Z resolver checkout-api.internal A NOERROR 1 answer 5ms
+2026-09-02T09:14:07Z tcp      connect 10.4.2.17:443 ok 3ms
+2026-09-02T09:14:07Z tls      handshake 10.4.2.17:443 FAILED alert=certificate_expired
+2026-09-02T09:31:40Z resolver checkout-api.internal A NOERROR 1 answer 4ms
+2026-09-02T09:31:40Z tcp      connect 10.4.2.17:443 ok 3ms
+2026-09-02T09:31:40Z tls      handshake 10.4.2.17:443 FAILED alert=certificate_expired
+2026-09-02T09:50:12Z resolver checkout-api.internal A NOERROR 1 answer 4ms
+2026-09-02T09:52:03Z tcp      connect 10.4.2.17:443 ok 3ms
+2026-09-02T09:52:03Z tls      handshake 10.4.2.17:443 ok 12ms

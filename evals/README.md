@@ -13,12 +13,14 @@ revision with no modified files and no ancestor `CLAUDE.md`. The checker reports
 
 Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
 `terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the twelve agent
-templates, only `python-security-verifier` has a suite. Its 2026-10-07 stamp measured the
+templates, `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a
+suite, and the last two have never been run. The verifier's 2026-10-07 stamp measured the
 template with its reasoning-discipline section and, like the 2026-10-06 stamp before it, scored
 full marks in both conditions on every task. The claim it tests from
 `instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the verifier,
 is therefore neither shown nor ruled out at the suite's present difficulty, and the suite cannot
-show whether the reasoning discipline changes anything.
+show whether the reasoning discipline changes anything. Its `discipline-ablation` comparison is
+implemented for that and has not been run.
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
@@ -76,31 +78,61 @@ surface. Pass `--all-tools` to measure a task against every tool the CLI offers 
 ## Agent-template suites
 
 A skill suite asks whether a skill changes what an agent produces. An agent-template suite under
-`evals/agents/<template>/` asks whether a template holds the rule it was written for, and its
-two conditions differ in the invocation rather than in what is installed. The first,
-`python-security-verifier`, measures the claim that "Splitting a Fixer from a Verifier" in
-`instructions/agent_configuration_instructions.md` makes: that a verifier given the fixer's
-summary is anchored into agreeing with it. Its `anchored` condition passes that summary, its
-`blind` condition withholds it, and the delta is `blind` minus `anchored`.
+`evals/agents/<template>/` asks whether a template holds the rule it was written for or changes
+what an agent produces, and its two conditions differ in the invocation or in what is installed.
+Which two is a comparison, declared in the suite's `tasks.json` as `comparisons`. The first one
+declared is the default, a suite that declares none gets `anchored-blind`, and
+`agent-tasks --comparison <name>` runs another declared one.
 
-A task names a fixture, which is the repository before the fix, and a `patch` under
-`patches/<task-id>.patch`, which is the fix. `run_eval.py agent-tasks` copies the fixture,
-installs the template adapted as README.md tells a consuming project to adapt it for a submodule
-install, commits, applies the patch as the fixer's own commit, and runs `claude -p --agent
-<template>` with the template's `tools:` line as the allowlist. `$EVAL_BASE_SHA` is the fixer's
-commit, so a grader asking what the run changed sees only what the verifier did.
+| Comparison | Control | Treatment | Suites |
+|---|---|---|---|
+| `anchored-blind` | The template, and the fixer's summary in the prompt | The template, and the summary withheld | `python-security-verifier` |
+| `template-vs-no-agent` | No agent, with `TASK_TOOLS` | The adapted template as the session's agent | `requirements-analyst`, `evidence-synthesizer` |
+| `discipline-ablation` | The template with its `## Reasoning discipline` section removed | The template as shipped | `python-security-verifier`, available to any suite |
+
+The delta in every report is treatment minus control. `anchored-blind` measures the claim that
+"Splitting a Fixer from a Verifier" in `instructions/agent_configuration_instructions.md` makes:
+that a verifier given the fixer's summary is anchored into agreeing with it.
+`template-vs-no-agent` measures the whole template, so its treatment differs from its control in
+the role text, the discipline section and the tool allowlist, the template's own `tools:` line
+against `TASK_TOOLS`, and a difference between the two cannot be attributed to any one of them.
+`discipline-ablation` isolates the section and gives both conditions the same prompt and the
+same tools; on a patch task it uses the blind prompt.
+
+A comparison other than a suite's default writes under the stamp `<date>--<comparison>`, so
+`results/raw/2026-10-08--discipline-ablation/` and `results/2026-10-08--discipline-ablation.md`
+sit beside the default's `2026-10-08` and never replace it. `report`, `regrade` and `snapshot`
+read the comparison from that suffix, so they take the full stamp in `--stamp`.
+
+A suite's tasks are all one of two shapes. A patch task names a fixture, which is the repository
+before a fix, and a `patch` under `patches/<task-id>.patch`, which is the fix. `agent-tasks`
+copies the fixture, installs the template (adapted as README.md tells a consuming project to
+adapt it for a submodule install, which handles a template that reads a skill, one that reads
+only `<submodule>/instructions/...`, or both), commits, applies the patch as the fixer's own
+commit, and runs `claude -p --agent <template>` with the template's `tools:` line as the
+allowlist. `$EVAL_BASE_SHA` is the fixer's commit, so a grader asking what the run changed sees
+only what the verifier did. A brief task has a `request` or a `question`, and the `sources` it
+names under its fixture, with no patch. The suite states a `brief_intro` and a
+`final_line_request` in `tasks.json`, and the prompt is those two and the task, identical in both
+conditions. Its `$EVAL_BASE_SHA` is the workspace as the run started.
 
 ```sh
 python3 evals/run_eval.py agent-tasks --template python-security-verifier --runs 3
+python3 evals/run_eval.py agent-tasks --template python-security-verifier --runs 3 \
+    --comparison discipline-ablation
+python3 evals/run_eval.py agent-tasks --template requirements-analyst --runs 3
 python3 evals/run_eval.py report --skill agents/python-security-verifier
+python3 evals/run_eval.py report --skill agents/python-security-verifier \
+    --stamp 2026-10-08--discipline-ablation
 ```
 
-`report`, `regrade` and `snapshot` take the suite as `--skill agents/<template>`. The grader
-review gate applies unchanged, since the suite's `assertions.json` and `run_eval.py` are the
-files it compares. `scripts/check_evals.py` holds these suites to the same structural rules, with
-a `request` and a `fixer_summary` in place of a prompt and no routing probes, and reports a suite
-that has never been run as unmeasured rather than failing it, since only a paid run can render
-the results file. It reports every template with no suite the same way.
+`report`, `regrade` and `snapshot` take the suite as `--skill agents/<template>`. The grader review
+gate applies unchanged, since the suite's `assertions.json` and `run_eval.py` are the files it
+compares. `scripts/check_evals.py` holds these suites to the same structural rules, with a patch
+task's `request` and `fixer_summary` or a brief task's `request` or `question` and `sources` in
+place of a prompt, each declared comparison checked against the tasks, and no routing probes. It
+reports a suite that has never been run as unmeasured rather than failing it, since only a paid run
+can render the results file. It reports every template with no suite the same way.
 
 ## Running them
 
