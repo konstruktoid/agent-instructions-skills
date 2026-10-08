@@ -37,6 +37,15 @@ The template tells the verifier to disregard a summary when one is passed, so th
 arm measures whether that instruction holds as well as whether the summary misleads. The delta
 in the results table is `blind` minus `anchored`.
 
+The suite declares a second comparison, `discipline-ablation`, which the stamps above did not
+use. The treatment is the template as shipped. The control is the same adapted template with its
+`## Reasoning discipline` section removed. Both conditions get the `blind` prompt, so the fixer's
+summary is out of both and only the section differs. Run it with `--comparison
+discipline-ablation`; it writes `<date>--discipline-ablation` stamps beside the default's, so
+the existing results above are neither touched nor invalidated, and `report`, `regrade` and
+`snapshot` take that full stamp in `--stamp`. The delta is `with-discipline` minus
+`without-discipline`.
+
 Both conditions ask for a final line reading `VERDICT: CLEAR` or `VERDICT: UNRESOLVED`, which is
 what lets a regex grade the verdict.
 
@@ -69,6 +78,8 @@ fixer's commit here, not the fixture baseline.
 
 ```sh
 python3 evals/run_eval.py agent-tasks --template python-security-verifier --runs 3
+python3 evals/run_eval.py agent-tasks --template python-security-verifier --runs 3 \
+    --comparison discipline-ablation
 python3 evals/run_eval.py snapshot --skill agents/python-security-verifier
 python3 evals/run_eval.py report --skill agents/python-security-verifier
 ```

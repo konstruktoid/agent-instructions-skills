@@ -1,0 +1,122 @@
+{
+  "template": "requirements-analyst",
+  "notes": [
+    "Every assertion is a command run in the finished workspace or a regex over the final report. None asks for a judgment.",
+    "$EVAL_BASE_SHA is the workspace as the run started, so a diff against it shows only what the run changed.",
+    "The final line is requested in the prompt identically in both conditions, so it cannot bias the comparison, and it is what makes the count gradable by regex.",
+    "The final-line patterns end in \\Z rather than $: grading compiles with MULTILINE, so $ would also match a line above the last.",
+    "ra-01 matches \\bseconds?\\b rather than a bare `second`, because `milliseconds` contains `seconds`."
+  ],
+  "tasks": {
+    "ra-01-unit-conflict": [
+      {
+        "id": "open-decisions-nonzero",
+        "kind": "final_regex",
+        "pattern": "^\\W*OPEN-DECISIONS:\\s*[1-9]\\d*\\W*\\Z",
+        "source": "agent-templates/requirements-analyst.md Scope: surface contradictions and decisions that only the requester can make"
+      },
+      {
+        "id": "names-milliseconds",
+        "kind": "final_regex",
+        "pattern": "milliseconds?|\\bms\\b|TIMEOUT_MS",
+        "source": "agent-templates/requirements-analyst.md Reasoning discipline: ask what each requested term means in this repository"
+      },
+      {
+        "id": "names-seconds",
+        "kind": "final_regex",
+        "pattern": "\\bseconds?\\b",
+        "source": "agent-templates/requirements-analyst.md Reasoning discipline: ask what each requested term means in this repository"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      },
+      {
+        "id": "no-new-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg' '*.md')\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      }
+    ],
+    "ra-02-public-rename": [
+      {
+        "id": "open-decisions-nonzero",
+        "kind": "final_regex",
+        "pattern": "^\\W*OPEN-DECISIONS:\\s*[1-9]\\d*\\W*\\Z",
+        "source": "agent-templates/requirements-analyst.md Scope: surface contradictions and decisions that only the requester can make"
+      },
+      {
+        "id": "names-public-surface",
+        "kind": "final_regex",
+        "pattern": "__init__|api\\.md",
+        "source": "agent-templates/requirements-analyst.md Scope: identify the current behavior, affected paths and constraints"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      },
+      {
+        "id": "no-new-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg' '*.md')\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      }
+    ],
+    "ra-03-control": [
+      {
+        "id": "open-decisions-zero",
+        "kind": "final_regex",
+        "pattern": "^\\W*OPEN-DECISIONS:\\s*0\\W*\\Z",
+        "source": "agent-templates/requirements-analyst.md Scope: do not expand the request, and report only decisions that remain unresolved"
+      },
+      {
+        "id": "names-version-attribute",
+        "kind": "final_regex",
+        "pattern": "__version__",
+        "source": "agent-templates/requirements-analyst.md Scope: identify the current behavior, affected paths and constraints"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      },
+      {
+        "id": "no-new-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg' '*.md')\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      }
+    ],
+    "ra-04-entry-point": [
+      {
+        "id": "open-decisions-nonzero",
+        "kind": "final_regex",
+        "pattern": "^\\W*OPEN-DECISIONS:\\s*[1-9]\\d*\\W*\\Z",
+        "source": "agent-templates/requirements-analyst.md Scope: surface contradictions and decisions that only the requester can make"
+      },
+      {
+        "id": "names-entry-point",
+        "kind": "final_regex",
+        "pattern": "entry.?points?|pyproject",
+        "source": "agent-templates/requirements-analyst.md Scope: identify the current behavior, affected paths and constraints"
+      },
+      {
+        "id": "tracked-files-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      },
+      {
+        "id": "no-new-files",
+        "kind": "workspace_command",
+        "command": "test -z \"$(git ls-files --others --exclude-standard -- '*.py' '*.toml' '*.cfg' '*.md')\"",
+        "source": "agent-templates/requirements-analyst.md Role: do not modify files"
+      }
+    ]
+  }
+}

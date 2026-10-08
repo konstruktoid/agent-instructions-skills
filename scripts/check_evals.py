@@ -37,9 +37,12 @@ fix for each is a paid re-run rather than an edit:
   measurement cannot be reproduced and the revision comparison above cannot certify it.
 
 Every evals/agents/<template>/ suite measures an agent template rather than a skill, and is
-held to the same rules with three differences: the specification files are `tasks.json` and
-`assertions.json` and name the template, each task carries the fixer's `patch` under
-`patches/<task-id>.patch`, a `request` and a `fixer_summary` in place of a prompt, and a suite
+held to the same rules with four differences: the specification files are `tasks.json` and
+`assertions.json` and name the template; a task is either a patch task, which carries the
+fixer's `patch` under `patches/<task-id>.patch`, a `request` and a `fixer_summary`, or a brief
+task, which carries a `request` or a `question` and the `sources` it names under its fixture,
+with the suite stating a `brief_intro` and a `final_line_request`; `tasks.json` may declare the
+`comparisons` the suite is measured under, each of which must fit the suite's tasks; and a suite
 with no rendered results file yet is reported as unmeasured rather than failed. A template
 with no suite is reported the same way.
 
@@ -82,6 +85,13 @@ NOT_A_SUITE = {"probe-sandbox", "__pycache__", AGENTS_DIR}
 AGENT_TEMPLATE_GLOB = "agent-templates/*.md"
 AGENT_SPEC_FILES = ("tasks.json", "assertions.json")
 AGENT_TASK_FIELDS = ("id", "title", "fixture", "patch", "request", "fixer_summary")
+BRIEF_SUITE_FIELDS = ("brief_intro", "final_line_request")
+
+# The comparisons run_eval.py can run, which must change with its AGENT_COMPARISONS table.
+# `anchored-blind` withholds a fixer's summary, so it needs patch tasks; the other two do not.
+COMPARISONS = ("anchored-blind", "template-vs-no-agent", "discipline-ablation")
+DISCIPLINE_HEADING = "## Reasoning discipline"
+
 
 SPEC_FILES = ("tasks.json", "assertions.json", "trigger-eval.json")
 
@@ -582,6 +592,47 @@ def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[s
     return errors, stale
 
 
+def check_brief_task(suite: Path, task: dict[str, Any], errors: list[str]) -> None:
+    """Check a brief task: a request or a question, and sources that exist in its fixture."""
+    task_id = task.get("id", "<unnamed>")
+    missing = [field for field in ("id", "title", "fixture") if not task.get(field)]
+    if missing:
+        errors.append(f"tasks.json {task_id}: missing {', '.join(missing)}")
+    if bool(task.get("request")) == bool(task.get("question")):
+        errors.append(f"tasks.json {task_id}: needs exactly one of request or question")
+    sources = task.get("sources", [])
+    if not isinstance(sources, list) or not all(isinstance(item, str) for item in sources):
+        errors.append(f"tasks.json {task_id}: sources is not a list of paths")
+        return
+    errors.extend(
+        f"tasks.json {task_id}: source {source} does not exist in {task.get('fixture')}"
+        for source in sources
+        if not (suite / str(task.get("fixture", "")) / source).is_file()
+    )
+
+
+def check_agent_task(suite: Path, task: dict[str, Any], errors: list[str]) -> None:
+    """Check one agent task's fields, its fixture, and its patch when it is a patch task."""
+    task_id = task.get("id", "<unnamed>")
+    patch_task = "patch" in task
+    if patch_task:
+        missing = [field for field in AGENT_TASK_FIELDS if not task.get(field)]
+        if missing:
+            errors.append(f"tasks.json {task_id}: missing {', '.join(missing)}")
+    else:
+        check_brief_task(suite, task, errors)
+    checks = [("fixture", f"fixtures/{task_id}", Path.is_dir)]
+    if patch_task:
+        checks.append(("patch", f"patches/{task_id}.patch", Path.is_file))
+    for field, expected, exists in checks:
+        if task.get(field) != expected:
+            errors.append(
+                f"tasks.json {task_id}: {field} is {task.get(field)!r}, expected {expected!r}"
+            )
+        elif not exists(suite / expected):
+            errors.append(f"tasks.json {task_id}: {expected} does not exist")
+
+
 def check_agent_tasks(suite: Path, tasks: list[dict[str, Any]], errors: list[str]) -> None:
     """Check an agent suite's tasks: count, fields, and the fixture and patch each starts from."""
     ids = [task.get("id") for task in tasks]
@@ -592,20 +643,7 @@ def check_agent_tasks(suite: Path, tasks: list[dict[str, Any]], errors: list[str
             f"tasks.json: {len(tasks)} tasks, evals/README.md states {MIN_TASKS} to {MAX_TASKS}"
         )
     for task in tasks:
-        task_id = task.get("id", "<unnamed>")
-        missing = [field for field in AGENT_TASK_FIELDS if not task.get(field)]
-        if missing:
-            errors.append(f"tasks.json {task_id}: missing {', '.join(missing)}")
-        for field, expected, exists in (
-            ("fixture", f"fixtures/{task_id}", Path.is_dir),
-            ("patch", f"patches/{task_id}.patch", Path.is_file),
-        ):
-            if task.get(field) != expected:
-                errors.append(
-                    f"tasks.json {task_id}: {field} is {task.get(field)!r}, expected {expected!r}"
-                )
-            elif not exists(suite / expected):
-                errors.append(f"tasks.json {task_id}: {expected} does not exist")
+        check_agent_task(suite, task, errors)
 
     referenced = {task.get("fixture") for task in tasks} | {task.get("patch") for task in tasks}
     for directory, pattern in (("fixtures", "*/"), ("patches", "*.patch")):
@@ -616,8 +654,51 @@ def check_agent_tasks(suite: Path, tasks: list[dict[str, Any]], errors: list[str
         )
 
 
+def check_comparisons(
+    doc: dict[str, Any], tasks: list[dict[str, Any]], template: Path | None, errors: list[str]
+) -> None:
+    """Check the comparisons tasks.json declares, and the brief fields the tasks need."""
+    declared = doc.get("comparisons", [])
+    if not isinstance(declared, list) or not all(isinstance(item, str) for item in declared):
+        errors.append("tasks.json: comparisons is not a list of names")
+        return
+    errors.extend(
+        f"tasks.json: comparison {name!r} is not one of {COMPARISONS}"
+        for name in declared
+        if name not in COMPARISONS
+    )
+    if len(set(declared)) != len(declared):
+        errors.append("tasks.json: duplicate comparisons")
+    patch_tasks = [task for task in tasks if "patch" in task]
+    if patch_tasks and len(patch_tasks) != len(tasks):
+        errors.append("tasks.json: a suite's tasks are all patch tasks or all brief tasks")
+    if not patch_tasks:
+        errors.extend(
+            f"tasks.json: a suite of brief tasks needs {field}"
+            for field in BRIEF_SUITE_FIELDS
+            if not isinstance(doc.get(field), str) or not doc[field]
+        )
+        if not declared or "anchored-blind" in declared:
+            errors.append(
+                "tasks.json: brief tasks have no fixer summary to withhold, so the suite must "
+                "declare comparisons without anchored-blind"
+            )
+    if (
+        "discipline-ablation" in declared
+        and template is not None
+        and DISCIPLINE_HEADING not in template.read_text(encoding="utf-8")
+    ):
+        errors.append(
+            f"tasks.json: discipline-ablation, but the template has no {DISCIPLINE_HEADING}"
+        )
+
+
 def template_skill(template: Path) -> Path | None:
-    """Return the skill directory a template's submodule row names, when it names one."""
+    """Return the skill directory a template's submodule row names, when it names one.
+
+    A template that wraps only an instructions document names none, and is then checked for
+    freshness against the template alone.
+    """
     found = re.search(
         r"`<submodule>/(skills/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+)/SKILL\.md`",
         template.read_text(encoding="utf-8"),
@@ -652,6 +733,7 @@ def check_agent_suite(suite: Path, templates: dict[str, Path]) -> tuple[list[str
     )
     task_ids = [task.get("id", "<unnamed>") for task in tasks]
     check_agent_tasks(suite, tasks, errors)
+    check_comparisons(docs["tasks.json"], tasks, template, errors)
     check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
     # A rendered results file needs a paid run, so its absence is the unmeasured finding
     # main() reports, as for a skill with no suite, rather than a structural error.

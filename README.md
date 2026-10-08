@@ -417,11 +417,18 @@ output, or that its `description` routes the right tasks to it. Two measurements
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
 - **Agent-template evals.** A suite under `evals/agents/<template>/` measures a template rather
-  than a skill. The first, for `python-security-verifier.md`, runs each task with and without
-  the fixer's summary in the verifier's prompt, which tests the claim that the summary anchors
-  the verifier. Both stamps, 2026-10-06 and 2026-10-07, scored full marks in both conditions on
-  all four tasks, so it neither shows nor rules out that anchoring at its present difficulty.
-  `scripts/check_evals.py` reports every template without a suite as unmeasured.
+  than a skill, under one or more comparisons that its `tasks.json` declares and that
+  `run_eval.py agent-tasks --comparison` selects. `python-security-verifier` has two. Its
+  default, `anchored-blind`, runs each task with and without the fixer's summary in the
+  verifier's prompt, which tests the claim that the summary anchors the verifier; its stamps
+  2026-10-06 and 2026-10-07 scored full marks in both conditions on all four tasks, so that
+  comparison neither shows nor rules out anchoring at its present difficulty. Its second,
+  `discipline-ablation`, compares the template as shipped with a copy that has its `## Reasoning
+  discipline` section removed, and has not been run. `requirements-analyst` and
+  `evidence-synthesizer` each have a suite under `template-vs-no-agent`, the template as the
+  session's agent against the same prompt with no agent, and neither has been run.
+  `scripts/check_evals.py` reports those two suites, and every template without a suite, as
+  unmeasured.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
