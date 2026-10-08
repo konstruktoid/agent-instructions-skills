@@ -419,8 +419,8 @@ output, or that its `description` routes the right tasks to it. Two measurements
 - **Agent-template evals.** A suite under `evals/agents/<template>/` measures a template rather
   than a skill. The first, for `python-security-verifier.md`, runs each task with and without
   the fixer's summary in the verifier's prompt, which tests the claim that the summary anchors
-  the verifier. Its first stamp, 2026-10-06, scored full marks in both conditions on all four
-  tasks, so it neither shows nor rules out that anchoring at its present difficulty.
+  the verifier. Both stamps, 2026-10-06 and 2026-10-07, scored full marks in both conditions on
+  all four tasks, so it neither shows nor rules out that anchoring at its present difficulty.
   `scripts/check_evals.py` reports every template without a suite as unmeasured.
 
 ```sh
@@ -448,33 +448,28 @@ have neither eval yet either; a suite for each is a follow-up.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness. Every latest stamp was measured on 2026-09-12 or 2026-09-13 against a modified
-working tree at `6273313`, so the source it graded is in no commit, and two of them also
-predate a later change to the skill they measured: `ansible-verification-loop` and
-`github-actions-security`. Two further limits apply to the whole row set and are not visible in
-any results file. The runs used a checkout under the operator's home directory, and ten of their
-transcripts, in both conditions, end on wording from the operator's own `~/.claude/CLAUDE.md`, so
-each baseline ran with that guidance rather than with none; `evals/README.md` describes the
-mechanism and the guard `run_eval.py` now applies against it. And all six aborted runs in the
-`ansible-verification-loop` stamp, the one regraded since the harness learned to tell, were
-usage-limit rejections, which measure the account rather than the task.
+is staleness, and it reports none. Every latest stamp was measured on 2026-10-06 or 2026-10-07
+from a fresh clone of a committed revision outside the operator's home directory, with no
+modified files and no ancestor `CLAUDE.md`, and the task and routing results in each row come
+from the same run. Runs that a usage limit cut short were discarded and the suite re-run from a
+new clone rather than graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `ansible-verification-loop` | 2026-09-13 | +6 over 5 comparable tasks | 2.1x | 10/10 (2026-07-25) | Three runs per condition. Only `avl-07-artifact-hygiene` separates, 4/16 against 10/16; the other four deltas are zero and marked *no reliable difference*. `avl-05-collection-review` has one graded run, baseline 10/11, and five usage-limit aborts, so it has no comparison. `avl-04-handler-refactor` has three baseline runs and no with-skill run, from a batch that never completed. Predates the skill change of 2026-09-24. Earlier stamps: 2026-08-20-repeat measured +6 on `avl-07` alone in three runs per condition. |
-| `bash-secure-scripting` | 2026-09-13 | +11 over 4 tasks | 2.3x | 9/10 (2026-08-14) | Three runs per condition. Only `bss-03-provision-user` separates (+3); the other three deltas are marked *no reliable difference*. `bss-t09` is out of scope and routed in. |
-| `bash-testing` | 2026-09-13 | -1 over 4 tasks | 1.8x | 7/10 (2026-08-14) | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
-| `github-actions-security` | 2026-09-12 | +42 over 7 tasks | 2.3x | 9/10 (2026-07-27) | Three runs per condition, and every one of the seven deltas separates, including `gas-05`, `gas-06` and `gas-07`, which no earlier stamp graded. Predates the skill change of 2026-09-16. `gas-t01` was replaced by a probe for the agentic-workflow clause after the routing stamp, so the routing score measures a probe set the suite no longer holds; `gas-t06` is out of scope and routed in on all 3 repetitions. |
-| `python-secure-coding` | 2026-09-13 | +6 over 5 tasks | 1.4x | 10/10 (2026-07-25) | Three runs per condition, and every delta is marked *no reliable difference*: the with-skill range overlaps the baseline on all five tasks, and `psc-02` shows no difference at all. |
-| `python-testing` | 2026-09-13 | +3 over 3 comparable tasks | 1.6x | 9/10 (2026-07-25) | `pt-04-upload-validation` and `pt-05-unusual-layout` aborted in all six runs each, so two of five tasks have no measurement in this stamp. Every remaining delta is marked *no reliable difference*, and the skill did not fire on `pt-03`. |
+| `ansible-verification-loop` | 2026-10-07 | +3 over 7 tasks | 1.4x | 10/10 | Three runs per condition. `avl-07-artifact-hygiene` (+2) and `avl-06-autofix-cosmetics` (+1) separate; the other five deltas are zero, and four of those five score full marks in both conditions, so they cannot discriminate. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
+| `bash-secure-scripting` | 2026-10-07 | +6 over 4 tasks | 2.4x | 9/10 | Three runs per condition. `bss-03-provision-user` (+4) and `bss-01-log-archive` (+1) separate; the other two are marked *no reliable difference*. `bss-t09`, a GitHub Actions upload step, is out of scope and routed in on all 3 repetitions, as it did on 2026-08-14. |
+| `bash-testing` | 2026-10-07 | +0 over 4 tasks | 1.4x | 10/10 | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. The skill shows no measurable task effect. Routing improved from 7/10 on 2026-08-14. |
+| `github-actions-security` | 2026-10-07 | +33 over 7 tasks | 2.3x | 10/10 | Three runs per condition, and every one of the seven deltas separates. The first stamp to include the skill change of 2026-09-16 and the current probe set. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
+| `python-secure-coding` | 2026-10-06 | +1 over 5 tasks | 2.3x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `20ef477`. |
+| `python-testing` | 2026-10-07 | +1 over 5 tasks | 1.2x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*. `pt-02` and `pt-05` scored full marks in both conditions. The skill did not fire on `pt-03`. Measured at `de69b8c`. |
 
-Two limits cut across the whole table. A routing score carried from an earlier stamp than the
-task result was measured against an earlier revision of that skill's `description`, so it does
-not transfer forward on its own; no 2026-09 stamp re-ran the probes. And a task delta is a
-measurement of the skill revision that ran, not of the file as it stands now: editing a skill,
-its `tasks.json` or its `assertions.json` invalidates the stamp above it until the eval is run
-again. That cannot be repaired by `regrade`, since it re-runs assertions only where the finished
-workspace survives, and a workspace is gitignored.
+Two limits cut across the whole table. A routing score carried from an earlier stamp than the task
+result was measured against an earlier revision of that skill's `description`, so it does not
+transfer forward on its own; every row above re-ran the probes in the same run as its tasks. And a
+task delta is a measurement of the skill revision that ran, not of the file as it stands now:
+editing a skill, its `tasks.json` or its `assertions.json` invalidates the stamp above it until the
+eval is run again. That cannot be repaired by `regrade`, since it re-runs assertions only where the
+finished workspace survives, and a workspace is gitignored.
 
 Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
 `evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each

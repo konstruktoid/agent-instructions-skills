@@ -5,24 +5,22 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-06
+## Current state, 2026-10-07
 
-Nothing measured here is current. Every latest stamp of the six skill suites, dated 2026-09-12
-and 2026-09-13, graded a modified working tree at `6273313a3811`, so the source each one measured
-is in no commit and cannot be reproduced. Two of them are also older than a later change to the
-skill they measured: `ansible-verification-loop` and `github-actions-security`. The results files
-below therefore describe the content as it stood at each stamp rather than as it stands now.
+Every latest stamp is current. The six skill suites were measured on 2026-10-06 and 2026-10-07,
+and the `python-security-verifier` suite on 2026-10-07, each from a fresh clone of a committed
+revision with no modified files and no ancestor `CLAUDE.md`. The checker reports no staleness.
 
 Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
-`terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the ten agent
-templates, only `python-security-verifier` has a suite. Its one stamp, 2026-10-06, was measured
-from a clean commit and scored full marks in both conditions on every task, so the claim it tests
-from `instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the
-verifier, is neither shown nor ruled out at the suite's present difficulty.
+`terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the twelve agent
+templates, only `python-security-verifier` has a suite. Its 2026-10-07 stamp measured the
+template with its reasoning-discipline section and, like the 2026-10-06 stamp before it, scored
+full marks in both conditions on every task. The claim it tests from
+`instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the verifier,
+is therefore neither shown nor ruled out at the suite's present difficulty, and the suite cannot
+show whether the reasoning discipline changes anything.
 
-The checker reports all of these, and none is answerable by an edit. The first needs a paid
-re-run from a clean, committed tree; the second needs a run before a skill suite can be complete,
-since a skill suite with no rendered results file is a structural error.
+`scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
 ## Layout
 
