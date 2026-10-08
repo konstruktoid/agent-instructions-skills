@@ -1,0 +1,16 @@
+{
+  "id": "bt-t09",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0549052,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T20:14:09.470985+00:00",
+    "seconds": 14.9
+  },
+  "aborted": false,
+  "rate_limited": false
+}

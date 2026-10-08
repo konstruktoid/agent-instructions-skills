@@ -1,0 +1,88 @@
+{
+  "task": "avl-04-handler-refactor",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T15:11:02.406009+00:00",
+    "seconds": 27.1
+  },
+  "base_sha": "70eee218daa97b789dd77d305a1a3ceb217798c4",
+  "skills_used": [],
+  "num_turns": 6,
+  "cost_usd": 0.0863452,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "lint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: lint passes",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "lint-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md step 7: stop and report the failing check and its output",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "lint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run ansible-lint",
+      "passed": true,
+      "evidence": "match: 'ansible-lint'"
+    },
+    {
+      "id": "handler-added",
+      "kind": "workspace_command",
+      "source": "task prompt: refactor the restarts into a handler",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "tasks-notify-handler",
+      "kind": "workspace_command",
+      "source": "task prompt: the configuration and rules tasks notify the handler",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-inline-restart",
+      "kind": "workspace_command",
+      "source": "task prompt: auditd restarts at most once and only when something changed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-num-logs-applied",
+      "kind": "workspace_command",
+      "source": "task prompt: auditd_num_logs is documented but never applied",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "test-fixtures-updated",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: test fixtures updated if behavior changed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "idempotence-considered",
+      "kind": "final_regex",
+      "source": "SKILL.md checklist: idempotence holds, no changes reported on a second converge",
+      "passed": true,
+      "evidence": "match: 'idempot'"
+    }
+  ],
+  "passed": 9,
+  "total": 9
+}

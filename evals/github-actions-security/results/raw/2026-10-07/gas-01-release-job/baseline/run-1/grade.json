@@ -1,0 +1,137 @@
+{
+  "task": "gas-01-release-job",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T10:03:32.412794+00:00",
+    "seconds": 20.4
+  },
+  "base_sha": "15dfed309c09511a531a76e1aed77acb666e4662",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.07518140000000001,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 14\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:19:15\n   |\n19 |       - uses: actions/checkout@v4\n   |               ^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:22:15\n   |\n22 |       - uses: actions/setup-node@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:36:15\n   |\n36 |       - uses: actions/checkout@v4\n   |               ^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:39:15\n   |\n39 |       - uses: actions/setup-node@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[cache-poisoning]: runtime artifacts potentially vulnerable to a cache poisoning attack\n  --> ./.github/workflows/ci.yml:22:9\n   |\n 4 | / on:\n 5 | |   push:\n 6 | |     branches:\n 7 | |       - main\n 8 | |     tags:\n 9 | |       - \"v*\"\n10 | |   pull_request:\n   | |_______________- generally used when publishing artifacts generated at runtime\n...\n22 |         - uses: actions/setup-node@v4\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ omitting `package-manager-cache` enables caching\n   |\n   = note: audit confidence \u2192 Low\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#cache-poisoning\n\nerror[cache-poisoning]: runtime artifacts potentially vulnerable to a cache poisoning attack\n  --> ./.github/workflows/ci.yml:39:9\n   |\n 4 | / on:\n 5 | |   push:\n 6 | |     branches:\n 7 | |       - main\n 8 | |     tags:\n 9 | |       - \"v*\"\n10 | |   pull_request:\n   | |_______________- generally used when publishing artifacts generated at runtime\n...\n39 |         - uses: actions/setup-node@v4\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ omitting `package-manager-cache` enables caching\n   |\n   = note: audit confidence \u2192 Low\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#cache-poisoning\n\n10 findings (4 suppressed, 4 unsafe fixes): 0 informational, 0 low, 0 medium, 6 high"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:19:15\n   |\n19 |       - uses: actions/checkout@v4\n   |               ^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:22:15\n   |\n22 |       - uses: actions/setup-node@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:36:15\n   |\n36 |       - uses: actions/checkout@v4\n   |               ^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[unpinned-uses]: unpinned action reference\n  --> ./.github/workflows/ci.yml:39:15\n   |\n39 |       - uses: actions/setup-node@v4\n   |               ^^^^^^^^^^^^^^^^^^^^^ action is not pinned to a hash (required by blanket policy)\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#unpinned-uses\n\nerror[cache-poisoning]: runtime artifacts potentially vulnerable to a cache poisoning attack\n  --> ./.github/workflows/ci.yml:22:9\n   |\n 4 | / on:\n 5 | |   push:\n 6 | |     branches:\n 7 | |       - main\n 8 | |     tags:\n 9 | |       - \"v*\"\n10 | |   pull_request:\n   | |_______________- generally used when publishing artifacts generated at runtime\n...\n22 |         - uses: actions/setup-node@v4\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ omitting `package-manager-cache` enables caching\n   |\n   = note: audit confidence \u2192 Low\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#cache-poisoning\n\nerror[cache-poisoning]: runtime artifacts potentially vulnerable to a cache poisoning attack\n  --> ./.github/workflows/ci.yml:39:9\n   |\n 4 | / on:\n 5 | |   push:\n 6 | |     branches:\n 7 | |       - main\n 8 | |     tags:\n 9 | |       - \"v*\"\n10 | |   pull_request:\n   | |_______________- generally used when publishing artifacts generated at runtime\n...\n39 |         - uses: actions/setup-node@v4\n   |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ omitting `package-manager-cache` enables caching\n   |\n   = note: audit confidence \u2192 Low\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#cache-poisoning\n\n10 findings (4 suppressed, 4 unsafe fixes): 0 informational, 0 low, 0 medium, 6 high"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-tag-trigger",
+      "kind": "workspace_command",
+      "source": "task prompt: runs when a version tag matching v* is pushed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-release-needs-build",
+      "kind": "workspace_command",
+      "source": "task prompt: the release job should only run after the build job has passed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "release-job-scoped-permissions",
+      "kind": "workspace_command",
+      "source": "SKILL.md minimal permissions: create a release needs contents: write",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README's release section",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 8,
+  "total": 16
+}

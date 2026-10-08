@@ -1,0 +1,16 @@
+{
+  "id": "pt-t07",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.07874619999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T05:09:05.893627+00:00",
+    "seconds": 24.0
+  },
+  "aborted": false,
+  "rate_limited": false
+}

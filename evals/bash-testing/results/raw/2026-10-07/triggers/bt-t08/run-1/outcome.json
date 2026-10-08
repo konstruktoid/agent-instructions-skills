@@ -1,0 +1,16 @@
+{
+  "id": "bt-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0342328,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T20:13:52.771306+00:00",
+    "seconds": 13.6
+  },
+  "aborted": false,
+  "rate_limited": false
+}
