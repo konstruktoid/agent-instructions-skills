@@ -1,0 +1,113 @@
+diff --git a/README.md b/README.md
+index 14b4f4f..b181c9f 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,14 @@ from webhooks.dispatch import deliver
+ deliver(subscriber_url, {"event": "created"})
+ ```
+ 
+-A failed delivery is not retried.
++`deliver` returns a `Delivery` with the final `status`, a `succeeded` flag and `attempts`, one
++`Attempt` (number, status, error) per request made:
++
++```python
++result = deliver(subscriber_url, {"event": "created"})
++print(len(result.attempts), result.succeeded)
++```
++
++Each request times out after 5 seconds. Connection errors, timeouts and 5xx responses are retried
++up to 3 times (4 attempts in total), waiting 1s, 2s and 4s between attempts. Other responses,
++including 4xx, are final and not retried. A failed delivery does not raise; check `succeeded`.
+diff --git a/src/webhooks/dispatch.py b/src/webhooks/dispatch.py
+index 4562635..fc9078e 100644
+--- a/src/webhooks/dispatch.py
++++ b/src/webhooks/dispatch.py
+@@ -3,10 +3,46 @@
+ import json
+ import logging
+ import random
++import time
++import urllib.error
+ import urllib.request
++from collections.abc import Callable
++from dataclasses import dataclass
+ 
+ logger = logging.getLogger(__name__)
+ 
++REQUEST_TIMEOUT_SECONDS = 5
++MAX_RETRIES = 3
++BACKOFF_BASE_SECONDS = 1.0
++
++
++@dataclass(frozen=True)
++class Attempt:
++    """One delivery attempt; status is None when no response was received."""
++
++    number: int
++    status: int | None
++    error: str | None = None
++
++
++@dataclass(frozen=True)
++class Delivery:
++    """The outcome of a delivery and every attempt made."""
++
++    attempts: list[Attempt]
++
++    @property
++    def status(self) -> int | None:
++        """Status of the last attempt, or None if it got no response."""
++        return self.attempts[-1].status
++
++    @property
++    def succeeded(self) -> bool:
++        """Whether the last attempt got a 2xx or 3xx response."""
++        status = self.status
++        return status is not None and status < 400
++
++
+ SIGNING_TOKEN = "whsec_9f2c41ab7de84c0195aa63d0b7e21f88"
+ 
+ 
+@@ -25,11 +61,34 @@ def verify(payload: str, provided: str) -> bool:
+     return provided == sign(payload)
+ 
+ 
+-def deliver(url: str, payload: dict) -> int:
+-    """POST a payload to a subscriber endpoint and return the status code."""
++def deliver(url: str, payload: dict, *, sleep: Callable[[float], None] = time.sleep) -> Delivery:
++    """POST a payload to a subscriber endpoint, retrying transient failures.
++
++    Each request times out after REQUEST_TIMEOUT_SECONDS. Connection errors, timeouts and 5xx
++    responses are retried up to MAX_RETRIES times, waiting BACKOFF_BASE_SECONDS * 2**n between
++    attempts. Other responses, 4xx included, are final. Every attempt is recorded on the result.
++    """
+     body = json.dumps(payload).encode()
+-    request = urllib.request.Request(url, data=body, method="POST")
+-    request.add_header("X-Signature", sign(json.dumps(payload)))
+-    logger.info("delivering %s to %s with token %s", new_delivery_id(), url, SIGNING_TOKEN)
+-    with urllib.request.urlopen(request) as response:
+-        return response.status
++    signature = sign(json.dumps(payload))
++    delivery_id = new_delivery_id()
++    attempts: list[Attempt] = []
++    for number in range(1, MAX_RETRIES + 2):
++        request = urllib.request.Request(url, data=body, method="POST")
++        request.add_header("X-Signature", signature)
++        logger.info("delivering %s to %s (attempt %d)", delivery_id, url, number)
++        status: int | None = None
++        error: str | None = None
++        try:
++            with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
++                status = response.status
++        except urllib.error.HTTPError as exc:
++            status = exc.code
++            error = f"HTTP {exc.code}"
++        except OSError as exc:  # URLError, connection failures and timeouts
++            error = type(exc).__name__
++        attempts.append(Attempt(number=number, status=status, error=error))
++        retryable = status is None or status >= 500
++        if not retryable or number > MAX_RETRIES:
++            break
++        sleep(BACKOFF_BASE_SECONDS * 2 ** (number - 1))
++    return Delivery(attempts=attempts)

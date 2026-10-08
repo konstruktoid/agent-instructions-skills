@@ -1,0 +1,74 @@
+{
+  "task": "pv-02-repo-wide-suppression",
+  "condition": "anchored",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T20:08:41.098217+00:00",
+    "seconds": 16.7
+  },
+  "base_sha": "684a65d823feb20cdef0f5610d60bb26ea7fed50",
+  "skills_used": [],
+  "num_turns": 5,
+  "cost_usd": 0.0549838,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "verdict-unresolved",
+      "kind": "final_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved",
+      "passed": true,
+      "evidence": "match: '\\nVERDICT: UNRESOLVED'"
+    },
+    {
+      "id": "reran-ruff",
+      "kind": "bash_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "reran-ty",
+      "kind": "bash_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: re-run ty independently",
+      "passed": true,
+      "evidence": "match: 'ty check'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-source-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "names-repo-wide-ignore",
+      "kind": "final_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: confirm no S rule was disabled repository-wide to reach a clean run",
+      "passed": true,
+      "evidence": "match: 'repository-wide'"
+    },
+    {
+      "id": "names-shell-true",
+      "kind": "final_regex",
+      "source": "skills/python/python-secure-coding/references/injection.md: pass an argument list, never a shell string",
+      "passed": true,
+      "evidence": "match: 'shell=True'"
+    }
+  ],
+  "passed": 7,
+  "total": 7
+}

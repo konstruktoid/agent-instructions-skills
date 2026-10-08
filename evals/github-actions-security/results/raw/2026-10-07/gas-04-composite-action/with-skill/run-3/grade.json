@@ -1,0 +1,146 @@
+{
+  "task": "gas-04-composite-action",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T10:05:36.637463+00:00",
+    "seconds": 42.7
+  },
+  "base_sha": "4de59b51ff87f6a18546e35ae92f73c71cbdf9f4",
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "num_turns": 11,
+  "cost_usd": 0.17470619999999998,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": false,
+      "evidence": "exit 12\nhelp[self-repository]: use GitHub's dedicated self-repository syntax\n  --> ./.github/workflows/ci.yml:27:15\n   |\n26 |       - name: Set up the toolchain\n   |         -------------------------- this step\n27 |         uses: ./actions/setup-toolchain\n   |               ^^^^^^^^^^^^^^^^^^^^^^^^^ use '$/...' instead of './...'\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#self-repository\n\nhelp[self-repository]: use GitHub's dedicated self-repository syntax\n  --> ./.github/workflows/ci.yml:47:15\n   |\n46 |       - name: Set up the toolchain\n   |         -------------------------- this step\n47 |         uses: ./actions/setup-toolchain\n   |               ^^^^^^^^^^^^^^^^^^^^^^^^^ use '$/...' instead of './...'\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#self-repository\n\n2 findings (2 unsafe fixes): 0 informational, 2 low, 0 medium, 0 high"
+    },
+    {
+      "id": "actionlint-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: never declare a workflow change done from the edit alone",
+      "passed": true,
+      "evidence": "match: 'actionlint'"
+    },
+    {
+      "id": "zizmor-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: zizmor is the security audit step",
+      "passed": true,
+      "evidence": "match: 'zizmor'"
+    },
+    {
+      "id": "verify-clean-or-reported",
+      "kind": "workspace_command",
+      "source": "SKILL.md bounded loop: stop and report the failing check and its output",
+      "passed": false,
+      "evidence": "exit 1\nhelp[self-repository]: use GitHub's dedicated self-repository syntax\n  --> ./.github/workflows/ci.yml:27:15\n   |\n26 |       - name: Set up the toolchain\n   |         -------------------------- this step\n27 |         uses: ./actions/setup-toolchain\n   |               ^^^^^^^^^^^^^^^^^^^^^^^^^ use '$/...' instead of './...'\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#self-repository\n\nhelp[self-repository]: use GitHub's dedicated self-repository syntax\n  --> ./.github/workflows/ci.yml:47:15\n   |\n46 |       - name: Set up the toolchain\n   |         -------------------------- this step\n47 |         uses: ./actions/setup-toolchain\n   |               ^^^^^^^^^^^^^^^^^^^^^^^^^ use '$/...' instead of './...'\n   |\n   = note: audit confidence \u2192 High\n   = note: this finding has an auto-fix\n   = help: audit documentation \u2192 https://docs.zizmor.sh/audits/#self-repository\n\n2 findings (2 unsafe fixes): 0 informational, 2 low, 0 medium, 0 high"
+    },
+    {
+      "id": "workflow-level-permissions-empty",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: permissions: {} at workflow level",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "every-job-has-timeout",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set timeout-minutes on every job",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "actions-pinned-by-sha",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: pin every third-party action to a full 40-character commit SHA",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pins-carry-version-comment",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: with the version in a trailing comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-resolved-not-recalled",
+      "kind": "bash_regex",
+      "source": "SKILL.md: never write a SHA from memory, ask the source repository",
+      "passed": true,
+      "evidence": "match: 'gh api'"
+    },
+    {
+      "id": "checkout-does-not-persist-credentials",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: set persist-credentials: false on actions/checkout",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-event-data-in-run-block",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: never interpolate untrusted event data into a run block",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-lint-step",
+      "kind": "workspace_command",
+      "source": "task prompt: add a lint step that runs ruff",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-lockfile-cache-key",
+      "kind": "workspace_command",
+      "source": "task prompt: make the cache key include a hash of uv.lock",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-windows-job",
+      "kind": "workspace_command",
+      "source": "task prompt: add a job that runs on windows-latest",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "composite-action-pinned",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: this includes actions used inside composite actions",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README table",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 15,
+  "total": 17
+}

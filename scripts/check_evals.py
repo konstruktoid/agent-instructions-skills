@@ -354,26 +354,43 @@ def check_results(suite: Path, errors: list[str], *, require_rendered: bool = Tr
             )
 
 
-def check_coverage(suite: Path, task_ids: list[str], stale: list[str]) -> None:
-    """Report every task the suite defines that no stamp has ever graded."""
-    raw = suite / "results" / "raw"
-    graded: set[str] = set()
-    if raw.is_dir():
-        for outcomes in sorted(raw.glob("*/task-outcomes.json")):
-            try:
-                runs = json.loads(outcomes.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if not isinstance(runs, list):
-                continue
-            graded.update(run["task"] for run in runs if isinstance(run, dict) and "task" in run)
+def recorded_runs(suite: Path) -> list[dict[str, Any]]:
+    """Return every run any stamp of the suite recorded in its `task-outcomes.json`."""
+    runs: list[dict[str, Any]] = []
+    for outcomes in sorted((suite / "results" / "raw").glob("*/task-outcomes.json")):
+        try:
+            loaded = json.loads(outcomes.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(loaded, list):
+            runs.extend(run for run in loaded if isinstance(run, dict) and "task" in run)
+    return runs
 
-    stale.extend(
-        f"{task_id}: defined but never graded in any stamp, so the suite's coverage is "
-        "smaller than its task list"
-        for task_id in task_ids
-        if task_id not in graded
-    )
+
+def check_coverage(suite: Path, task_ids: list[str], stale: list[str]) -> None:
+    """Report every task the suite defines that no stamp has ever graded to completion.
+
+    An aborted or truncated run is recorded in `task-outcomes.json` but excluded from every
+    median, so it does not count as coverage here either: a task whose every run met the usage
+    limit has an entry in the file and no measurement behind it.
+    """
+    runs = recorded_runs(suite)
+    recorded = {run["task"] for run in runs}
+    graded = {run["task"] for run in runs if not run.get("aborted") and not run.get("truncated")}
+
+    for task_id in task_ids:
+        if task_id in graded:
+            continue
+        if task_id in recorded:
+            stale.append(
+                f"{task_id}: every recorded run was aborted or truncated, so no stamp has "
+                "graded it to completion"
+            )
+        else:
+            stale.append(
+                f"{task_id}: defined but never graded in any stamp, so the suite's coverage is "
+                "smaller than its task list"
+            )
 
 
 def git_output(arguments: list[str]) -> str:

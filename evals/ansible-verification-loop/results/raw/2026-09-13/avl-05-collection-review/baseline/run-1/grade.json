@@ -96,5 +96,6 @@
     }
   ],
   "passed": 10,
-  "total": 11
+  "total": 11,
+  "rate_limited": false
 }

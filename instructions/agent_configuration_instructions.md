@@ -29,7 +29,8 @@ Covered:
   directory it applies to.
 - Skills a project ships or installs, and the choice of what becomes one.
 - Hooks, their placement, and which rules require one.
-- Subagent definitions: their model, tool allowlist, and scope.
+- Subagent definitions: their model, tool allowlist, and scope, and the briefs that delegate work
+  to them.
 - Changing any of the above, and measuring that the change did what it was written to do.
 
 Not covered:
@@ -233,6 +234,77 @@ which makes it the place for a rule that binds one kind of work rather than the 
 `agent-templates/terraform-security-reviewer.md` uses one to block `terraform apply`, a rule its
 prose states and nothing else enforced.
 
+### Delegating Work to a Subagent
+
+A definition decides what a subagent may do. The call decides what it is asked to do, and the
+main conversation writes every call. The subagent starts with its definition and the prompt it
+was given, and with nothing from the conversation that produced that prompt. A fact the main
+conversation holds and the prompt omits does not exist for the subagent.
+
+#### Required
+
+- Delegate a piece of work only when it has a definition of done that can be checked without the
+  subagent's account of it. Work that cannot be stated that way is not ready to hand off.
+- Keep in the main conversation the work that depends on what only it holds: planning, resolving
+  an ambiguity with the user, reconciling two subagents that disagree, and accepting the result.
+  A subagent given one of these decides it with less context than the caller had.
+- Run subagents in parallel only when their pieces are independent and their writes fall on
+  disjoint files. Two subagents editing one file produce a conflict that neither of them sees.
+  Read-only investigation can fan out without that constraint, with the synthesis done by the
+  main conversation rather than by one of the investigators.
+- Write each prompt as a complete brief, carrying:
+  - The objective, as an outcome rather than an activity.
+  - The context a good decision needs, including what has already been tried or ruled out.
+  - The constraints: which paths it may change, and which it must leave alone.
+  - The inputs, by exact path, revision, or reference, rather than by description.
+  - The expected output, its shape, and a bound on its length. The report lands in the caller's
+    context in full, so ask for findings and the commands that support them, not file contents,
+    diffs, or the output of commands that succeeded.
+  - The definition of done: the verification command to run and the result that counts as
+    passing.
+- Name in the brief the decisions the subagent returns rather than takes: anything that changes
+  an interface, a dependency, the security posture, an external system, cost, or state that
+  cannot be restored. A subagent that meets one stops and reports it.
+- Resolve the requirements before the call, or name the ones still open in the brief and ask
+  for them back as questions. A subagent that meets an open requirement picks an answer, and
+  the pick reads in its report like a fact.
+- Ask for a report that separates what was found, what was changed, what was verified and by
+  which command with which result, the assumptions the result rests on, what remains
+  uncertain, and the next action it recommends. A report that cannot separate these cannot be
+  checked, and one without a recommended action leaves the caller to rederive it.
+- Accept the result only after reading the change and running the verification from the main
+  conversation. Delegation hands off the execution and keeps the responsibility: a subagent's
+  report is a claim about its work, in the same way a fixer's summary is a claim to its verifier.
+
+#### Avoid
+
+- Delegating work whose brief would cost more to write than the work itself, such as a change of
+  a few lines in one file or a question the main conversation can answer from what it already
+  holds. The coordination is then the larger part of the cost.
+- A brief that names an activity, such as "look into authentication", in place of an objective
+  such as "find where authorization decisions are made, document the current behavior with file
+  and line references, and propose the smallest change that supports X; change no code".
+- Splitting one piece of work across several subagents in fragments, where one subagent with a
+  complete brief would hold the whole of it.
+- Two subagents given overlapping scope, which spends twice on one result and returns two
+  answers to reconcile.
+- Treating a subagent that reached `maxTurns`, or returned without the verification its brief
+  required, as finished.
+- Delegating to raise the agent count. The measure is whether each piece of work was finished
+  and checked, and an extra subagent adds a brief to write and a report to read.
+
+#### Patterns
+
+Four shapes cover most delegation. Each names who synthesizes, because synthesis is where the
+pieces are reconciled and it stays with the main conversation.
+
+| Pattern | Use when | Shape |
+|---|---|---|
+| Parallel investigation | Questions about one system that do not depend on each other, such as its architecture, its current behavior, and its tests | Read-only subagents, one per question, each returning findings with file and line references; the main conversation synthesizes |
+| Competing approaches | More than one credible design, where comparing working attempts is cheaper than arguing in advance | One subagent per approach, each writing into its own copy of the tree; the main conversation judges by re-running the same checks on each, not by reading each attempt's account of itself |
+| Implementation and review | A false "done" costs more than a second pass | A fixer, then an independent verifier, then a fresh fixer on what the verifier left unresolved, as in [Splitting a Fixer from a Verifier](#splitting-a-fixer-from-a-verifier) |
+| Research and synthesis | An answer assembled from several sources, such as documentation, advisories, and the code | Researchers per source returning claims with citations; a synthesis; then a check of each claim against its cited source, given the citations and not the synthesis's reasoning |
+
 ### Splitting a Fixer from a Verifier
 
 Where the cost of a false "clean" from a review justifies a second, independent pass, split the
@@ -243,8 +315,9 @@ reviews and edits, and a verifier that checks the fixer's result without trustin
   roles. The tool was named `Task` before Claude Code 2.1.63 and still accepts that name. A fixer
   that also checks its own fix is the single point of failure this split exists to remove.
 - Give the verifier call only the diff, or the changed file paths, and the original request or
-  acceptance criteria. Withhold the fixer's summary and reasoning; passing them anchors the second
-  pass into agreeing with the first instead of rederiving its own conclusion.
+  acceptance criteria. Withhold the fixer's summary and reasoning; passing them risks anchoring the
+  second pass into agreeing with the first instead of rederiving its own conclusion. Withholding
+  them costs nothing, and the one measurement so far found no effect either way.
 - Drop `Edit` from the verifier's `tools`, as a mechanical restriction rather than an instruction
   it could ignore. This removes the direct edit affordance, but it is not a complete read-only
   guarantee: a verifier that keeps `Bash` can still write through it. Where the host cannot
@@ -374,6 +447,9 @@ Before finalizing a configuration change, verify that:
 - Each subagent definition sets `model` explicitly, carries the smallest tool allowlist its work
   needs, sets `maxTurns`, does not set `bypassPermissions`, and sets `memory` only where the
   widened access and the committed directory were intended.
+- Each delegation instruction the change adds asks for a complete brief, keeps acceptance with
+  the main conversation, runs subagents in parallel only over disjoint writes, and asks for a
+  report that ends in a recommended next action.
 - Each verifier definition grants no write tool, carries a `PreToolUse` hook that blocks them, and
   is invoked with a model and effort no weaker than its fixer's, within a bounded number of rounds.
 - The change was measured against recorded tasks, or its lack of measurement was stated.

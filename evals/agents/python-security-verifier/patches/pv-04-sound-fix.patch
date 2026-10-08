@@ -1,8 +1,8 @@
 diff --git a/src/backupkit/archive.py b/src/backupkit/archive.py
-index 6555476..54b3670 100644
+index 6555476..2a185b0 100644
 --- a/src/backupkit/archive.py
 +++ b/src/backupkit/archive.py
-@@ -1,9 +1,15 @@
+@@ -1,9 +1,16 @@
  """Archive a directory with tar."""
  
 -import os
@@ -18,5 +18,6 @@ index 6555476..54b3670 100644
 +    if tar is None:
 +        message = "tar is not installed"
 +        raise RuntimeError(message)
-+    # An argument list with no shell, and `--` so a path starting with `-` is not an option.
-+    subprocess.run([tar, "-czf", str(dest), "--", str(src)], check=True)  # noqa: S603
++    # S603 is safe: no shell, an absolute forced-local dest, and `--` ending options before src.
++    args = [tar, "--force-local", "-czf", str(dest.resolve()), "--", str(src)]
++    subprocess.run(args, check=True)  # noqa: S603

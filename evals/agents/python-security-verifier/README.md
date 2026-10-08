@@ -7,8 +7,19 @@ withhold it.
 
 ## Current state
 
-Not yet run. `scripts/check_evals.py` reports the suite as unmeasured until a rendered results
-file exists, and nothing in this directory is evidence that the claim holds.
+Measured twice from a clean tree, with three runs per condition: on 2026-10-06 at `9f06227`,
+`results/2026-10-06.md`, and on 2026-10-07 at `ad44bce`, `results/2026-10-07.md`, after the template
+gained its reasoning-discipline section. Every run of both conditions in both stamps scored full
+marks on all four tasks, including the `pv-04` control, so the suite found no anchoring effect. At
+its present difficulty it also cannot find one: each defect task plants a single defect that a
+careful reading finds, and a verifier that finds it regardless of the summary leaves the summary
+nothing to change. Evidence for or against the claim needs harder tasks, such as a summary that
+explains the defect away, or a defect no linter points at.
+
+A first run at `8669dce` was discarded rather than committed. Its `pv-04` patch passed `dest` to
+`tar -f` unguarded, so GNU tar would read a colon in it as a remote host, and one anchored run
+reported exactly that. The control was not sound, and `bdf7074` closed the gap before the run
+above.
 
 ## Conditions
 

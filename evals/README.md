@@ -5,15 +5,22 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-08-30
+## Current state, 2026-10-07
 
-Nothing measured here is current. `scripts/check_evals.py` reports every one of the six suites
-as older than the skill or the specification it measured, so the results files below describe
-the content as it stood at each stamp rather than as it stands now. Two skills have no suite at
-all, `github-repository-security` and `github-organization-governance`, so nothing measures
-either. Both states are reported by the checker and neither is answerable by an edit: each needs
-a paid re-run, and in the second case a run has to happen before the suite can even be complete,
-since a suite with no rendered results file is a structural error.
+Every latest stamp is current. The six skill suites were measured on 2026-10-06 and 2026-10-07,
+and the `python-security-verifier` suite on 2026-10-07, each from a fresh clone of a committed
+revision with no modified files and no ancestor `CLAUDE.md`. The checker reports no staleness.
+
+Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
+`terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the twelve agent
+templates, only `python-security-verifier` has a suite. Its 2026-10-07 stamp measured the
+template with its reasoning-discipline section and, like the 2026-10-06 stamp before it, scored
+full marks in both conditions on every task. The claim it tests from
+`instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the verifier,
+is therefore neither shown nor ruled out at the suite's present difficulty, and the suite cannot
+show whether the reasoning discipline changes anything.
+
+`scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
 ## Layout
 
@@ -39,6 +46,18 @@ test plus `instructions/`, exactly as a real plugin install would resolve. Both 
 `--setting-sources project` so the user's own settings and installed plugins stay out of
 both arms. The result is that any difference is attributable to the skill, and `skills_used`
 in each `grade.json` records whether it actually fired.
+
+Neither that flag nor the per-run `CLAUDE_CONFIG_DIR` keeps out an instruction file sitting in
+an ancestor of the run directory, because Claude Code walks up from its working directory and
+loads `CLAUDE.md`, `CLAUDE.local.md` and `.claude/CLAUDE.md` wherever it finds them. A checkout
+under `$HOME` has `~/.claude/CLAUDE.md` as such an ancestor, and ten transcripts across the
+2026-09-13 stamps, in both conditions, end on wording taken from one. A probe on 2026-10-06,
+with a private `CLAUDE_CONFIG_DIR` and `--setting-sources project`, quoted that file when run
+from `evals/` and found nothing when run from `/tmp`. `tasks`, `triggers` and `agent-tasks`
+therefore refuse to start while any of those files exists above `evals/`. Run from a checkout
+outside those directories, or pass `--allow-ancestor-instructions` to measure anyway, in which
+case the paths are recorded in `source-revision.json` and the rendered report states that the
+baseline ran with that guidance.
 
 Assertions are of two kinds, and neither asks for a judgment: a `workspace_command` runs in
 the finished workspace and passes on exit 0, and a regex kind matches against the run's
@@ -324,4 +343,12 @@ address it.
   table; a condition whose every run aborted is reported as `aborted` rather than given a
   tally. The distinction from `truncated` is worth keeping: a truncated run did the work and
   stopped before saying so, an aborted one never got that far, so re-running it is the only
-  way to recover the measurement.
+  way to recover the measurement. A run rejected by the usage limit is also marked
+  `rate_limited`, and the harness starts no further queued run after seeing one, since each
+  would meet the same rejection within seconds; the skipped runs are named on standard error
+  and the command exits 1. `task-outcomes.json` is rewritten as each run finishes, so an
+  interrupted batch leaves it in step with the `grade.json` files on disk. Before this, the
+  2026-09-13 `avl-05-collection-review` baseline run 1 was re-run and graded 10/11 in a batch
+  that never completed, and the report named it as aborted until `run_eval.py regrade` brought
+  that stamp back in step. `check_evals.py` counts a task as covered only when some stamp holds
+  a run of it that neither aborted nor truncated.

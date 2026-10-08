@@ -1,0 +1,53 @@
+diff --git a/src/paging/slicing.py b/src/paging/slicing.py
+index f395508..e879fed 100644
+--- a/src/paging/slicing.py
++++ b/src/paging/slicing.py
+@@ -7,8 +7,7 @@ def page_slice(items: list, page: int, per_page: int) -> list:
+         message = "page and per_page must be positive"
+         raise ValueError(message)
+     start = (page - 1) * per_page
+-    end = min(start + per_page, len(items) - 1)
+-    return items[start:end]
++    return items[start : start + per_page]
+ 
+ 
+ def page_count(total: int, per_page: int) -> int:
+diff --git a/tests/test_slicing.py b/tests/test_slicing.py
+index 089ab16..d578e68 100644
+--- a/tests/test_slicing.py
++++ b/tests/test_slicing.py
+@@ -1,6 +1,7 @@
+ """Tests for paging.slicing."""
+ 
+ import pytest
++
+ from paging import page_count, page_slice
+ 
+ 
+@@ -17,6 +18,26 @@ def test_page_slice_returns_the_requested_page(letters, page, per_page, expected
+     assert page_slice(letters, page, per_page) == expected
+ 
+ 
++@pytest.mark.parametrize(
++    ("page", "per_page", "expected"),
++    [
++        (3, 2, ["e", "f"]),
++        (2, 4, ["e", "f"]),
++        (4, 2, []),
++        (10, 2, []),
++    ],
++)
++def test_page_slice_reaches_the_end_and_past_it(letters, page, per_page, expected):
++    """The last item is reachable and a page past the end is empty."""
++    assert page_slice(letters, page, per_page) == expected
++
++
++def test_page_slice_puts_every_item_on_exactly_one_page(letters):
++    """Concatenating all pages reproduces the sequence."""
++    pages = [page_slice(letters, n, 4) for n in range(1, page_count(len(letters), 4) + 1)]
++    assert [item for page in pages for item in page] == letters
++
++
+ @pytest.mark.parametrize(
+     ("total", "per_page", "expected"),
+     [(6, 2, 3), (7, 2, 4), (0, 2, 0)],

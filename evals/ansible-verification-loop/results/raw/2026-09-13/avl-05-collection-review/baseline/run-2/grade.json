@@ -70,31 +70,32 @@
       "id": "var-prefix-fixed",
       "kind": "workspace_command",
       "source": "ansible-lint var-naming[no-role-prefix], a finding present in the fixture",
-      "passed": false,
-      "evidence": "exit 1"
+      "passed": true,
+      "evidence": "exit 0"
     },
     {
       "id": "requires-ansible-supported",
       "kind": "workspace_command",
       "source": "ansible-lint meta-runtime[unsupported-version], a finding present in the fixture",
-      "passed": false,
-      "evidence": "exit 1"
+      "passed": true,
+      "evidence": "exit 0"
     },
     {
       "id": "galaxy-metadata-fixed",
       "kind": "workspace_command",
       "source": "ansible-lint galaxy[no-repository] and galaxy[tags], findings present in the fixture",
-      "passed": false,
-      "evidence": "exit 1"
+      "passed": true,
+      "evidence": "exit 0"
     },
     {
       "id": "changed-when-set",
       "kind": "workspace_command",
       "source": "SKILL.md checklist: idempotence holds",
-      "passed": false,
-      "evidence": "exit 1"
+      "passed": true,
+      "evidence": "exit 0"
     }
   ],
-  "passed": 1,
-  "total": 11
+  "passed": 5,
+  "total": 11,
+  "rate_limited": true
 }

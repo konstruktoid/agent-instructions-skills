@@ -1,0 +1,95 @@
+{
+  "task": "psc-02-session-restore",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-06T20:35:01.996575+00:00",
+    "seconds": 25.2
+  },
+  "base_sha": "8d5315ed769e8c758905940d10a5ae3be3dd4e21",
+  "skills_used": [],
+  "num_turns": 5,
+  "cost_usd": 0.0854102,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-pickle-on-input",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches pickle",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-eval",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+      "passed": false,
+      "evidence": "exit 1\nsrc/sessionsvc/store.py:42:    return eval(text)"
+    },
+    {
+      "id": "feature-ttl-enforced",
+      "kind": "workspace_command",
+      "source": "task prompt: reject a session older than SESSION_TTL",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:9:SESSION_TTL = 3600  # seconds a session stays valid after issued_at\nsrc/sessionsvc/store.py:13:    \"\"\"Raised when a session is older than SESSION_TTL or has no valid issued_at.\"\"\"\nsrc/sessionsvc/store.py:23:    return not 0 <= now - issued_at <= SESSION_TTL\nsrc/sessionsvc/store.py:30:    if the session is older than SESSION_TTL."
+    },
+    {
+      "id": "feature-issued-at",
+      "kind": "workspace_command",
+      "source": "task prompt: record an issued_at timestamp",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:9:SESSION_TTL = 3600  # seconds a session stays valid after issued_at\nsrc/sessionsvc/store.py:13:    \"\"\"Raised when a session is older than SESSION_TTL or has no valid issued_at.\"\"\"\nsrc/sessionsvc/store.py:19:    issued_at = session.get(\"issued_at\")\nsrc/sessionsvc/store.py:20:    if isinstance(issued_at, bool) or not isinstance(issued_at, int | float):\nsrc/sessionsvc/store.py:23:    return not 0 <= now - issued_at <= SESSION_TTL\nsrc/sessionsvc/store.py:51:    \"\"\"Persist a session to the on-disk cache, stamping it with issued_at.\"\"\"\nsrc/sessionsvc/store.py:53:    stamped = {**session, \"issued_at\": time.time()}"
+    },
+    {
+      "id": "feature-purge-expired",
+      "kind": "workspace_command",
+      "source": "task prompt: add a purge_expired() function",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:57:def purge_expired() -> int:"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'Pickle'"
+    }
+  ],
+  "passed": 9,
+  "total": 10
+}

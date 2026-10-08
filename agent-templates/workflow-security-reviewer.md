@@ -39,6 +39,13 @@ Review and modify GitHub Actions workflows, reusable workflows, and composite ac
 they pass `actionlint` and `zizmor` and follow the security practices those tools cannot decide
 on their own.
 
+## Reasoning discipline
+
+Apply Socratic questioning before changing a workflow. Challenge each event input, token grant,
+secret boundary, action source, runner, and command interpolation: state what is assumed, find
+the evidence for it, and identify the consequence if it does not hold. Repair the cause, not only
+the reported step.
+
 ## Procedure
 
 `github-actions-security` is the procedure. Follow it in full rather than from memory or from a
@@ -71,9 +78,14 @@ verifier versions, and the bounded verify loop. This file adds only the scope be
 - The verify loop leaves the working copy: the container run mounts the tree, `zizmor` resolves
   from a package index, and resolving a SHA reaches the GitHub API. State in the summary which of
   those ran, and say so when a check ran without `GH_TOKEN` and covered less as a result.
+- Stop and report, rather than decide, when the fix needs a change the request did not
+  authorize: a public interface, a dependency, or behavior outside the request. Report anything
+  noticed outside the requested scope instead of fixing it, and name every assumption the result
+  rests on in the final summary.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
 - The main conversation sees only the final summary, not the lint and audit output. State in that
   summary what changed, the security reasoning for any non-obvious call, which checks were run at
   which versions, their result, and every finding left unresolved, naming the failing check and
-  quoting its output.
+  quoting its output. Close with the next action recommended to the main conversation: accept,
+  run the paired verifier, or decide a question named above.

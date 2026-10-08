@@ -1,0 +1,104 @@
+{
+  "task": "bt-03-inline-script",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T20:06:55.419146+00:00",
+    "seconds": 19.8
+  },
+  "base_sha": "80ebfdaf4959c438149ae6c3fe15b2af97d06ccc",
+  "skills_used": [
+    "eval-bash-testing:bash-testing"
+  ],
+  "num_turns": 8,
+  "cost_usd": 0.10028480000000001,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+      "passed": true,
+      "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the suite, do not describe it",
+      "passed": true,
+      "evidence": "match: '_test.sh'"
+    },
+    {
+      "id": "rejects-empty-name",
+      "kind": "workspace_command",
+      "source": "task prompt: reject an empty name with a non-zero exit status",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "rejection-message-on-stderr",
+      "kind": "workspace_command",
+      "source": "SKILL.md: assert that diagnostics go to stderr",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "valid-name-still-works",
+      "kind": "workspace_command",
+      "source": "SKILL.md: the full suite passes, not only the new test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "script-made-sourceable",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "test-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-convention-followed",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "rejection-covered",
+      "kind": "workspace_command",
+      "source": "SKILL.md: cover the rejection paths, not only the happy path",
+      "passed": true,
+      "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+    },
+    {
+      "id": "shellcheck-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: shellcheck clean on the test files too",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-leftover-scratch-files",
+      "kind": "workspace_command",
+      "source": "SKILL.md: nothing written outside the test's own temporary directory",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 10,
+  "total": 11
+}

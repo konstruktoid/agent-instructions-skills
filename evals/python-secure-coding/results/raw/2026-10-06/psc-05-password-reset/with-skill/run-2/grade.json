@@ -1,0 +1,125 @@
+{
+  "task": "psc-05-password-reset",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-06T20:37:44.542091+00:00",
+    "seconds": 43.4
+  },
+  "base_sha": "ee372dc8194fbdee850f1d5c2315a773282d7dfb",
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 10,
+  "cost_usd": 0.15613279999999996,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n3 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-fast-hash-for-passwords",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: hash passwords with bcrypt or Argon2, never MD5, SHA-1, or a bare SHA-2 digest",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/crypto.py:29:    return hashlib.sha256(token.encode()).hexdigest()"
+    },
+    {
+      "id": "strong-password-hash",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: passwords hashed with bcrypt/Argon2",
+      "passed": true,
+      "evidence": "exit 0\nsrc/accounts/crypto.py:10:# scrypt cost parameters (RFC 7914 interactive-login recommendation: ~16 MiB of memory).\nsrc/accounts/crypto.py:11:SCRYPT_N = 2**14\nsrc/accounts/crypto.py:12:SCRYPT_R = 8\nsrc/accounts/crypto.py:13:SCRYPT_P = 1\nsrc/accounts/crypto.py:18:    return hashlib.scrypt(\nsrc/accounts/crypto.py:21:        n=SCRYPT_N,\nsrc/accounts/crypto.py:22:        r=SCRYPT_R,\nsrc/accounts/crypto.py:23:        p=SCRYPT_P,"
+    },
+    {
+      "id": "secrets-module-token",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+      "passed": true,
+      "evidence": "exit 0\nsrc/accounts/reset.py:36:    return secrets.token_hex(8)\nsrc/accounts/reset.py:47:    return secrets.token_urlsafe(TOKEN_BYTES)"
+    },
+    {
+      "id": "token-entropy-sufficient",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: a reset token is a secret, so it needs enough bytes to be unguessable, not enough to be retyped",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/reset.py:36:    return secrets.token_hex(8)"
+    },
+    {
+      "id": "constant-time-comparison",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: token comparisons use secrets/hmac compare_digest",
+      "passed": true,
+      "evidence": "exit 0\nsrc/accounts/crypto.py:34:    return hmac.compare_digest(left.encode(), right.encode())"
+    },
+    {
+      "id": "no-digest-equality-shortcut",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: compare tokens with compare_digest, never ==; hashing both sides first equalises length but the comparison still short-circuits",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-token-logged",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not logged",
+      "passed": false,
+      "evidence": "exit 1\nsrc/accounts/reset.py:55:    logger.info(\"issued a reset token\")"
+    },
+    {
+      "id": "feature-implemented",
+      "kind": "workspace_command",
+      "source": "task prompt: implement complete_reset()",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-single-use-and-expiry",
+      "kind": "workspace_command",
+      "source": "task prompt: single use, expires 30 minutes after issue",
+      "passed": true,
+      "evidence": "exit 0\nsrc/accounts/reset.py:64:    \"\"\"Return the unexpired outstanding token matching `token`, if any."
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'compare_digest'"
+    }
+  ],
+  "passed": 11,
+  "total": 14
+}
