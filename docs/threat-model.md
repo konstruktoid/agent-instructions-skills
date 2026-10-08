@@ -101,7 +101,7 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 
 | Field | Value |
 |---|---|
-| Trigger | `:3`, on creating or editing a shell script, sourced library, or shell embedded in CI steps, container entrypoints, systemd units, cron jobs, or git hooks |
+| Trigger | `:3`, on creating or editing a shell script, sourced library, or shell embedded in CI `run:` steps, container entrypoints, systemd units, cron jobs, or git hooks, and not on a workflow step that only calls an action |
 | Tools implied | Read, Edit, Bash |
 | Shell | Yes. The repository's own entry point, named as `make lint` or `pre-commit run --all-files` (`:261`); `shellcheck`, with `-x` (`:264`); `bash -n` (`:267`); `shfmt -d` (`:269`); the script under test, on a representative input and on at least one failure path (`:270`); the repository's shell test suite, `bats`, `shunit2`, or a `make test` target (`:275`) |
 | Reads | Scripts already in the repository (`:63`); `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md` (`:66`) |
@@ -209,9 +209,10 @@ states they are templates, not installable agents. The four verifiers grant no w
 | `agent-templates/terraform-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:21`) | Yes, through Bash, to re-run `terraform fmt`, `terraform validate`, `tflint`, and the configuration scanner (`:16`). `:83` bars `terraform apply`, and `:20` excludes `plan` as well | As for the reviewer: `terraform init` reaches the registries and `source` URLs the configuration names |
 | `agent-templates/workflow-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:20`) | Yes, through Bash, to re-run `actionlint` and `zizmor` and re-resolve action SHAs (`:16`) | Yes, the GitHub API, which `:73` has it query to re-resolve every SHA in the diff |
 
-Every template also runs shell through its `hooks:` field, whatever `tools:` declares. Each
-verifier's inline `PreToolUse` command blocks `Edit`, `Write`, and `NotebookEdit` and reads no
-input (`agent-templates/python-security-verifier.md:35`). The two Terraform templates run
+The five templates that declare `hooks:`, the four verifiers and
+`agent-templates/terraform-security-reviewer.md`, also run shell through it, whatever `tools:`
+declares. Each verifier's inline `PreToolUse` command blocks `Edit`, `Write`, and `NotebookEdit`
+and reads no input (`agent-templates/python-security-verifier.md:35`). The two Terraform templates run
 `agent-templates/hooks/deny-terraform-subcommands.sh` on every Bash call
 (`agent-templates/terraform-security-reviewer.md:37`, `agent-templates/terraform-security-verifier.md:44`).
 It parses the tool input with `jq` (`agent-templates/hooks/deny-terraform-subcommands.sh:37`),
@@ -231,9 +232,9 @@ later session loads as system prompt. No template sets it and
 
 ### Instructions documents
 
-Seven files under `instructions/`. `README.md:232` states no tool auto-discovers them. They carry
-no shell invocation of their own and no egress. Under the submodule install at `README.md:239`
-they are referenced directly from a consumer's `CLAUDE.md` (`README.md:245`-`:247`), which loads
+Seven files under `instructions/`. `README.md:256` states no tool auto-discovers them. They carry
+no shell invocation of their own and no egress. Under the submodule install at `README.md:263`
+they are referenced directly from a consumer's `CLAUDE.md` (`README.md:269`-`:271`), which loads
 them into every session rather than on demand.
 
 ### Marketplace manifest
@@ -249,7 +250,7 @@ no file in the repository defines it.
 |---|---|---|---|---|---|---|
 | `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:68`, `:91`, `:128`, `:164`). `persist-credentials: false` on every checkout (`:27`, `:73`, `:96`, `:133`, `:169`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:80`-`:84`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`); `docker run` of `rhysd/actionlint` pinned by digest (`:146`-`:147`); `uvx "zizmor@1.29.0"` over `.github/` (`:157`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:157`); `docker run` pulls the actionlint image (`:146`). Actions are pinned by SHA (`:25`, `:33`, `:176`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:156`) |
 | `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:984`, `:82`, `:84`, `:73`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:471`) | Read-only | None | `evals/` | None | Eval suite files |
+| `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:490`) | Read-only | None | `evals/` | None | Eval suite files |
 | `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
 
 ### `evals/run_eval.py`
@@ -259,12 +260,12 @@ ship to consumers; it runs on the maintainer's machine.
 
 | Field | Value |
 |---|---|
-| Trigger | Manual. `evals/README.md:124` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
+| Trigger | Manual. `evals/README.md:122` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
 | Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:472`) and for git (`:873`, `:902`, `:903`, `:1046`, `:1192`, `:1200`, `:1561`, `:1562`, `:1579`). And `subprocess.run(command, shell=True, ...)` at `:814`-`:816`, where `command` is a grader string read from a suite's `assertions.json` |
 | Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:104`, applied through `RunPermissions` at `:300` and `:346`-`:351`, with the unbounded surface behind `--all-tools` (`:1402`, `:2180`). `--setting-sources project` keeps the caller's own settings out of both arms (`:335`) |
 | Filesystem, outside the repository root | Yes, and it reaches a live credential. `:276` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:279` symlinks it into the run's private home. A private HOME tree is created per run (`:263`-`:275`). `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed" |
 | Environment | `env = dict(os.environ)` (`:291`), so the run starts from the caller's full environment; `$EVAL_TOOL_BIN` is prepended to `PATH` (`:294`) |
-| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:104`). Plus whatever a fixture's own tooling fetches (`evals/README.md:111`-`:122` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`) |
+| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:104`). Plus whatever a fixture's own tooling fetches (`evals/README.md:109`-`:120` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`) |
 | Reads content it did not author | Comprehensively. Task prompts from `tasks.json`, fixture trees, grader commands from `assertions.json`, and the model's own transcript, which is then parsed at `:618`-`:645`. Claude Code also loads any `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` above `evals/` into both conditions; a run refuses to start when one exists, unless `--allow-ancestor-instructions` is passed, in which case the paths are recorded in the stamp's `source-revision.json` and stated in its report |
 
 Supporting eval data:
@@ -307,7 +308,7 @@ this repository, since a new eval task requires both files.
 holds only for the trust assumption it names: "The command comes from a checked-in
 assertions.json in this repository". A pull request branch is not yet that.
 
-**What happens.** The maintainer runs the suite as `evals/README.md:124` documents. `run_grader`
+**What happens.** The maintainer runs the suite as `evals/README.md:122` documents. `run_grader`
 executes the string under `/bin/sh` with `cwd` set to the finished workspace and `env` from
 `run_environment(home)`, which is `dict(os.environ)` plus the run's private HOME
 (`run_eval.py:291`, `:797`).
@@ -348,7 +349,7 @@ sandbox option in `controls.md` is the one that bounds reach, and it is still op
 **Entry point.** A pull request adding a task to `evals/<skill>/tasks.json` and its fixture tree.
 
 **File abused.** `evals/run_eval.py`, in the branch that added `--permission-mode
-bypassPermissions` whenever `--tools` was not passed. `evals/README.md:124` shows the documented
+bypassPermissions` whenever `--tools` was not passed. `evals/README.md:122` shows the documented
 invocation, which passes no `--tools`, so every task run took that branch.
 
 **What happens.** The agent is handed a contributor-written prompt and a contributor-written
@@ -462,7 +463,7 @@ mechanism present.
    deploy keys. An added instruction to widen a bypass actor, or to grant a collaborator, is
    camouflaged by everything around it.
 3. **A line in `instructions/*.md`**. Under the submodule install these are referenced directly
-   from the consumer's `CLAUDE.md` (`README.md:245`), so they load into every session
+   from the consumer's `CLAUDE.md` (`README.md:269`), so they load into every session
    unconditionally rather than when a skill triggers.
 4. **A changed pin in `skills/github/github-actions-security/SKILL.md:239` or `:249`**, pointing
    the container or the `uvx` package at an attacker-controlled name. Consumers run these
@@ -580,7 +581,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:239`-`:241` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:147`, and `README.md:471` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:147`, and `README.md:498` was changed
 with it. The surrounding text at `:238`-`:242` states the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
 "zizmor@1.29.0"` at `github-actions-security/SKILL.md:249`, which still resolves a package
@@ -597,14 +598,14 @@ form, and gave the update pair with no ref either.
 setting offered `"ref": "<branch-or-tag>"` as the way to pin and stated that a marketplace source
 "accepts a branch or tag, not a commit SHA". No tag existed in the repository, so the only
 available pin was a branch, which is itself moving. The single mechanism that pinned an exact
-commit was the submodule at `README.md:239`, presented as the route for the instructions documents
+commit was the submodule at `README.md:263`, presented as the route for the instructions documents
 and for non-plugin setups rather than as the way to obtain skills.
 
 **Landed on the repository side.** `README.md:193` now gives the pinned form first, with the
 unpinned form kept below and labeled as tracking the default branch (`:203`). The team setting at
 `:248` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:744` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:607` documents the release order, and
+disagrees with the others. `README.md:626` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 

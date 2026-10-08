@@ -99,7 +99,7 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:471` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:498` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:147`. The prose at
 `github-actions-security/SKILL.md:226`-`:230` was rewritten to state the reason where the
 command is, rather than as a rule the
@@ -108,7 +108,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:471` documents it as something to type.
+no job for it. `README.md:490` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -141,7 +141,7 @@ it:
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:464` was updated from four jobs to five.
+clean. `README.md:483` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -280,7 +280,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:607` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:626` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -542,7 +542,7 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:471` carry the
+   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:498` carry the
    digest from `lint.yml:147`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:715`. Attack path 1.3 is closed.
