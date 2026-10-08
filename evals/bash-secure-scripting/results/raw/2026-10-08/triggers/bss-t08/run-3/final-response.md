@@ -1,51 +1,44 @@
-This is a conceptual question about interactive shells, so here's the explanation directly.
+Job control lets one interactive shell run several pipelines ("jobs") at once and move them between the foreground and the background. Bash, the kernel's terminal driver and process groups all take part.
 
-## Job control in interactive bash
+## The pieces underneath
 
-### The pieces
-- **Process groups:** Bash puts each pipeline you launch (e.g. `grep foo log | sort`) into its own process group. That group is one **job**. Signals from the terminal go to a whole group at once, which is why Ctrl-C stops every process in a pipeline.
-- **Sessions and the controlling terminal:** The shell leads a session tied to a terminal (tty). The terminal driver tracks one **foreground process group**. Only that group can read from the terminal, and it's the group that gets keyboard-generated signals.
-- **Job table:** Bash keeps a numbered list of its jobs. Each job is marked Running, Stopped or Done.
+- **Process groups.** Bash puts each pipeline in its own process group (`setpgid`), so `cat log | grep err | less` is one job made of three processes. Signals from the terminal go to the whole group.
+- **Sessions and the controlling terminal.** The interactive shell leads a session tied to a TTY. That terminal has one **foreground process group** at a time, which bash sets with `tcsetpgrp()`.
+- **Terminal-generated signals.** The TTY driver turns special keys into signals and sends them to the foreground group only:
+  - `Ctrl-C` → `SIGINT` (interrupt)
+  - `Ctrl-Z` → `SIGTSTP` (suspend)
+  - `Ctrl-\` → `SIGQUIT`
+- **Background access to the TTY.** If a background job tries to read from the terminal, the kernel sends it `SIGTTIN` and it stops. If it writes while `stty tostop` is set, it gets `SIGTTOU`. This keeps background jobs from taking over your input.
 
-### Foreground vs background
-- `cmd` runs in the **foreground**. Bash gives the terminal to the job's process group with `tcsetpgrp()` and waits. When the job exits or stops, bash takes the terminal back.
-- `cmd &` runs in the **background**. Bash prints `[1] 12345` (job number and PID) and gives you a prompt right away. `$!` holds the PID of the last background job.
+## Lifecycle of a job
 
-### Keyboard signals (sent by the terminal driver, not bash)
-| Key | Signal | Default effect |
-|---|---|---|
-| Ctrl-C | `SIGINT` | terminate |
-| Ctrl-\ | `SIGQUIT` | terminate + core dump |
-| Ctrl-Z | `SIGTSTP` | stop (suspend) |
+1. **Start in the foreground:** `make`. Bash gives the job's group the terminal and waits for it (`waitpid` with `WUNTRACED`).
+2. **Suspend:** pressing `Ctrl-Z` sends `SIGTSTP`, the job stops, `waitpid` returns, and bash takes the terminal back. You'll see `[1]+  Stopped  make`.
+3. **Resume in the background:** `bg` (or `bg %1`) sends `SIGCONT`, and the job keeps running without the terminal.
+4. **Bring it back:** `fg %1` gives the job the terminal again, sends `SIGCONT` if it was stopped, and bash waits for it.
+5. **Start in the background directly:** `cmd &`. Bash prints `[N] PID`, doesn't wait, and stores the PID in `$!`.
 
-All of these go only to the foreground process group. Bash itself ignores them while it's waiting at the prompt.
+When a background job finishes, bash tells you before the next prompt by default. With `set -b` (`notify`) it tells you immediately.
 
-### Builtins
-- `jobs` (or `jobs -l` to include PIDs) lists jobs.
-- `fg %n` moves job *n* to the foreground. If it was stopped, bash sends it `SIGCONT`.
-- `bg %n` resumes a stopped job in the background with `SIGCONT`.
-- `kill %n` sends a signal to a job's whole process group.
-- `wait [%n]` blocks until a job finishes.
-- `disown [-h] %n` removes a job from the table so bash won't send it `SIGHUP` when the shell exits. `-h` keeps the job in the table but still skips the `SIGHUP`.
-- `suspend` stops the shell itself, for example a sub-shell started with `su`.
+## Built-ins and job specs
 
-### Job specs
-- `%n` is job number *n*.
-- `%+` or `%%` is the current job (the most recent one) and `%-` is the previous one.
-- `%str` is the job whose command starts with *str*, and `%?str` is the job whose command contains *str*.
-- A bare `%1` works as shorthand for `fg %1`, and `%1 &` for `bg %1`.
+| Command | Purpose |
+|---|---|
+| `jobs` / `jobs -l` | List jobs (with `-l`, also show PIDs) |
+| `fg [%job]`, `bg [%job]` | Move a job to the foreground or background |
+| `kill %job` | Send a signal to the job's whole process group |
+| `wait [%job]` | Block until a job finishes |
+| `disown [%job]` | Remove a job from the table so it doesn't get `SIGHUP` |
+| `suspend` | Stop the shell itself (for example, a nested shell) |
 
-### Background jobs and the terminal
-- If a background job tries to **read** from the tty, it gets `SIGTTIN` and stops. You'll see `[1]+ Stopped (tty input)`.
-- If it **writes** to the tty, the output normally just appears. If `stty tostop` is set, the job gets `SIGTTOU` and stops instead.
+Job specs: `%1` (by number), `%+` or `%%` (current job, marked `+`), `%-` (previous job, marked `-`), `%vim` (command starts with "vim"), `%?log` (command contains "log").
 
-### State-change notification
-Bash learns that a child stopped or exited from `SIGCHLD` / `waitpid(..., WUNTRACED)`. By default it reports the change just before the next prompt. With `set -b` (`notify`) it reports immediately.
+## Hangups and leaving the shell
 
-### Exiting the shell
-- If you try to exit while jobs are **stopped**, bash warns "There are stopped jobs." A second `exit` really quits.
-- With `shopt -s checkjobs`, bash also warns about running jobs.
-- When the shell exits because the terminal hung up, it sends `SIGHUP` to all jobs. With `shopt -s huponexit`, it also does this on a normal login-shell exit. `nohup`, `disown` and `setsid` are the usual ways to keep a job alive past that.
+- When the terminal closes, bash gets `SIGHUP` and passes it on to all its jobs, sending `SIGCONT` to stopped ones first so they can handle it.
+- `disown`, `nohup cmd &` or `shopt -s huponexit` (which sends SIGHUP on a login shell's normal `exit`) change that behaviour.
+- If you type `exit` while jobs are stopped, bash warns "There are stopped jobs." A second `exit` really quits. `shopt -s checkjobs` adds a warning for running jobs too.
 
-### Scripts vs interactive shells
-Job control (the `monitor` option, `set -m`) is **on by default only in interactive shells**. In a script, background jobs stay in the shell's own process group, `fg` and `bg` don't work, and Ctrl-Z isn't handled per job. You can turn it on with `set -m`, but scripts rarely need it. `wait` and `$!` work without it.
+## Interactive vs. scripts
+
+Job control (`set -m`, the `monitor` option) is on by default only in interactive shells. In a non-interactive script, background jobs stay in the shell's own process group and `Ctrl-Z` doesn't apply. Commands like `fg` fail unless you run `set -m` explicitly. Scripts normally just use `&`, `$!` and `wait`.

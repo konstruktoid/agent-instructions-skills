@@ -1,4 +1,6 @@
-I don't have a file-writing or shell tool in this session, so I couldn't save the script or run it. It's below to drop in as `scripts/backup-etc.sh`. That also means none of the skill's checks were run (`shellcheck`, `bash -n`, a test run, a failure-path run). Please run them before scheduling it.
+I couldn't save or run anything this session. The only tools I had were for reading and searching, and none could write a file or run a command. So below is the script itself. It hasn't been run, and `shellcheck` and `bash -n` haven't been run on it either.
+
+It follows `scripts/backup.sh`, the only shell script in the repo, which treats `/mnt/backup` as the backup share. Unlike that script, it writes to a mounted share rather than using `scp`.
 
 ```bash
 #!/usr/bin/env bash
@@ -9,18 +11,18 @@ I don't have a file-writing or shell tool in this session, so I couldn't save th
 set -Eeuo pipefail
 shopt -s inherit_errexit
 
-# Runs privileged and unattended: set the environment rather than inheriting it.
+# Runs privileged and unattended: don't inherit the caller's environment.
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 export PATH
 export LC_ALL=C
-export TMPDIR=/var/tmp
-umask 077 # /etc holds shadow, keys and credentials: archives are root-only
+umask 077 # the archive contains /etc/shadow and private keys
 
 readonly PROGNAME="${0##*/}"
-readonly SHARE='/mnt/backup'
-readonly BACKUP_DIR="${SHARE}/etc"
+readonly SOURCE_DIR='/etc'
+readonly SHARE_MOUNT='/mnt/backup'
+readonly BACKUP_DIR="${SHARE_MOUNT}/etc"
 readonly KEEP=7
-readonly LOCK_FILE='/run/lock/backup-etc.lock'
+readonly LOCK_FILE='/run/lock/etc-backup.lock'
 
 # Script scope: the EXIT trap runs after main has returned.
 partial=''
@@ -30,12 +32,13 @@ err() {
 }
 
 cleanup() {
-  if [[ -n ${partial} && -e ${partial} ]]; then
+  if [[ -n ${partial} && -f ${partial} ]]; then
     rm -f -- "${partial}"
   fi
   return 0
 }
 
+# Clean up, then die of the signal so the caller sees 128+n, not success.
 on_signal() {
   local sig="$1"
   cleanup
@@ -43,91 +46,125 @@ on_signal() {
   kill -s "${sig}" -- "$$"
 }
 
-# Deletes all but the newest KEEP archives. The names embed a UTC timestamp,
-# so the C-locale glob order is chronological.
+# Creates the archive under a temporary name, verifies it, then renames it
+# into place so a half-written file never looks like a valid backup.
+# Globals: SOURCE_DIR, BACKUP_DIR, partial
+# Returns: 0 on success, 1 on failure
+create_archive() {
+  local stamp final rc
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  final="${BACKUP_DIR}/etc-${stamp}.tar.gz"
+
+  if [[ -e ${final} ]]; then
+    err "archive already exists: ${final}"
+    return 1
+  fi
+
+  # Temp file on the same filesystem as the target, so the mv is atomic.
+  partial="$(mktemp -- "${BACKUP_DIR}/.etc-${stamp}.XXXXXX.partial")"
+
+  # GNU tar exits 1 when a file changed while being read, which is normal on a
+  # live /etc; accept that as a warning, fail on anything else.
+  rc=0
+  tar --create --gzip --file "${partial}" \
+    --one-file-system --numeric-owner --acls --xattrs \
+    --directory / -- "${SOURCE_DIR#/}" || rc=$?
+  if ((rc == 1)); then
+    err "warning: some files changed while being archived"
+  elif ((rc != 0)); then
+    err "tar failed with status ${rc}"
+    return 1
+  fi
+
+  if ! gzip --test -- "${partial}"; then
+    err "archive failed integrity check: ${partial}"
+    return 1
+  fi
+
+  chmod 0600 -- "${partial}"
+  mv -- "${partial}" "${final}"
+  partial=''
+  printf '%s: wrote %s\n' "${PROGNAME}" "${final}"
+}
+
+# Deletes all but the newest KEEP archives. Names carry a UTC timestamp, so
+# lexical order under LC_ALL=C is chronological order.
 # Globals: BACKUP_DIR, KEEP
 prune_archives() {
-  local -a archives
-  local count
+  local -a archives=()
+  local f i count
 
   shopt -s nullglob
-  archives=("${BACKUP_DIR}"/etc-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z.tar.gz)
+  for f in "${BACKUP_DIR}"/etc-*.tar.gz; do
+    # Only touch regular files matching our exact naming scheme.
+    if [[ -f ${f} && ! -L ${f} && ${f##*/} =~ ^etc-[0-9]{8}T[0-9]{6}Z\.tar\.gz$ ]]; then
+      archives+=("${f}")
+    fi
+  done
   shopt -u nullglob
 
   count=${#archives[@]}
-  if ((count > KEEP)); then
-    rm -f -- "${archives[@]:0:count-KEEP}"
-  fi
+  for ((i = 0; i < count - KEEP; i++)); do
+    rm -f -- "${archives[i]}"
+    printf '%s: pruned %s\n' "${PROGNAME}" "${archives[i]}"
+  done
 }
 
 main() {
-  local stamp archive lock_fd
-
   if (($# != 0)); then
     err "usage: ${PROGNAME}"
     return 64
   fi
+
   if ((EUID != 0)); then
-    err 'must run as root to read all of /etc'
+    err "must run as root to read all of ${SOURCE_DIR}"
     return 77
   fi
 
-  # Fail closed: without the share mounted, the archive would silently land
-  # on the local disk under the mount point.
-  if ! mountpoint -q -- "${SHARE}"; then
-    err "backup share not mounted: ${SHARE}"
+  # Fail closed: if the share isn't mounted, writing to the mountpoint would
+  # silently fill the local disk instead.
+  if ! mountpoint -q -- "${SHARE_MOUNT}"; then
+    err "backup share is not mounted at ${SHARE_MOUNT}"
     return 69
   fi
-  mkdir -p -- "${BACKUP_DIR}"
 
-  # Prevent two overlapping runs from racing on the same files.
-  exec {lock_fd}>"${LOCK_FILE}"
-  if ! flock -n "${lock_fd}"; then
-    err 'another backup is already running'
+  mkdir -p -- "${BACKUP_DIR}"
+  chmod 0700 -- "${BACKUP_DIR}"
+
+  # One run at a time; a second run exits rather than racing on pruning.
+  exec 9>"${LOCK_FILE}"
+  if ! flock -n 9; then
+    err "another run holds ${LOCK_FILE}"
     return 75
   fi
 
+  # Traps go in before mktemp; cleanup tolerates an empty $partial.
   trap cleanup EXIT
   trap 'on_signal INT' INT
   trap 'on_signal TERM' TERM
 
-  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
-  archive="${BACKUP_DIR}/etc-${stamp}.tar.gz"
-
-  # Write on the same filesystem, then rename: a reader never sees a partial
-  # archive, and an interrupted run leaves nothing that matches the prune glob.
-  partial="$(mktemp -- "${BACKUP_DIR}/.etc-${stamp}.XXXXXXXXXX")"
-
-  if ! tar --create --gzip --numeric-owner --acls --xattrs \
-    --file "${partial}" --directory / -- etc; then
-    err 'tar failed; keeping existing archives untouched'
-    return 1
-  fi
-
-  mv -f -- "${partial}" "${archive}"
-  partial=''
-
-  # Prune only after a new archive exists, so a failing run never shrinks the set.
+  create_archive
+  # Old copies are pruned only after a new archive has been verified.
   prune_archives
 }
 
 main "$@"
 ```
 
-**How it behaves:**
-- **Archive name and location:** archives go to `/mnt/backup/etc/etc-YYYYMMDDTHHMMSSZ.tar.gz`. I took `/mnt/backup` from the existing `scripts/backup.sh`. Change `SHARE` if your share is mounted somewhere else. Paths inside the tarball are relative (`etc/...`), so restoring with `tar -xzf … -C /` doesn't depend on where you run it.
-- **Unmounted share:** if `/mnt/backup` isn't a mount point, the script exits with an error instead of quietly filling the local disk.
-- **Pruning:** old archives are only deleted after a new one has been written in full. Only files matching the exact `etc-<timestamp>Z.tar.gz` pattern can be deleted, so nothing else in the directory is touched. Leftover temp files are hidden dotfiles that the pattern doesn't match.
-- **Permissions:** archives are mode 0600 (owner-only), because `/etc` contains `shadow` and private keys. If the share is NFS with root squashing, root may not be able to write there. That would show up as an error, not an empty backup.
-- **Overlapping runs:** a lock file stops two runs at once. If one is already running, the new one exits with status 75.
-- **Exit codes:** 64 = bad usage, 77 = not root, 69 = share not mounted, 75 = already running, 1 = `tar` failed. If interrupted, it deletes its partial file and exits with the signal's status.
+**What it does:**
+- **Share not mounted:** if `/mnt/backup` isn't mounted, the script exits with an error. Otherwise it would write onto the local disk underneath the mount point.
+- **Half-written archives:** it writes to a hidden `.partial` file in the target directory and checks it with `gzip --test`. Only then does it rename it to `etc-YYYYmmddTHHMMSSZ.tar.gz`. If the script fails or is interrupted (Ctrl-C or a stop signal), the partial file is deleted.
+- **Keeping seven:** it deletes old copies only after a new one has been written and checked, so a failed run never reduces you below seven. It only deletes regular files whose names match the exact pattern. The names use UTC timestamps, so sorting by name puts them in date order.
+- **Permissions:** archives are mode `0600` in a `0700` directory, because `/etc` contains password hashes (`/etc/shadow`) and private keys.
+- **Overlapping runs:** a lock (`flock`) stops two runs at once, and the second exits with status 75. The script sets its own `PATH` and locale, since it runs as root.
 
-**Decision for you:** with GNU `tar`, exit status 1 means "a file changed while being read." The script counts that as a failure, which is the safe choice. If package updates during the backup window cause false alarms, that's where to relax it.
+**Decisions to check:**
+- **Changed files:** GNU `tar` exits with status 1 when a file changes while it's being read, which is normal on a live `/etc`. The script treats that as a warning and keeps the archive. If you'd rather it fail, remove that branch.
+- **Network share:** if the share is NFS with root squashing, root may not be able to create or `chmod` files there. Test this on the real share before scheduling it.
+- **Locations:** `BACKUP_DIR` (`/mnt/backup/etc`) and `KEEP` are set at the top of the script, not read from the environment. That's deliberate for a script running as root, so edit them there.
 
-**Checks to run:**
-```bash
+**To check it once you've saved it, for example as `scripts/backup-etc.sh`:**
+```
 shellcheck scripts/backup-etc.sh && bash -n scripts/backup-etc.sh
 ```
-To test it safely, point `SHARE` at a scratch mount and run it more than seven times; only seven archives should remain. Then unmount the scratch share and run it again; it should exit 69.
-
-**Separate problem in `scripts/backup.sh`:** it uses a predictable `/tmp/backup.$$` path and unquoted variables, it has no strict mode, and it skips cleanup if `tar` or `scp` fails. I left it alone, but I can harden it the same way if you want.
+Then do a test run with `SHARE_MOUNT` and `SOURCE_DIR` pointed at scratch directories, and check it exits with 0. Also run the failure cases: share not mounted, not root, and Ctrl-C partway through. Confirm each exits non-zero and leaves no `.partial` file behind.

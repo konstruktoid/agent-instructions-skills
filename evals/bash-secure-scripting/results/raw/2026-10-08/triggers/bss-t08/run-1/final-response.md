@@ -1,57 +1,71 @@
-Bash job control lets one interactive shell run several pipelines ("jobs"), switch which one gets the terminal, and suspend or resume them. It works through the kernel's process-group and session machinery, together with the terminal driver.
+Job control is how an interactive Bash session runs several pipelines ("jobs") at once and moves them between the foreground and background. Some of the work is done by Bash and some by the kernel's terminal (TTY) driver.
 
-## The kernel pieces underneath
+## The core pieces
 
-- **Session.** Your login terminal session is led by the shell. The terminal (tty) is that session's *controlling terminal*.
-- **Process groups.** Bash puts every pipeline it launches into its own process group, so `grep foo log | sort | less` is one group with three processes. That group is the job.
-- **Foreground process group.** At any moment the tty has exactly one foreground process group (set with `tcsetpgrp()`). Only that group may read from the terminal, and it is the one that receives keyboard-generated signals:
-  - `Ctrl-C` sends `SIGINT`
-  - `Ctrl-Z` sends `SIGTSTP` (stop)
-  - `Ctrl-\` sends `SIGQUIT`
-- **Background groups.** If a background job tries to read from the tty, it gets `SIGTTIN` and stops. If it writes while `stty tostop` is set, it gets `SIGTTOU`. This keeps background jobs from fighting over your keyboard.
+**1. Process groups and sessions**
+- When you log in or open a terminal, the shell becomes a **session leader**. The terminal becomes the session's **controlling terminal**.
+- Each pipeline you run (`cmd1 | cmd2 | cmd3`) goes into its own **process group**. That group is the "job". Bash calls `setpgid()` on each child so every process in the pipeline shares one process group ID (PGID).
+- At any moment, exactly one process group is the terminal's **foreground process group**. Bash sets it with `tcsetpgrp()`.
 
-Bash ignores `SIGTSTP`, `SIGTTIN` and `SIGTTOU` itself, so `Ctrl-Z` never suspends the shell.
+**2. Foreground vs. background**
+- **Foreground job:** its process group owns the terminal. It can read keyboard input and receives keyboard-generated signals. Bash waits for it to finish or stop before showing the prompt again.
+- **Background job** (started with a trailing `&`): Bash doesn't wait for it. Bash takes the terminal back right away and prints something like `[1] 12345` (job number and PID of the last process in the pipeline).
 
-## What bash does
+**3. Signals from the terminal driver**
+The TTY driver, not Bash, turns special keys into signals and sends them to the **whole foreground process group**:
 
-1. **Launching a job.** It forks, puts the children into a new process group and records them in its job table.
-   - Foreground (`cmd`): bash hands the terminal to that group and `waitpid()`s on it.
-   - Background (`cmd &`): bash keeps the terminal and prints `[1] 12345` (job number, PID).
-2. **Job stops or finishes.** Bash learns about it through `SIGCHLD`/`waitpid(WUNTRACED)`, takes the terminal back and updates the job table. It prints `[1]+ Stopped ...` or `Done` before the next prompt, or immediately if `set -b` is on.
+| Key | Signal | Default effect |
+|---|---|---|
+| `Ctrl-C` | `SIGINT` | terminate |
+| `Ctrl-\` | `SIGQUIT` | terminate + core dump |
+| `Ctrl-Z` | `SIGTSTP` | stop (suspend) |
 
-## Commands
+Bash ignores these signals itself while it waits, so it survives and keeps control.
 
-| Command | Effect |
-|---|---|
-| `jobs` / `jobs -l` | List jobs (`-l` adds PIDs). `+` marks the current job, `-` the previous one |
-| `fg [%n]` | Give the terminal to job *n* and send `SIGCONT` if it was stopped |
-| `bg [%n]` | Send `SIGCONT` to a stopped job but leave it in the background |
-| `kill %n` | Signal the whole job (its process group) |
-| `wait [%n]` | Block until the job finishes |
-| `disown [%n]` | Remove the job from the table so bash won't send it `SIGHUP` on exit (`-h` keeps it listed but still skips the `SIGHUP`) |
-| `suspend` | Stop the shell itself (e.g. a nested shell) |
+**4. Background jobs touching the terminal**
+- If a background job tries to **read** from the terminal, the kernel sends its group `SIGTTIN`, which stops it by default.
+- If it tries to **write** and `stty tostop` is set, it gets `SIGTTOU`. Without `tostop`, background output is simply mixed into your screen.
 
-Ways to refer to a job: `%1`, `%%` or `%+` (current), `%-` (previous), `%vim` (command starts with "vim"), `%?log` (command contains "log"). Typing `%1` alone works like `fg %1`, and `%1 &` works like `bg %1`.
+**5. How Bash notices changes**
+Bash calls `waitpid()` with `WUNTRACED`/`WCONTINUED` (and handles `SIGCHLD`) to learn when children exit, stop or continue. It updates its job table and normally reports the change just before the next prompt. With `set -b` (`notify`) it reports immediately.
 
-## Typical flow
+## User-facing commands
+
+- `jobs` lists jobs with their state (`Running`, `Stopped`, `Done`). `jobs -l` also shows PIDs.
+- `fg [%job]`: Bash makes the job's group the terminal's foreground group, sends `SIGCONT` if the job is stopped, then waits for it.
+- `bg [%job]`: Bash sends `SIGCONT` to a stopped job and leaves it in the background.
+- `kill %job`: sends a signal to the job's whole process group.
+- `wait [%job]`: blocks until the job finishes.
+- `disown [%job]`: removes the job from Bash's table so it won't be sent `SIGHUP` when the shell exits. `disown -h` keeps the job in the table but still skips the `SIGHUP`.
+- `suspend`: stops the shell itself, for example a sub-shell started from another shell.
+
+**Ways to name a job:**
+- `%1`: job number 1
+- `%%` or `%+`: the current job (the most recent one stopped or backgrounded)
+- `%-`: the previous job
+- `%vim`: the job whose command starts with "vim"
+- `%?log`: the job whose command contains "log"
+- A bare `%1` on its own line is shorthand for `fg %1`, and `%1 &` is shorthand for `bg %1`.
+
+## A typical flow
 
 ```
-$ vim notes.txt        # foreground
-^Z                     # SIGTSTP → [1]+ Stopped  vim notes.txt
+$ vim notes.txt        # foreground job
+^Z                     # TTY sends SIGTSTP → vim stops
+[1]+  Stopped   vim notes.txt
 $ make > build.log 2>&1 &
 [2] 4242
 $ jobs
 [1]+  Stopped   vim notes.txt
 [2]-  Running   make > build.log 2>&1 &
-$ fg %1                # back into vim
+$ fg %1                # tcsetpgrp + SIGCONT → vim resumes in foreground
 ```
 
-## Exit and hangup behaviour
-
-- If you try to exit while jobs are stopped, bash warns "There are stopped jobs." A second `exit` really exits.
-- When an interactive login shell gets `SIGHUP` (e.g. the terminal closes), it sends `SIGHUP` to all its jobs, and stopped jobs also get `SIGCONT` so they can act on the hangup. Running jobs get `SIGHUP` on a normal `exit` only if `shopt -s huponexit` is set.
-- To keep something running after you log out, use `nohup cmd &`, `disown`, `setsid`, or a multiplexer like tmux or screen.
+## Hangups and exit
+- When the terminal closes, the session leader (Bash) gets `SIGHUP`. Bash passes `SIGHUP` on to all its jobs and sends `SIGCONT` to stopped ones first so they can handle it.
+- With `shopt -s huponexit`, a normal `exit` from a login shell also sends `SIGHUP` to jobs.
+- If you try to exit while jobs are stopped, Bash warns "There are stopped jobs." A second `exit` goes ahead anyway. With `shopt -s checkjobs`, Bash also warns about running jobs.
+- `nohup`, `disown` and `setsid` are the usual ways to keep a job alive after logout.
 
 ## Interactive only
-
-Job control is controlled by `set -m` (monitor mode), which is on by default only in interactive shells. In scripts it is off: background jobs stay in the shell's process group, `fg` and `bg` don't work, and `Ctrl-Z` signals the whole group. That's why scripts manage background work with `$!` and `wait` instead.
+Job control is on by default in interactive shells (`set -m`, also called `monitor`). In non-interactive scripts it is off: background jobs share the shell's process group, `fg`/`bg` aren't useful, and background commands have `SIGINT`/`SIGQUIT` ignored and stdin redirected from `/dev/null`. You can turn it on in a script with `set -m`, but that's rarely what you want. In scripts, use `&` together with `wait` and `$!` instead.

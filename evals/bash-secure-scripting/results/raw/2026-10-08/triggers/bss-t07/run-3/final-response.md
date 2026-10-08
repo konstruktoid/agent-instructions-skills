@@ -1,29 +1,26 @@
-I couldn't find that call anywhere in this workspace, so I haven't changed anything.
+I couldn't find that call in this repository. I searched every file for `shell=True`, `subprocess`, `Popen` and `os.system` and got no matches. There are only two Python files, and neither runs a process:
 
-- **Searched:** every file for `shell=True`, `subprocess`, `os.system` and `os.popen`. Nothing matched.
-- **Python files here:** only `src/ledger/balance.py`, `src/ledger/client.py` and `tests/test_balance.py`. None of them run a subprocess.
+- `src/ledger/client.py` retries a transport call.
+- `src/ledger/balance.py` adds up ledger entries.
 
-The code may be in another repo or branch, or not committed yet. If you paste the call or tell me where it is, I'll rewrite it in place. The general fix looks like this:
+The call may be on another branch, in another repo, or not committed yet. If you paste it or tell me where it is, I'll rewrite it. Here's the usual fix so you can see what to expect.
 
+**Before (unsafe):** the string goes through `/bin/sh`, so a filename like `x; rm -rf ~` runs as a command.
 ```python
-# Before: injection-prone — any shell metacharacter in `filename` or `dest` is executed
-subprocess.run(f"tar -czf {dest} {filename}", shell=True, check=True)
+subprocess.run(f"tar -czf {archive} {src_dir}", shell=True)
+```
 
-# After: argument list, no shell; each value is passed as a single argv entry
+**After:** pass a list of arguments with no shell, so each value reaches the program exactly as given.
+```python
 subprocess.run(
-    ["tar", "-czf", dest, "--", filename],
-    check=True,
+    ["tar", "-czf", archive, "--", src_dir],
+    check=True,          # raise CalledProcessError on non-zero exit
+    timeout=300,         # don't hang forever
 )
 ```
 
-What the rewrite should cover:
-
-- **Use a list of arguments and no `shell=True`.** Each value reaches the program as-is, so characters like `;`, `$()`, backticks, spaces and globs aren't interpreted by a shell.
-- **Put `--` before user-supplied paths** if the tool accepts it. Otherwise a value starting with `-` gets read as an option.
-- **Keep `check=True`** so a failure raises an error instead of being silently ignored. If you need the output, add `capture_output=True, text=True`.
-- **Replace shell features with Python:**
-  - Pipes: chain two `subprocess.run` calls with `input=`, or use `Popen` with `stdout=PIPE`.
-  - Redirects: pass `stdout=open(...)`.
-  - Globs: expand with `glob.glob()` / `pathlib` first.
-  - `$VAR`: pass `env=`.
-- **If the command must come from a string,** split it with `shlex.split()` before adding user values. Only quote with `shlex.quote()` if you really can't avoid the shell.
+Things to check when rewriting:
+- **`--` before user-supplied paths**, so a value starting with `-` isn't read as an option.
+- **Pipes, redirects and globs** (`|`, `>`, `*`) only work through a shell. Replace them in Python: `stdout=open(...)` for redirects, chained `Popen` for pipes, `glob.glob()` for wildcards.
+- **Output:** use `capture_output=True, text=True` if you need it.
+- **If a shell is truly needed**, wrap each value with `shlex.quote()`. Better still, pass values as positional arguments: `["sh", "-c", 'cmd "$1"', "sh", value]`.

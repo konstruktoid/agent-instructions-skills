@@ -1,40 +1,29 @@
-I couldn't find the call in this workspace. Searching for `shell=True`, `subprocess`, `os.system` and `os.popen` returned nothing, so I haven't changed anything. If you paste the real line or tell me where the file is, I'll rewrite it exactly. In the meantime, here's the usual fix.
+I couldn't find that call, so I haven't changed anything.
 
-**The risky pattern:**
+I searched the workspace for `shell=True`, `subprocess`, `os.system` and `Popen` and got no matches. The only Python files are:
+
+- `src/ledger/balance.py`
+- `src/ledger/client.py`
+- `tests/test_balance.py`
+
+The code may be in another repository or branch, or not committed yet. Send me the path or paste the call and I'll rewrite it there.
+
+The rewrite will usually look like this:
+
 ```python
-subprocess.run(f"grep {pattern} {path} | wc -l", shell=True)
-```
-With `shell=True`, the shell reads the whole string, so a value like `x; rm -rf ~` in `pattern` or `path` runs as a command.
+# Before: the shell parses the string, so a value like "x; rm -rf ~" runs as a command
+subprocess.run(f"tool --input {path} --name {name}", shell=True)
 
-**The fix: pass a list of arguments and drop the shell:**
-```python
-import subprocess
-
-result = subprocess.run(
-    ["grep", "--", pattern, path],
-    capture_output=True,
-    text=True,
+# After: pass an argument list with no shell, so each value reaches the program as-is
+subprocess.run(
+    ["tool", "--input", str(path), "--name", name],
     check=True,
-    timeout=30,
 )
 ```
 
-What this changes:
-- **List of arguments, no `shell=True`:** each value goes to the program as one argument, and nothing reads `;`, `|`, `$()`, backticks or spaces as shell syntax.
-- **`--`:** marks the end of options, so a value starting with `-` (like `-rf`) isn't treated as an option.
-- **`check=True`:** raises `CalledProcessError` if the command fails, instead of failing silently.
-- **`timeout=`:** stops a stuck command from hanging your program.
-- **`capture_output=True, text=True`:** gives you the output as a string in `result.stdout`.
+Also worth knowing:
 
-**If the old string used shell features**, do that part in Python instead:
-- **Pipes (`a | b`):** run `a`, then pass `result.stdout` to `b` with `input=`. Or do the second step in Python, for example `len(result.stdout.splitlines())` instead of `| wc -l`.
-- **Redirects (`> file`):** use `stdout=open(path, "w")`.
-- **Globs (`*.log`):** use `glob.glob()` or `pathlib.Path.glob()` and add the results to the list.
-- **`~` and `$VAR`:** use `os.path.expanduser()` or `os.environ[...]`.
-- **`&&` chains:** make separate `subprocess.run(..., check=True)` calls.
-
-**If you really need a shell**, keep the command text fixed and pass the values as separate arguments:
-```python
-subprocess.run(["sh", "-c", 'grep -- "$1" "$2" | wc -l', "sh", pattern, path], check=True)
-```
-`shlex.quote()` also works, but it's easier to get wrong than the list form.
+- **`--` before untrusted values:** if a value can start with `-`, put `"--"` before it (where the tool supports that) so it isn't read as an option.
+- **Pipes and redirects:** if the original uses `|`, `>` or `&&`, chain separate `subprocess.run` calls instead. Use `stdout=`/`stdin=` file handles or `input=` to move data between them.
+- **Full paths:** use the full path to the program (or `shutil.which`) if `PATH` could be controlled by someone else.
+- **`shlex.quote`:** only use it if you truly need a shell. The argument list is the better fix.

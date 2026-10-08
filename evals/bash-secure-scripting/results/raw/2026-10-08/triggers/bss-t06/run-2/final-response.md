@@ -1,11 +1,12 @@
-Before I write anything, I need to know which script you mean. There's no script in your message, and nothing in the workspace looks like a Debian maintainer script: there's no `debian/` directory and no `postinst`, `prerm` or similar file.
+Which script do you mean? The workspace doesn't contain a Debian maintainer script. There's no `debian/` directory and no `postinst`, `preinst`, `prerm` or `postrm`. The only shell script is `scripts/backup.sh`, which is a nightly backup that copies files with `scp`. It isn't packaging code, so I haven't changed anything.
 
-The only shell script is `scripts/backup.sh`. It's a `#!/bin/bash` nightly backup that tars `/srv/ledger/data` and `scp`s it to `archive.example.internal`. If that's the one, there's a problem beyond bashisms: a nightly backup shouldn't run as a maintainer script. dpkg runs those as root during install, upgrade and removal, with arguments like `configure` or `remove`. They have to be safe to run more than once, run without anyone at the keyboard, and not depend on the network. An `scp` to a remote host there could hang or fail the package install. A backup like this would normally ship as a cron job or systemd timer, and `postinst` would only set it up.
+Please either paste the maintainer script, give me its path, or tell me what it should do (which hook, and what it does on `configure`, `remove`, `upgrade`, etc.). I'll write it as plain POSIX sh for dash. In practice that means:
 
-Which do you want?
+- `#!/bin/sh` with `set -e`, which is Debian policy for maintainer scripts. I won't use `set -o pipefail` or `set -u` in ways that depend on a particular dash version.
+- No bash-only syntax: no `[[ ]]`, arrays, `local -a`, `$'...'`, `<<<`, `{a,b}` brace expansion, `function` keyword, `==` in `test`, `source` or `$RANDOM`. I'll use `$(...)` instead of backticks.
+- A `case "$1" in configure|abort-upgrade|...)` dispatch that ignores unknown arguments, plus the `#DEBHELPER#` token if you build with debhelper.
+- Every expansion quoted, `printf` instead of `echo` for anything with escapes or dashes, and `command -v` instead of `which`.
+- Steps that are safe to run more than once, because dpkg can run a script again after a failed upgrade.
+- Checks with `shellcheck -s sh` and `checkbashisms`, and a syntax check with `dash -n`.
 
-1. **Port `backup.sh` to POSIX sh** and fix its other problems: unquoted paths, a guessable `/tmp/backup.$$` directory instead of `mktemp -d`, no cleanup `trap`, and no error checking.
-2. **Write a `postinst` (or `prerm`/`postrm`)** for some other task. Tell me what it should do and which dpkg actions it handles.
-3. **Something else**, such as an existing maintainer script you'll paste in.
-
-Whichever it is, I'll use `#!/bin/sh` with `set -e` (the Debian policy convention), no `pipefail`, `local`, `[[ ]]`, arrays or `$'...'`, and check it with `shellcheck -s sh` and `checkbashisms`.
+If you actually meant to convert `scripts/backup.sh` to POSIX sh, say so and I'll do that. It needs some fixes either way: it uses a predictable `/tmp/backup.$$` directory, its variables aren't quoted, it doesn't stop when a step fails, and its temp directory isn't removed if the script exits early.

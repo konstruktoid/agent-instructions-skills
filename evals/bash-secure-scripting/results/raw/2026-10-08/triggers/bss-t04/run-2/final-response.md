@@ -1,14 +1,16 @@
-I couldn't make this change, for two reasons:
+I couldn't make this change, because the repository has no container entrypoint script. Nothing was edited and nothing was run.
 
-1. **There's no entrypoint script in this repo.** The `Dockerfile` has no `ENTRYPOINT`, only `CMD ["python", "-m", "app"]`. I searched the workspace for "entrypoint" and found nothing, so there was nothing to edit. The only shell script is `scripts/backup.sh`.
-2. **I have no way to write files or run commands in this session.** I can only read and search, so I couldn't create the script, update the `Dockerfile`, or run `shellcheck`, `bash -n` or the script itself.
+**What's there now:**
+- `Dockerfile` has no `ENTRYPOINT`. It ends with `CMD ["python", "-m", "app"]`.
+- No file in the workspace mentions "entrypoint". The only shell script is `scripts/backup.sh`, which is a backup job.
+- The `CMD` runs a module called `app`, but the only Python package I found is `src/ledger/`. The `Dockerfile` also installs from `requirements.txt`, which doesn't exist. So the image may not build or run as it stands.
 
-Here's a draft you can add as `docker-entrypoint.sh`. I haven't run or checked it at all:
+I also can't write or run files in this session: I only have read and search tools. So I can't create the script or check it with `shellcheck`, `bash -n` or a test run. Here's a draft for you to review:
 
 ```bash
 #!/usr/bin/env bash
 #
-# Container entrypoint: accept --config PATH, pass the remaining arguments to the app.
+# Container entrypoint: accepts --config PATH, passes all other arguments to the app.
 
 set -Eeuo pipefail
 shopt -s inherit_errexit
@@ -19,10 +21,6 @@ err() {
   printf '%s: %s\n' "${PROGNAME}" "$*" >&2
 }
 
-usage() {
-  printf 'usage: %s [--config PATH] [--] [ARGS...]\n' "${PROGNAME}" >&2
-}
-
 main() {
   local config=''
   local -a passthrough=()
@@ -31,8 +29,7 @@ main() {
     case "$1" in
       --config)
         if (($# < 2)) || [[ -z $2 ]]; then
-          err '--config requires a path'
-          usage
+          err "--config requires a path"
           return 64
         fi
         config="$2"
@@ -41,8 +38,7 @@ main() {
       --config=*)
         config="${1#--config=}"
         if [[ -z ${config} ]]; then
-          err '--config requires a path'
-          usage
+          err "--config requires a path"
           return 64
         fi
         shift
@@ -67,14 +63,14 @@ main() {
     export APP_CONFIG="${config}"
   fi
 
-  # exec so the app runs as PID 1 and receives the container's signals directly.
+  # exec makes the app PID 1, so it receives SIGTERM directly from the runtime.
   exec python -m app "${passthrough[@]}"
 }
 
 main "$@"
 ```
 
-And these `Dockerfile` changes:
+The matching `Dockerfile` change:
 
 ```dockerfile
 COPY --chmod=0755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -82,11 +78,14 @@ ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD []
 ```
 
-Notes on the draft:
-- **One guess to check:** I don't know how the app reads its config, so the script puts the path in an `APP_CONFIG` environment variable. If the app takes its own `--config` flag instead, put `--config "${config}"` at the start of the `exec` arguments.
-- **Pass-through:** every argument the script doesn't recognise goes to the app unchanged. Anything after `--` is passed as-is, even if it looks like `--config`.
-- **Failures:** a missing value or an unreadable config file prints a message to stderr and exits non-zero (64 or 66) before the app starts.
-- **`CMD` change:** once there's an `ENTRYPOINT`, Docker passes `CMD` to the script as arguments. The script already runs `python -m app`, so `CMD` has to be emptied, or the app would receive `python -m app` as its arguments.
-- **Bash version:** expanding an empty `"${passthrough[@]}"` under `set -u` needs Bash 4.4 or later. `python:3.13-slim` is Debian-based and should meet that, but I haven't confirmed it.
+How the draft behaves:
+- **Passing arguments through:** everything except `--config` goes to the app as separate, quoted arguments, never as one rebuilt string. After `--`, everything is passed through as-is, including a literal `--config`.
+- **Bad input:** a missing or empty config path exits with status 64, and an unreadable file exits with 66. In both cases the error goes to stderr before the app starts.
+- **No cleanup needed:** the script creates no temporary files.
 
-Before merging, run `shellcheck docker-entrypoint.sh` and `bash -n docker-entrypoint.sh`. Then build the image and try three runs: one with `--config` pointing at a real file plus extra arguments, one with `--config` and no path, and one with a path that doesn't exist. Check the exit status of each. If you give me write and shell access, I can add the files and run these checks myself.
+**Decisions for you:**
+1. **Where should the script live,** and is there an existing one somewhere else that I should edit instead?
+2. **How should the app get the config path?** The draft sets an `APP_CONFIG` environment variable, but I guessed that name. It could instead pass `--config` on to the app, or copy the file to a fixed location.
+3. **What should the app command be?** `python -m app` doesn't match the code in the repo.
+
+Once you've answered these and I can write files, I'll add the script and update the `Dockerfile`. Then I'll run `shellcheck`, `bash -n`, a normal run and the failure cases.

@@ -15,12 +15,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.22489259999999997,
+        "cost_usd": 0.24503039999999998,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:14.194520+00:00",
-          "seconds": 38.2
+          "started": "2026-10-08T11:28:08.381095+00:00",
+          "seconds": 46.8
         },
         "aborted": false,
         "rate_limited": false
@@ -33,12 +33,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.259123,
+        "cost_usd": 0.2423302,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:14.205185+00:00",
-          "seconds": 57.5
+          "started": "2026-10-08T11:28:08.378003+00:00",
+          "seconds": 47.6
         },
         "aborted": false,
         "rate_limited": false
@@ -51,18 +51,18 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.255247,
+        "cost_usd": 0.25770400000000004,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:14.205927+00:00",
-          "seconds": 56.9
+          "started": "2026-10-08T11:28:08.379195+00:00",
+          "seconds": 58.9
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.7392626
+    "cost_usd": 0.7450646000000001
   },
   {
     "id": "bss-t02",
@@ -80,12 +80,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.19111319999999998,
+        "cost_usd": 0.2070412,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:14.202376+00:00",
-          "seconds": 56.5
+          "started": "2026-10-08T11:28:08.381931+00:00",
+          "seconds": 28.9
         },
         "aborted": false,
         "rate_limited": false
@@ -98,12 +98,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.17917960000000002,
+        "cost_usd": 0.1874382,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:14.198084+00:00",
-          "seconds": 20.8
+          "started": "2026-10-08T11:28:08.374304+00:00",
+          "seconds": 25.2
         },
         "aborted": false,
         "rate_limited": false
@@ -116,18 +116,18 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.2006846,
+        "cost_usd": 0.2028488,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:14.204527+00:00",
-          "seconds": 28.0
+          "started": "2026-10-08T11:28:08.375868+00:00",
+          "seconds": 34.4
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.5709774
+    "cost_usd": 0.5973282
   },
   {
     "id": "bss-t03",
@@ -145,12 +145,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.1965266,
+        "cost_usd": 0.19604180000000002,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:35.056128+00:00",
-          "seconds": 25.2
+          "started": "2026-10-08T11:28:33.542956+00:00",
+          "seconds": 37.6
         },
         "aborted": false,
         "rate_limited": false
@@ -163,12 +163,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.2037628,
+        "cost_usd": 0.19871479999999997,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:42.203342+00:00",
-          "seconds": 27.7
+          "started": "2026-10-08T11:28:37.254001+00:00",
+          "seconds": 24.9
         },
         "aborted": false,
         "rate_limited": false
@@ -181,18 +181,18 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.20235980000000003,
+        "cost_usd": 0.2184566,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:44:52.392979+00:00",
-          "seconds": 26.9
+          "started": "2026-10-08T11:28:42.762695+00:00",
+          "seconds": 36.9
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.6026492
+    "cost_usd": 0.6132132
   },
   {
     "id": "bss-t04",
@@ -210,12 +210,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.17415239999999998,
+        "cost_usd": 0.1934766,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:00.276106+00:00",
-          "seconds": 16.8
+          "started": "2026-10-08T11:28:55.147510+00:00",
+          "seconds": 23.9
         },
         "aborted": false,
         "rate_limited": false
@@ -228,12 +228,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.20687459999999996,
+        "cost_usd": 0.2005058,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:09.958269+00:00",
-          "seconds": 37.9
+          "started": "2026-10-08T11:28:56.018521+00:00",
+          "seconds": 25.8
         },
         "aborted": false,
         "rate_limited": false
@@ -246,18 +246,18 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.2101244,
+        "cost_usd": 0.21404459999999997,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:10.713475+00:00",
-          "seconds": 30.3
+          "started": "2026-10-08T11:29:02.158851+00:00",
+          "seconds": 31.0
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.5911514
+    "cost_usd": 0.608027
   },
   {
     "id": "bss-t05",
@@ -275,12 +275,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.16780659999999997,
+        "cost_usd": 0.19168459999999998,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:11.111063+00:00",
-          "seconds": 18.5
+          "started": "2026-10-08T11:29:07.255726+00:00",
+          "seconds": 20.8
         },
         "aborted": false,
         "rate_limited": false
@@ -293,12 +293,12 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.18809260000000003,
+        "cost_usd": 0.19546039999999998,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:11.684325+00:00",
-          "seconds": 20.3
+          "started": "2026-10-08T11:29:11.173787+00:00",
+          "seconds": 22.4
         },
         "aborted": false,
         "rate_limited": false
@@ -311,18 +311,18 @@
         "skills_used": [
           "eval-bash-secure-scripting:bash-secure-scripting"
         ],
-        "cost_usd": 0.18304499999999999,
+        "cost_usd": 0.19452899999999998,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:17.086799+00:00",
-          "seconds": 17.9
+          "started": "2026-10-08T11:29:19.027947+00:00",
+          "seconds": 20.2
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.5389442
+    "cost_usd": 0.5816739999999999
   },
   {
     "id": "bss-t06",
@@ -338,12 +338,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.1118814,
+        "cost_usd": 0.1172134,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:19.259064+00:00",
-          "seconds": 17.4
+          "started": "2026-10-08T11:29:19.636098+00:00",
+          "seconds": 26.5
         },
         "aborted": false,
         "rate_limited": false
@@ -354,12 +354,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.1071724,
+        "cost_usd": 0.1140982,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:29.593476+00:00",
-          "seconds": 16.6
+          "started": "2026-10-08T11:29:21.837389+00:00",
+          "seconds": 16.9
         },
         "aborted": false,
         "rate_limited": false
@@ -370,18 +370,18 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.10544239999999999,
+        "cost_usd": 0.1581378,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:31.974680+00:00",
-          "seconds": 15.5
+          "started": "2026-10-08T11:29:28.109152+00:00",
+          "seconds": 37.6
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.3244962
+    "cost_usd": 0.3894494
   },
   {
     "id": "bss-t07",
@@ -397,11 +397,27 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.10187399999999999,
+        "cost_usd": 0.10594120000000001,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:34.987036+00:00",
+          "started": "2026-10-08T11:29:33.206534+00:00",
+          "seconds": 14.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.1197856,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-08T11:29:33.584027+00:00",
           "seconds": 16.3
         },
         "aborted": false,
@@ -413,34 +429,18 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.114381,
+        "cost_usd": 0.11995299999999998,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:36.658250+00:00",
-          "seconds": 17.9
-        },
-        "aborted": false,
-        "rate_limited": false
-      },
-      {
-        "id": "bss-t07",
-        "expect": "no-trigger",
-        "fired": false,
-        "correct": true,
-        "skills_used": [],
-        "cost_usd": 0.1149308,
-        "run": {
-          "returncode": 0,
-          "timed_out": false,
-          "started": "2026-10-08T06:45:41.061098+00:00",
-          "seconds": 16.9
+          "started": "2026-10-08T11:29:38.712246+00:00",
+          "seconds": 19.5
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.3311858
+    "cost_usd": 0.3456798
   },
   {
     "id": "bss-t08",
@@ -456,12 +456,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.07606879999999999,
+        "cost_usd": 0.0894928,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:46.184796+00:00",
-          "seconds": 17.5
+          "started": "2026-10-08T11:29:39.275438+00:00",
+          "seconds": 20.5
         },
         "aborted": false,
         "rate_limited": false
@@ -472,12 +472,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.0824288,
+        "cost_usd": 0.0936488,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:47.519536+00:00",
-          "seconds": 20.7
+          "started": "2026-10-08T11:29:46.188802+00:00",
+          "seconds": 21.4
         },
         "aborted": false,
         "rate_limited": false
@@ -488,18 +488,18 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.07420879999999999,
+        "cost_usd": 0.08038880000000001,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:47.821007+00:00",
-          "seconds": 16.2
+          "started": "2026-10-08T11:29:47.471077+00:00",
+          "seconds": 15.4
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.23270639999999998
+    "cost_usd": 0.2635304
   },
   {
     "id": "bss-t09",
@@ -515,12 +515,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.1038246,
+        "cost_usd": 0.110776,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:51.315013+00:00",
-          "seconds": 15.3
+          "started": "2026-10-08T11:29:49.873699+00:00",
+          "seconds": 16.4
         },
         "aborted": false,
         "rate_limited": false
@@ -531,12 +531,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.1029158,
+        "cost_usd": 0.1146442,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:54.578292+00:00",
-          "seconds": 15.2
+          "started": "2026-10-08T11:29:58.230879+00:00",
+          "seconds": 17.1
         },
         "aborted": false,
         "rate_limited": false
@@ -547,18 +547,18 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.1038808,
+        "cost_usd": 0.11204620000000001,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:45:58.012973+00:00",
-          "seconds": 16.0
+          "started": "2026-10-08T11:29:59.738365+00:00",
+          "seconds": 16.1
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.3106212
+    "cost_usd": 0.3374664
   },
   {
     "id": "bss-t10",
@@ -574,12 +574,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.11793260000000001,
+        "cost_usd": 0.1162878,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:46:03.673767+00:00",
-          "seconds": 27.8
+          "started": "2026-10-08T11:30:02.848939+00:00",
+          "seconds": 16.9
         },
         "aborted": false,
         "rate_limited": false
@@ -590,12 +590,12 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.11563880000000001,
+        "cost_usd": 0.12471399999999999,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:46:04.008690+00:00",
-          "seconds": 16.4
+          "started": "2026-10-08T11:30:05.711639+00:00",
+          "seconds": 16.6
         },
         "aborted": false,
         "rate_limited": false
@@ -606,17 +606,17 @@
         "fired": false,
         "correct": true,
         "skills_used": [],
-        "cost_usd": 0.1161026,
+        "cost_usd": 0.12325479999999998,
         "run": {
           "returncode": 0,
           "timed_out": false,
-          "started": "2026-10-08T06:46:06.664392+00:00",
-          "seconds": 16.2
+          "started": "2026-10-08T11:30:06.315266+00:00",
+          "seconds": 15.7
         },
         "aborted": false,
         "rate_limited": false
       }
     ],
-    "cost_usd": 0.34967400000000004
+    "cost_usd": 0.3642566
   }
 ]

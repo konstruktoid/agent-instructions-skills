@@ -1,26 +1,20 @@
-I didn't change anything, because this workspace has no shell task that creates an account.
+I didn't change anything, because there's no `shell` task in this repository to replace.
 
-The only Ansible role here is `roles/nginx`, and none of its files contain one:
+What I found:
+- The only Ansible role is `roles/nginx`. Its tasks file, `roles/nginx/tasks/main.yml`, has two tasks: installing nginx with `ansible.builtin.package`, and rendering `site.conf.j2` with `ansible.builtin.template`.
+- I searched every `.yml`/`.yaml` file for `shell`, `command` and `useradd` and got no matches. That covers the role's handlers and defaults, plus the CI, compose and k8s files.
 
-- `roles/nginx/tasks/main.yml` has two tasks: `ansible.builtin.package`, which installs nginx, and `ansible.builtin.template`, which renders `site.conf`.
-- `roles/nginx/handlers/main.yml` is empty (`[]`).
-- `roles/nginx/defaults/main.yml` only sets `nginx_worker_processes`.
-
-I also searched every YAML file in the workspace for `shell`, `command` and `useradd`, and nothing matched.
-
-The task may be in another role, another branch, or a file that hasn't been added yet. If you tell me where it is or paste it, I'll swap it for `ansible.builtin.user`. That would look something like this:
+The task may be on another branch, or in a role that isn't in this workspace. If you paste it or tell me where it lives, I'll convert it. Usually a `shell: useradd ...` task becomes something like:
 
 ```yaml
-- name: Create the nginx service account
+- name: Create the service account
   ansible.builtin.user:
-    name: "{{ nginx_user }}"
+    name: nginx_svc
     system: true
     shell: /usr/sbin/nologin
-    home: /var/lib/nginx
+    home: /var/lib/nginx_svc
     create_home: false
     state: present
 ```
 
-I'd copy the exact options (UID, groups, home directory, shell) from your current `useradd` flags so the account comes out the same.
-
-Or, if you just want an account task added to the nginx role, I can add it to `tasks/main.yml` before the template task and add `nginx_user` to the defaults. Tell me the account name and options you want.
+Unlike the shell version, this is idempotent: it won't fail or report "changed" when the account already exists. It also keeps the username out of a shell command line, so the name can't be used for injection. I'd match the exact options (`uid`, `group`, `groups`, `home`, `password`) to whatever your current `useradd` call passes.

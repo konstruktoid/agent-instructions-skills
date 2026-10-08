@@ -1,41 +1,39 @@
-I don't have a file-writing or shell tool in this session, so I couldn't save this to disk or run any checks on it. Here's the script for you to save as something like `/usr/local/sbin/backup-etc`:
+I couldn't save the file or run anything, because this session only gives me read and search tools. The script below is **untested**: I haven't run `shellcheck`, `bash -n`, or a trial run on it.
+
+I based it on `scripts/backup.sh`, which uses `/mnt/backup` as the backup location. Save it as something like `scripts/backup-etc.sh` and make it executable (`chmod 0750`).
 
 ```bash
 #!/usr/bin/env bash
 #
 # Archive /etc into a timestamped tarball on the backup share and keep the
-# newest seven archives. Intended to run as root from cron or a systemd timer.
+# newest KEEP archives. Intended to run as root from cron or a systemd timer.
 
 set -Eeuo pipefail
-shopt -s inherit_errexit nullglob
+shopt -s inherit_errexit
 
-# Runs as root from a scheduler: set the environment rather than inheriting it.
+# Runs privileged and unattended: do not trust the caller's environment.
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 export PATH
-export LC_ALL=C # also makes glob results sort bytewise, i.e. chronologically
-umask 077       # /etc holds shadow and private keys: archives are 0600
+export LC_ALL=C # glob order is byte order, so timestamped names sort by age
+umask 077       # /etc holds shadow and private keys; archives are root-only
 
 readonly PROGNAME="${0##*/}"
-readonly BACKUP_MOUNT='/mnt/backup' # mount point of the backup share
-readonly DEST_DIR="${BACKUP_MOUNT}/etc-archives"
+readonly SHARE_MOUNT='/mnt/backup'
+readonly BACKUP_DIR="${SHARE_MOUNT}/etc"
 readonly KEEP=7
-readonly LOCK_FILE='/run/backup-etc.lock'
+readonly LOCK_FILE='/run/lock/backup-etc.lock'
 readonly NAME_RE='^etc-[0-9]{8}T[0-9]{6}Z\.tar\.gz$'
 
-# Script scope: the EXIT trap runs after the function that sets it has returned.
-tmp_archive=''
+# Script scope: the EXIT trap runs after main has returned.
+tmpfile=''
 
 err() {
   printf '%s: %s\n' "${PROGNAME}" "$*" >&2
 }
 
-log() {
-  printf '%s: %s\n' "${PROGNAME}" "$*"
-}
-
 cleanup() {
-  if [[ -n ${tmp_archive} && -e ${tmp_archive} ]]; then
-    rm -f -- "${tmp_archive}"
+  if [[ -n ${tmpfile} && -e ${tmpfile} ]]; then
+    rm -f -- "${tmpfile}"
   fi
   return 0
 }
@@ -48,115 +46,114 @@ on_signal() {
   kill -s "${sig}" -- "$$"
 }
 
-# Fails closed: if the share isn't mounted, writing to DEST_DIR would fill the
-# local disk under the mount point instead of reaching the backup share.
-preflight() {
-  if ((EUID != 0)); then
-    err "must run as root to read all of /etc"
-    return 77
-  fi
-  if ! mountpoint -q "${BACKUP_MOUNT}"; then
-    err "backup share is not mounted at ${BACKUP_MOUNT}"
-    return 69
-  fi
-  if [[ -L ${DEST_DIR} || ! -d ${DEST_DIR} ]]; then
-    err "${DEST_DIR} is missing, not a directory, or a symlink"
-    return 73
-  fi
-  if [[ ! -w ${DEST_DIR} ]]; then
-    err "${DEST_DIR} is not writable"
-    return 73
-  fi
-}
-
-# Writes to a temp file on the same share, verifies it, then renames it into
-# place so a partial archive never carries a final name.
+# Writes /etc to the given file. GNU tar exits 1 when a file changed while it
+# was being read; that archive is still usable, so warn instead of failing.
+# Arguments: output file
+# Returns: 0 on success or warning, 1 on a fatal tar error
 create_archive() {
-  local final
+  local out="$1"
+  local rc=0
 
-  final="${DEST_DIR}/etc-$(date -u +%Y%m%dT%H%M%SZ).tar.gz"
-  if [[ -e ${final} || -L ${final} ]]; then
-    err "refusing to overwrite ${final}"
-    return 73
+  tar --create --gzip --numeric-owner --file "${out}" \
+    --directory / -- etc || rc=$?
+
+  if ((rc == 1)); then
+    err "warning: some files changed while being archived"
+  elif ((rc != 0)); then
+    err "tar failed with status ${rc}"
+    return 1
   fi
-
-  tmp_archive="$(mktemp -- "${DEST_DIR}/.etc-XXXXXXXX.partial")"
-  tar --create --gzip --one-file-system --file "${tmp_archive}" \
-    --directory / -- etc
-  tar --list --gzip --file "${tmp_archive}" >/dev/null
-
-  mv -T -- "${tmp_archive}" "${final}"
-  tmp_archive=''
-  log "created ${final}"
+  return 0
 }
 
-# Deletes only regular files whose names match this script's own pattern,
-# oldest first, leaving the newest KEEP.
-prune_archives() {
+# Deletes all but the newest KEEP archives. Only regular files whose names
+# match NAME_RE are considered, so nothing else on the share is touched.
+# Globals: BACKUP_DIR, KEEP, NAME_RE
+prune_old() {
   local -a archives=()
-  local path name excess i
+  local f excess i
 
-  for path in "${DEST_DIR}"/etc-*.tar.gz; do
-    name="${path##*/}"
-    if [[ ${name} =~ ${NAME_RE} && -f ${path} && ! -L ${path} ]]; then
-      archives+=("${path}")
-    fi
+  for f in "${BACKUP_DIR}"/etc-*.tar.gz; do
+    [[ -f ${f} && ! -L ${f} ]] || continue
+    [[ ${f##*/} =~ ${NAME_RE} ]] || continue
+    archives+=("${f}")
   done
 
   excess=$((${#archives[@]} - KEEP))
   for ((i = 0; i < excess; i++)); do
     rm -f -- "${archives[i]}"
-    log "removed ${archives[i]}"
   done
 }
 
 main() {
+  local archive
+
   if (($# != 0)); then
     err "usage: ${PROGNAME}"
     return 64
   fi
+  if ((EUID != 0)); then
+    err "must run as root to read all of /etc"
+    return 77
+  fi
 
-  preflight
+  # Fail closed: if the share is not mounted, writing to the mount point
+  # would silently fill the local disk instead.
+  if ! mountpoint -q -- "${SHARE_MOUNT}"; then
+    err "${SHARE_MOUNT} is not mounted"
+    return 69
+  fi
+  mkdir -p -- "${BACKUP_DIR}"
 
-  # Traps go in before mktemp; cleanup is a no-op while tmp_archive is empty.
-  trap cleanup EXIT
-  trap 'on_signal INT' INT
-  trap 'on_signal TERM' TERM
-  trap 'on_signal HUP' HUP
-
+  # Refuse to run concurrently with a previous, still-running backup.
   exec 9>"${LOCK_FILE}"
   if ! flock -n 9; then
-    err "another run holds ${LOCK_FILE}"
+    err "another backup is already running"
     return 75
   fi
 
-  create_archive
-  prune_archives # only reached after a verified new archive exists
+  trap cleanup EXIT
+  trap 'on_signal INT' INT
+  trap 'on_signal TERM' TERM
+
+  # Temp file in the destination directory so the final mv is an atomic
+  # rename; its dot-prefixed name never matches the rotation glob.
+  tmpfile="$(mktemp -- "${BACKUP_DIR}/.etc.XXXXXXXX")"
+  archive="${BACKUP_DIR}/etc-$(date -u +%Y%m%dT%H%M%SZ).tar.gz"
+
+  create_archive "${tmpfile}"
+  if ! gzip -t -- "${tmpfile}"; then
+    err "archive failed integrity check"
+    return 1
+  fi
+  mv -f -- "${tmpfile}" "${archive}"
+  tmpfile=''
+
+  # Prune only after a new archive has landed, so a failing run never
+  # shrinks the set of good copies.
+  prune_old
+  printf '%s: wrote %s\n' "${PROGNAME}" "${archive}"
 }
 
 main "$@"
 ```
 
-Install it as root-owned and not group- or world-writable (`install -o root -g root -m 0700 ...`). Then schedule it, for example with `/etc/cron.d/backup-etc`:
+**How it works:**
+- **If the share isn't mounted, the script stops.** It checks with `mountpoint` first. Otherwise, writing to `/mnt/backup` would silently fill the local disk.
+- **A failed or interrupted run leaves nothing behind.** The archive is written to a temporary file on the share and only renamed into place after `gzip -t` confirms it's intact.
+- **Old copies are deleted only after a new one lands.** Deletion only touches regular files named like `etc-20261008T020000Z.tar.gz`, so a run of failures never shrinks your set of good backups.
+- **Only one copy can run at a time.** A lock (`flock`) on `/run/lock/backup-etc.lock` makes an overlapping run exit with status 75.
+- **The archives are readable by root only.** They have mode `0600` because `/etc` contains `shadow` and private keys.
+- **Files changing during the backup only cause a warning.** That's GNU tar's exit status 1. Any other tar error fails the run.
 
-```
-30 2 * * * root /usr/local/sbin/backup-etc
-```
+**Things to check before using it:**
+- **NFS with `root_squash`:** if the share is mounted this way, root can't write to it. You'd need to write to a directory the squashed user owns, or change the export settings.
+- **Scheduling:** for example, a root crontab line `15 2 * * * /usr/local/sbin/backup-etc.sh`. If it runs more than once a day, "seven copies" means seven runs, not seven days.
+- **Before relying on it,** save it and run `shellcheck backup-etc.sh` and `bash -n backup-etc.sh`. Then do one real run, and one run with the share unmounted to confirm it exits non-zero.
 
-**How it behaves:**
-- **Retention:** Old copies are only deleted after a new archive has been written and read back successfully. If a run fails, you keep your existing seven copies.
-- **Share not mounted:** The script refuses to run. Otherwise it would quietly write into the empty local directory under `/mnt/backup`.
-- **Deletions:** Only files matching `etc-YYYYmmddTHHMMSSZ.tar.gz` can be deleted, and never symlinks. Other files on the share are left alone.
-- **Interrupted runs:** Nothing half-written is left on the share. The `.partial` temp file is removed on any error or signal.
-- **Overlapping runs:** A lock (`flock`) stops two runs at once. Each failure type exits with its own non-zero code.
+**About the existing `scripts/backup.sh`:** I didn't change it, but it has real problems:
+- Its temporary directory under `/tmp` has a predictable name, which another user could plant a symlink at.
+- None of its variables are quoted.
+- It has no error handling or cleanup trap, so a failed `tar` still runs `scp`.
 
-**Things to check or adjust:**
-- **Paths:** `BACKUP_MOUNT` and `DEST_DIR` are guesses at your layout. Change them, and create `DEST_DIR` once by hand.
-- **Network share permissions:** If the share is CIFS/SMB, file modes depend on the mount options (`file_mode=`, `uid=`). The archives contain `/etc/shadow` and private keys, so make sure the share only lets backup admins read them.
-- **Strict about failures:** Any warning from `tar` (for example "file changed as we read it") fails the run. That's on purpose, because a possibly inconsistent archive is treated as a failure.
-- **ACLs, xattrs, SELinux labels:** These aren't saved. Add `--acls --xattrs` (or `--selinux`) if your restores need them.
-
-**Not yet verified:** I haven't run `shellcheck`, `bash -n`, or the script itself, so treat it as untested. Before scheduling it:
-1. Run `shellcheck backup-etc && bash -n backup-etc`.
-2. Point `BACKUP_MOUNT` at a scratch mount and run it nine times to confirm only seven archives remain.
-3. Unmount the share and check that it exits with 69 and writes nothing.
+I can harden it the same way if you'd like.

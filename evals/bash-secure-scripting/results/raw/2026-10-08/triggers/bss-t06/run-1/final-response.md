@@ -1,23 +1,14 @@
-Before I write anything, I need to know what "it" is. Your message gives a constraint (POSIX sh under dash, no bashisms) but not the task.
+I couldn't find a Debian maintainer script in this workspace, so I need to know which script you mean before writing anything.
 
-The only shell script in the workspace is `scripts/backup.sh`. It's a 13-line nightly backup that tars `/srv/ledger/data` and copies it with `scp` to `backup@archive.example.internal`. It doesn't look like a maintainer script, so I don't want to guess. Which of these do you mean?
+There are no `debian/` files, `postinst`, `prerm` or similar here. The only shell script is `scripts/backup.sh`, a nightly backup that starts with `#!/bin/bash` and copies the archive to a remote server with `scp`. That isn't the kind of thing a maintainer script does. Which do you want?
 
-1. **Convert `scripts/backup.sh` to POSIX sh.** I'd change the shebang to `#!/bin/sh` and replace the backticks with `$(...)`. I'd also fix its real problems:
-   - The predictable `/tmp/backup.$$` path is a symlink/race risk; I'd use `mktemp -d` instead.
-   - None of the variables are quoted.
-   - Nothing stops the script if `tar` fails, so it would still `scp` a broken archive. I'd add `set -eu` and check each step.
-   - The temp directory isn't cleaned up on failure; I'd add an `EXIT` trap.
+1. **A new maintainer script** (`postinst`, `prerm`, `postrm` or `preinst`). Tell me what it should do, such as creating a system user, fixing ownership on `/srv/ledger/data`, or enabling a service.
+2. **`scripts/backup.sh` rewritten in POSIX sh.** It needs fixing either way: it doesn't stop on errors and nothing is quoted. It uses a predictable `/tmp/backup.$$` directory. If `tar` or `scp` fails, it still deletes the temp directory and exits 0.
 
-   I'd leave out `pipefail` because dash doesn't reliably support it.
-2. **Write a new maintainer script** (`postinst`, `prerm`, `postrm` or `preinst`) for a package, for example one that installs this backup as a cron job or systemd timer. If so, tell me:
-   - which script and package
-   - what it should do for each action it receives (`configure`, `remove`, `purge`, `upgrade`, ...)
-   - whether you use debhelper, so I can include the `#DEBHELPER#` token
+Whichever it is, I'll write it to these rules:
 
-Either way I'd follow the Debian Policy rules for maintainer scripts:
-- Start with `set -e`.
-- Handle every argument with a `case` statement.
-- Make the script safe to run more than once.
-- Don't prompt the user (use debconf for questions).
-
-I'd check it with `checkbashisms`, `shellcheck -s sh` and `dash -n` where those tools are installed.
+- **Shell and error handling:** `#!/bin/sh` with `set -e`, as Debian policy requires. I won't use `pipefail`, because the dash in current Debian releases doesn't support it. Where a pipe's exit status matters, I'll check it directly.
+- **No bashisms:** no `[[ ]]`, arrays, `local`, `function`, `$'...'`, `<<<`, `{1..n}`, `==` inside `[ ]`, `echo -e`/`-n` (I'll use `printf`), `source` (I'll use `.`) or `$RANDOM`.
+- **Standard structure:** a `case "$1" in configure|abort-upgrade|...)` block for the arguments dpkg passes, with an error on unknown actions. It will also include the `#DEBHELPER#` token if you build with debhelper.
+- **Safe temp files and cleanup:** temp paths from `mktemp -d`, removed by a `trap` on `EXIT` that also covers `INT` and `TERM`. Every variable will be quoted, and paths will be passed after `--`.
+- **Checks:** I'll run `checkbashisms`, `shellcheck -s sh` and `dash -n` on the result if they're installed.

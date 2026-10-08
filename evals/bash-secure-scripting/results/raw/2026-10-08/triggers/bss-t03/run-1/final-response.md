@@ -1,12 +1,14 @@
-I couldn't apply the fix. This session gives me only read and search tools, with no way to edit files or run commands. Below is the corrected `scripts/backup.sh` for you to paste in. I haven't run `shellcheck`, `bash -n` or the script itself.
+I couldn't apply this fix. This session gave me read-only file tools, with no Edit, Write or Bash, so `scripts/backup.sh` is unchanged and I couldn't run `shellcheck`, `bash -n` or the script. The replacement is below for you to paste in.
 
-## What's wrong with the current script
+## Why the directory gets left behind
 
-- **The cleanup only runs if the script reaches the last line.** `rm -rf $TMP` is the final command. If the job is stopped partway (a cron timeout, a reboot, or a `kill` during a slow `scp`), that line never runs and the directory stays.
-- **A failed step is ignored.** There's no `set -e`, so if `tar` fails the script still runs `scp` on a missing or half-written archive. The exit status comes from `rm`, so cron sees success even when the backup didn't happen.
-- **The temp directory name is predictable.** `/tmp/backup.$$` can be guessed, so another local user can create it in advance as a directory or symlink. Then `mkdir` fails or the data goes somewhere it shouldn't. Paths are also unquoted, and cron's `PATH` decides which `tar`/`scp` run.
+At `scripts/backup.sh:13`, the only cleanup is an `rm -rf $TMP` on the last line. It only runs if the script gets that far, so a kill, a timeout or a hung `scp` skips it. Three other things make it worse:
 
-## Fixed `scripts/backup.sh`
+- **No error checking.** There's no `set -e`, so a failed `tar` still lets `scp` upload a broken archive. The script then exits with `scp`'s status, and cron can't tell the backup failed.
+- **Predictable temp path.** `/tmp/backup.$$` is easy to guess. Another user can create it or symlink it first, and `mkdir $TMP` doesn't fail safely when that happens.
+- **Unquoted variables and cron's environment.** The paths aren't quoted, and the script relies on whatever `PATH` cron happens to provide.
+
+## Proposed `scripts/backup.sh`
 
 ```bash
 #!/usr/bin/env bash
@@ -19,7 +21,6 @@ shopt -s inherit_errexit
 # Runs from cron: don't trust the inherited environment.
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 export PATH
-export LC_ALL=C
 export TMPDIR=/var/tmp
 umask 077
 
@@ -42,7 +43,7 @@ cleanup() {
   return 0
 }
 
-# Clean up, then die of the signal so cron/supervisors see 128+n.
+# Clean up, then die of the signal so cron and supervisors see 128+n.
 on_signal() {
   local sig="$1"
   cleanup
@@ -53,21 +54,23 @@ on_signal() {
 main() {
   local stamp
 
-  # Traps before mktemp, so there is no window where the path can be lost.
+  # Traps before mktemp, so no window where a signal loses the path.
   trap cleanup EXIT
   trap 'on_signal INT' INT
   trap 'on_signal TERM' TERM
   trap 'on_signal HUP' HUP
   workdir="$(mktemp -d)"
 
-  stamp="$(date -u +%F)"
+  stamp="$(date +%F)"
 
-  if ! tar --create --gzip --file "${workdir}/data.tar.gz" -- "${DATA_DIR}"; then
-    err "tar of ${DATA_DIR} failed"
+  if ! tar -czf "${workdir}/data.tar.gz" -- "${DATA_DIR}"; then
+    err "tar failed for ${DATA_DIR}"
     return 1
   fi
 
-  if ! scp -q -- "${workdir}/data.tar.gz" "${REMOTE}:${TARGET}/data-${stamp}.tar.gz"; then
+  # BatchMode: fail instead of hanging on a prompt when run from cron.
+  if ! scp -q -o BatchMode=yes -- "${workdir}/data.tar.gz" \
+    "${REMOTE}:${TARGET}/data-${stamp}.tar.gz"; then
     err "upload to ${REMOTE} failed"
     return 1
   fi
@@ -78,14 +81,20 @@ main "$@"
 
 ## What changed
 
-- **The temp directory is always removed.** It's deleted by the `EXIT` trap whether the script succeeds, fails partway, or is stopped. The traps are set before `mktemp` creates the directory, and `cleanup` always returns 0 so it can't hide the real exit status.
-- **A failed step stops the job.** If `tar` or `scp` fails, the script prints an error to stderr and exits non-zero, so cron's mail or your monitoring will see it.
-- **The temp directory is safer.** `mktemp -d` under `/var/tmp` gives a name nobody can guess, and `umask 077` makes the directory and archive readable only by the backup user.
-- **The script sets its own environment.** It fixes `PATH` and the locale, quotes every path, and uses `$(…)` instead of backticks.
-- **The date is now UTC.** `date -u` stops the backup's file name shifting with the time zone. Drop `-u` if you want local dates.
+- **Cleanup on every exit path.** An `EXIT` trap covers both success and any `errexit` abort. The `INT`/`TERM`/`HUP` handlers clean up and then re-raise the signal, so a killed run doesn't report success. All traps are installed before `mktemp`, and `cleanup` always returns 0, so it never turns a successful run into a failure.
+- **Safe temp directory.** `mktemp -d` under `/var/tmp` with `umask 077` replaces the guessable `/tmp/backup.$$`.
+- **Failures stop the script.** With strict mode on, a failed `tar` stops the run before `scp` uploads anything. Both steps print an error to stderr and exit non-zero.
+- **Cron-friendly.** The script sets its own `PATH`, quotes every variable, and uses `$(…)` instead of backticks. `BatchMode=yes` makes `scp` fail rather than hang waiting for a password.
 
-## Before merging
+`date +%F` still uses local time, as before. Add `-u` if you want UTC filenames.
 
-1. Run `shellcheck scripts/backup.sh` and `bash -n scripts/backup.sh`.
-2. Test the failure path. Point `DATA_DIR` at a path that doesn't exist, or make `scp` fail by using an unreachable host. The script should exit non-zero and leave nothing in `/var/tmp/tmp.*`.
-3. Test an interruption. Start the script, run `kill -TERM <pid>` during the `scp`, and check that the exit status is 143 and the directory is gone.
+## To verify after pasting
+
+```bash
+shellcheck scripts/backup.sh && bash -n scripts/backup.sh
+```
+
+Then test it against a scratch `DATA_DIR`:
+- Point `DATA_DIR` at a path that doesn't exist. The script should exit non-zero and nothing new should appear in `/var/tmp/tmp.*`.
+- Run it with a reachable host and confirm it exits 0.
+- Send it `kill -TERM` mid-run. It should exit with status 143 and leave no temp directory behind.

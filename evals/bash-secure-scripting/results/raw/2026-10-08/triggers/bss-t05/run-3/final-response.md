@@ -1,15 +1,12 @@
-I couldn't find a provisioning script in this workspace, so I haven't changed anything.
+I couldn't find the provisioning script in this workspace, so I haven't changed anything.
 
-- **Nothing calls `mysql`.** I searched every file for `mysql` and `password` (case-insensitive), including the CI configs (`.github/workflows/deploy.yml`, `.gitlab-ci.yml`, `Jenkinsfile`), the `Dockerfile`, `docker-compose.yml` and the Ansible role. None of them matched.
-- **The only shell script is `scripts/backup.sh`.** It tars `/srv/ledger/data` and copies it off with `scp`. It has no password and no database step.
+- **Nothing matches.** I searched the whole workspace for `mysql`, `passw` and `provision` (case-insensitive) and got no hits.
+- **The only shell script is `scripts/backup.sh`.** It's a nightly `tar` + `scp` backup with no database step and no password. It does have its own problems (no strict mode, a guessable `/tmp/backup.$$`, unquoted variables, and it only cleans up if it gets to the end), but that's a different job.
+- **I couldn't make the edit anyway.** This session only lets me search and read files. I can't edit files or run `shellcheck` or `bash -n`.
 
-Could you point me to the script? It might be on another branch, in another repo, or not committed yet. Once I have it, the fix would be:
+Could you tell me where the script lives, or add it to this workspace? Once I can see it and edit files, the fix is:
 
-- **Stop putting the password on the command line.** Anything passed as `-p"$DB_PASS"` or `--password=…` shows up in `ps` and `/proc/<pid>/cmdline` to every user on the host while the command runs. `MYSQL_PWD` isn't the answer either, because MySQL deprecates it.
-- **Write a private client config file instead.** Create it with `mktemp` under `umask 077`, put the password in its `[client]` section, and pass it with `--defaults-extra-file="$cnf"` (it has to be the first option). A `trap … EXIT` installed before the `mktemp` deletes the file on every exit path.
-- **Keep the password out of the process table while writing that file.** Use `printf`, which is a Bash builtin, or a here-doc, never `echo` through an external command. Also check that no `set -x` is active around it and that it never gets logged.
-- **Read the password from somewhere safer.** Take it from a root-only file or a secrets manager rather than hardcoding it in the variable. If it was ever committed, treat it as exposed and rotate it.
-
-After the edit I'd run `shellcheck` and `bash -n` on the script, then run it once on a normal input and once on a failure path to confirm the temp file is removed either way.
-
-The skill's own reference on secrets (`references/secrets.md`) needed a read permission that wasn't granted, so the steps above are the standard practice rather than that file's exact wording.
+1. **Take the password off the command line.** Remove `-p"$password"`/`--password=…` from the `mysql` call. Anything in the arguments shows up to every local user through `ps` and `/proc/<pid>/cmdline`.
+2. **Pass it in a private option file instead.** Create a temporary file with `mktemp` under `umask 077`, so only the owner can read it. Set the cleanup `trap … EXIT` (plus INT/TERM handlers that re-raise the signal) *before* creating the file. Write `[client]` / `user=` / `password=` into it with `printf`. `printf` is built into bash, so the password never becomes a command argument. Then call `mysql --defaults-extra-file="$cnf" …`. That flag must come first in the argument list. Two alternatives: a `mysql_config_editor` login path, or an existing root-owned `~/.my.cnf` with mode 0600. The `MYSQL_PWD` environment variable is deprecated and can also leak, so I'd avoid it.
+3. **Stop the password reaching the script in plain text.** Don't hardcode it or read it from a file the repo tracks; get it from a secrets store, a root-only file or a systemd credential. Make sure `set -x` is never on around it. Treat the old password as compromised and rotate it, since it has already been visible in the process table and maybe in shell history or CI logs.
+4. **Check the result.** Run `shellcheck`, `bash -n` and a test run on a good input and a failing one (wrong password, missing variable). Confirm it exits non-zero, `ps` never shows the password, and the temporary file is gone afterwards.
