@@ -5,22 +5,23 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-07
+## Current state, 2026-10-08
 
 Every latest stamp is current. The six skill suites were measured on 2026-10-06 and 2026-10-07,
-and the `python-security-verifier` suite on 2026-10-07, each from a fresh clone of a committed
-revision with no modified files and no ancestor `CLAUDE.md`. The checker reports no staleness.
+and the `python-security-verifier` suite on 2026-10-06, 2026-10-07 and 2026-10-08, each from a
+fresh clone of a committed revision with no modified files and no ancestor `CLAUDE.md`. The
+checker reports no staleness.
 
 Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
 `terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the twelve agent
 templates, `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a
-suite, and the last two have never been run. The verifier's 2026-10-07 stamp measured the
-template with its reasoning-discipline section and, like the 2026-10-06 stamp before it, scored
-full marks in both conditions on every task. The claim it tests from
-`instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the verifier,
-is therefore neither shown nor ruled out at the suite's present difficulty, and the suite cannot
-show whether the reasoning discipline changes anything. Its `discipline-ablation` comparison is
-implemented for that and has not been run.
+suite, and the last two have never been run. The verifier's 2026-10-08 stamp re-ran the same
+tasks as 2026-10-07, unchanged, because adding `comparisons` to `tasks.json` invalidated the prior
+stamp; it scored full marks in both conditions on every task, as the 2026-10-06 and 2026-10-07
+stamps did. The claim it tests from `instructions/agent_configuration_instructions.md`, that a
+fixer's summary anchors the verifier, is therefore neither shown nor ruled out at the suite's
+present difficulty, and the suite cannot show whether the reasoning discipline changes anything.
+Its `discipline-ablation` comparison is implemented for that and has not been run.
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
