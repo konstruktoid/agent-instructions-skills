@@ -1,0 +1,6 @@
+I added `running_balance(entries, account)` and exported it from `ledger` next to `Entry` and `balance`. The repository's checks pass: `uv run pytest` gives 4 passed, `ruff check` and `ruff format --check` are clean, and `uv run ty check src` is clean. I haven't committed anything.
+
+- **Behaviour:** the function is in `src/ledger/balance.py`. It returns the cumulative total after each matching entry, in order. It skips other accounts' entries and returns `[]` if the account has none.
+- **Tests:** I added two checks to `src/ledger/_tests/check_balance.py`, matching the existing layout. That directory is where `pyproject.toml` collects tests, with `check_*` file and function names. One check covers the cumulative `[100, 70]` result with other accounts ignored. The other covers the empty result for an unknown account. I used plain `assert` rather than the existing `_helpers.check_values`, because that helper only prints a mismatch instead of failing.
+- **`ty check`:** a bare `uv run ty check` also scans scripts in a parent directory outside this repo and reports 14 errors there. I limited it to `src`, which is clean.
+- **Not changed:** the existing `check_balance_of_an_unknown_account_is_zero` goes through that non-failing helper, so it can't fail. I left it alone since you didn't ask for that change.

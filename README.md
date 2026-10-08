@@ -120,6 +120,28 @@ Each template is a thin wrapper. Its system prompt names the instructions docume
 holds the substance and points at it by path, rather than restating it. What the agent file adds
 is routing and policy: which model, which tools, which scope, and what to report back.
 
+### Reasoning disciplines
+
+Each template also states a reasoning discipline that fits its role. These are working methods,
+not appeals to philosophical authority: a template still follows the request, its supplied
+procedure, and the evidence it finds.
+
+| Agent kind | Philosopher | Applied reasoning |
+|------------|-------------|-------------------|
+| Main conversation | Aristotle | Classifies the task, constraints, and evidence, then coordinates delegated work and accepts its result. |
+| Requirements analysis | Socrates | Questions ambiguous terms, assumptions, and contradictions until the request has testable acceptance criteria. |
+| Security review and repair | Socrates | Challenges each trust boundary, input, authorization decision, and failure path before fixing the cause. |
+| Independent verification | David Hume | Treats a fix as an unproven expectation and seeks fresh evidence and counterexamples that could disprove it. |
+| Ansible review | John Stuart Mill | Compares candidate changes by their demonstrated operational consequences, including idempotence and failure behavior. |
+| Prose editing | Ludwig Wittgenstein | Clarifies meaning by examining how terms and requirements are used in their surrounding context. |
+| Evidence synthesis | Immanuel Kant | Separates source facts from inference, and states the conditions and limits of each conclusion. |
+| Competing approaches | Hegel | Lets independent approaches expose their tradeoffs, then has the main conversation reconcile them against the same checks. |
+
+The main conversation and the competing-approaches pattern do not have templates because both
+depend on the full request and on reconciling results from other agents. The
+`requirements-analyst` and `evidence-synthesizer` templates provide the bounded work that those
+two roles can delegate without giving away those decisions.
+
 Current templates:
 
 | Template | Wraps | Notes |
@@ -134,6 +156,8 @@ Current templates:
 | `bash-security-verifier.md` | `skills/bash/bash-secure-scripting` | Independently checks `bash-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
 | `terraform-security-verifier.md` | `skills/terraform/terraform-secure-iac` | Independently checks `terraform-security-reviewer.md`'s result in a fresh context. No `Edit`. A hook blocks `terraform apply`, `destroy`, and `plan`. Consider pinning a strong model. |
 | `workflow-security-verifier.md` | `skills/github/github-actions-security` | Independently checks `workflow-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
+| `requirements-analyst.md` | `instructions/written_language_instructions.md` | Read-only Socratic requirements analysis for an ambiguous or high-impact request. It returns acceptance criteria and unresolved decisions to the main conversation. |
+| `evidence-synthesizer.md` | `instructions/written_language_instructions.md` | Read-only Kantian synthesis of supplied evidence. It separates facts, inferences, conditions, and open questions. |
 
 The directory is named `agent-templates/` rather than `agents/` deliberately. Claude Code
 auto-discovers an `agents/` directory at a plugin's root, and every plugin here is sourced
@@ -395,8 +419,9 @@ output, or that its `description` routes the right tasks to it. Two measurements
 - **Agent-template evals.** A suite under `evals/agents/<template>/` measures a template rather
   than a skill. The first, for `python-security-verifier.md`, runs each task with and without
   the fixer's summary in the verifier's prompt, which tests the claim that the summary anchors
-  the verifier. It has not been run yet, and `scripts/check_evals.py` reports it and every
-  template without a suite as unmeasured.
+  the verifier. Both stamps, 2026-10-06 and 2026-10-07, scored full marks in both conditions on
+  all four tasks, so it neither shows nor rules out that anchoring at its present difficulty.
+  `scripts/check_evals.py` reports every template without a suite as unmeasured.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
@@ -423,38 +448,28 @@ have neither eval yet either; a suite for each is a follow-up.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness: three defined tasks, `avl-06-autofix-cosmetics`, `gas-06-blocked-egress` and
-`gas-07-agent-workflow`, have
-never been graded in any stamp, four of the six stamps predate a change to the skill they
-measured, and the newest stamp, `ansible-verification-loop`'s 2026-08-20-repeat, was measured
-against a modified working tree, so the source it graded is in no commit and the run cannot be
-reproduced from the repository until it is repeated from a clean checkout. One skill's
-`description` has changed since the stamp that measured its routing: `github-actions-security`
-gained a clause covering workflows that run an AI coding agent, so its 9/10 is a measurement of
-the description as it stood on 2026-07-27 and its probes test nothing in the added clause. Every
-other row's routing column still describes the description as it stands.
+is staleness, and it reports none. Every latest stamp was measured on 2026-10-06 or 2026-10-07
+from a fresh clone of a committed revision outside the operator's home directory, with no
+modified files and no ancestor `CLAUDE.md`, and the task and routing results in each row come
+from the same run. Runs that a usage limit cut short were discarded and the suite re-run from a
+new clone rather than graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `ansible-verification-loop` | 2026-08-20-repeat | +6 over 1 task | 1.2x | 10/10 (2026-07-25) | Three runs per condition on `avl-07-artifact-hygiene` alone, 15/16 in all three with-skill runs against 9 to 10 in the baseline, so the ranges do not overlap. Two of its assertions were corrected after the single-run 2026-08-20 stamp but before these six runs, which makes this stamp a measurement of checks fixed in advance rather than after the fact; both stamps and that reasoning are in [evals/ansible-verification-loop/README.md](evals/ansible-verification-loop/README.md). The stamp was measured against an uncommitted tree. Earlier stamps: 2026-07-28-isolation measured +1 over `avl-03` at 1.8x, and 2026-07-25 measured +6 over 5 tasks at 2.2x with `avl-05` classified truncated rather than graded. `avl-06-autofix-cosmetics` has never been graded in any stamp. |
-| `bash-secure-scripting` | 2026-08-14 | +9 over 4 tasks | 3.5x | 9/10 | One run per condition, so variance is uncontrolled. `bss-t09` is out of scope and routed in. |
-| `bash-testing` | 2026-08-14 | +1 over 4 tasks | 2.1x | 7/10 | Two fixtures pass fully in both conditions and cannot discriminate. `bt-t01` and `bt-t04` are in scope and never routed; `bt-t07` is out of scope and routed in 2 of 3 repetitions. |
-| `github-actions-security` | 2026-07-28 | +29 over 4 comparable tasks | 2.4x | 9/10 (2026-07-27) | Three runs per condition. `gas-05-dependabot-pinning` aborted in all three with-skill runs and has no comparable measurement, and `gas-02` is marked *no reliable difference*. `gas-06-blocked-egress` has never been graded in any stamp. `gas-07-agent-workflow` was added with the clause about workflows that run an AI coding agent and has never been graded either, and `gas-t01` was replaced by a probe for that clause, so the routing score above measures a probe set the suite no longer holds. `gas-t06` is out of scope and routed in on all 3 repetitions. |
-| `python-secure-coding` | 2026-07-28, marked for regeneration | +4 over 5 tasks | 1.7x | 10/10 (2026-07-25) | Only `psc-02` has a delta not marked *no reliable difference*, and on `psc-03`, `psc-04` and `psc-05` the with-skill condition failed the same security assertions as the baseline. The fixtures were anchored for `ty` on 2026-08-17, which this stamp predates; see [evals/python-secure-coding/README.md](evals/python-secure-coding/README.md). |
-| `python-testing` | 2026-07-28 | +1 over 5 tasks | 1.4x | 9/10 (2026-07-25) | Four of five deltas are zero or marked *no reliable difference*, at $2.07 per net assertion gained. |
+| `ansible-verification-loop` | 2026-10-07 | +3 over 7 tasks | 1.4x | 10/10 | Three runs per condition. `avl-07-artifact-hygiene` (+2) and `avl-06-autofix-cosmetics` (+1) separate; the other five deltas are zero, and four of those five score full marks in both conditions, so they cannot discriminate. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
+| `bash-secure-scripting` | 2026-10-07 | +6 over 4 tasks | 2.4x | 9/10 | Three runs per condition. `bss-03-provision-user` (+4) and `bss-01-log-archive` (+1) separate; the other two are marked *no reliable difference*. `bss-t09`, a GitHub Actions upload step, is out of scope and routed in on all 3 repetitions, as it did on 2026-08-14. |
+| `bash-testing` | 2026-10-07 | +0 over 4 tasks | 1.4x | 10/10 | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. The skill shows no measurable task effect. Routing improved from 7/10 on 2026-08-14. |
+| `github-actions-security` | 2026-10-07 | +33 over 7 tasks | 2.3x | 10/10 | Three runs per condition, and every one of the seven deltas separates. The first stamp to include the skill change of 2026-09-16 and the current probe set. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
+| `python-secure-coding` | 2026-10-06 | +1 over 5 tasks | 2.3x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `20ef477`. |
+| `python-testing` | 2026-10-07 | +1 over 5 tasks | 1.2x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*. `pt-02` and `pt-05` scored full marks in both conditions. The skill did not fire on `pt-03`. Measured at `de69b8c`. |
 
-Two limits cut across the whole table. A routing score carried from an earlier stamp than the
-task result was measured against an earlier revision of that skill's `description`, so it does
-not transfer forward on its own. And a task delta is a measurement of the skill revision that
-ran, not of the file as it stands now: editing a skill, its `tasks.json` or its
-`assertions.json` invalidates the stamp above it until the eval is run again. That second limit
-is not hypothetical here. Every row except `ansible-verification-loop` and `bash-testing`
-carries a stamp older than the skill directory it measured, and `github-actions-security` is
-older than its own `tasks.json` and `assertions.json`, both of which gained a task on
-2026-08-17. That cannot be repaired by `regrade`, since it re-runs assertions only where the
-finished workspace survives, and a workspace is gitignored. The `ansible-verification-loop` row
-is the one case where the workspaces were still on disk, which is why its correction could be
-applied by regrading rather than by paying for the runs again.
+Two limits cut across the whole table. A routing score carried from an earlier stamp than the task
+result was measured against an earlier revision of that skill's `description`, so it does not
+transfer forward on its own; every row above re-ran the probes in the same run as its tasks. And a
+task delta is a measurement of the skill revision that ran, not of the file as it stands now:
+editing a skill, its `tasks.json` or its `assertions.json` invalidates the stamp above it until the
+eval is run again. That cannot be repaired by `regrade`, since it re-runs assertions only where the
+finished workspace survives, and a workspace is gitignored.
 
 Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
 `evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each

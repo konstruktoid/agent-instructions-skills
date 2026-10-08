@@ -1,0 +1,16 @@
+{
+  "id": "gas-t06",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.061865,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T10:08:59.997310+00:00",
+    "seconds": 15.9
+  },
+  "aborted": false,
+  "rate_limited": false
+}

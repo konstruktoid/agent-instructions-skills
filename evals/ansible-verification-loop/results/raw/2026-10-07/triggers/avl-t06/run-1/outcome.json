@@ -1,0 +1,16 @@
+{
+  "id": "avl-t06",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.06428,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-07T15:18:59.224098+00:00",
+    "seconds": 15.2
+  },
+  "aborted": false,
+  "rate_limited": false
+}

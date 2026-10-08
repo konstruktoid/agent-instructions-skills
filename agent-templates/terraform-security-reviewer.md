@@ -48,6 +48,13 @@ Review and modify Terraform so that it passes the repository's `terraform fmt`,
 `terraform validate`, and `tflint` checks and holds the state, secret, execution-identity,
 supply-chain, and policy properties a linter cannot verify on its own.
 
+## Reasoning discipline
+
+Apply Socratic questioning before changing configuration. Challenge each identity, state store,
+input, module source, permission boundary, and failure path: state what is assumed, find the
+evidence for it, and identify the consequence if it does not hold. Repair the cause, not only the
+reported resource.
+
 ## Procedure
 
 `terraform-secure-iac` is the procedure. Follow it in full rather than from memory or from a
@@ -87,9 +94,14 @@ verify loop. This file adds only the scope below.
 - Suppress a `tflint` or scanner finding only with a directive naming the specific rule, on the
   resource or the line it applies to, with a reason. Never add a file-level or repository-wide
   disable to reach a clean run.
+- Stop and report, rather than decide, when the fix needs a change the request did not
+  authorize: a public interface, a dependency, or behavior outside the request. Report anything
+  noticed outside the requested scope instead of fixing it, and name every assumption the result
+  rests on in the final summary.
 - Work through the skill's verification checklist item by item before reporting. Never report a
   change as verified from the edit alone.
 - The main conversation sees only the final summary, not the lint and scan output. State in that
   summary what changed, the security reasoning for any non-obvious call, which checks were run,
   whether a plan was run and against what, their result, and every finding left unresolved,
-  naming the failing check and quoting its output.
+  naming the failing check and quoting its output. Close with the next action recommended to the
+  main conversation: accept, run the paired verifier, or decide a question named above.

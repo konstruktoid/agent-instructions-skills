@@ -32,7 +32,7 @@ Truncated runs: none.
 |---|---|
 | Total baseline cost | $0.18 |
 | Total with-skill cost | $0.32 |
-| Multiplier | 1.8x |
+| Multiplier, comparable tasks, per graded run | 1.8x |
 | Net assertions gained | +1 |
 | Cost per net assertion gained | $0.14 |
 

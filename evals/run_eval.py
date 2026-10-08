@@ -44,6 +44,7 @@ import socket
 import subprocess
 import sys
 import textwrap
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from pathlib import Path
@@ -103,6 +104,15 @@ TRIGGER_TOOLS = "Skill,Read,Glob,Grep"
 TASK_TOOLS = "Bash,Edit,Glob,Grep,Read,Skill,Write"
 TRIGGER_BUDGET_USD = 0.35
 TASK_BUDGET_USD = 2.0
+
+# The status the API answers with when the account's usage limit rejects a request.
+HTTP_TOO_MANY = 429
+
+# Claude Code reads these from every ancestor of a run's working directory. Neither
+# `CLAUDE_CONFIG_DIR` nor `--setting-sources project` stops it, so a file here loads into
+# both conditions: ten 2026-09-13 transcripts, baseline and with-skill alike, end on wording
+# from the operator's own `~/.claude/CLAUDE.md`, which is an ancestor of any checkout in $HOME.
+ANCESTOR_INSTRUCTION_FILES = ("CLAUDE.md", "CLAUDE.local.md", ".claude/CLAUDE.md")
 
 # Probes run against a small mixed repository rather than an empty directory. An empty
 # directory makes an agent stop and report that there is nothing to work on, which
@@ -583,6 +593,20 @@ def truncation(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def rate_limited(events: Iterable[dict[str, Any]]) -> bool:
+    """Report whether the API rejected a request for quota, rather than the run failing.
+
+    The avl-05 runs of 2026-09-13 ended on a 429 session-limit rejection, most within two
+    seconds of starting, while the harness went on launching runs that met the same limit.
+    Such a run measures the account's quota, so it is told apart from an abort the run
+    caused, and `execute` stops scheduling once one is seen.
+    """
+    return any(
+        event.get("error") == "rate_limit" or event.get("api_error_status") == HTTP_TOO_MANY
+        for event in events
+    )
+
+
 def result_event(events: Iterable[dict[str, Any]]) -> dict[str, Any]:
     """Return the terminal result event, or an empty mapping when the run produced none."""
     for event in events:
@@ -616,6 +640,7 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
         "num_turns": result.get("num_turns"),
         "cost_usd": result.get("total_cost_usd"),
         "is_error": result.get("is_error"),
+        "rate_limited": rate_limited(events),
         **truncation(events),
     }
 
@@ -942,6 +967,7 @@ def run_one_task(job: Job) -> dict[str, Any]:
         # result event, having produced a partial transcript that grades like a real run
         # and scores badly. That is a measurement of the quota, not of the skill.
         "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
+        "rate_limited": facts["rate_limited"],
         "assertions": graded,
         "passed": sum(1 for item in graded if item["passed"]),
         "total": len(graded),
@@ -1088,6 +1114,7 @@ def run_one_agent_task(job: Job) -> dict[str, Any]:
         "scheduled_wakeups": facts["scheduled_wakeups"],
         "outstanding_background": facts["outstanding_background"],
         "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
+        "rate_limited": facts["rate_limited"],
         "assertions": graded,
         "passed": sum(1 for item in graded if item["passed"]),
         "total": len(graded),
@@ -1126,10 +1153,13 @@ def run_one_trigger(job: Job) -> dict[str, Any]:
         "skills_used": facts["skills_used"],
         "cost_usd": facts["cost_usd"],
         "run": record,
+        # A probe that never ran records `fired: false`, which reads as a routing decision.
+        "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
+        "rate_limited": facts["rate_limited"],
     }
     (run_dir / "outcome.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
     (run_dir / "final-response.md").write_text(scrub(facts["final_text"]) + "\n", encoding="utf-8")
-    verdict = "ok" if outcome["correct"] else "WRONG"
+    verdict = "ABORTED" if outcome["aborted"] else "ok" if outcome["correct"] else "WRONG"
     print(f"{probe['id']} expect={probe['expect']} fired={fired} {verdict}")
     return outcome
 
@@ -1144,7 +1174,7 @@ def today() -> str:
     return datetime.now(tz=UTC).strftime("%Y-%m-%d")
 
 
-def record_source_revision(root: Path) -> None:
+def record_source_revision(root: Path, ancestry: list[str] | None = None) -> None:
     """Record the commit the stamp was measured against, beside the runs it graded.
 
     The date in a stamp's name says when the measurement happened, not what it measured.
@@ -1171,32 +1201,174 @@ def record_source_revision(root: Path) -> None:
         [GIT, "status", "--porcelain"], cwd=REPO_ROOT, capture_output=True, text=True, check=False
     )
     root.mkdir(parents=True, exist_ok=True)
+    revision: dict[str, Any] = {
+        "revision": head.stdout.strip(),
+        # An uncommitted tree means the measured source is in no commit at all, so the
+        # revision above is a lower bound on what ran rather than a record of it.
+        "dirty": bool(status.stdout.strip()) if status.returncode == 0 else None,
+    }
+    # Written only when present, so a stamp measured from a clean ancestry keeps its old shape.
+    if ancestry:
+        revision["ancestor_instructions"] = ancestry
     (root / "source-revision.json").write_text(
-        json.dumps(
-            {
-                "revision": head.stdout.strip(),
-                # An uncommitted tree means the measured source is in no commit at all, so the
-                # revision above is a lower bound on what ran rather than a record of it.
-                "dirty": bool(status.stdout.strip()) if status.returncode == 0 else None,
-            },
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
+        json.dumps(revision, indent=2) + "\n", encoding="utf-8"
     )
 
 
-def execute(jobs: list[Job], worker: Worker, parallel: int) -> list[dict[str, Any]]:
-    """Run jobs through a bounded thread pool, preserving input order in the results."""
+def record_trigger_ancestry(root: Path, ancestry: list[str]) -> None:
+    """Record the ancestor files a trigger pass loaded, keeping any revision a task run wrote.
+
+    A task run and a trigger pass can share one stamp, and the task run's record says which
+    tree its graded runs measured, so the paths are merged into it rather than replacing it.
+    """
+    path = root / "source-revision.json"
+    if not path.is_file():
+        record_source_revision(root, ancestry)
+        return
+    revision = json.loads(path.read_text(encoding="utf-8"))
+    recorded = revision.get("ancestor_instructions", [])
+    revision["ancestor_instructions"] = sorted({*recorded, *ancestry})
+    path.write_text(json.dumps(revision, indent=2) + "\n", encoding="utf-8")
+
+
+def ancestor_instructions() -> list[Path]:
+    """Return every instruction file Claude Code would load from above the evals tree."""
+    return [
+        directory / name
+        for directory in (EVALS_DIR, *EVALS_DIR.parents)
+        for name in ANCESTOR_INSTRUCTION_FILES
+        if (directory / name).is_file()
+    ]
+
+
+def require_clean_ancestry(*, allowed: bool) -> list[str]:
+    """Stop a run whose conditions would both load an instruction file nobody chose.
+
+    Returns the scrubbed paths when the operator allowed them, so the stamp can record that
+    both conditions ran with that guidance rather than as an agent with none.
+    """
+    found = ancestor_instructions()
+    if not found:
+        return []
+    listing = "\n".join(f"  {path}" for path in found)
+    if not allowed:
+        message = (
+            "Claude Code loads instruction files from every ancestor of a run's working "
+            f"directory, and these sit above evals/:\n{listing}\n"
+            "They reach both conditions, so the baseline is not an agent without guidance. "
+            "Run from a checkout outside those directories, or pass "
+            "--allow-ancestor-instructions to measure anyway and record the paths."
+        )
+        raise SystemExit(message)
+    print(f"WARNING: both conditions load these instruction files:\n{listing}", file=sys.stderr)
+    return [scrub(str(path)) for path in found]
+
+
+def execute(
+    jobs: list[Job],
+    worker: Worker,
+    parallel: int,
+    on_result: Callable[[dict[str, Any]], None] | None = None,
+) -> list[dict[str, Any]]:
+    """Run jobs through a bounded thread pool, in input order, stopping at the rate limit.
+
+    Once one run is rejected by the usage limit, every queued run meets the same rejection,
+    so the jobs not yet started are skipped and left out of the result. `on_result` sees each
+    outcome as it finishes, under a lock, so a batch interrupted part way has still recorded
+    every run it graded.
+    """
+    halted = threading.Event()
+    lock = threading.Lock()
+
+    def guarded(job: Job) -> dict[str, Any] | None:
+        if halted.is_set():
+            return None
+        outcome = worker(job)
+        if outcome.get("rate_limited"):
+            halted.set()
+        if on_result is not None:
+            with lock:
+                on_result(outcome)
+        return outcome
+
     if parallel <= 1:
-        return [worker(job) for job in jobs]
-    with ThreadPoolExecutor(max_workers=parallel) as pool:
-        return list(pool.map(worker, jobs))
+        results = [guarded(job) for job in jobs]
+    else:
+        with ThreadPoolExecutor(max_workers=parallel) as pool:
+            results = list(pool.map(guarded, jobs))
+    skipped = sum(1 for result in results if result is None)
+    if skipped:
+        print(
+            f"SKIPPED {skipped} queued run(s) after the usage limit rejected one; "
+            "re-run them with --task once the limit resets",
+            file=sys.stderr,
+        )
+    return [result for result in results if result is not None]
+
+
+def outcome_key(outcome: dict[str, Any]) -> tuple[str, str, int]:
+    """Identify one graded run within a stamp."""
+    return outcome["task"], outcome["condition"], outcome.get("run_index", 1)
+
+
+def load_outcomes(path: Path) -> list[dict[str, Any]]:
+    """Read a stamp's task outcomes, or nothing when none were written yet."""
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else []
+
+
+def write_outcomes(path: Path, outcomes: list[dict[str, Any]]) -> None:
+    """Write a stamp's task outcomes in a stable order, replacing the file atomically."""
+    outcomes = sorted(outcomes, key=outcome_key)
+    partial = path.with_suffix(".json.partial")
+    partial.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
+    partial.replace(path)
+
+
+def run_and_record(jobs: list[Job], worker: Worker, parallel: int, root: Path, runs: int) -> int:
+    """Run graded task jobs, keeping `task-outcomes.json` in step with each `grade.json`.
+
+    The file is rewritten as each run finishes rather than once at the end. Written only at
+    the end, an interrupted batch leaves a `grade.json` that the outcomes file, and therefore
+    the rendered report, never sees: avl-05's 2026-09-13 baseline run 1 held a graded 10/11 on
+    disk and was reported as aborted until regraded. Runs of the scheduled pairs beyond
+    `--runs` are dropped up front, so a smaller re-run replaces a larger one rather than
+    mixing with it.
+    """
+    outcomes_path = root / "task-outcomes.json"
+    scheduled = {(job["task"]["id"], job["condition"]) for job in jobs}
+    write_outcomes(
+        outcomes_path,
+        [
+            outcome
+            for outcome in load_outcomes(outcomes_path)
+            if (outcome["task"], outcome["condition"]) not in scheduled
+            or outcome.get("run_index", 1) <= runs
+        ],
+    )
+
+    def record(outcome: dict[str, Any]) -> None:
+        key = outcome_key(outcome)
+        kept = [item for item in load_outcomes(outcomes_path) if outcome_key(item) != key]
+        write_outcomes(outcomes_path, [*kept, outcome])
+
+    finished = execute(jobs, worker, parallel, on_result=record)
+    # The documented contract: a failing assertion is a result, but a run that did not
+    # execute is a harness failure and must not be mistaken for a completed measurement.
+    aborted = [outcome for outcome in load_outcomes(outcomes_path) if outcome.get("aborted")]
+    for outcome in aborted:
+        cause = " (usage limit)" if outcome.get("rate_limited") else ""
+        print(
+            f"ABORTED{cause} {outcome['task']} [{outcome['condition']}] "
+            f"run {outcome.get('run_index', 1)}",
+            file=sys.stderr,
+        )
+    return 1 if aborted or len(finished) < len(jobs) else 0
 
 
 def cmd_tasks(args: argparse.Namespace) -> int:
     """Run every task for one skill in both conditions and grade the runs."""
     require_reviewed_graders(args.skill, reviewed=args.graders_reviewed)
+    ancestry = require_clean_ancestry(allowed=args.allow_ancestor_instructions)
     skill_dir = EVALS_DIR / args.skill
     tasks = load_json(skill_dir / "tasks.json")["tasks"]
     assertions = load_json(skill_dir / "assertions.json")["tasks"]
@@ -1204,7 +1376,7 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         tasks = [task for task in tasks if task["id"] in args.task]
     stamp = args.stamp or today()
     root = results_root(args.skill, stamp)
-    record_source_revision(root)
+    record_source_revision(root, ancestry)
     plugin_dir = build_plugin(args.skill, root)
 
     runs = max(1, args.runs)
@@ -1235,39 +1407,16 @@ def cmd_tasks(args: argparse.Namespace) -> int:
         for condition in CONDITIONS
         for index in range(1, runs + 1)
     ]
-    outcomes = execute(jobs, run_one_task, args.parallel)
-
-    # Merge rather than overwrite: --task runs one subset at a time, and a later batch must
+    # Merged rather than overwritten: --task runs one subset at a time, and a later batch must
     # not discard the graded runs an earlier one already produced under the same stamp.
-    outcomes_path = root / "task-outcomes.json"
-    if outcomes_path.is_file():
-        fresh = {(outcome["task"], outcome["condition"]) for outcome in outcomes}
-        previous = json.loads(outcomes_path.read_text(encoding="utf-8"))
-        outcomes += [
-            outcome for outcome in previous if (outcome["task"], outcome["condition"]) not in fresh
-        ]
-    outcomes.sort(
-        key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
-    )
-    outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
-    # The documented contract: a failing assertion is a result, but a run that did not
-    # execute is a harness failure and must not be mistaken for a completed measurement.
-    aborted = [outcome for outcome in outcomes if outcome.get("aborted")]
-    if aborted:
-        for outcome in aborted:
-            print(
-                f"ABORTED {outcome['task']} [{outcome['condition']}] "
-                f"run {outcome.get('run_index', 1)}",
-                file=sys.stderr,
-            )
-        return 1
-    return 0
+    return run_and_record(jobs, run_one_task, args.parallel, root, runs)
 
 
 def cmd_agent_tasks(args: argparse.Namespace) -> int:
     """Run every task of one agent template's suite in both conditions and grade the runs."""
     suite = f"{AGENT_SUITES_DIR}/{args.template}"
     require_reviewed_graders(suite, reviewed=args.graders_reviewed)
+    ancestry = require_clean_ancestry(allowed=args.allow_ancestor_instructions)
     suite_dir = EVALS_DIR / suite
     tasks = load_json(suite_dir / "tasks.json")["tasks"]
     assertions = load_json(suite_dir / "assertions.json")["tasks"]
@@ -1275,7 +1424,7 @@ def cmd_agent_tasks(args: argparse.Namespace) -> int:
         tasks = [task for task in tasks if task["id"] in args.task]
     stamp = args.stamp or today()
     root = results_root(suite, stamp)
-    record_source_revision(root)
+    record_source_revision(root, ancestry)
     # Fails here rather than in every worker when the template cannot be adapted.
     adapt_template(args.template)
 
@@ -1300,26 +1449,7 @@ def cmd_agent_tasks(args: argparse.Namespace) -> int:
         for condition in AGENT_ARMS.names
         for index in range(1, runs + 1)
     ]
-    outcomes = execute(jobs, run_one_agent_task, args.parallel)
-
-    outcomes_path = root / "task-outcomes.json"
-    if outcomes_path.is_file():
-        fresh = {(outcome["task"], outcome["condition"]) for outcome in outcomes}
-        previous = json.loads(outcomes_path.read_text(encoding="utf-8"))
-        outcomes += [
-            outcome for outcome in previous if (outcome["task"], outcome["condition"]) not in fresh
-        ]
-    outcomes.sort(
-        key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
-    )
-    outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
-    aborted = [outcome for outcome in outcomes if outcome.get("aborted")]
-    for outcome in aborted:
-        print(
-            f"ABORTED {outcome['task']} [{outcome['condition']}] run {outcome.get('run_index', 1)}",
-            file=sys.stderr,
-        )
-    return 1 if aborted else 0
+    return run_and_record(jobs, run_one_agent_task, args.parallel, root, runs)
 
 
 def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dict[str, Any]:
@@ -1345,9 +1475,12 @@ def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dic
 
 def cmd_triggers(args: argparse.Namespace) -> int:
     """Run every trigger probe for one skill and record the routing decisions."""
+    ancestry = require_clean_ancestry(allowed=args.allow_ancestor_instructions)
     skill_dir = EVALS_DIR / args.skill
     probes = load_json(skill_dir / "trigger-eval.json")["prompts"]
     stamp = args.stamp or today()
+    if ancestry:
+        record_trigger_ancestry(results_root(args.skill, stamp), ancestry)
     root = results_root(args.skill, stamp) / "triggers"
     plugin_dir = build_plugin(args.skill, root)
     runs = max(1, args.runs)
@@ -1367,17 +1500,28 @@ def cmd_triggers(args: argparse.Namespace) -> int:
     ]
     results = execute(jobs, run_one_trigger, args.parallel)
 
+    # A pass that did not run made no routing decision, so it is left out of the majority
+    # rather than counted as a probe that did not fire.
     by_probe: dict[str, list[dict[str, Any]]] = {}
     for result in results:
-        by_probe.setdefault(result["id"], []).append(result)
-    outcomes = [majority_outcome(probe, by_probe[probe["id"]]) for probe in probes]
+        if not result.get("aborted"):
+            by_probe.setdefault(result["id"], []).append(result)
+    unmeasured = [probe["id"] for probe in probes if probe["id"] not in by_probe]
+    outcomes = [
+        majority_outcome(probe, by_probe[probe["id"]])
+        for probe in probes
+        if probe["id"] in by_probe
+    ]
 
     correct = sum(1 for outcome in outcomes if outcome["correct"])
     print(f"trigger accuracy: {correct}/{len(outcomes)} over {runs} pass(es) per probe")
     (root / "trigger-outcomes.json").write_text(
         json.dumps(outcomes, indent=2) + "\n", encoding="utf-8"
     )
-    return 0
+    if unmeasured:
+        print(f"UNMEASURED, no pass finished: {', '.join(unmeasured)}", file=sys.stderr)
+    aborted = sum(1 for result in results if result.get("aborted"))
+    return 1 if unmeasured or aborted or len(results) < len(jobs) else 0
 
 
 def cmd_snapshot(args: argparse.Namespace) -> int:
@@ -1473,21 +1617,9 @@ def cmd_regrade(args: argparse.Namespace) -> int:
     # the runs still on disk, and one that reached none of them must not silently replace a
     # committed results file with an empty list.
     outcomes_path = root / "task-outcomes.json"
-    if outcomes_path.is_file():
-        fresh = {
-            (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
-            for outcome in outcomes
-        }
-        previous = json.loads(outcomes_path.read_text(encoding="utf-8"))
-        outcomes += [
-            outcome
-            for outcome in previous
-            if (outcome["task"], outcome["condition"], outcome.get("run_index", 1)) not in fresh
-        ]
-    outcomes.sort(
-        key=lambda outcome: (outcome["task"], outcome["condition"], outcome.get("run_index", 1))
-    )
-    outcomes_path.write_text(json.dumps(outcomes, indent=2) + "\n", encoding="utf-8")
+    fresh = {outcome_key(outcome) for outcome in outcomes}
+    previous = [item for item in load_outcomes(outcomes_path) if outcome_key(item) not in fresh]
+    write_outcomes(outcomes_path, [*outcomes, *previous])
     return 0
 
 
@@ -1525,6 +1657,7 @@ def regrade_one(
         {key: facts[key] for key in ("truncated", "scheduled_wakeups", "outstanding_background")}
     )
     outcome["aborted"] = bool(outcome.get("run", {}).get("returncode", 0) != 0 or facts["is_error"])
+    outcome["rate_limited"] = facts["rate_limited"]
     (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
     state = " TRUNCATED" if outcome["truncated"] else ""
     kept = "" if workspace.is_dir() else " (transcript only, workspace not kept)"
@@ -1631,6 +1764,11 @@ def cost_section(
 
     A skill that improves nothing has no cost per assertion to report, and dividing by
     zero or by a negative net would manufacture a number that reads as one.
+
+    The totals are what was spent. The multiplier and the cost per assertion compare like
+    with like instead: the same tasks the net delta is across, at the mean cost of one
+    graded run per task and condition, so a task graded in one arm only, or graded a
+    different number of times in each, does not tilt the ratio.
     """
     totals = {
         condition: sum(
@@ -1640,7 +1778,14 @@ def cost_section(
         )
         for condition in arms.names
     }
-    baseline, with_skill = totals[arms.control], totals[arms.treatment]
+    paired = dict.fromkeys(arms.names, 0.0)
+    for conditions in by_task.values():
+        graded = {condition: graded_runs(conditions.get(condition, [])) for condition in arms.names}
+        if not all(graded.values()):
+            continue
+        for condition, runs in graded.items():
+            paired[condition] += sum(run["cost_usd"] or 0 for run in runs) / len(runs)
+    baseline, with_skill = paired[arms.control], paired[arms.treatment]
     multiplier = f"{with_skill / baseline:.1f}x" if baseline else "n/a"
     if net_delta > 0:
         per_assertion = f"${(with_skill - baseline) / net_delta:.2f}"
@@ -1651,9 +1796,9 @@ def cost_section(
         "",
         "| Measure | Value |",
         "|---|---|",
-        f"| Total {arms.control} cost | ${baseline:.2f} |",
-        f"| Total {arms.treatment} cost | ${with_skill:.2f} |",
-        f"| Multiplier | {multiplier} |",
+        f"| Total {arms.control} cost | ${totals[arms.control]:.2f} |",
+        f"| Total {arms.treatment} cost | ${totals[arms.treatment]:.2f} |",
+        f"| Multiplier, comparable tasks, per graded run | {multiplier} |",
         f"| Net assertions gained | {net_delta:+g} |",
         f"| Cost per net assertion gained | {per_assertion} |",
         "",
@@ -1779,12 +1924,26 @@ def aborted_section(by_task: dict[str, dict[str, list[dict[str, Any]]]], arms: A
     ]
     if not named:
         return []
+    limited = sum(
+        1
+        for conditions in by_task.values()
+        for condition in arms.names
+        for run in conditions.get(condition, [])
+        if run.get("aborted") and run.get("rate_limited")
+    )
+    # Absent from stamps graded before the field existed, so their rendering is unchanged.
+    quota = (
+        f" {limited} of them were rejected by the usage limit, which measures the account "
+        "rather than the task; re-run those with `--task` once the limit resets."
+        if limited
+        else ""
+    )
     return [
         *wrap_prose(
             f"Aborted runs ({len(named)}): {', '.join(named)}. Each ended with a non-zero "
             "exit or an error result, so the transcript is partial and the score it would "
             "have produced measures where the run stopped. These are excluded from the "
-            "medians and the delta above."
+            f"medians and the delta above.{quota}"
         ),
         "",
     ]
@@ -1858,7 +2017,9 @@ def failure_section(
             runs = conditions.get(condition, [])
             finished = graded_runs(runs)
             failures = failed_ids(finished)
-            if runs and not finished:
+            if not runs:
+                rendered = "not run"
+            elif not finished:
                 # "none" here would read as a clean sweep. A condition with no finished run
                 # has no failure list to give, the same distinction `verdict` draws.
                 rendered = "not measured"
@@ -1891,6 +2052,20 @@ def render_report(skill: str, stamp: str) -> str:
         "the finished workspace or a regex over the run transcript.",
         "",
     ]
+    revision_path = root / "source-revision.json"
+    revision = (
+        json.loads(revision_path.read_text(encoding="utf-8")) if revision_path.is_file() else {}
+    )
+    if revision.get("ancestor_instructions"):
+        listed = ", ".join(f"`{path}`" for path in revision["ancestor_instructions"])
+        lines += [
+            *wrap_prose(
+                f"Both conditions loaded instruction files from above the run directory: "
+                f"{listed}. The baseline is therefore not an agent without guidance, and a "
+                "delta here measures the skill on top of that guidance."
+            ),
+            "",
+        ]
     # A stamp can hold trigger probes alone, as when only a description is under test. Emit
     # the task sections only when there are graded task runs, rather than a table of zeroes
     # that reads as a measured result.
@@ -1986,6 +2161,11 @@ def build_parser() -> argparse.ArgumentParser:
             )
         if name in {"report", "regrade", "snapshot"}:
             continue
+        sub.add_argument(
+            "--allow-ancestor-instructions",
+            action="store_true",
+            help="run although a CLAUDE.md above evals/ loads into both conditions",
+        )
         sub.add_argument("--model", default=model, help=f"model for each run (default: {model})")
         sub.add_argument("--parallel", type=int, default=4, help="concurrent runs (default: 4)")
         if name == "tasks":
@@ -2019,6 +2199,11 @@ def build_parser() -> argparse.ArgumentParser:
     agent_parser.add_argument("--parallel", type=int, default=4, help="concurrent runs")
     agent_parser.add_argument("--task", action="append", help="run only this task id, repeatable")
     agent_parser.add_argument("--runs", type=int, default=1, help="runs per condition")
+    agent_parser.add_argument(
+        "--allow-ancestor-instructions",
+        action="store_true",
+        help="run although a CLAUDE.md above evals/ loads into both conditions",
+    )
     agent_parser.add_argument(
         "--graders-reviewed",
         action="store_true",

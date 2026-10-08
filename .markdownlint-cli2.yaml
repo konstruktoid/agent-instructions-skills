@@ -22,3 +22,4 @@ config:
 # was in, not anything the agent wrote, and it must not be published.
 ignores:
   - "evals/*/results/raw/**"
+  - "evals/agents/*/results/raw/**"

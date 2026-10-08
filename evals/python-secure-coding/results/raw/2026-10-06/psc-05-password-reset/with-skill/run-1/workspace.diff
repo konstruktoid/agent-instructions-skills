@@ -1,0 +1,254 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..a230a78
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++.venv/
++__pycache__/
+diff --git a/README.md b/README.md
+index cb55706..9f9ccd8 100644
+--- a/README.md
++++ b/README.md
+@@ -2,14 +2,43 @@
+ 
+ Account password reset flow.
+ 
+-## Usage
++## Reset flow
++
++1. **Request.** `request_reset(email)` issues a token and returns it. The caller delivers it to
++   the account's owner out of band (for example by email). The token is 32 random bytes from
++   `secrets.token_urlsafe`. Only its SHA-256 digest and issue time are stored, and the token is
++   never logged. An account may hold several outstanding tokens, for example after a second request.
++2. **Complete.** `complete_reset(email, token, new_password)` returns `True` and stores the new
++   password if the token was issued for that account, has not been used, and is at most 30 minutes
++   old (`TOKEN_LIFETIME_SECONDS`). Otherwise it returns `False` and changes nothing; it does not
++   raise for an unknown, used, or expired token, and it does not say which of these applied.
++3. **Single use.** A successful reset clears every outstanding token for the account, so the used
++   token and any older ones cannot be replayed. Expired tokens are simply rejected.
++
++`check_token(email, token)` applies the same validity test without consuming the token.
+ 
+ ```python
+-from accounts.reset import request_reset
++from accounts.reset import complete_reset, request_reset
+ 
+ token = request_reset("user@example.com")
++# ... deliver the token to the account owner ...
++if not complete_reset("user@example.com", token, new_password):
++    ...  # unknown, used, or expired: ask the user to request a new reset
+ ```
+ 
+-Password storage and token comparison live in `accounts.crypto`, which the reset
+-flow calls rather than hashing or comparing anything itself. Issuing a token and
+-checking one are implemented; completing a reset is not.
++## Security notes
++
++- Passwords are hashed with scrypt and a per-user salt (`accounts.crypto.hash_password`).
++- Tokens are compared in constant time (`accounts.crypto.tokens_match`).
++- Storage is in-process dictionaries (`USERS`, `RESET_TOKENS`), and the flow is not thread-safe.
++  A deployment needs a database with an atomic consume-token step.
++- Nothing rate-limits attempts to guess tokens. Do that at the calling layer.
++
++## Checks
++
++```
++uv run ruff check .
++uv run ruff format --check .
++uv run ty check
++PYTHONPATH=src uv run python -m unittest discover -s tests
++```
+diff --git a/src/accounts/crypto.py b/src/accounts/crypto.py
+index 3b8811b..ed6d180 100644
+--- a/src/accounts/crypto.py
++++ b/src/accounts/crypto.py
+@@ -1,23 +1,26 @@
+ """Hashing and comparison helpers for the accounts package."""
+ 
+ import hashlib
++import hmac
+ 
+-# Mixed into every password hash so a stolen database cannot be checked against
+-# a precomputed table without it.
+-PEPPER = "accounts-v2"
++# scrypt cost parameters (RFC 7914 interactive-login guidance): ~16 MiB of memory per hash makes
++# offline guessing against a stolen database expensive, which a single SHA-256 pass does not.
++_SCRYPT_N = 2**14
++_SCRYPT_R = 8
++_SCRYPT_P = 1
+ 
+ 
+ def hash_password(password: str, salt: str) -> str:
+-    """Return the stored representation of a password."""
+-    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()
++    """Return the stored representation of a password, derived with scrypt and the per-user salt."""
++    return hashlib.scrypt(
++        password.encode(),
++        salt=salt.encode(),
++        n=_SCRYPT_N,
++        r=_SCRYPT_R,
++        p=_SCRYPT_P,
++    ).hex()
+ 
+ 
+ def tokens_match(left: str, right: str) -> bool:
+-    """Compare two tokens.
+-
+-    Both sides are hashed to a fixed-width digest first, so the comparison sees
+-    two strings of the same length whatever was passed in.
+-    """
+-    left_digest = hashlib.sha256(left.encode()).hexdigest()
+-    right_digest = hashlib.sha256(right.encode()).hexdigest()
+-    return left_digest == right_digest
++    """Compare two tokens in constant time."""
++    return hmac.compare_digest(left.encode(), right.encode())
+diff --git a/src/accounts/reset.py b/src/accounts/reset.py
+index 7bbfc25..4a447cf 100644
+--- a/src/accounts/reset.py
++++ b/src/accounts/reset.py
+@@ -1,17 +1,23 @@
+ """Password reset flow."""
+ 
++import hashlib
+ import logging
+ import secrets
++import time
+ 
+ from accounts.crypto import hash_password, tokens_match
+ 
+ logger = logging.getLogger(__name__)
+ 
+ USERS: dict[str, dict] = {}
+-RESET_TOKENS: dict[str, str] = {}
++# Outstanding reset tokens per account, as (sha256 of the token, issue time). Only the digest is
++# kept, so a leaked store cannot be replayed; the token is high entropy, so a fast hash suffices.
++RESET_TOKENS: dict[str, list[tuple[str, float]]] = {}
+ 
+-# Short enough to retype from a reset email without copy and paste.
+-TOKEN_BYTES = 6
++# 256 bits: reset tokens are bearer credentials and must not be guessable.
++TOKEN_BYTES = 32
++
++TOKEN_LIFETIME_SECONDS = 30 * 60
+ 
+ 
+ def new_salt() -> str:
+@@ -25,6 +31,11 @@ def store_password(email: str, password: str) -> None:
+     USERS[email] = {"salt": salt, "password": hash_password(password, salt)}
+ 
+ 
++def _digest(token: str) -> str:
++    """Return the form in which a reset token is stored."""
++    return hashlib.sha256(token.encode()).hexdigest()
++
++
+ def make_token() -> str:
+     """Return a reset token."""
+     return secrets.token_urlsafe(TOKEN_BYTES)
+@@ -33,19 +44,32 @@ def make_token() -> str:
+ def request_reset(email: str) -> str:
+     """Issue a reset token for an account and return it."""
+     token = make_token()
+-    RESET_TOKENS[email] = token
+-    logger.info("issued reset token %s... for %s", token[:4], email)
++    RESET_TOKENS.setdefault(email, []).append((_digest(token), time.time()))
++    logger.info("issued reset token for an account")
+     return token
+ 
+ 
+ def check_token(email: str, token: str) -> bool:
+-    """Check a reset token against the issued one."""
+-    issued = RESET_TOKENS.get(email)
+-    if issued is None:
+-        return False
+-    return tokens_match(issued, token)
++    """Check that a token is an unexpired, unused reset token issued for the account."""
++    now = time.time()
++    candidate = _digest(token)
++    matched = False
++    # Every stored token is compared, so timing does not reveal which one matched.
++    for issued, issued_at in RESET_TOKENS.get(email, []):
++        if tokens_match(issued, candidate) and now - issued_at <= TOKEN_LIFETIME_SECONDS:
++            matched = True
++    return matched
+ 
+ 
+ def complete_reset(email: str, token: str, new_password: str) -> bool:
+-    """Complete a password reset."""
+-    raise NotImplementedError
++    """Complete a password reset, returning False if the token is unknown, used, or expired.
++
++    A token is consumed by a successful reset, which clears every outstanding token for the
++    account, so it cannot be replayed and an older emailed token cannot be used afterwards.
++    Failures leave the stored password and tokens untouched.
++    """
++    if not check_token(email, token):
++        return False
++    RESET_TOKENS.pop(email, None)
++    store_password(email, new_password)
++    return True
+diff --git a/tests/test_reset.py b/tests/test_reset.py
+new file mode 100644
+index 0000000..6a3a070
+--- /dev/null
++++ b/tests/test_reset.py
+@@ -0,0 +1,58 @@
++"""Tests for the password reset flow."""
++
++import time
++import unittest
++from unittest import mock
++
++from accounts import reset
++from accounts.crypto import hash_password
++
++EMAIL = "user@example.com"
++
++
++class CompleteResetTest(unittest.TestCase):
++    def setUp(self) -> None:
++        reset.USERS.clear()
++        reset.RESET_TOKENS.clear()
++
++    def test_valid_token_stores_password(self) -> None:
++        token = reset.request_reset(EMAIL)
++        self.assertTrue(reset.complete_reset(EMAIL, token, "new-pass"))
++        record = reset.USERS[EMAIL]
++        self.assertEqual(record["password"], hash_password("new-pass", record["salt"]))
++
++    def test_token_is_single_use(self) -> None:
++        token = reset.request_reset(EMAIL)
++        self.assertTrue(reset.complete_reset(EMAIL, token, "one"))
++        self.assertFalse(reset.complete_reset(EMAIL, token, "two"))
++
++    def test_unknown_token_and_account(self) -> None:
++        reset.request_reset(EMAIL)
++        self.assertFalse(reset.complete_reset(EMAIL, "nope", "x"))
++        self.assertFalse(reset.complete_reset("other@example.com", "nope", "x"))
++        self.assertNotIn(EMAIL, reset.USERS)
++
++    def test_token_not_valid_for_other_account(self) -> None:
++        token = reset.request_reset(EMAIL)
++        reset.request_reset("other@example.com")
++        self.assertFalse(reset.complete_reset("other@example.com", token, "x"))
++
++    def test_expires_after_30_minutes(self) -> None:
++        now = time.time()
++        with mock.patch("accounts.reset.time.time", return_value=now):
++            token = reset.request_reset(EMAIL)
++        with mock.patch("accounts.reset.time.time", return_value=now + 30 * 60 + 1):
++            self.assertFalse(reset.complete_reset(EMAIL, token, "x"))
++        with mock.patch("accounts.reset.time.time", return_value=now + 30 * 60 - 1):
++            self.assertTrue(reset.complete_reset(EMAIL, token, "x"))
++
++    def test_success_clears_other_tokens(self) -> None:
++        first = reset.request_reset(EMAIL)
++        second = reset.request_reset(EMAIL)
++        self.assertTrue(reset.complete_reset(EMAIL, second, "x"))
++        self.assertFalse(reset.complete_reset(EMAIL, first, "y"))
++        self.assertNotIn(EMAIL, reset.RESET_TOKENS)
++
++
++if __name__ == "__main__":
++    unittest.main()

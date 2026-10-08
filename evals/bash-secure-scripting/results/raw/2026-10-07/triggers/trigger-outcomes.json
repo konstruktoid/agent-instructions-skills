@@ -1,0 +1,628 @@
+[
+  {
+    "id": "bss-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1655856,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:17.839639+00:00",
+          "seconds": 50.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.169024,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:17.843616+00:00",
+          "seconds": 44.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1157454,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:17.841809+00:00",
+          "seconds": 49.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.450355
+  },
+  {
+    "id": "bss-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.08972180000000002,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:17.844884+00:00",
+          "seconds": 18.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1087898,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:17.838408+00:00",
+          "seconds": 24.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.10202340000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:36.622194+00:00",
+          "seconds": 20.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.30053500000000005
+  },
+  {
+    "id": "bss-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1150574,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:42.337582+00:00",
+          "seconds": 24.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1214374,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:10:57.109499+00:00",
+          "seconds": 24.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.11887660000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:02.301261+00:00",
+          "seconds": 48.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3553714
+  },
+  {
+    "id": "bss-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.0990068,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:07.015215+00:00",
+          "seconds": 24.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1331828,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:07.016183+00:00",
+          "seconds": 32.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1046398,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:07.998739+00:00",
+          "seconds": 19.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3368294
+  },
+  {
+    "id": "bss-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.10130159999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:21.801253+00:00",
+          "seconds": 17.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.09716340000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:27.314848+00:00",
+          "seconds": 16.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.0903482,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:31.531760+00:00",
+          "seconds": 14.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2888132
+  },
+  {
+    "id": "bss-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.07585320000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:38.937589+00:00",
+          "seconds": 24.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.07242019999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:38.994524+00:00",
+          "seconds": 19.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0733542,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:43.757260+00:00",
+          "seconds": 22.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.22162759999999998
+  },
+  {
+    "id": "bss-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.048427,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:46.349766+00:00",
+          "seconds": 13.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0573772,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:50.589514+00:00",
+          "seconds": 12.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0487712,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:58.776644+00:00",
+          "seconds": 18.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1545754
+  },
+  {
+    "id": "bss-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0376528,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:11:59.633435+00:00",
+          "seconds": 13.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0375828,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:03.507005+00:00",
+          "seconds": 14.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0417028,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:03.578485+00:00",
+          "seconds": 16.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1169384
+  },
+  {
+    "id": "bss-t09",
+    "expect": "no-trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": false,
+    "passes": [
+      {
+        "id": "bss-t09",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1071338,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:06.129193+00:00",
+          "seconds": 20.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t09",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.1026654,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:13.293316+00:00",
+          "seconds": 25.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t09",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-bash-secure-scripting:bash-secure-scripting"
+        ],
+        "cost_usd": 0.0988704,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:17.076005+00:00",
+          "seconds": 18.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3086696
+  },
+  {
+    "id": "bss-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "bss-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0598262,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:17.595124+00:00",
+          "seconds": 15.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.05384280000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:20.064709+00:00",
+          "seconds": 10.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "bss-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0574512,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-10-07T20:12:26.613587+00:00",
+          "seconds": 11.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1711202
+  }
+]
