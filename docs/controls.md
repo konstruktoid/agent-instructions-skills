@@ -76,7 +76,7 @@ point of choosing that shape. It fails open if someone adds the new name to the 
 understanding it, and it fails open entirely under actor 2, who edits the checker in the same
 commit.
 
-**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:715`.
+**Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:717`.
 It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:109`),
 skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:132`) that `.gitignore` already excludes.
 Verified against a planted `hooks/` and `.mcp.json`: both were reported and the check exited
@@ -92,23 +92,23 @@ As audited, `skills/github/github-actions-security/SKILL.md` ran `rhysd/actionli
 **What it stops.** Attack path 3.5.
 
 **What it does not stop.** Everything else the skill runs at a mutable reference, notably
-`uvx "zizmor@1.29.0"` at `github-actions-security/SKILL.md:249`, which resolves a package name
+`uvx "zizmor@1.31.1"` at `github-actions-security/SKILL.md:251`, which resolves a package name
 from an index at run time. A version
 is not a hash.
 
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:505` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:523` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:147`. The prose at
-`github-actions-security/SKILL.md:226`-`:230` was rewritten to state the reason where the
+`github-actions-security/SKILL.md:228`-`:232` was rewritten to state the reason where the
 command is, rather than as a rule the
 command beneath it broke.
 
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:497` documents it as something to type.
+no job for it. `README.md:515` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -141,7 +141,7 @@ it:
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:490` was updated from four jobs to five.
+clean. `README.md:508` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -263,15 +263,15 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:193` gives
+- **The documented install is pinned first.** `README.md:211` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
   is kept below it at `:203`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:248` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:266` gives `"ref": "v0.1.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:744` fails the
+  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:746` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
@@ -280,7 +280,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:633` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:651` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -333,9 +333,11 @@ distrust in a file it is reading.
 
 It is in all eight because every skill reads something it did not author, even where no rule file
 is involved: `github-organization-governance/SKILL.md:64` names the settings and API responses
-read back, and the two Python skills name command output. The existing counterweight at
-`ansible-verification-loop/SKILL.md:65` is kept as it was, since it is stronger than the general
-sentence for the category it covers.
+read back, and the two Python skills name command output. The stronger, domain-specific
+counterweight at `ansible-verification-loop/SKILL.md:65` is kept as it was, and the same pattern
+now also exists in `python-secure-coding/SKILL.md:48`, `bash-secure-scripting/SKILL.md:67`,
+`github-actions-security/SKILL.md:69`, and `terraform-secure-iac/SKILL.md:68`, each naming its own
+domain's high-sensitivity categories rather than the general sentence alone.
 
 Nothing about the ranking changes. This is still an instruction to a model about how to weigh
 other instructions to a model, it still fails open where `references/agent-content.md:94`
@@ -403,7 +405,7 @@ looking at three hundred. **It makes a capability change reviewable rather than 
 
 **The hard part is the detector, and it does not work well.** `check_skills.py` already demonstrates
 the ceiling. It enforces the verify loop by exact string comparison against a canonical block
-(`scripts/check_skills.py:302`, `:359`), and the comment at `:298` records why: the wording "had
+(`scripts/check_skills.py:304`, `:361`), and the comment at `:300` records why: the wording "had
 already drifted three ways before this check existed". Paraphrase defeated a check over a fixed
 seven-line paragraph. A capability detector faces the same problem over unbounded prose.
 
@@ -415,7 +417,7 @@ Concretely, on this repository's own files:
   positive rate on the existing tree gets suppressed within a month.
 - The same regex misses `github-repository-security/SKILL.md:141`, "check the current REST
   documentation", which is an instruction to fetch a web page written entirely in English.
-- It misses `bash-secure-scripting/SKILL.md:262`, `pre-commit run --all-files`, which is arbitrary
+- It misses `bash-secure-scripting/SKILL.md:264`, `pre-commit run --all-files`, which is arbitrary
   third-party code execution wearing the name of a linter.
 
 So the honest statement of scope: a declared-capability block catches capability changes expressed
@@ -445,7 +447,7 @@ present it to consumers as a guarantee, because it is not one.
 
 - **The block.** Every `SKILL.md` declares `capabilities` with `tools`, `shell`, `paths` and
   `egress`, each a sorted list, one entry per line. `check_capabilities` at
-  `scripts/check_skills.py:565` fails the build when the block is missing, has an unknown key, has
+  `scripts/check_skills.py:567` fails the build when the block is missing, has an unknown key, has
   a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:188`). Sorting is
   not tidiness: it is what makes an added capability one line of diff rather than a reordering.
   The tool allowlist deliberately excludes `WebFetch`, `WebSearch` and `Task`, so adding one is a
@@ -534,7 +536,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:193` now leads with the pinned form and `README.md:248` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:211` now leads with the pinned form and `README.md:266` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
 
 ## Recommended order of implementation
 
@@ -542,10 +544,10 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:239`-`:241` and `README.md:505` carry the
+   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:523` carry the
    digest from `lint.yml:147`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
-   `scripts/check_skills.py:715`. Attack path 1.3 is closed.
+   `scripts/check_skills.py:717`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
@@ -566,7 +568,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    five the control named.
 9. **Control 9**, declared-capability frontmatter, at the low-ambition version described above.
    **Landed**: the block in all eight skills, its shape enforced at
-   `scripts/check_skills.py:565`, and the report-only detector at
+   `scripts/check_skills.py:567`, and the report-only detector at
    `scripts/check_capabilities.py`, wired into `lint.yml:58`.
 10. **Control 10**, capability-diff release notes, generated from 9 between the tags from 6.
 11. **Control 11**, provenance, once there is something to attest. Never with a source-track claim
