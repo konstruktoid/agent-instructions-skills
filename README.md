@@ -186,11 +186,13 @@ Agent templates are the exception to everything in this section: copy them, as d
 should not copy the files or write its own version of them. Use one of the mechanisms below, each
 of which keeps a single upstream copy that can be updated in place.
 
-Every mechanism below is a Claude Code mechanism: the plugin marketplace, the submodule-and-symlink
-path, and the agent-template copy step all assume Claude Code is the consuming tool. A project
-using a different agentskills.io-compliant tool can still read a skill's `SKILL.md` body directly
-from a clone of this repository, but must rewrite its `${CLAUDE_PLUGIN_ROOT}` references first,
-as stated in the skills/ section above.
+Every mechanism below but one is a Claude Code mechanism: the plugin marketplace, the
+project-settings prompt, and the agent-template copy step all assume Claude Code is the consuming
+tool. The submodule path for `instructions/` documents does not: it works for any tool that reads
+a path named in its own `CLAUDE.md` or `AGENTS.md`, and only the symlink step layered on top of it
+is Claude Code specific. A project using a different agentskills.io-compliant tool can still read
+a skill's `SKILL.md` body directly from a clone of this repository, but must rewrite its
+`${CLAUDE_PLUGIN_ROOT}` references first, as stated in the skills/ section above.
 
 ### Skills, as a Claude Code plugin
 
