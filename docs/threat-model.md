@@ -442,9 +442,9 @@ consumes event text. Recorded so a future workflow addition is understood as ope
 
 ### Actor 2: compromised maintainer credentials, pushing to main and cutting a release
 
-#### 2.1 There is no release to forge, because the branch is the release
+#### 2.1 For an unpinned install, the branch is the release
 
-The attacker does not need to cut anything. No tag exists, no plugin entry declares a `version`,
+The attacker needs no tag. An unpinned install ignores tags, no plugin entry declares a `version`,
 and `README.md:260`-`:261` states plainly that without the `@<tag>` suffix "the marketplace tracks the
 default branch, and every commit pushed here reaches the project at its next update, reviewed by
 nobody on the consuming side". Pushing to `main` **is** publishing.

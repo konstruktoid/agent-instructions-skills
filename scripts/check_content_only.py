@@ -118,6 +118,7 @@ EXEMPT_DIR = "agent-templates"
 
 MARKETPLACE_PATH = Path(".claude-plugin/marketplace.json")
 PLUGIN_MANIFEST_PATH = Path(".claude-plugin/plugin.json")
+MANIFEST_NAMES = {MARKETPLACE_PATH.as_posix(), PLUGIN_MANIFEST_PATH.as_posix()}
 
 # A frontmatter key that registers hooks or selects the shell that injected commands run in.
 FORBIDDEN_FRONTMATTER = {
@@ -178,6 +179,13 @@ def plugin_roots(root: Path) -> list[str]:
     return sorted(roots)
 
 
+def manifest_case_errors(path: str, prefix: str, parts: list[str]) -> list[str]:
+    """Reject a manifest whose name differs in case, which the exact-path manifest checks skip."""
+    if "/".join(parts) in MANIFEST_NAMES and path[len(prefix) :] not in MANIFEST_NAMES:
+        return [f"{path}: a manifest name must be lower-case, or the manifest checks skip it"]
+    return []
+
+
 def check_paths(root: Path, files: list[str]) -> list[str]:
     """Check that no file sits at a discovered location or carries a code-bearing extension."""
     errors: list[str] = []
@@ -193,6 +201,7 @@ def check_paths(root: Path, files: list[str]) -> list[str]:
             if not lowered.startswith(prefix.lower()):
                 continue
             parts = lowered.removeprefix(prefix.lower()).split("/")
+            errors += manifest_case_errors(path, prefix, parts)
             if len(parts) > 1 and parts[0] in FORBIDDEN_ROOT_DIRS:
                 reason = FORBIDDEN_ROOT_DIRS[parts[0]]
                 errors.append(f"{path}: {parts[0]}/ is not allowed in a plugin root, {reason}")
@@ -560,6 +569,10 @@ MUTATIONS: dict[str, tuple[Callable[[Path], None], str]] = {
     "a mixed-case hooks directory": (
         lambda f: write(f / "Hooks/hooks.json", '{"modules": ["./register.js"]}\n'),
         "Hooks/hooks.json",
+    ),
+    "a mixed-case plugin manifest": (
+        lambda f: write(f / ".claude-plugin/Plugin.json", '{"name": "x", "hooks": "./h.json"}\n'),
+        "manifest name must be lower-case",
     ),
     "a mixed-case .mcp.json file": (lambda f: write(f / ".MCP.json", "{}\n"), ".MCP.json"),
     "a quoted hooks frontmatter key in a skill": (add_frontmatter_key('"hooks"'), "'hooks'"),
