@@ -1,0 +1,21 @@
+diff --git a/pages/paths.py b/pages/paths.py
+index 24e2bfe..141566f 100644
+--- a/pages/paths.py
++++ b/pages/paths.py
+@@ -1,5 +1,7 @@
+ """URL paths for site pages."""
+ 
++from pages.textutil import slugify
++
+ 
+ def home_path():
+     """Return the path of the home page."""
+@@ -9,3 +11,8 @@ def home_path():
+ def about_path():
+     """Return the path of the about page."""
+     return "/about"
++
++
++def article_path(title, article_id):
++    """Return the path of an article page: `/articles/<id>-<slug>`."""
++    return f"/articles/{article_id}-{slugify(title)}"

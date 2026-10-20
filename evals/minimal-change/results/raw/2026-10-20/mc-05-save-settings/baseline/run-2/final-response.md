@@ -1,0 +1,3 @@
+I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict with `json.dump(..., indent=2, sort_keys=True)` and then a trailing newline. I did not run it or add a test.
+
+`ruff format --check` and `ty check` pass. `ruff check` reports 22 errors across the repo, 7 of them in `app/settings.py`. Some of those 7 come from the new function (missing type annotations on `path` and `settings`, and `open()` instead of `Path.open()`). The existing `load_settings` already triggers the same kinds of findings. I kept the new function in the same style as `load_settings` rather than annotating only the new code. If you want, I can fix both functions together.

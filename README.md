@@ -84,7 +84,7 @@ Current instructions documents:
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 | `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
 | `agent_configuration_instructions.md` | Choosing between a project instructions file, a skill, a hook, and a subagent, writing each, and changing one without losing the behavior it was written for. |
-| `minimal_change_instructions.md` | The smallest complete change in any language: a reuse ladder applied after reading the callers, what is never cut, the scope and supply chain carve-outs, one small test for new logic, and a closing line stating what was skipped. |
+| `minimal_change_instructions.md` | The smallest complete change in any language: a reuse ladder applied after reading the callers, what is never cut, the scope and supply chain carve-outs, one small test for new logic, and a closing line stating what was skipped. Measured once, by `evals/minimal-change`: it wrote less source than no instruction and than a one-sentence instruction, and it added tests, but it used more output tokens than the sentence and showed no effect on reuse or error handling. |
 | `terraform_coding_instructions.md` | Passing `terraform fmt`, `terraform validate`, and `tflint` cleanly, plus the state, secret, version-pinning, and layout judgment those tools cannot enforce. |
 
 ### skills/
@@ -505,7 +505,14 @@ output, or that its `description` routes the right tasks to it. Two measurements
   measures a document in `instructions/` rather than a skill, in up to three arms on identical
   fixtures: nothing, the document referenced from a project `CLAUDE.md`, and a one-sentence
   plain instruction. It has no routing probes, since a document has no `description`. See
-  [evals/README.md](evals/README.md#instructions-document-suites).
+  [evals/README.md](evals/README.md#instructions-document-suites). The first, `minimal-change`
+  (2026-10-20, three runs per arm over six tasks), measured `minimal_change_instructions.md`
+  against no instruction and against one sentence. The document passed 29 of 31 assertions, the
+  baseline 28, and the sentence 27, and every difference came from the assertions that a test
+  was added. It wrote 50 lines of source against 60 and 54, and 33 lines of tests against 28 and
+  none, but it used 6,523 output tokens against 6,624 and 4,232. On the reuse, error-handling
+  and scope tasks the arms did not differ, and one task failed in every run of every arm. That
+  stamp was measured on an uncommitted tree.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5

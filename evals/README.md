@@ -194,6 +194,11 @@ file reads or shell commands named the document, and the other files from the co
 opened. A command that only names the file counts as a read, so the count is an upper bound. An arm
 whose runs never named it measured nothing about it.
 
+The first suite, `minimal-change`, is described in its own README, which also states its
+limits. Its 2026-10-20 stamp compared `instructions/minimal_change_instructions.md` with no
+instruction and with one sentence, and its result is summarized in the instructions table of the
+repository README.
+
 An instructions suite can be neither stale-checked against a skill nor routed, so
 `scripts/check_evals.py` compares a stamp against the instructions file, `tasks.json` and
 `assertions.json`, and reports a suite that has never run as unmeasured.
