@@ -648,9 +648,10 @@ invisible, which is how a five-task, three-run `github-actions-security` stamp s
 Four further findings are reported separately and do not fail the run, because the fix for each is a
 paid re-run rather than an edit: a skill with no suite at all, a task no stamp has ever graded, a
 stamp older than the skill or the specification it measured, and a stamp that graded a modified
-working tree. `--strict` fails on those as well. The first is reported rather than failed for a
-reason worth stating: the structural rules require a rendered results file, so the suite that would
-answer the finding cannot be authored complete until a run has been paid for. Freshness compares the
+working tree. `--strict` fails on those as well, and `--strict-suite <name>` only on the ones for
+that suite. The first is reported rather than failed for a reason worth stating: the structural
+rules require a rendered results file, so the suite that would answer the finding cannot be
+authored complete until a run has been paid for. Freshness compares the
 commit a stamp recorded in `source-revision.json` against the commit that last changed the skill or
 the specification, so a change made later on the day of the run is still seen; a stamp with no
 recorded revision falls back to comparing dates, and a stamp that graded a modified tree measured

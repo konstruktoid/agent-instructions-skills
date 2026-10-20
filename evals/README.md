@@ -323,6 +323,7 @@ than half of its passes.
 ```sh
 python3 scripts/check_evals.py           # structural problems fail, staleness is reported
 python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
+python3 scripts/check_evals.py --strict-suite <name>  # the same, for that suite's findings only
 ```
 
 Structural checks cover what an edit can break: the three specification files parse and name

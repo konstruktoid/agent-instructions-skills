@@ -57,6 +57,7 @@ It reports on the checkout it lives in and can be run from anywhere:
 
     python3 scripts/check_evals.py           # structural errors fail, the rest is reported
     python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
+    python3 scripts/check_evals.py --strict-suite NAME  # the same, for the findings on NAME only
 
 Exits 0 when everything passes, 1 otherwise. It needs only the standard library.
 """
@@ -897,6 +898,13 @@ def main() -> int:
         action="store_true",
         help="fail on unmeasured skills and staleness as well, not only on structural errors",
     )
+    parser.add_argument(
+        "--strict-suite",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help="fail on unmeasured and staleness findings for this suite only; repeatable",
+    )
     args = parser.parse_args()
 
     skills = {path.parent.name: path.parent for path in sorted(REPO_ROOT.glob(SKILL_GLOB))}
@@ -964,7 +972,16 @@ def main() -> int:
         f"{len(unmeasured)} unmeasured skill(s) or template(s), "
         f"{len(stale_total)} staleness finding(s)"
     )
-    if failed or (args.strict and (unmeasured or stale_total)):
+    # A suite's findings are prefixed with its path, so a scoped run matches on that prefix.
+    scoped = [
+        finding
+        for finding in unmeasured + stale_total
+        if any(
+            finding.startswith((f"{EVALS_DIR}/{name}:", f"{EVALS_DIR}/{AGENTS_DIR}/{name}:"))
+            for name in args.strict_suite
+        )
+    ]
+    if failed or (args.strict and (unmeasured or stale_total)) or scoped:
         strict_only = "; --strict fails on the findings above" if not failed else ""
         print(
             f"\n{failed} of {len(checks)} suite(s) failed, {counts}{strict_only}",

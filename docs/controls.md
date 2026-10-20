@@ -122,7 +122,8 @@ fields; it does not care what the command does.
 count this as a control against 1.1. Count it as the place a check against 1.1 would go.
 
 **Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:112`-`:147`, running
-`python3 scripts/check_evals.py`, conditionally with `--strict` (`:138`-`:147`). Three choices in
+`python3 scripts/check_evals.py`, with `--strict-suite` for each suite the diff touches
+(`:138`-`:147`). Three choices in
 it:
 
 - **No uv setup.** The script imports only the standard library and shells out to `git` and
@@ -132,13 +133,15 @@ it:
   failed git lookup to an empty string, which reads as "nothing changed". A shallow checkout
   would report every suite fresh without having compared anything, which is worse than not
   running it.
-- **`--strict` only when the diff itself is what went stale** (`:142`-`:144`). Staleness is a
-  statement about when a measurement was last taken, and a pull request that does not touch a
-  skill cannot fix it, so an unconditional `--strict` would fail every pull request for a reason
-  none of them caused. A change under `skills/`, or to an eval's own `tasks.json` or
-  `assertions.json`, is the one case where the contributor causing the staleness can also resolve
-  it before merge, so that diff shape runs `--strict`; everything else runs the structural-only
-  form, which is what blocks regardless.
+- **Strict only for the suites the diff touches** (`:141`-`:147`). Staleness is a statement
+  about when a measurement was last taken, and a pull request that does not touch a suite
+  cannot fix it, so an unconditional `--strict` would fail every pull request for a reason none
+  of them caused. A change to an eval's own `tasks.json` or `assertions.json` is the case where
+  the contributor causing the staleness can also resolve it before merge, so each such suite is
+  passed as `--strict-suite` and its unmeasured and staleness findings fail. The findings on
+  every other suite are reported and do not fail, and the structural checks block regardless.
+  An earlier form ran the all-suite `--strict` on that diff shape, which failed any pull
+  request that touched a suite on findings it could not resolve.
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
@@ -282,7 +285,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:725` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:726` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
