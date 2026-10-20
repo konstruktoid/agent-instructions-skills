@@ -25,6 +25,17 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
+Open work, as of 2026-10-20:
+
+- A suite for each of the four skills without one. The two bash skills, `bash-secure-scripting`
+  and `bash-testing`, already have suites, so they are not on this list.
+- A re-run of the four stamps that `scripts/check_evals.py` reports as stale since the change of
+  2026-10-19: `bash-secure-scripting`, `github-actions-security`, `python-secure-coding`, and the
+  `python-security-verifier` template.
+- A first run of the `requirements-analyst` and `evidence-synthesizer` suites.
+- No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
+  of a skill.
+
 ## Layout
 
 ```text

@@ -9,6 +9,48 @@ which model and which tools.
 The three kinds of material differ in how far they travel beyond Claude Code: how portable each
 one is, and where it stops, is stated in its own section below.
 
+## What this plugin contains
+
+The plugin ships skills and instruction documents, and nothing that runs. It carries no hooks, no
+mods, no MCP servers, no language servers, no monitors, no workflows, and no executable under
+`bin/`: no code that Claude Code loads into a session or starts as a process. Every file a consumer
+receives is text a reviewer can read.
+
+The claim matters because a plugin update is a code-execution channel. A Claude Code mod is a
+JavaScript or TypeScript event handler that runs inside the Claude Code process with the user's
+privileges, is not sandboxed, and is on by default, and a plugin can carry one beside its skills
+(<https://code.claude.com/docs/en/plugins/mods/overview>). Without a control, one commit to a
+content plugin could change what runs on every consumer's machine at the next update, and the update
+would look the same as any other.
+
+Two controls hold the claim:
+
+- `scripts/check_content_only.py`, run by the `Content-only plugin` job in
+  `.github/workflows/lint.yml`, fails the build on a file at any location Claude Code loads code
+  from in any plugin root, on a module or MCP bundle file or a symlink anywhere, on a manifest key
+  outside an allowlist, on a plugin source that is not a relative path inside the repository, and
+  on `hooks` frontmatter or shell injection in a skill or command file. Its docstring lists every
+  location with the documentation page that names it. Its `--self-test` builds copies of the
+  plugin with each forbidden shape added and fails unless every copy is rejected.
+- Review of the files that define the plugin. `.github/CODEOWNERS` names `.claude-plugin/`,
+  `.github/`, `SECURITY.md`, and the gate script, and [Releases](#releases) lists the repository
+  settings that make that review and the gate mandatory.
+
+`claude plugin validate` is a second reader, not the gate. It reports a mod as `Validation passed`,
+and given a marketplace file it does not open a plugin's hooks module, so the script runs it on a
+copy of the plugin that carries a synthesized `plugin.json`, fails on any `hooks:` or `calls:` line
+it prints, and states in its output when the CLI is absent and that step was skipped. The CI job
+installs no CLI, so there only the static checks run.
+
+`agent-templates/` is exempt from the gate on purpose. It holds copy-and-adapt definitions that
+Claude Code does not discover from the plugin root, and five of them carry a `hooks:` key that takes
+effect only after a consumer copies the file into their own `.claude/agents/`. The plugin root is
+the repository root, so the whole tree is installed, including `scripts/` and `evals/`; the Python
+there runs in CI and in a contributor's shell and is never loaded by Claude Code.
+
+Enforcement code that applies these rules at run time, such as a hook or a mod, would ship as a
+separate, opt-in plugin from a separate repository, never in this one.
+
 ## Repository structure
 
 ```text
@@ -243,6 +285,14 @@ To move to a newer release, re-add the marketplace at the new tag, then update:
 Every plugin entry declares the same `version`, which matches the tag it ships from, so an
 installed plugin names a fixed point rather than whatever the default branch held that day.
 On an unpinned marketplace, `update` still fetches the current default branch.
+
+A tag is the strongest pin the marketplace accepts. A marketplace source takes a `ref` that names a
+branch or a tag, and a `sha` field exists only on plugin sources such as `github` or `git-subdir`,
+not on the marketplace or on a relative-path plugin
+(<https://code.claude.com/docs/en/plugins/marketplace-reference>). To pin to a commit, check the
+commit out in a local clone, run `python3 scripts/check_content_only.py` there, and add the clone's
+directory as the marketplace with `/plugin marketplace add <path>`. The plugin runs from that
+directory and stops loading if it moves.
 
 ### For a whole team, through project settings
 
@@ -510,14 +560,16 @@ fixture's own `README.md` is still held to this repository's Markdown rules.
 ## Checks
 
 `.github/workflows/lint.yml` enforces the rules above on every pull request and every push to
-`main`, in five jobs: the authoring rules, this repository's own Python, its eval suites, its own
-workflows, and its Markdown. Every check runs locally:
+`main`, in six jobs: the authoring rules, the content-only gate, this repository's own Python,
+its eval suites, its own workflows, and its Markdown. Every check runs locally:
 
 ```sh
 uv run --frozen python scripts/check_skills.py         # authoring rules for every SKILL.md
 uv run --frozen python scripts/check_capabilities.py   # capabilities a change adds undeclared
 python3 scripts/check_evals.py                         # structure and coverage of every suite
 python3 scripts/check_citations.py                     # every `path:line` citation in the prose
+python3 scripts/check_content_only.py --self-test      # the gate rejects each forbidden shape
+python3 scripts/check_content_only.py                  # the plugin holds no executable extension code
 python3 scripts/check_citations.py --renumber          # rewrite the ones an edit moved
 uv run --frozen ruff check .                           # the repository's own Python
 uv run --frozen ruff format --check .
@@ -679,3 +731,43 @@ gh api repos/konstruktoid/agent-instructions-skills/rulesets --jq '.[] | {id, na
 A tag is a fixed point, not a safe one: a tag cut from a bad commit is a bad tag. What tagging
 changes is that a consumer moves between versions deliberately instead of receiving every commit
 at the moment it merges.
+
+### Provenance
+
+Pushing the tag starts `.github/workflows/release.yml`. It checks that the tag names the version in
+`.claude-plugin/marketplace.json`, runs the content-only gate, builds an archive of the tagged
+commit, attests the archive with GitHub artifact attestations, and opens a draft release with the
+archive and its checksums attached. It never publishes: a person writes the release notes from step
+4 above and publishes the draft. Verify a downloaded archive with:
+
+```sh
+gh attestation verify agent-instructions-skills-v<version>.tar.gz -R konstruktoid/agent-instructions-skills
+```
+
+A provenance attestation proves where and how an artifact was built: which repository, workflow, and
+commit produced it. It does not prove the content is safe. Provenance for malicious content is still
+provenance. The content-only gate and the review of the files that define the plugin are the content
+controls. See
+[the artifact attestation documentation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations).
+
+### Repository settings the release relies on
+
+Branch protection and similar settings cannot be set from files in the repository, so these are
+recorded here and have to be applied and read back by the maintainer:
+
+- **Default branch ruleset.** Require a pull request, require review from code owners so that
+  `.github/CODEOWNERS` is enforced, dismiss stale approvals on push, and block force pushes and
+  deletion. Add every lint job to the required status checks, `Content-only plugin` included, since
+  a job that is not required can fail without blocking the merge. A ruleset update replaces the
+  whole definition, so send the full set of rules.
+- **Release tag ruleset.** `.github/rulesets/release-tags.json`, applied as above.
+- **Immutable releases.** Enable them in the repository settings so that a published release locks
+  its tag and assets (<https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases>).
+  Read the state back with `gh api repos/konstruktoid/agent-instructions-skills/immutable-releases`.
+  The release workflow creates a draft so that the release notes are written before the lock.
+- **Actions policy.** Allow-listed actions with SHA pinning required. `release.yml` uses only
+  `actions/*` actions.
+
+With one owner, code-owner review cannot be satisfied by a second person, so the required review
+adds a pause and a record but not a second reader. Adding a second code owner for `.claude-plugin/`,
+`.github/`, and the gate script is the change that makes the control independent.
