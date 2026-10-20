@@ -266,7 +266,7 @@ while only one of them is fixed.
 
 - **The documented install is pinned first.** `README.md:255` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.3.0`, and the unpinned form
-  is kept below it at `:245`, labeled as tracking the default branch. This is the half of the
+  is kept below it at `:265`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
 - **The team setting names a tag.** `README.md:318` gives `"ref": "v0.3.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a

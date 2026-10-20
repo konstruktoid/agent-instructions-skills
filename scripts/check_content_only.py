@@ -113,6 +113,9 @@ MARKETPLACE_KEYS = frozenset(
     {"$schema", "name", "description", "version", "owner", "metadata", "plugins"}
 )
 
+# Exempt from the path and content checks, so no manifest path may make it part of a plugin.
+EXEMPT_DIR = "agent-templates"
+
 MARKETPLACE_PATH = Path(".claude-plugin/marketplace.json")
 PLUGIN_MANIFEST_PATH = Path(".claude-plugin/plugin.json")
 
@@ -180,14 +183,16 @@ def check_paths(root: Path, files: list[str]) -> list[str]:
     errors: list[str] = []
     roots = plugin_roots(root)
     for path in files:
-        if path.split("/")[0] == "agent-templates":
+        # Lower-cased because a case-insensitive filesystem opens `Hooks/` as `hooks/`.
+        lowered = path.lower()
+        if lowered.split("/")[0] == EXEMPT_DIR:
             continue
         if (root / path).is_symlink():
             errors.append(f"{path}: a symlink can point a discovered location at any file")
         for prefix in roots:
-            if not path.startswith(prefix):
+            if not lowered.startswith(prefix.lower()):
                 continue
-            parts = path.removeprefix(prefix).split("/")
+            parts = lowered.removeprefix(prefix.lower()).split("/")
             if len(parts) > 1 and parts[0] in FORBIDDEN_ROOT_DIRS:
                 reason = FORBIDDEN_ROOT_DIRS[parts[0]]
                 errors.append(f"{path}: {parts[0]}/ is not allowed in a plugin root, {reason}")
@@ -220,6 +225,20 @@ def check_keys(label: str, value: object, allowed: frozenset[str]) -> list[str]:
     ]
 
 
+def manifest_path_errors(label: str, key: str, value: object) -> list[str]:
+    """Reject a manifest path that leaves the marketplace root or reaches the exempt directory."""
+    errors: list[str] = []
+    for item in value if isinstance(value, list) else [value]:
+        if not isinstance(item, str):
+            continue
+        parts = [part for part in Path(item).parts if part != "."]
+        if ".." in parts:
+            errors.append(f"{label}: {key} {item!r} leaves the marketplace root")
+        elif parts and parts[0].lower() == EXEMPT_DIR:
+            errors.append(f"{label}: {key} {item!r} reaches {EXEMPT_DIR}/, which the gate exempts")
+    return errors
+
+
 def check_manifests(root: Path) -> list[str]:
     """Check the marketplace and plugin manifests against the key and source allowlists."""
     errors: list[str] = []
@@ -233,9 +252,10 @@ def check_manifests(root: Path) -> list[str]:
             label = f"{MARKETPLACE_PATH}: plugins[{index}]"
             errors += check_keys(label, entry, ENTRY_KEYS)
             source = entry.get("source") if isinstance(entry, dict) else None
-            if isinstance(source, str) and ".." in Path(source).parts:
-                errors.append(f"{label}: source {source!r} leaves the marketplace root")
-            elif not (isinstance(source, str) and source.startswith(".")):
+            errors += manifest_path_errors(label, "source", source)
+            if isinstance(entry, dict):
+                errors += manifest_path_errors(label, "skills", entry.get("skills"))
+            if not (isinstance(source, str) and source.startswith(".")):
                 errors.append(
                     f"{label}: source must be a relative path, since any other source type "
                     "fetches code from outside this repository or runs a command to find it"
@@ -263,10 +283,10 @@ def split_frontmatter(text: str) -> tuple[list[str], str]:
 
 def is_skill_or_command(path: str) -> bool:
     """Return whether Claude Code could load path as a skill or a command file."""
-    parts = path.split("/")
-    if parts[0] == "agent-templates" or not path.endswith(".md"):
+    parts = path.lower().split("/")
+    if parts[0] == EXEMPT_DIR or not parts[-1].endswith(".md"):
         return False
-    return parts[-1] == "SKILL.md" or "skills" in parts[:-1] or "commands" in parts[:-1]
+    return parts[-1] == "skill.md" or "skills" in parts[:-1] or "commands" in parts[:-1]
 
 
 def check_skill_content(root: Path, files: list[str]) -> list[str]:
@@ -523,6 +543,25 @@ MUTATIONS: dict[str, tuple[Callable[[Path], None], str]] = {
         ),
         "leaves the marketplace root",
     ),
+    "a plugin source in the exempt directory": (
+        edit_manifest(
+            ".claude-plugin/marketplace.json",
+            lambda m: first_entry(m).update({"source": "./agent-templates"}),
+        ),
+        "reaches agent-templates/",
+    ),
+    "a skills path in the exempt directory": (
+        edit_manifest(
+            ".claude-plugin/marketplace.json",
+            lambda m: first_entry(m).update({"skills": ["./agent-templates/x"]}),
+        ),
+        "reaches agent-templates/",
+    ),
+    "a mixed-case hooks directory": (
+        lambda f: write(f / "Hooks/hooks.json", '{"modules": ["./register.js"]}\n'),
+        "Hooks/hooks.json",
+    ),
+    "a mixed-case .mcp.json file": (lambda f: write(f / ".MCP.json", "{}\n"), ".MCP.json"),
     "a quoted hooks frontmatter key in a skill": (add_frontmatter_key('"hooks"'), "'hooks'"),
     "shell injection in a command file": (
         lambda f: write(f / "commands/run.md", "Status: !`git status`\n"),

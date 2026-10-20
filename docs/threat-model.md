@@ -290,8 +290,8 @@ Supporting eval data:
 | `.github/CODEOWNERS` | `* @konstruktoid` (`:5`). One account owns everything, including itself |
 | `SECURITY.md` | Absent as audited. Control 8 adds it at the root, naming private vulnerability reporting, which `gh api .../private-vulnerability-reporting` confirms is enabled |
 | Data-access statement | Absent as audited. Control 8 puts it in the same `SECURITY.md`, which is where `references/scanning-and-response.md:110` asks for it |
-| Tags | None. `git tag` returns nothing. Control 6 documents and enforces a tag-based release, but no tag is pushed |
-| Releases | None, and no release workflow |
+| Tags | As audited, none: `git tag` returned nothing. Since control 6, `v0.1.0` and `v0.2.0` are pushed and held by the release tag ruleset |
+| Releases | As audited, none and no release workflow. `.github/workflows/release.yml` now drafts an attested release on a `v*` tag, and has not run yet |
 | `.gitignore` | Blocks `**/.credentials.json` and `.env` tree-wide (`:9`, `:10`) |
 | `.github/dependabot.yml` | Weekly, with a 7-day cooldown on both ecosystems and 14 days on a uv major (`:25`, `:42`) |
 
@@ -626,8 +626,8 @@ disagrees with the others. `README.md:708` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
-**Landed, 2026-08-30.** The tag exists and the ruleset is applied, so the `v0.1.0` that
-`README.md:255` named at the time resolves and cannot be deleted or moved. Read back,
+**Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0`, which the README's
+pinned install named at the time, resolves and cannot be deleted or moved. Read back,
 the ruleset blocks `deletion` and `non_fast_forward` on `refs/tags/v*` with no bypass actors. This
 path is closed for a consumer who pins. It stays open for one who installs the unpinned
 marketplace form, since that still tracks the default branch.

@@ -30,16 +30,34 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # One repository at one tag is one version, so the tag has to name the manifest's.
-      - name: Check the tag names the manifest version
+          # The ancestry check below needs main's history, not only the tagged commit.
+          fetch-depth: 0
+      # The tag ruleset does not restrict who creates a tag or where, so a tag on a commit that
+      # never merged would otherwise be built, attested, and drafted as a release.
+      - name: Check the tagged commit is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" FETCH_HEAD; then
+            echo "tagged commit ${GITHUB_SHA} is not on main" >&2
+            exit 1
+          fi
+      # One repository at one tag is one version, so every plugin entry has to name the tag.
+      - name: Check the tag names every manifest version
         env:
           TAG: ${{ github.ref_name }}
         run: |
-          version="$(python3 -c 'import json; print(json.load(open(".claude-plugin/marketplace.json"))["plugins"][0]["version"])')"
-          if [ "v${version}" != "${TAG}" ]; then
-            echo "tag ${TAG} does not match marketplace.json version ${version}" >&2
-            exit 1
-          fi
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          tag = os.environ["TAG"]
+          with open(".claude-plugin/marketplace.json", encoding="utf-8") as manifest:
+              plugins = json.load(manifest)["plugins"]
+          wrong = [p["name"] for p in plugins if f"v{p.get('version')}" != tag]
+          if not plugins or wrong:
+              sys.exit(f"tag {tag} does not match the version of: {', '.join(wrong) or 'no plugins'}")
+          PY
       - name: Check the gate rejects extension code
         run: python3 scripts/check_content_only.py --self-test
       - name: Check the plugin is content-only
