@@ -46,6 +46,13 @@ with the suite stating a `brief_intro` and a `final_line_request`; `tasks.json` 
 with no rendered results file yet is reported as unmeasured rather than failed. A template
 with no suite is reported the same way.
 
+A suite whose `tasks.json` names an `instructions` file measures an instructions document
+rather than a skill. It is held to the same rules with three differences: no skill has to match
+the directory, no `trigger-eval.json` exists or is required because a document has no
+description to route on, and `tasks.json` declares the `arms` it runs from baseline, doc and
+plain, plus the `plain` instruction text when that arm is declared. A suite with no
+rendered results file yet is reported as unmeasured rather than failed.
+
 It reports on the checkout it lives in and can be run from anywhere:
 
     python3 scripts/check_evals.py           # structural errors fail, the rest is reported
@@ -119,6 +126,10 @@ PROBE_FIELDS = ("id", "prompt", "expect")
 # A rendered stamp is named for its date; a hand-written analysis beside it, such as
 # ansible-verification-loop's avl-05 autopsy, is not and is not treated as one.
 STAMP_NAME = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+# The arms an instructions-document suite may declare, which must change with run_eval.py's
+# INSTRUCTIONS_ARM_NAMES.
+INSTRUCTIONS_ARMS = ("baseline", "doc", "plain")
 
 
 def load_json(path: Path, errors: list[str]) -> dict[str, Any] | None:
@@ -550,8 +561,131 @@ def check_freshness(
             )
 
 
+def instructions_document(suite: Path) -> str | None:
+    """Return the instructions file a suite's tasks.json names, or None for any other suite."""
+    try:
+        doc = json.loads((suite / "tasks.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    named = doc.get("instructions") if isinstance(doc, dict) else None
+    return named if isinstance(named, str) else None
+
+
+def check_instructions_arms(doc: dict[str, Any], errors: list[str]) -> None:
+    """Check the arms an instructions suite declares and the text its plain arm needs."""
+    arms = doc.get("arms")
+    if (
+        not isinstance(arms, list)
+        or arms[:1] != ["baseline"]
+        or len(set(map(str, arms))) != len(arms)
+        or not set(map(str, arms)) <= set(INSTRUCTIONS_ARMS)
+    ):
+        errors.append(f"tasks.json: arms must start with baseline, from {INSTRUCTIONS_ARMS}")
+        return
+    plain = doc.get("plain")
+    if "plain" not in arms:
+        if plain is not None:
+            errors.append("tasks.json: a 'plain' instruction, but the plain arm is not declared")
+        return
+    if not (isinstance(plain, str) and plain.strip()):
+        errors.append("tasks.json: the plain arm needs a non-empty 'plain' instruction")
+
+
+# Names a task id may take, since it becomes a path component, and the names Claude Code loads
+# as instructions or settings from anywhere under a working directory.
+SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+FIXTURE_GUIDANCE_NAMES = frozenset({"CLAUDE.md", "CLAUDE.local.md", "AGENTS.md", ".claude"})
+
+
+def instructions_task_problems(suite: Path, tasks: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    """Return (task id, problem) for each unsafe task id, guidance file, or symbolic link.
+
+    A guidance file in a fixture would reach the baseline arm as well as the treatment, a
+    symbolic link makes the workspace copy read outside the fixture, and an id with a separator
+    leaves the results directory.
+    """
+    found: list[tuple[str, str]] = []
+    for task in tasks:
+        task_id = str(task.get("id", "<unnamed>"))
+        if not SAFE_NAME.fullmatch(task_id):
+            found.append((task_id, "the id is not a plain name, so it cannot be a path component"))
+            continue
+        fixture = suite / str(task.get("fixture", ""))
+        if not fixture.is_dir():
+            continue
+        found.extend(
+            (
+                task_id,
+                f"fixture holds {path.relative_to(fixture)}, which every arm would load or follow",
+            )
+            for path in sorted(fixture.rglob("*"))
+            if path.is_symlink() or path.name in FIXTURE_GUIDANCE_NAMES
+        )
+    return found
+
+
+def check_arm_coverage(suite: Path, arms: list[str], task_ids: list[str], stale: list[str]) -> None:
+    """Report each task that some declared arm never graded to completion.
+
+    A stamp with the baseline and the document but not the plain arm still renders, and its
+    comparisons against the missing arm would be silently absent.
+    """
+    graded: dict[str, set[str]] = {}
+    for run in recorded_runs(suite):
+        if not run.get("aborted") and not run.get("truncated"):
+            graded.setdefault(run["task"], set()).add(str(run.get("condition")))
+    for task_id in task_ids:
+        missing = [arm for arm in arms if arm not in graded.get(task_id, set())]
+        if missing and task_id in graded:
+            stale.append(f"{task_id}: no completed run in the arm(s) {', '.join(missing)}")
+
+
+def check_instructions_suite(suite: Path, document: str) -> tuple[list[str], list[str]]:
+    """Check one instructions-document suite, returning its structural errors and findings."""
+    errors: list[str] = []
+    stale: list[str] = []
+    target = REPO_ROOT / document
+    if not (target.is_file() and target.parent == REPO_ROOT / "instructions"):
+        errors.append(f"tasks.json: 'instructions' {document!r} is not a file in instructions/")
+
+    docs: dict[str, dict[str, Any]] = {}
+    for name in AGENT_SPEC_FILES:
+        doc = load_json(suite / name, errors)
+        if doc is None:
+            return errors, stale
+        docs[name] = doc
+    check_spec_headers(suite, docs, errors)
+    check_instructions_arms(docs["tasks.json"], errors)
+
+    tasks = scalar_fields(
+        object_entries(docs["tasks.json"].get("tasks", []), "tasks.json 'tasks'", errors),
+        TASK_FIELDS,
+        "tasks.json 'tasks'",
+        errors,
+    )
+    task_ids = [task.get("id", "<unnamed>") for task in tasks]
+    check_tasks(suite, tasks, errors)
+    errors.extend(
+        f"tasks.json {task_id}: {problem}"
+        for task_id, problem in instructions_task_problems(suite, tasks)
+    )
+    check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
+    check_results(suite, errors, require_rendered=False)
+    if rendered_stamps(suite):
+        check_coverage(suite, task_ids, stale)
+        arms = docs["tasks.json"].get("arms")
+        if isinstance(arms, list):
+            check_arm_coverage(suite, [str(arm) for arm in arms], task_ids, stale)
+        check_freshness(suite, None, stale, ("the instructions document", [target]))
+    return errors, stale
+
+
 def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[str]]:
     """Check one suite, returning its structural errors and its staleness findings."""
+    document = instructions_document(suite)
+    if document is not None:
+        return check_instructions_suite(suite, document)
+
     errors: list[str] = []
     stale: list[str] = []
 
@@ -813,6 +947,11 @@ def main() -> int:
             f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this template"
             for suite in agent_suites
             if not rendered_stamps(suite)
+        ]
+        + [
+            f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this document"
+            for suite in suites
+            if instructions_document(suite) is not None and not rendered_stamps(suite)
         ]
     )
     for finding in unmeasured:

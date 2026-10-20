@@ -32,6 +32,12 @@ than the default writes under a stamp suffixed `--<comparison>`, so its results 
 with the default's. `report`, `regrade` and `snapshot` take such a suite as
 `--skill agents/<template>`, and the stamp, suffix included, selects the comparison.
 
+`instructions-tasks` measures an instructions document rather than a skill. A suite whose
+`tasks.json` names an `instructions` file runs each task in the arms the suite declares, from
+`baseline` (nothing), `doc` (the document, referenced from a project `CLAUDE.md` written into the
+workspace) and `plain` (a one-line instruction held in `tasks.json` and written into that
+`CLAUDE.md`). Each run also records the lines it added and its output tokens.
+
 `report` renders the graded runs as the Markdown table checked in under
 `evals/<skill>/results/`.
 
@@ -209,6 +215,17 @@ def arms_for(suite: str, stamp: str = "") -> Arms:
         return SKILL_ARMS
     return AGENT_COMPARISONS[stamp_comparison(suite, stamp)]
 
+
+# An instructions-document suite compares up to three arms on identical fixtures: nothing, the
+# document under test, and a plain one-line instruction that states the same goal in a sentence.
+# A report is the three pairwise comparisons the declared arms allow, each rendered by the same
+# code a skill suite uses.
+INSTRUCTIONS_ARM_NAMES = ("baseline", "doc", "plain")
+INSTRUCTIONS_PAIRS = (
+    Arms("baseline", "doc", "the instructions document", "Baseline", "Doc"),
+    Arms("baseline", "plain", "the plain instruction", "Baseline", "Plain"),
+    Arms("plain", "doc", "the instructions document", "Plain", "Doc"),
+)
 
 # Written as an escape rather than the literal character, which ruff flags as ambiguous.
 RANGE_DASH = "\u2013"
@@ -689,6 +706,7 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
         "files_read": files_read,
         "num_turns": result.get("num_turns"),
         "cost_usd": result.get("total_cost_usd"),
+        "output_tokens": (result.get("usage") or {}).get("output_tokens"),
         "is_error": result.get("is_error"),
         "rate_limited": rate_limited(events),
         **truncation(events),
@@ -1028,6 +1046,28 @@ def run_one_task(job: Job) -> dict[str, Any]:
     return outcome
 
 
+# Kept out of a workspace's staged diff, so tool output does not count as the run's change.
+WORKSPACE_EXCLUDES = ".venv/\n.ansible/\n__pycache__/\n.pytest_cache/\n.ruff_cache/\nuv.lock\n"
+
+# What a size count leaves out on top of the snapshot's list: output of the tools a fixture is
+# likely to run, which is not code the run wrote.
+COUNT_EXCLUDES = (
+    WORKSPACE_EXCLUDES
+    + ".mypy_cache/\n.coverage\nnode_modules/\n.terraform/\npackage-lock.json\n"
+    + ".terraform.lock.hcl\nvenv/\nenv/\n.tox/\nhtmlcov/\n*.egg-info/\n"
+    + "dist/\nbuild/\n.hypothesis/\n*.tfstate*\n"
+)
+
+# Lock files are generated rather than written, and a fixture can track one, which an exclude
+# list alone does not hide, so the size count also leaves these out by pathspec.
+COUNT_PATHSPEC_EXCLUDES = (
+    "package-lock.json",
+    "uv.lock",
+    "poetry.lock",
+    "Cargo.lock",
+    ".terraform.lock.hcl",
+)
+
 # Where a copied template reads the library from inside a workspace. It stands in for the
 # submodule path a consuming project would substitute for `<submodule>`, which is the install
 # the templates document for reaching a skill by path.
@@ -1247,6 +1287,212 @@ def run_one_agent_task(job: Job) -> dict[str, Any]:
     return outcome
 
 
+def instructions_claude_md(arm: str, document: str, plain: str) -> str | None:
+    """Return the project instruction file an arm runs with, or None for the baseline."""
+    if arm == "doc":
+        return (
+            "When writing or changing code, follow "
+            f"{AGENT_STANDARDS_DIR}/instructions/{Path(document).name}.\n"
+        )
+    if arm == "plain":
+        return plain.strip() + "\n"
+    return None
+
+
+# A suite, task id or fixture name that becomes a path component. A leading dot is refused so
+# `.` and `..` cannot pass, and a separator is refused so a name cannot leave its directory.
+SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+# Names Claude Code loads as instructions or settings from anywhere under a working directory, and
+# which would therefore reach every arm of a run that started from the fixture.
+FIXTURE_GUIDANCE_NAMES = frozenset({"CLAUDE.md", "CLAUDE.local.md", "AGENTS.md", ".claude"})
+
+
+def fixture_problems(fixture: Path) -> list[str]:
+    """Return what a fixture holds that must not reach every arm, or that a copy would follow.
+
+    A guidance file anywhere in the tree would load into the baseline as well as the treatment,
+    and a symbolic link makes a copy read what lies outside the fixture.
+    """
+    return [
+        str(path.relative_to(fixture))
+        for path in sorted(fixture.rglob("*"))
+        if path.is_symlink() or path.name in FIXTURE_GUIDANCE_NAMES
+    ]
+
+
+def instructions_tasks(
+    suite: str, suite_doc: object, assertions_doc: object
+) -> list[dict[str, Any]]:
+    """Return the tasks of an instructions suite, stopping with a message on a malformed spec.
+
+    Every field the run reads is checked here, so a bad `tasks.json` ends the command before
+    any run is paid for rather than as a traceback inside a worker.
+    """
+    tasks = suite_doc.get("tasks") if isinstance(suite_doc, dict) else None
+    graded = assertions_doc.get("tasks") if isinstance(assertions_doc, dict) else None
+    if not (isinstance(tasks, list) and tasks and isinstance(graded, dict)):
+        message = f"{suite}: tasks.json and assertions.json must each hold a 'tasks' collection"
+        raise SystemExit(message)
+    for task in tasks:
+        task_id = task.get("id") if isinstance(task, dict) else None
+        if not (isinstance(task_id, str) and SAFE_NAME.fullmatch(task_id)):
+            message = f"{suite}/tasks.json: a task id must be a plain name, got {task_id!r}"
+            raise SystemExit(message)
+        if task.get("fixture") != f"fixtures/{task_id}" or not isinstance(task.get("prompt"), str):
+            message = f"{suite}/tasks.json {task_id}: needs a prompt and fixture fixtures/{task_id}"
+            raise SystemExit(message)
+        if not isinstance(graded.get(task_id), list):
+            message = f"{suite}/assertions.json: no assertion list for task {task_id}"
+            raise SystemExit(message)
+    return tasks
+
+
+def diff_size(
+    workspace: Path, base_sha: str, home: Path, scratch: Path
+) -> tuple[int, int] | tuple[None, None]:
+    """Return the lines a finished run added and deleted against the commit it started from.
+
+    The count is taken through a throwaway index and exclude file kept beside the run, so the
+    workspace's own index and `.git/info` are left as the run left them. Staging in the real
+    index would make a new file visible to a later `git diff`, and a regrade would then grade a
+    different workspace than the first grading did. Binary files report no count.
+    """
+    index, excludes = scratch / "size.index", scratch / "size.exclude"
+    excludes.write_text(COUNT_EXCLUDES, encoding="utf-8")
+    env = workspace_git_env(home)
+    env["GIT_INDEX_FILE"] = str(index)
+    # The workspace's own `.git/config` is written by the run. These close the two hooks a run
+    # could use to execute a command under this process's environment; a filter driver named in
+    # that config and in a `.gitattributes` the run wrote is not closed by any option here, and
+    # that residual risk is the same one the graders' own `git diff` carries.
+    env["GIT_CONFIG_NOSYSTEM"] = "1"
+    index.unlink(missing_ok=True)
+    # Seeded from the baseline commit, so a tracked file that matches an exclude is not read as
+    # deleted. Fixed argument lists, shell=False, run inside the finished workspace.
+    hardened = ["-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null"]
+    for arguments in (
+        ["read-tree", base_sha],
+        ["-c", f"core.excludesFile={excludes}", "add", "-A"],
+    ):
+        subprocess.run(  # noqa: S603
+            [GIT, *hardened, *arguments], cwd=workspace, env=env, check=True, capture_output=True
+        )
+    stat = subprocess.run(  # noqa: S603
+        [
+            GIT,
+            *hardened,
+            "diff",
+            "--cached",
+            "--no-textconv",
+            "--numstat",
+            "--no-renames",
+            base_sha,
+            "--",
+            ".",
+            *(f":(exclude,glob)**/{name}" for name in COUNT_PATHSPEC_EXCLUDES),
+        ],
+        cwd=workspace,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    rows = [line.split("\t") for line in stat.stdout.splitlines()]
+    counted = [row for row in rows if row[0].isdigit() and row[1].isdigit()]
+    return sum(int(row[0]) for row in counted), sum(int(row[1]) for row in counted)
+
+
+def measured_size(
+    workspace: Path, base_sha: str, home: Path, scratch: Path
+) -> tuple[int, int] | tuple[None, None]:
+    """Return `diff_size`, or no count when git fails, so a paid run is still graded and kept."""
+    try:
+        return diff_size(workspace, base_sha, home, scratch)
+    except subprocess.CalledProcessError as exc:
+        print(f"size count failed for {workspace}: {exc.stderr!r}", file=sys.stderr)
+        return None, None
+
+
+def run_one_instructions_task(job: Job) -> dict[str, Any]:
+    """Run and grade one (task, arm) pair of an instructions-document suite."""
+    task, condition = job["task"], job["condition"]
+    run_dir: Path = job["run_dir"]
+    run_dir.mkdir(parents=True, exist_ok=True)
+    home = prepare_run_home(run_dir)
+    workspace = run_dir / "workspace"
+    base_sha = prepare_workspace(job["fixture"], workspace, home)
+    claude_md = instructions_claude_md(condition, job["document"], job["plain"])
+    if claude_md is not None:
+        (workspace / "CLAUDE.md").write_text(claude_md, encoding="utf-8")
+        if condition == "doc":
+            # The whole library, as a submodule install lays it out, so the document's own
+            # references to skills and sibling instructions resolve under the same prefix.
+            for directory in ("instructions", "skills"):
+                shutil.copytree(
+                    REPO_ROOT / directory,
+                    workspace / AGENT_STANDARDS_DIR / directory,
+                    symlinks=True,
+                )
+        # Committed before the run, so neither file counts as a line the run added.
+        base_sha = commit_workspace(workspace, home, "arm install")
+
+    command = claude_command(
+        prompt=TASK_PREAMBLE + task["prompt"],
+        model=job["model"],
+        plugin_dir=None,
+        permissions=job["permissions"],
+        budget=TASK_BUDGET_USD,
+    )
+    timeout = int(task.get("timeout_seconds", RUN_TIMEOUT_SECONDS))
+    record = invoke_claude(command, workspace, run_dir / "run.jsonl", home, timeout)
+    facts = transcript_facts(run_dir / "run.jsonl")
+    (run_dir / "final-response.md").write_text(scrub(facts["final_text"]) + "\n", encoding="utf-8")
+    # Counted before grading, so a file an assertion command creates is not the run's change.
+    sizes = measured_size(workspace, base_sha, home, run_dir)
+    graded = [
+        grade_assertion(assertion, workspace, facts, base_sha, home)
+        for assertion in job["assertions"]
+    ]
+    document = Path(job["document"]).name
+    outcome = {
+        "task": task["id"],
+        "condition": condition,
+        "run_index": job.get("run_index", 1),
+        "model": job["model"],
+        "run": record,
+        "base_sha": base_sha,
+        "skills_used": facts["skills_used"],
+        "num_turns": facts["num_turns"],
+        "cost_usd": facts["cost_usd"],
+        "output_tokens": facts["output_tokens"],
+        "lines_added": sizes[0],
+        "lines_deleted": sizes[1],
+        # Whether the document was opened at all: a doc arm that never read it measured nothing.
+        "doc_read": any(
+            document in text for text in (*facts["files_read"], *facts["bash_commands"])
+        ),
+        # Other files the run opened from the copied library, which can push size either way.
+        "standards_read": sum(
+            1
+            for path in facts["files_read"]
+            if AGENT_STANDARDS_DIR in path and document not in path
+        ),
+        "truncated": facts["truncated"],
+        "scheduled_wakeups": facts["scheduled_wakeups"],
+        "outstanding_background": facts["outstanding_background"],
+        "aborted": bool(record["returncode"] != 0 or facts["is_error"]),
+        "rate_limited": facts["rate_limited"],
+        "assertions": graded,
+        "passed": sum(1 for item in graded if item["passed"]),
+        "total": len(graded),
+    }
+    (run_dir / "grade.json").write_text(json.dumps(outcome, indent=2) + "\n", encoding="utf-8")
+    state = " TRUNCATED" if outcome["truncated"] else ""
+    print(f"{task['id']} [{condition}] {outcome['passed']}/{outcome['total']}{state}")
+    return outcome
+
+
 def run_one_trigger(job: Job) -> dict[str, Any]:
     """Run one trigger probe and record whether the skill under test was invoked."""
     probe = job["probe"]
@@ -1284,6 +1530,19 @@ def run_one_trigger(job: Job) -> dict[str, Any]:
     verdict = "ABORTED" if outcome["aborted"] else "ok" if outcome["correct"] else "WRONG"
     print(f"{probe['id']} expect={probe['expect']} fired={fired} {verdict}")
     return outcome
+
+
+def is_instructions_suite(suite: str) -> bool:
+    """Report whether a suite measures an instructions document, which its tasks.json says."""
+    path = EVALS_DIR / suite / "tasks.json"
+    return path.is_file() and "instructions" in load_json(path)
+
+
+def condition_names(suite: str, stamp: str) -> tuple[str, ...]:
+    """Return every condition a stamp of the suite holds runs for."""
+    if is_instructions_suite(suite):
+        return tuple(load_json(EVALS_DIR / suite / "tasks.json")["arms"])
+    return arms_for(suite, stamp).names
 
 
 def results_root(skill: str, stamp: str) -> Path:
@@ -1590,6 +1849,83 @@ def cmd_agent_tasks(args: argparse.Namespace) -> int:
     return run_and_record(jobs, run_one_agent_task, args.parallel, root, runs)
 
 
+def cmd_instructions_tasks(args: argparse.Namespace) -> int:
+    """Run every task of an instructions-document suite in each declared arm and grade."""
+    suite = args.suite
+    if not SAFE_NAME.fullmatch(suite):
+        message = f"--suite must be a plain directory name under evals/, got {suite!r}"
+        raise SystemExit(message)
+    suite_dir = EVALS_DIR / suite
+    suite_doc = load_json(suite_dir / "tasks.json")
+    if not isinstance(suite_doc, dict):
+        message = f"{suite}/tasks.json must hold an object"
+        raise SystemExit(message)
+    document = suite_doc.get("instructions")
+    arms = suite_doc.get("arms")
+    if not isinstance(document, str) or (REPO_ROOT / document).parent != REPO_ROOT / "instructions":
+        message = f"{suite}/tasks.json 'instructions' must name a file in instructions/"
+        raise SystemExit(message)
+    if not (REPO_ROOT / document).is_file():
+        message = f"{suite}/tasks.json 'instructions' names {document}, which does not exist"
+        raise SystemExit(message)
+    if (
+        not isinstance(arms, list)
+        or not all(isinstance(arm, str) for arm in arms)
+        or arms[:1] != ["baseline"]
+        or len(set(arms)) != len(arms)
+        or not set(arms) <= set(INSTRUCTIONS_ARM_NAMES)
+    ):
+        message = (
+            f"{suite}/tasks.json 'arms' must start with baseline, from {INSTRUCTIONS_ARM_NAMES}"
+        )
+        raise SystemExit(message)
+    require_reviewed_graders(suite, reviewed=args.graders_reviewed)
+    ancestry = require_clean_ancestry(allowed=args.allow_ancestor_instructions)
+    plain = suite_doc.get("plain", "")
+    if "plain" in arms and not (isinstance(plain, str) and plain.strip()):
+        message = f"{suite}/tasks.json declares the plain arm but holds no 'plain' instruction"
+        raise SystemExit(message)
+    assertions_doc = load_json(suite_dir / "assertions.json")
+    tasks = instructions_tasks(suite, suite_doc, assertions_doc)
+    assertions = assertions_doc["tasks"]
+    if args.task:
+        tasks = [task for task in tasks if task["id"] in args.task]
+    for task in tasks:
+        found = fixture_problems(suite_dir / task["fixture"])
+        if found:
+            message = (
+                f"fixture {task['fixture']} holds {', '.join(found)}: a guidance file would "
+                "reach every arm, and a symbolic link would be followed by the copy"
+            )
+            raise SystemExit(message)
+    root = results_root(suite, args.stamp or today())
+    record_source_revision(root, ancestry)
+
+    runs = max(1, args.runs)
+    jobs = [
+        {
+            "task": task,
+            "condition": condition,
+            "model": args.model,
+            "document": document,
+            "plain": plain,
+            "fixture": suite_dir / task["fixture"],
+            "assertions": assertions[task["id"]],
+            "run_dir": (
+                root / task["id"] / condition
+                if runs == 1
+                else root / task["id"] / condition / f"run-{index}"
+            ),
+            "run_index": index,
+            "permissions": RunPermissions(tools=TASK_TOOLS, mode="bypassPermissions"),
+        }
+        for task in tasks
+        for condition in arms
+        for index in range(1, runs + 1)
+    ]
+    return run_and_record(jobs, run_one_instructions_task, args.parallel, root, runs)
+
+
 def majority_outcome(probe: dict[str, Any], passes: list[dict[str, Any]]) -> dict[str, Any]:
     """Reduce repeated passes of one probe to a single verdict by majority.
 
@@ -1692,7 +2028,7 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
         # runs to 160 MB, which `git add -A` would otherwise hash on every snapshot.
         (workspace / ".git" / "info").mkdir(parents=True, exist_ok=True)
         (workspace / ".git" / "info" / "exclude").write_text(
-            ".venv/\n.ansible/\n__pycache__/\n.pytest_cache/\n.ruff_cache/\nuv.lock\n",
+            WORKSPACE_EXCLUDES,
             encoding="utf-8",
         )
         # Stage everything else, so files the run created appear in the diff too.
@@ -1741,7 +2077,7 @@ def cmd_regrade(args: argparse.Namespace) -> int:
 
     outcomes: list[dict[str, Any]] = []
     for task_dir in sorted(path for path in root.iterdir() if path.name in assertions):
-        for condition in arms_for(args.skill, args.stamp or today()).names:
+        for condition in condition_names(args.skill, args.stamp or today()):
             # A single-run stamp keeps the workspace directly under the condition; a
             # multi-run one nests it under run-<n>. Regrade whichever layout is on disk.
             condition_dir = task_dir / condition
@@ -2186,6 +2522,175 @@ def report_source(root: Path, stamp: str, *, graded: bool) -> list[str]:
     return lines
 
 
+def spread(values: list[int | None]) -> str:
+    """Render a measurement as its median with the observed range, or n/a with no count."""
+    counted = [value for value in values if value is not None]
+    if not counted:
+        return "n/a"
+    middle = f"{median(counted):,.0f}"
+    if len(counted) == 1:
+        return middle
+    return f"{middle} ({min(counted):,}{RANGE_DASH}{max(counted):,})"
+
+
+def measurement_section(
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], names: Sequence[str]
+) -> list[str]:
+    """Render lines added and output tokens per task and arm, which are measured, not asserted.
+
+    A cell is the median over the runs that finished, with the observed range. The total row
+    sums those medians over the tasks graded in every arm, so each arm is totalled over the same
+    tasks and a task one arm lost to an abort or a truncation does not tilt the comparison.
+    """
+    lines = [
+        "## Size and output tokens",
+        "",
+        "Lines added counts the lines the run added against the commit it started from, tests",
+        "included, with lock files and tool output left out. Neither figure is an assertion.",
+        "The last two columns apply to the `doc` arm: the runs that opened the instructions",
+        "document, and the files from the copied library besides it that the runs opened.",
+        "",
+        "| Task | Arm | Lines added | Lines deleted | Output tokens | Document read | Other read |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    graded = {
+        task_id: {name: graded_runs(conditions.get(name, [])) for name in names}
+        for task_id, conditions in by_task.items()
+    }
+    common = [task_id for task_id, arms in graded.items() if all(arms.values())]
+    totals = {name: [0.0, 0.0, 0.0] for name in names}
+    for task_id, arms in graded.items():
+        for name, finished in arms.items():
+            if not finished:
+                continue
+            cells = [
+                spread([run.get("lines_added") for run in finished]),
+                spread([run.get("lines_deleted") for run in finished]),
+                spread([run.get("output_tokens") for run in finished]),
+            ]
+            read = f"{sum(1 for run in finished if run.get('doc_read'))} of {len(finished)}"
+            other = sum(run.get("standards_read", 0) for run in finished)
+            lines.append(
+                f"| `{task_id}` | {name} | {' | '.join(cells)} | "
+                f"{read if name == 'doc' else 'n/a'} | {other if name == 'doc' else 'n/a'} |"
+            )
+            if task_id in common:
+                for index, key in enumerate(("lines_added", "lines_deleted", "output_tokens")):
+                    values = [run[key] for run in finished if run.get(key) is not None]
+                    totals[name][index] += median(values) if values else 0
+    for name in names:
+        added, deleted, tokens = totals[name]
+        lines.append(
+            f"| all {len(common)} task(s) graded in every arm | {name} | {added:,.0f} | "
+            f"{deleted:,.0f} | {tokens:,.0f} | | |"
+        )
+    lines.append("")
+    return lines
+
+
+def instructions_cost_section(
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], arms: Arms
+) -> list[str]:
+    """Render what each arm of a pair cost, without the skill report's cost-per-gain framing.
+
+    Every arm scoring full marks is the outcome a size study wants, so a cost per assertion
+    gained would misread it.
+    """
+    totals = {
+        condition: sum(
+            run["cost_usd"] or 0
+            for conditions in by_task.values()
+            for run in conditions.get(condition, [])
+        )
+        for condition in arms.names
+    }
+    return [
+        "## Cost",
+        "",
+        "| Measure | Value |",
+        "|---|---|",
+        f"| Total {arms.control} cost | ${totals[arms.control]:.2f} |",
+        f"| Total {arms.treatment} cost | ${totals[arms.treatment]:.2f} |",
+        "",
+    ]
+
+
+def instructions_sections(
+    by_task: dict[str, dict[str, list[dict[str, Any]]]], runs_per_condition: int
+) -> list[str]:
+    """Render an instructions suite as one block per pairwise comparison, then its sizes.
+
+    Each block reuses the skill suite's table and failure sections, with its headings prefixed
+    by the comparison so the document keeps unique headings. The skill report's verdict prose is
+    left out: an arm scoring full marks while writing less is the result sought here, so a
+    zero correctness delta is not a failure to discriminate and gains no "improvement".
+    """
+    present = {name for conditions in by_task.values() for name in conditions}
+    lines: list[str] = []
+    for arms in INSTRUCTIONS_PAIRS:
+        if not set(arms.names) <= present:
+            continue
+        title = f"{arms.treatment_label} against {arms.control_label.lower()}"
+        table, _ = task_table(by_task, runs_per_condition, arms)
+        block = [
+            *table,
+            *truncated_section(by_task, arms),
+            *aborted_section(by_task, arms),
+            *failure_section(by_task, runs_per_condition, arms),
+            *instructions_cost_section(by_task, arms),
+        ]
+        lines += [re.sub(r"^## ", f"## {title}: ", line) for line in block]
+    return [
+        *lines,
+        *measurement_section(by_task, [n for n in INSTRUCTIONS_ARM_NAMES if n in present]),
+    ]
+
+
+def skill_sections(
+    skill: str,
+    stamp: str,
+    by_task: dict[str, dict[str, list[dict[str, Any]]]],
+    runs_per_condition: int,
+) -> list[str]:
+    """Render the task, cost and routing sections of a skill or agent-template suite."""
+    lines: list[str] = []
+    arms = arms_for(skill, stamp)
+    table, total_delta = task_table(by_task, runs_per_condition, arms)
+    lines += table
+    lines += truncated_section(by_task, arms)
+    lines += aborted_section(by_task, arms)
+    lines += undiscriminating(by_task, arms)
+    if total_delta == 0:
+        lines += [
+            f"{arms.subject.capitalize()} produced no net measurable improvement on these tasks.",
+            "",
+        ]
+
+    lines += failure_section(by_task, runs_per_condition, arms)
+
+    lines += [
+        "## Run cost and length",
+        "",
+        "| Task | Condition | Turns | Cost (USD) |",
+        "|---|---|---|---|",
+    ]
+    for task_id, conditions in by_task.items():
+        for condition in arms.names:
+            for outcome in conditions.get(condition, []):
+                label = condition
+                if runs_per_condition > 1:
+                    label = f"{condition} run {outcome.get('run_index', 1)}"
+                cost = outcome["cost_usd"] or 0
+                lines.append(f"| `{task_id}` | {label} | {outcome['num_turns']} | {cost:.2f} |")
+    lines.append("")
+
+    lines += cost_section(by_task, total_delta, arms)
+    # An agent-template suite has no description to route, so it has no probes to report.
+    if arms == SKILL_ARMS:
+        lines += trigger_section(skill, stamp)
+    return lines
+
+
 def render_report(skill: str, stamp: str) -> str:
     """Render the Markdown results file for one dated run of one skill."""
     root = results_root(skill, stamp)
@@ -2231,41 +2736,11 @@ def render_report(skill: str, stamp: str) -> str:
         ]
         return "\n".join(lines + trigger_section(skill, stamp))
 
-    arms = arms_for(skill, stamp)
-    table, total_delta = task_table(by_task, runs_per_condition, arms)
-    lines += table
-    lines += truncated_section(by_task, arms)
-    lines += aborted_section(by_task, arms)
-    lines += undiscriminating(by_task, arms)
-    if total_delta == 0:
-        lines += [
-            f"{arms.subject.capitalize()} produced no net measurable improvement on these tasks.",
-            "",
-        ]
-
-    lines += failure_section(by_task, runs_per_condition, arms)
-
-    lines += [
-        "## Run cost and length",
-        "",
-        "| Task | Condition | Turns | Cost (USD) |",
-        "|---|---|---|---|",
-    ]
-    for task_id, conditions in by_task.items():
-        for condition in arms.names:
-            for outcome in conditions.get(condition, []):
-                label = condition
-                if runs_per_condition > 1:
-                    label = f"{condition} run {outcome.get('run_index', 1)}"
-                cost = outcome["cost_usd"] or 0
-                lines.append(f"| `{task_id}` | {label} | {outcome['num_turns']} | {cost:.2f} |")
-    lines.append("")
-
-    lines += cost_section(by_task, total_delta, arms)
-    # An agent-template suite has no description to route, so it has no probes to report.
-    if arms == SKILL_ARMS:
-        lines += trigger_section(skill, stamp)
-    return "\n".join(lines)
+    if is_instructions_suite(skill):
+        sections = instructions_sections(by_task, runs_per_condition)
+    else:
+        sections = skill_sections(skill, stamp, by_task, runs_per_condition)
+    return "\n".join(lines + sections)
 
 
 def cmd_report(args: argparse.Namespace) -> int:
@@ -2339,6 +2814,37 @@ def build_parser() -> argparse.ArgumentParser:
             sub.add_argument(
                 "--runs", type=int, default=1, help="passes per probe, majority wins (default: 1)"
             )
+
+    instructions_parser = subparsers.add_parser(
+        "instructions-tasks", help=cmd_instructions_tasks.__doc__
+    )
+    instructions_parser.add_argument(
+        "--suite", required=True, help="an instructions-document suite under evals/"
+    )
+    instructions_parser.add_argument(
+        "--stamp", default="", help="results date stamp, default today"
+    )
+    instructions_parser.add_argument(
+        "--model",
+        default=DEFAULT_TASK_MODEL,
+        help=f"model for each run (default: {DEFAULT_TASK_MODEL})",
+    )
+    instructions_parser.add_argument("--parallel", type=int, default=4, help="concurrent runs")
+    instructions_parser.add_argument(
+        "--task", action="append", help="run only this task id, repeatable"
+    )
+    instructions_parser.add_argument("--runs", type=int, default=1, help="runs per arm")
+    instructions_parser.add_argument(
+        "--allow-ancestor-instructions",
+        action="store_true",
+        help="run although a CLAUDE.md above evals/ loads into every arm",
+    )
+    instructions_parser.add_argument(
+        "--graders-reviewed",
+        action="store_true",
+        help="proceed after reading the assertion commands this run will execute",
+    )
+    instructions_parser.set_defaults(handler=cmd_instructions_tasks)
 
     agent_parser = subparsers.add_parser("agent-tasks", help=cmd_agent_tasks.__doc__)
     agent_parser.add_argument(

@@ -146,6 +146,58 @@ place of a prompt, each declared comparison checked against the tasks, and no ro
 reports a suite that has never been run as unmeasured rather than failing it, since only a paid run
 can render the results file. It reports every template with no suite the same way.
 
+## Instructions-document suites
+
+A skill suite asks whether a skill changes what an agent produces. An instructions-document suite
+asks the same of a standing standard in `instructions/`, which has no description to route on and
+is applied only when a project's `CLAUDE.md` points at it. A suite is recognized by its
+`tasks.json` naming an `instructions` file, and it lives at `evals/<name>/` beside the skill
+suites. It has no `trigger-eval.json`, and `scripts/check_evals.py` neither requires nor looks
+for one.
+
+Each task runs in up to three arms on identical fixture copies, declared in `tasks.json` as
+`arms`, which starts with `baseline`:
+
+| Arm | What the workspace holds |
+|---|---|
+| `baseline` | The fixture alone. |
+| `doc` | A project `CLAUDE.md` that points at the document, and copies of `instructions/` and `skills/` under `.agent-standards/`, the way a consumer installs it as a submodule. |
+| `plain` | A project `CLAUDE.md` holding one sentence, stated in `tasks.json` as `plain`, that asks for the smallest complete change. |
+
+The `plain` arm exists because a document that beats no instruction at all has not shown that it
+beats a sentence. The files an arm receives are committed to the workspace before the run, so
+none counts as a line the run added. The `doc` arm receives `instructions/` and `skills/` under
+`.agent-standards/`, as a submodule install lays them out, so the document's references to
+sibling files resolve. That adds a text tree the other arms lack, which a grader that searches
+the whole workspace can reach, and the pointer is a plain sentence the agent has to follow, while
+the `plain` sentence is always in context. A difference between the two therefore mixes the
+document's content with whether the agent opened it, and the document-read and other-read
+columns separate them. Only the named instructions file is checked for freshness, not the
+siblings the arm also copies.
+A fixture may hold no `CLAUDE.md`, `CLAUDE.local.md`, `AGENTS.md`, `.claude` or symbolic link,
+because the first four would load into the baseline too and a copy would follow the last. Task ids
+and the suite name must be plain names, since they become path components.
+
+```sh
+python3 evals/run_eval.py instructions-tasks --suite <name> --runs 3 --parallel 5
+python3 evals/run_eval.py report --skill <name>
+```
+
+`report`, `regrade` and `snapshot` take the suite as `--skill <name>`. The report holds one block
+for each pair of declared arms, `Doc against baseline`, `Plain against baseline` and `Doc
+against plain`, each built by the functions a skill suite uses, so a delta reads the same way.
+Two measurements follow the blocks. Neither is an assertion. Lines added is the size of the
+run's diff against the commit it started from, tests included, counted through a throwaway
+index so the workspace stays as graded. The deletions are recorded beside it. Output tokens come
+from the `result` event of the transcript. The same table counts, for the `doc` arm, the runs whose
+file reads or shell commands named the document, and the other files from the copied library they
+opened. A command that only names the file counts as a read, so the count is an upper bound. An arm
+whose runs never named it measured nothing about it.
+
+An instructions suite can be neither stale-checked against a skill nor routed, so
+`scripts/check_evals.py` compares a stamp against the instructions file, `tasks.json` and
+`assertions.json`, and reports a suite that has never run as unmeasured.
+
 ## Running them
 
 ```sh
@@ -186,6 +238,7 @@ python3 evals/run_eval.py tasks --skill python-testing
 
 The refusal lists the `workspace_command` strings that are new or changed against the baseline,
 which is what a review of them consists of. Read those, then pass `--graders-reviewed` to proceed.
+`instructions-tasks` carries the gate too.
 The comparison is against the working tree rather than `HEAD`, so it covers a contributor's branch
 and a patch applied locally alike, and it fires on uncommitted edits to a suite of one's own. That
 is the intended cost: the flag is an assertion that a human read the commands, and it is recorded

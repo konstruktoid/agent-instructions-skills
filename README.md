@@ -499,11 +499,17 @@ output, or that its `description` routes the right tasks to it. Two measurements
   session's agent against the same prompt with no agent, and neither has been run.
   `scripts/check_evals.py` reports those two suites, and every template without a suite, as
   unmeasured.
+- **Instructions-document evals.** A suite whose `tasks.json` names an `instructions` file
+  measures a document in `instructions/` rather than a skill, in up to three arms on identical
+  fixtures: nothing, the document referenced from a project `CLAUDE.md`, and a one-sentence
+  plain instruction. It has no routing probes, since a document has no `description`. See
+  [evals/README.md](evals/README.md#instructions-document-suites).
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
 python3 evals/run_eval.py triggers --skill <name> --model sonnet --parallel 5
 python3 evals/run_eval.py report   --skill <name>
+python3 evals/run_eval.py instructions-tasks --suite <name> --runs 3 --parallel 5
 ```
 
 Results land in `evals/<skill>/results/<date>.md`, rendered by `report` rather than written by
@@ -624,7 +630,9 @@ and "privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
 assertions cover exactly the defined tasks with unique ids, a known kind, and a `source`, that
 every `workspace_command` parses under `bash -n` and every regex compiles, that the probes number
 10 in a 5 and 5 split, and that every raw stamp holding graded runs has a rendered
-`results/<stamp>.md` beside it. A measurement that ran and was never reported is otherwise
+`results/<stamp>.md` beside it. A suite whose `tasks.json` names an `instructions` file is held to
+the same rules without a matching skill or a `trigger-eval.json`, and its declared arms and
+fixtures are checked instead. A measurement that ran and was never reported is otherwise
 invisible, which is how a five-task, three-run `github-actions-security` stamp sat unread in
 `results/raw/2026-07-28/`.
 
