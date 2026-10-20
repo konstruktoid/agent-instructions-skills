@@ -622,8 +622,8 @@ disagrees with the others. `README.md:656` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
-**Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0` in
-`README.md:213` names a reference that resolves and that cannot be deleted or moved. Read back,
+**Landed, 2026-08-30.** The tag exists and the ruleset is applied, so the `v0.1.0` that
+`README.md:213` named at the time resolves and cannot be deleted or moved. Read back,
 the ruleset blocks `deletion` and `non_fast_forward` on `refs/tags/v*` with no bypass actors. This
 path is closed for a consumer who pins. It stays open for one who installs the unpinned
 marketplace form, since that still tracks the default branch.
@@ -631,7 +631,7 @@ marketplace form, since that still tracks the default branch.
 **Blast radius.** For a consumer on the unpinned form, whatever paths 1.3, 1.4, 2.3, or 3.5
 planted, delivered at their next `/plugin update` with no version number to notice, no release
 note to read, and no diff between what they had and what they now run. That exposure window is one
-command, and the consumer closes it by pinning to `v0.1.0`, which the tag ruleset holds immutable.
+command, and the consumer closes it by pinning to a release tag, which the tag ruleset holds immutable.
 A consumer who is already pinned takes nothing from these paths until they move the pin.
 
 The consumer-side audit the repository itself specifies at `references/agent-content.md:129`
