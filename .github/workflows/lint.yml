@@ -60,6 +60,32 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: uv run --frozen python scripts/check_capabilities.py --base "${BASE_SHA:-origin/main}"
 
+  # The plugin ships skills and instruction documents only. This job fails on anything that
+  # runs code inside a consumer's Claude Code: hooks, mods, MCP servers, and the other
+  # locations scripts/check_content_only.py lists. It is its own job, so its result is one
+  # named status check in the ruleset rather than a step buried in another job.
+  content-only:
+    name: Content-only plugin
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Builds copies of the plugin with a hooks module, an MCP file, and the other
+      # forbidden shapes added, and fails if any copy is accepted. A gate that never
+      # rejects anything would read as a pass.
+      - name: Check the gate rejects extension code
+        run: python3 scripts/check_content_only.py --self-test
+      # The runner image has no `claude` CLI and this job does not install one, so the
+      # script reports that `claude plugin validate` was skipped. The static checks are
+      # the gate; the validator is a second reader when the CLI is on PATH.
+      - name: Check the plugin is content-only
+        run: python3 scripts/check_content_only.py
+
   python:
     name: Python
     runs-on: ubuntu-latest

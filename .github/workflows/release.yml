@@ -1,0 +1,108 @@
+---
+name: release
+
+# A release is a version tag. Pushing `v<version>` builds the plugin as an archive, attests
+# where it was built, and opens a draft release with the archive attached. The draft is
+# published by a person after writing the release notes README.md asks for, which is also the
+# moment an immutable release locks its tag and assets, so nothing here publishes.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and attest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # Mints the OIDC token the attestation is signed with.
+      attestations: write # Stores the signed provenance attestation.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # The ancestry check below needs main's history, not only the tagged commit.
+          fetch-depth: 0
+      # The tag ruleset does not restrict who creates a tag or where, so a tag on a commit that
+      # never merged would otherwise be built, attested, and drafted as a release.
+      - name: Check the tagged commit is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" FETCH_HEAD; then
+            echo "tagged commit ${GITHUB_SHA} is not on main" >&2
+            exit 1
+          fi
+      # One repository at one tag is one version, so every plugin entry has to name the tag.
+      - name: Check the tag names every manifest version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          tag = os.environ["TAG"]
+          with open(".claude-plugin/marketplace.json", encoding="utf-8") as manifest:
+              plugins = json.load(manifest)["plugins"]
+          wrong = [p["name"] for p in plugins if f"v{p.get('version')}" != tag]
+          if not plugins or wrong:
+              sys.exit(f"tag {tag} does not match the version of: {', '.join(wrong) or 'no plugins'}")
+          PY
+      - name: Check the gate rejects extension code
+        run: python3 scripts/check_content_only.py --self-test
+      - name: Check the plugin is content-only
+        run: python3 scripts/check_content_only.py
+      # The archive is the tree at the tagged commit, which is what a consumer who pins the
+      # tag receives from the marketplace.
+      - name: Build the archive
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir dist
+          git archive --format=tar.gz --prefix="agent-instructions-skills-${TAG}/" \
+            --output="dist/agent-instructions-skills-${TAG}.tar.gz" "${GITHUB_SHA}"
+          (cd dist && sha256sum -- *.tar.gz > SHA256SUMS)
+      - name: Attest build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/*.tar.gz
+      - name: Upload the archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-archive
+          path: dist/
+          if-no-files-found: error
+
+  draft:
+    name: Draft release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # Creates the draft release and attaches the archive.
+    steps:
+      - name: Download the archive
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-archive
+          path: dist/
+      # --verify-tag refuses a tag that does not exist on the remote, and --draft leaves
+      # the release unpublished, so the notes are written before anything becomes immutable.
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "${TAG}" dist/* --draft --verify-tag --title "${TAG}" \
+            --notes "Draft. State what changed in what a skill can do before publishing."

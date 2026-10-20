@@ -22,7 +22,7 @@ their notes.
 and one agent template. No control below changes: the two new skills were written to carry the
 control-7 data-handling paragraph and the control-9 `capabilities` block. Clauses scoped to a
 control's landing ("in all eight skills") keep their count, since that is what the control
-touched; the standalone count of reference files is now thirty-five.
+touched; the standalone count of reference files is now thirty-six.
 
 ## Contents
 
@@ -46,7 +46,8 @@ touched; the standalone count of reference files is now thirty-five.
 | 8 | `SECURITY.md` and a data-access statement | Nothing; enables outside reporting | Half a day | Medium | Landed |
 | 9 | Declared-capability frontmatter plus a CI diff check | Nothing; makes 1.4 reviewable | A week, then ongoing | Medium, and lower than it looks | Landed, at the low-ambition version |
 | 10 | Capability-diff release notes | Nothing; makes 2.3 and 4 reviewable | Depends on 6 and 9 | Low until 6 and 9 exist | Open |
-| 11 | SLSA provenance and a source-track claim | Nothing in this threat model | High, and there is no build | Lowest | Open |
+| 11 | SLSA provenance and a source-track claim | Nothing in this threat model | High, and there is no build | Lowest | Partly landed: build provenance only, not yet exercised |
+| 12 | Content-only gate for executable extension code | Executable code reaching a consumer through the plugin channel | Low | High | Landed on the repository side; the required check, immutable releases and a second code owner are open |
 
 ## Controls in detail
 
@@ -87,7 +88,7 @@ learns why the root is special. `docs` was added to the allowlist to admit this 
 
 As audited, `skills/github/github-actions-security/SKILL.md` ran `rhysd/actionlint:1.7.12` with
 `$PWD` bind-mounted read-write, a few lines below its own instruction to pin by digest, while
-`lint.yml:147` already carried the digest.
+`lint.yml:173` already carried the digest.
 
 **What it stops.** Attack path 3.5.
 
@@ -99,8 +100,8 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:525` now
-carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:147`. The prose at
+**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:577` now
+carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:173`. The prose at
 `github-actions-security/SKILL.md:228`-`:232` was rewritten to state the reason where the
 command is, rather than as a rule the
 command beneath it broke.
@@ -108,7 +109,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:517` documents it as something to type.
+no job for it. `README.md:567` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -120,18 +121,18 @@ fields; it does not care what the command does.
 **Where it fails open.** Immediately, against any grader command that is structurally valid. Do not
 count this as a control against 1.1. Count it as the place a check against 1.1 would go.
 
-**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:86`-`:121`, running
-`python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`). Three choices in
+**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:112`-`:147`, running
+`python3 scripts/check_evals.py`, conditionally with `--strict` (`:138`-`:147`). Three choices in
 it:
 
 - **No uv setup.** The script imports only the standard library and shells out to `git` and
   `bash`, both of which the runner image provides, so the job is a checkout and a command.
-- **`fetch-depth: 0`** (`:102`). The staleness half of the check compares the commit a stamp
+- **`fetch-depth: 0`** (`:128`). The staleness half of the check compares the commit a stamp
   recorded against the commits that have since touched the skill, and the script degrades a
   failed git lookup to an empty string, which reads as "nothing changed". A shallow checkout
   would report every suite fresh without having compared anything, which is worse than not
   running it.
-- **`--strict` only when the diff itself is what went stale** (`:116`-`:118`). Staleness is a
+- **`--strict` only when the diff itself is what went stale** (`:142`-`:144`). Staleness is a
   statement about when a measurement was last taken, and a pull request that does not touch a
   skill cannot fix it, so an unconditional `--strict` would fail every pull request for a reason
   none of them caused. A change under `skills/`, or to an eval's own `tasks.json` or
@@ -141,7 +142,7 @@ it:
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:510` was updated from four jobs to five.
+clean. `README.md:560` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -263,15 +264,15 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:213` gives
-  `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
-  is kept below it at `:203`, labeled as tracking the default branch. This is the half of the
+- **The documented install is pinned first.** `README.md:255` gives
+  `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.3.0`, and the unpinned form
+  is kept below it at `:265`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:268` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:318` gives `"ref": "v0.3.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:746` fails the
+  `0.3.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:746` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`
@@ -280,7 +281,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:653` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:708` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -434,7 +435,7 @@ prose, which is the medium of the entire threat.
 | 4, moving ref | None directly. It becomes the input to control 10, which is where it pays out |
 
 **Where it fails open.** Any capability written in prose. Any reference file, if the check reads
-only `SKILL.md`; there are thirty-five of them and they hold most of the commands. Any commit that
+only `SKILL.md`; there are thirty-six of them and they hold most of the commands. Any commit that
 edits the block and the body together. And the ordinary drift case, where the block becomes a field
 people fill in without meaning it, which is the fate of most declarations that nothing verifies.
 
@@ -527,6 +528,53 @@ published, `gh attestation verify` becomes available to consumers, which
 `github-actions-security/references/supply-chain.md:187` already teaches them to run. Adopt it then,
 and describe it in the release notes as what it is: proof of origin, not proof of safety.
 
+**Landed, 2026-10-20, not yet exercised.** `.github/workflows/release.yml` builds an archive of the
+tagged commit and attests it with `actions/attest`, so a consumer can run `gh attestation verify` on
+it. The workflow has not run, because it triggers on a `v*` tag and none has been pushed since it
+was added; the first tag is its first test. The control stays an authenticity control: it records
+which workflow and commit produced the archive and says nothing about whether the content is safe.
+The source-track claim above is still not made.
+
+### 12. Content-only gate for executable extension code
+
+Claude Code mods are JavaScript or TypeScript handlers that run inside the Claude Code process with
+the user's privileges, are not sandboxed, and load from a plugin on the same update channel as a
+skill (<https://code.claude.com/docs/en/plugins/mods/overview>). A plugin can also carry hooks, MCP
+servers, language servers, monitors, workflows and executables, so a repository whose value is text
+a reviewer can read has to keep every one of them out of the plugin or lose that property at the
+next update.
+
+**What it stops.** A change that adds code which Claude Code loads or starts: a file at a default
+discovery location, a module or MCP bundle file at any path, a manifest key outside an allowlist, a
+plugin source that fetches code from elsewhere or runs a command, `hooks` or `shell` frontmatter in
+a skill, and shell injection in a skill body. The manifest check is an allowlist, so a key a later
+Claude Code release adds fails until it has been read. `scripts/check_content_only.py` runs as the
+`Content-only plugin` job, and its `--self-test` rejects a copy of the plugin with each forbidden
+shape added.
+
+**What it does not stop.** Content that misleads an agent without running anything, which is attack
+path 3 and control 7. A maintainer, or an attacker holding the maintainer's credentials, who edits
+the gate in the same commit that adds the code: the gate and the code it guards sit in one
+repository with one owner, so the control makes that change reviewable rather than impossible, and
+the review is only as independent as the second code owner, who does not exist yet.
+
+**Where it fails open.** The path list names the discovery locations Claude Code documents today, so
+a new default location is not caught until it is added, unlike the manifest keys. `claude plugin
+validate` reports a mod as `Validation passed`, does not open a hooks module when given a
+marketplace file, and is absent from the CI runner, so there the static checks are the whole gate
+and the script says the validator step was skipped. The job is not a required status check until the
+default branch ruleset lists it.
+
+**Effort.** Low. One standard-library script, one job, and a CODEOWNERS entry for the paths that
+define the plugin.
+
+**Landed on the repository side, 2026-10-20.** The script, its self-test, the `content-only` job in
+`lint.yml`, the same gate as a precondition of `release.yml`, the CODEOWNERS entries, and the `What
+this plugin contains` section in `README.md`. **Not landed, and not settable from a file:** adding
+`Content-only plugin` to the required checks of the default branch ruleset, enabling immutable
+releases (the repository read back `enabled: false` on 2026-10-20), and a second code owner.
+`README.md` lists them under Repository settings the release relies on.
+
 ## The four controls the brief asks to evaluate
 
 Collected, so the answers are in one place.
@@ -536,7 +584,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:213` now leads with the pinned form and `README.md:268` names a tag in the team setting, the tag it names is pushed, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:255` now leads with the pinned form and `README.md:318` names a tag in the team setting, the tag it names is pushed once `v0.3.0` is cut, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
 
 ## Recommended order of implementation
 
@@ -544,8 +592,8 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:525` carry the
-   digest from `lint.yml:147`.
+   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:577` carry the
+   digest from `lint.yml:173`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:717`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
@@ -556,7 +604,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at
-   `.github/workflows/lint.yml:86`. It stops nothing by itself; it is the slot where a real
+   `.github/workflows/lint.yml:112`. It stops nothing by itself; it is the slot where a real
    grader check will live.
 6. **Control 6**, tag, protect the tags, and change the documented install so the pinned form is
    first. **Landed in the repository**: pinned install, declared versions with a CI check, and

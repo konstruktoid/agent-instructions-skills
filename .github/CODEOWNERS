@@ -1,1 +1,10 @@
+# One account owns everything, so each rule below names the same owner. The explicit entries
+# mark the paths whose change decides what a consumer's Claude Code runs after an update: the
+# manifests, the workflows, the content-only gate, and the statement of what ships. Giving one
+# of them a second owner later is a one-line change here plus the ruleset's code-owner review.
 * @konstruktoid
+/.claude-plugin/ @konstruktoid
+/.github/ @konstruktoid
+/scripts/check_content_only.py @konstruktoid
+/scripts/check_skills.py @konstruktoid
+/SECURITY.md @konstruktoid

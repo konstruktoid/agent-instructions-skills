@@ -55,11 +55,15 @@ The statement below is what
 asks every publisher of agent-facing content to provide, so that a reader can compare the claim
 against the files.
 
-**What ships.** Ten skills under `skills/`, seven documents under `instructions/`, ten agent
-templates under `agent-templates/`, and the reference files each skill loads on demand. There are
-no session hooks, no MCP server definitions, no slash commands, no installable subagents, and no
-`.claude/settings.json`; `scripts/check_skills.py` fails the build when any of those appears at
-the repository root. The eval harness under `evals/` is not part of any plugin and does not ship.
+**What ships.** Ten skills under `skills/`, seven documents under `instructions/`, twelve agent
+templates under `agent-templates/`, and the reference files each skill loads on demand. The plugin
+root is the repository root, so a plugin install also receives `scripts/`, `evals/`, and `docs/`;
+the Python in them runs in CI and in a contributor's shell, and Claude Code does not load it. There
+are no session hooks, no mods, no MCP server definitions, no language servers, no monitors, no
+workflows, no executables under `bin/`, no slash commands, no installable subagents, and no
+`.claude/settings.json`. `scripts/check_content_only.py` fails the build when any code-bearing file,
+manifest key, or skill construct appears, and `scripts/check_skills.py` fails it when an `agents/`
+directory appears at the repository root.
 
 **Reads.** Files in the repository the agent is already working in: source, tests, CI workflows,
 and the rule files a skill names, which are `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`,

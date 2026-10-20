@@ -25,8 +25,8 @@ the control-9 `capabilities` block.
 The repository is both a library of Claude Code skills and its own plugin marketplace. Two facts
 from Phase 1 shape everything in Phase 2, so they are stated first:
 
-- Every plugin entry sets `"source": "./"` (`.claude-plugin/marketplace.json:11`, `:21`, `:31`,
-  `:40`), so the plugin root and the repository root are the same directory.
+- Every plugin entry sets `"source": "./"` (`.claude-plugin/marketplace.json:11`, `:22`, `:33`,
+  `:43`, `:55`), so the plugin root and the repository root are the same directory.
 - As audited, no plugin entry declared a `version`, and `README.md` stated that every commit
   counted as a new version and an update always fetched the current default branch. Control 6
   gives all four entries the same `version` and documents a tag-based release, so the second fact
@@ -49,8 +49,10 @@ no match for any of the following, and the repository root holds none of them:
 | Session hooks (`hooks/hooks.json`) | Not tracked; not present at the repository root |
 | MCP server definitions (`.mcp.json`) | Not tracked; not present at the repository root |
 | Slash commands (`commands/`) | Not tracked; not present at the repository root |
+| Mods and hooks modules (`*.js`, `*.mjs`, `*.cjs`, `*.ts`, and the other module extensions) | `git ls-files` returns none, and `scripts/check_content_only.py` fails the build if one appears at any path |
+| Language servers, monitors, workflows, `bin/` executables (`.lsp.json`, `monitors/`, `workflows/`, `bin/`) | Not tracked; not present at the repository root, and the same script fails the build if one appears |
 | Installable subagents (`agents/`) | Not present, and `scripts/check_skills.py:717` fails the build if it appears |
-| Committed `.claude/settings.json` | Not tracked. `README.md:249` tells a *consumer* to commit one, in the consumer's repository |
+| Committed `.claude/settings.json` | Not tracked. `README.md:299` tells a *consumer* to commit one, in the consumer's repository |
 
 As audited, `scripts/check_skills.py` blocked exactly one of the four auto-discovered plugin
 directories and left the other three unguarded. That gap was attack path 1.3.
@@ -185,13 +187,13 @@ The highest-egress skill in the repository.
 
 ### Reference files
 
-Thirty-five files under `skills/*/*/references/`, loaded on demand through each skill's triage
+Thirty-six files under `skills/*/*/references/`, loaded on demand through each skill's triage
 table. They carry the commands cited above. They are held to the same prose and Contents-list
-checks as a `SKILL.md` (`scripts/check_skills.py:201`, `:852`) and to no capability check at all.
+checks as a `SKILL.md` (`scripts/check_skills.py:202`, `:881`) and to no capability check at all.
 
 ### Agent templates
 
-Twelve files, and the only content in the repository that declares a tool allowlist. `README.md:83`
+Twelve files, and the only content in the repository that declares a tool allowlist. `README.md:137`
 states they are templates, not installable agents. The four verifiers grant no write tool.
 
 | Path | Trigger | Tools declared | Shell | Egress |
@@ -232,26 +234,28 @@ later session loads as system prompt. No template sets it and
 
 ### Instructions documents
 
-Seven files under `instructions/`. `README.md:276` states no tool auto-discovers them. They carry
-no shell invocation of their own and no egress. Under the submodule install at `README.md:283`
-they are referenced directly from a consumer's `CLAUDE.md` (`README.md:289`-`:291`), which loads
+Seven files under `instructions/`. `README.md:326` states no tool auto-discovers them. They carry
+no shell invocation of their own and no egress. Under the submodule install at `README.md:333`
+they are referenced directly from a consumer's `CLAUDE.md` (`README.md:339`-`:341`), which loads
 them into every session rather than on demand.
 
 ### Marketplace manifest
 
 `.claude-plugin/marketplace.json` declares five plugins covering all ten skills. Every entry
 sets `"source": "./"` and `"strict": false`, and since control 6 every entry declares the same
-`version` `0.1.0`. What `strict: false` relaxes is UNKNOWN: the repository does not state it and
+`version` `0.3.0`. What `strict: false` relaxes is UNKNOWN: the repository does not state it and
 no file in the repository defines it.
 
 ### Repository automation
 
 | Path | Trigger | Permissions | Shell | Paths | Egress | Untrusted input |
 |---|---|---|---|---|---|---|
-| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:68`, `:91`, `:128`, `:164`). `persist-credentials: false` on every checkout (`:27`, `:73`, `:96`, `:133`, `:169`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:80`-`:84`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`); `docker run` of `rhysd/actionlint` pinned by digest (`:146`-`:147`); `uvx "zizmor@1.31.1"` over `.github/` (`:157`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:157`); `docker run` pulls the actionlint image (`:146`). Actions are pinned by SHA (`:25`, `:33`, `:176`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:156`) |
-| `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:984`, `:82`, `:84`, `:73`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:517`) | Read-only | None | `evals/` | None | Eval suite files |
+| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:72`, `:94`, `:117`, `:154`, `:190`). `persist-credentials: false` on every checkout (`:27`, `:77`, `:99`, `:122`, `:159`, `:195`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `python3 scripts/check_content_only.py`, with and without `--self-test` (`:82`, `:87`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:106`-`:110`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:138`-`:147`); `docker run` of `rhysd/actionlint` pinned by digest (`:172`-`:173`); `uvx "zizmor@1.31.1"` over `.github/` (`:183`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:183`); `docker run` pulls the actionlint image (`:172`). Actions are pinned by SHA (`:25`, `:33`, `:202`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:182`) |
+| `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:75`, `:84`) | None | The files under check |
+| `scripts/check_evals.py` | CI, `lint.yml:138`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:567`) | Read-only | None | `evals/` | None | Eval suite files |
 | `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
+| `scripts/check_content_only.py` | CI, `lint.yml:82` and `lint.yml:87`, in the `content-only` job; `.github/workflows/release.yml:44` and `.github/workflows/release.yml:46` | Read-only | `git ls-files`, and `claude plugin validate` on a copy in a temporary directory when `claude` is on `PATH`, which the CI runner does not provide | The checkout, the manifests, and `skills/**/*.md` | None | The files under check. It never executes them |
+| `.github/workflows/release.yml` | `push` of a tag matching `v*` (`:10`-`:11`) | `permissions: {}` at the top level (`:13`). The `build` job adds `id-token: write` and `attestations: write` (`:26`-`:27`); the `draft` job adds `contents: write` (`:74`) | Yes. A manifest version check, the content-only gate, `git archive`, `sha256sum`, and `gh release create --draft` | The checkout and `dist/` | Yes. `actions/attest` calls GitHub's attestation service, whose endpoints this audit did not trace; `gh release create` calls the GitHub API | The tag name, passed through `env` and never interpolated into a script. Anyone who can push a tag controls it, which the release tag ruleset limits |
 
 ### `evals/run_eval.py`
 
@@ -260,12 +264,12 @@ ship to consumers; it runs on the maintainer's machine.
 
 | Field | Value |
 |---|---|
-| Trigger | Manual. `evals/README.md:155` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
+| Trigger | Manual. `evals/README.md:166` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
 | Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:522`) and for git (`:923`, `:952`, `:953`, `:1121`, `:1314`, `:1322`, `:1699`, `:1700`, `:1717`). And `subprocess.run(command, shell=True, ...)` at `:864`-`:866`, where `command` is a grader string read from a suite's `assertions.json` |
 | Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:116`, applied through `RunPermissions` at `:350` and `:396`-`:401`, with the unbounded surface behind `--all-tools` (`:1524`, `:2334`). `--setting-sources project` keeps the caller's own settings out of both arms (`:385`) |
 | Filesystem, outside the repository root | Yes, and it reaches a live credential. `:326` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:329` symlinks it into the run's private home. A private HOME tree is created per run (`:313`-`:325`). `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed" |
 | Environment | `env = dict(os.environ)` (`:341`), so the run starts from the caller's full environment; `$EVAL_TOOL_BIN` is prepended to `PATH` (`:344`) |
-| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:116`). Plus whatever a fixture's own tooling fetches (`evals/README.md:142`-`:153` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`) |
+| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:116`). Plus whatever a fixture's own tooling fetches (`evals/README.md:153`-`:164` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`) |
 | Reads content it did not author | Comprehensively. Task prompts from `tasks.json`, fixture trees, grader commands from `assertions.json`, and the model's own transcript, which is then parsed at `:668`-`:695`. Claude Code also loads any `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` above `evals/` into both conditions; a run refuses to start when one exists, unless `--allow-ancestor-instructions` is passed, in which case the paths are recorded in the stamp's `source-revision.json` and stated in its report |
 
 Supporting eval data:
@@ -274,7 +278,7 @@ Supporting eval data:
   executed at `run_eval.py:864`. Since control 4, a run refuses when a suite's file differs from
   the review baseline (`run_eval.py:794`).
 - `evals/*/fixtures/**` are deliberately flawed inputs, excluded from `ruff` and `ty`
-  (`pyproject.toml:28`, `:32`) and from secret scanning (`.github/secret_scanning.yml:12`).
+  (`pyproject.toml:28`, `:38`) and from secret scanning (`.github/secret_scanning.yml:12`).
 - `evals/probe-sandbox/` is a mixed repository holding a Dockerfile, a `docker-compose.yml`, a
   Jenkinsfile, a `.gitlab-ci.yml`, Terraform, Kubernetes manifests, an Ansible role, Go, Python
   and `scripts/backup.sh` (`evals/probe-sandbox/README.md:3`-`:9`).
@@ -283,11 +287,11 @@ Supporting eval data:
 
 | Item | State |
 |---|---|
-| `.github/CODEOWNERS` | `* @konstruktoid` (`:1`). One account owns everything, including itself |
+| `.github/CODEOWNERS` | `* @konstruktoid` (`:5`). One account owns everything, including itself |
 | `SECURITY.md` | Absent as audited. Control 8 adds it at the root, naming private vulnerability reporting, which `gh api .../private-vulnerability-reporting` confirms is enabled |
 | Data-access statement | Absent as audited. Control 8 puts it in the same `SECURITY.md`, which is where `references/scanning-and-response.md:110` asks for it |
-| Tags | None. `git tag` returns nothing. Control 6 documents and enforces a tag-based release, but no tag is pushed |
-| Releases | None, and no release workflow |
+| Tags | As audited, none: `git tag` returned nothing. Since control 6, `v0.1.0` and `v0.2.0` are pushed and held by the release tag ruleset |
+| Releases | As audited, none and no release workflow. `.github/workflows/release.yml` now drafts an attested release on a `v*` tag, and has not run yet |
 | `.gitignore` | Blocks `**/.credentials.json` and `.env` tree-wide (`:9`, `:10`) |
 | `.github/dependabot.yml` | Weekly, with a 7-day cooldown on both ecosystems and 14 days on a uv major (`:25`, `:42`) |
 
@@ -309,7 +313,7 @@ this repository, since a new eval task requires both files.
 holds only for the trust assumption it names: "The command comes from a checked-in
 assertions.json in this repository". A pull request branch is not yet that.
 
-**What happens.** The maintainer runs the suite as `evals/README.md:155` documents. `run_grader`
+**What happens.** The maintainer runs the suite as `evals/README.md:166` documents. `run_grader`
 executes the string under `/bin/sh` with `cwd` set to the finished workspace and `env` from
 `run_environment(home)`, which is `dict(os.environ)` plus the run's private HOME
 (`run_eval.py:341`, `:847`).
@@ -319,7 +323,7 @@ whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.
 From there the attacker has the credential that authenticates the maintainer's Claude Code, and
 write access to the working tree of a repository whose default branch reaches every consumer at
 their next update. As audited, nothing in CI inspected the file first, because
-`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:112`,
+`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:138`,
 which changes nothing about this path: the checks there are structural, and a grader command that
 is structurally valid is exactly the one this path uses.
 
@@ -350,7 +354,7 @@ sandbox option in `controls.md` is the one that bounds reach, and it is still op
 **Entry point.** A pull request adding a task to `evals/<skill>/tasks.json` and its fixture tree.
 
 **File abused.** `evals/run_eval.py`, in the branch that added `--permission-mode
-bypassPermissions` whenever `--tools` was not passed. `evals/README.md:155` shows the documented
+bypassPermissions` whenever `--tools` was not passed. `evals/README.md:166` shows the documented
 invocation, which passes no `--tools`, so every task run took that branch.
 
 **What happens.** The agent is handed a contributor-written prompt and a contributor-written
@@ -379,7 +383,7 @@ repository root, plausibly framed as tooling for the repository's own developmen
 
 **File abused.** `.claude-plugin/marketplace.json:11`, `:21`, `:31`, `:40`, which set
 `"source": "./"` so the plugin root is the repository root, combined with the packaging check as
-audited, which blocked `agents/` and nothing else. `README.md:174` explains the `agents/` rule
+audited, which blocked `agents/` and nothing else. `README.md:216` explains the `agents/` rule
 exactly, and stops there.
 
 **What happens.** On the next `/plugin update`, the consumer's Claude Code discovers the new
@@ -438,10 +442,10 @@ consumes event text. Recorded so a future workflow addition is understood as ope
 
 ### Actor 2: compromised maintainer credentials, pushing to main and cutting a release
 
-#### 2.1 There is no release to forge, because the branch is the release
+#### 2.1 For an unpinned install, the branch is the release
 
-The attacker does not need to cut anything. No tag exists, no plugin entry declares a `version`,
-and `README.md:218`-`:219` states plainly that without the `@<tag>` suffix "the marketplace tracks the
+The attacker needs no tag. An unpinned install ignores tags, no plugin entry declares a `version`,
+and `README.md:260`-`:261` states plainly that without the `@<tag>` suffix "the marketplace tracks the
 default branch, and every commit pushed here reaches the project at its next update, reviewed by
 nobody on the consuming side". Pushing to `main` **is** publishing.
 
@@ -473,7 +477,7 @@ mechanism present.
    deploy keys. An added instruction to widen a bypass actor, or to grant a collaborator, is
    camouflaged by everything around it.
 3. **A line in `instructions/*.md`**. Under the submodule install these are referenced directly
-   from the consumer's `CLAUDE.md` (`README.md:289`), so they load into every session
+   from the consumer's `CLAUDE.md` (`README.md:339`), so they load into every session
    unconditionally rather than when a skill triggers.
 4. **A changed pin in `skills/github/github-actions-security/SKILL.md:241` or `:251`**, pointing
    the container or the `uvx` package at an attacker-controlled name. Consumers run these
@@ -585,7 +589,7 @@ for trust boundary, and the file does not distinguish the two cases.
 **File abused.** `skills/github/github-actions-security/SKILL.md`, at the command that bind-mounts
 `$PWD` read-write into a container that was pinned by **tag**. The same file said, a few lines
 above, to pin the container by digest when it runs in CI, and this repository's own
-`lint.yml:147` did exactly that.
+`lint.yml:173` did exactly that.
 
 **What the agent does.** Runs the image and mounts the consumer's working tree into it.
 
@@ -593,7 +597,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:241`-`:243` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:147`, and `README.md:525` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:173`, and `README.md:577` was changed
 with it. The surrounding text at `skills/github/github-actions-security/SKILL.md:240`-`:244` states
 the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
@@ -611,19 +615,19 @@ form, and gave the update pair with no ref either.
 setting offered `"ref": "<branch-or-tag>"` as the way to pin and stated that a marketplace source
 "accepts a branch or tag, not a commit SHA". No tag existed in the repository, so the only
 available pin was a branch, which is itself moving. The single mechanism that pinned an exact
-commit was the submodule at `README.md:283`, presented as the route for the instructions documents
+commit was the submodule at `README.md:333`, presented as the route for the instructions documents
 and for non-plugin setups rather than as the way to obtain skills.
 
-**Landed on the repository side.** `README.md:213` now gives the pinned form first, with the
-unpinned form kept below and labeled as tracking the default branch (`:218`). The team setting at
-`:268` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
+**Landed on the repository side.** `README.md:255` now gives the pinned form first, with the
+unpinned form kept below and labeled as tracking the default branch (`:260`). The team setting at
+`:318` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:746` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:653` documents the release order, and
+disagrees with the others. `README.md:708` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
-**Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0` in
-`README.md:213` names a reference that resolves and that cannot be deleted or moved. Read back,
+**Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0`, which the README's
+pinned install named at the time, resolves and cannot be deleted or moved. Read back,
 the ruleset blocks `deletion` and `non_fast_forward` on `refs/tags/v*` with no bypass actors. This
 path is closed for a consumer who pins. It stays open for one who installs the unpinned
 marketplace form, since that still tracks the default branch.
@@ -631,7 +635,7 @@ marketplace form, since that still tracks the default branch.
 **Blast radius.** For a consumer on the unpinned form, whatever paths 1.3, 1.4, 2.3, or 3.5
 planted, delivered at their next `/plugin update` with no version number to notice, no release
 note to read, and no diff between what they had and what they now run. That exposure window is one
-command, and the consumer closes it by pinning to `v0.1.0`, which the tag ruleset holds immutable.
+command, and the consumer closes it by pinning to a release tag, which the tag ruleset holds immutable.
 A consumer who is already pinned takes nothing from these paths until they move the pin.
 
 The consumer-side audit the repository itself specifies at `references/agent-content.md:129`
