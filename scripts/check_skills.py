@@ -112,6 +112,7 @@ PLUGIN_ROOT_ALLOWED = frozenset(
         ".github",
         ".gitignore",
         ".markdownlint-cli2.yaml",
+        "AGENTS.md",
         "LICENSE",
         "README.md",
         "SECURITY.md",
@@ -199,6 +200,7 @@ PROSE_MARKERS = (("—", "em dash"), ("→", "arrow"))
 # inputs and eval results are verbatim evidence of what an agent wrote, so neither is held
 # to this rule; the hand-written README of an eval suite is.
 PROSE_GLOBS = (
+    "AGENTS.md",
     "README.md",
     "SECURITY.md",
     "instructions/*.md",

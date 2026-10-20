@@ -6,6 +6,9 @@ Claude Code skills that describe a repeatable procedure an agent should follow, 
 follow it and how to verify the result, and agent templates that describe who runs the work, with
 which model and which tools.
 
+The three kinds of material differ in how far they travel beyond Claude Code: how portable each
+one is, and where it stops, is stated in its own section below.
+
 ## Repository structure
 
 ```text
@@ -57,6 +60,15 @@ Once a skill is available to Claude Code, it is invoked automatically when its `
 matches the current task, or explicitly by name. See
 [Using this library from another project](#using-this-library-from-another-project) for how to
 make it available without copying it.
+
+The `SKILL.md` format follows the Agent Skills open standard Anthropic published at agentskills.io
+in December 2025, implemented beyond Claude Code by tools including Cursor, VS Code, Gemini CLI,
+OpenAI Codex, and GitHub Copilot. The standard requires only `name` and `description` in
+frontmatter, so the format itself is not Claude Code specific. This repository's skills are
+coupled to Claude Code anyway: every `SKILL.md` here resolves its own bundled scripts and
+reference files through `${CLAUDE_PLUGIN_ROOT}`, a substitution Claude Code's plugin runtime
+performs and no other implementer of the standard does. Reusing a skill's body in a different
+agentskills.io-compliant tool requires rewriting those paths first.
 
 Current skills:
 
@@ -173,6 +185,14 @@ Agent templates are the exception to everything in this section: copy them, as d
 [agent-templates/](#agent-templates). For `instructions/` and `skills/`, a consuming project
 should not copy the files or write its own version of them. Use one of the mechanisms below, each
 of which keeps a single upstream copy that can be updated in place.
+
+Every mechanism below but one is a Claude Code mechanism: the plugin marketplace, the
+project-settings prompt, and the agent-template copy step all assume Claude Code is the consuming
+tool. The submodule path for `instructions/` documents does not: it works for any tool that reads
+a path named in its own `CLAUDE.md` or `AGENTS.md`, and only the symlink step layered on top of it
+is Claude Code specific. A project using a different agentskills.io-compliant tool can still read
+a skill's `SKILL.md` body directly from a clone of this repository, but must rewrite its
+`${CLAUDE_PLUGIN_ROOT}` references first, as stated in the skills/ section above.
 
 ### Skills, as a Claude Code plugin
 
@@ -505,7 +525,7 @@ uv run --frozen ty check .
 npx --yes markdownlint-cli2@0.23.2 "**/*.md"           # add --fix to correct spacing in place
 docker run --rm -v "$PWD:/repo" -w /repo \
   rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
-uvx zizmor@1.29.0 --persona=pedantic --no-progress .github/
+uvx zizmor@1.31.1 --persona=pedantic --no-progress .github/
 ```
 
 The last two are this repository's own workflows held to the skill it publishes about them,
@@ -535,8 +555,9 @@ must be named back by it, which is the bidirectional rule stated above. It requi
 `references/*.md` over 100 lines to carry a `## Contents` section ahead of every other section, and
 compares its entries against the headings that follow, so a list cannot drift into pointing at a
 section that has been renamed or removed. Last, it holds the prose this repository writes about
-itself, meaning `README.md`, `instructions/*.md`, `skills/**/*.md`, `agent-templates/*.md`, and the
-hand-written `evals/*/README.md`, to the em dash, arrow, inflated-vocabulary, and grammatical-person
+itself, meaning `AGENTS.md`, `README.md`, `instructions/*.md`, `skills/**/*.md`,
+`agent-templates/*.md`, and the hand-written `evals/*/README.md`, to the em dash, arrow,
+inflated-vocabulary, and grammatical-person
 rules in `instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and
 table rows are exempt, because the rule allows those and a document has to be able to quote what it
 bans. The person check additionally exempts Markdown link text and double-quoted spans, which is
@@ -569,7 +590,7 @@ reports nothing useful outside a checkout. Like `check_skills.py` it needs no th
 and the `evals` job runs it with `fetch-depth: 0` so the freshness comparison has history to read.
 
 `scripts/check_citations.py` reads the `path/to/file:123` citations this repository argues from,
-in `README.md`, `SECURITY.md`, `docs/*.md`, `instructions/*.md`, `skills/**/*.md`,
+in `AGENTS.md`, `README.md`, `SECURITY.md`, `docs/*.md`, `instructions/*.md`, `skills/**/*.md`,
 `agent-templates/*.md` and the hand-written eval READMEs, and fails when one does not hold. A
 citation is evidence only while it resolves, and an edit anywhere above a cited line moves it
 without touching the document that cites it. It checks that the line number is inside the file,

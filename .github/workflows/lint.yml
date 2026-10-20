@@ -30,7 +30,7 @@ jobs:
           # no baseline and exits 0, which would read as a passing check that ran nothing.
           fetch-depth: 0
       - name: Set up uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           # `auto` rather than `true`, here and in the jobs below. From v10 the default
           # disables the cache on `release`, tag push, `pull_request_target`, and
@@ -72,7 +72,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: auto
           version: latest-known
@@ -132,7 +132,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           enable-cache: auto
           version: latest-known
@@ -154,7 +154,7 @@ jobs:
       - name: zizmor
         env:
           GH_TOKEN: ${{ github.token }}
-        run: uvx "zizmor@1.29.0" --persona=pedantic --no-progress .github/
+        run: uvx "zizmor@1.31.1" --persona=pedantic --no-progress .github/
 
   markdown:
     name: Markdown

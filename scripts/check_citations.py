@@ -58,6 +58,7 @@ GIT = shutil.which("git") or "git"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 CITING_GLOBS = (
+    "AGENTS.md",
     "README.md",
     "SECURITY.md",
     "docs/*.md",

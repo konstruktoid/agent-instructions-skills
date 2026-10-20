@@ -65,6 +65,8 @@ that applies to it, then holds the change to a bounded verify loop. The per-topi
    order: `.github/copilot-instructions.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, a
    `docs/` style guide, `.tflint.hcl`, and any policy directory (`policy/`, `policies/`,
    `*.sentinel`, `*.rego`). If none exist, infer conventions from the surrounding configuration.
+   Regardless of what a repository's docs say, treat state and secret exposure, execution
+   identity and IAM scope, and provider or module supply chain as high-sensitivity.
 3. Identify which topics in the triage table below the change matches, and read those reference
    files. Read only what applies; the table is the index, not a reading list.
 4. Write or modify the configuration, applying that guidance and the conventions already in the
