@@ -210,7 +210,7 @@ project installs only what it needs:
 From inside Claude Code, in the consuming project. Pin to a release tag:
 
 ```shell
-/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0
+/plugin marketplace add konstruktoid/agent-instructions-skills@v0.3.0
 /plugin install python-standards@konstruktoid
 /reload-plugins
 ```
@@ -235,7 +235,7 @@ doing anything.
 To move to a newer release, re-add the marketplace at the new tag, then update:
 
 ```shell
-/plugin marketplace add konstruktoid/agent-instructions-skills@v0.2.0
+/plugin marketplace add konstruktoid/agent-instructions-skills@v0.3.0
 /plugin marketplace update konstruktoid
 /plugin update python-standards
 ```
@@ -265,7 +265,7 @@ plugins when they trust the project folder:
 }
 ```
 
-Add `"ref": "v0.1.0"` next to `repo` to pin the team to a release tag rather than tracking the
+Add `"ref": "v0.3.0"` next to `repo` to pin the team to a release tag rather than tracking the
 default branch. The field accepts a branch or a tag, not a commit SHA, and the two are not
 equivalent: a tag in this repository is protected against deletion and force update, so it names
 the same tree tomorrow, while a branch is a moving reference that the next push changes. Pin to a

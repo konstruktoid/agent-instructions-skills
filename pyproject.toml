@@ -1,6 +1,6 @@
 [project]
 name = "agent-instructions-skills"
-version = "0.1.0"
+version = "0.3.0"
 description = "Checks that enforce this repository's own authoring rules"
 # 3.9 and 3.10 are past, or within months of, upstream end of life, so a floor at either
 # claims support for an interpreter that no longer receives security fixes. 3.11 is the

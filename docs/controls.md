@@ -264,14 +264,14 @@ while only one of them is fixed.
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
 - **The documented install is pinned first.** `README.md:213` gives
-  `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.1.0`, and the unpinned form
+  `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.3.0`, and the unpinned form
   is kept below it at `:203`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:268` gives `"ref": "v0.1.0"` and states why branch
+- **The team setting names a tag.** `README.md:268` gives `"ref": "v0.3.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
-  `0.1.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:746` fails the
+  `0.3.0` on all five, and `check_plugin_versions` at `scripts/check_skills.py:746` fails the
   build when one is missing, is not `MAJOR.MINOR.PATCH`, or disagrees with the others. Verified
   against all three shapes; `claude plugin validate .` still passes.
 - **The tag protection is a file, not a settings page.** `.github/rulesets/release-tags.json`

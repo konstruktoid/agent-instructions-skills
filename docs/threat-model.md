@@ -241,7 +241,7 @@ them into every session rather than on demand.
 
 `.claude-plugin/marketplace.json` declares five plugins covering all ten skills. Every entry
 sets `"source": "./"` and `"strict": false`, and since control 6 every entry declares the same
-`version` `0.1.0`. What `strict: false` relaxes is UNKNOWN: the repository does not state it and
+`version` `0.3.0`. What `strict: false` relaxes is UNKNOWN: the repository does not state it and
 no file in the repository defines it.
 
 ### Repository automation
