@@ -84,6 +84,7 @@ Current instructions documents:
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 | `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
 | `agent_configuration_instructions.md` | Choosing between a project instructions file, a skill, a hook, and a subagent, writing each, and changing one without losing the behavior it was written for. |
+| `minimal_change_instructions.md` | The smallest complete change in any language: a reuse ladder applied after reading the callers, what is never cut, the scope and supply chain carve-outs, one small test for new logic, and a closing line stating what was skipped. |
 | `terraform_coding_instructions.md` | Passing `terraform fmt`, `terraform validate`, and `tflint` cleanly, plus the state, secret, version-pinning, and layout judgment those tools cannot enforce. |
 
 ### skills/
@@ -339,6 +340,7 @@ Then reference the file by path from the project's `CLAUDE.md` or `AGENTS.md`:
 When writing Python, follow .agent-standards/instructions/python_coding_instructions.md.
 When writing shell, follow .agent-standards/instructions/bash_coding_instructions.md.
 When writing prose, follow .agent-standards/instructions/written_language_instructions.md.
+When changing code, follow .agent-standards/instructions/minimal_change_instructions.md.
 ```
 
 A submodule pins an exact commit, which is recorded in the consuming repository and updated

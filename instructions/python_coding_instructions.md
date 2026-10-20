@@ -21,6 +21,11 @@ Two skills build on this document and are worth applying alongside it:
   running the suite in a bounded verify loop. Test files are source, so the
   tooling baseline below applies to them as well.
 
+For how much code a change should add, apply `instructions/minimal_change_instructions.md`. Its
+reuse ladder generalizes the rule below against adding a dependency without checking for an
+existing equivalent, and its never-cut list includes the boundary validation described under
+"Beyond What the Tools Check".
+
 ## Tooling
 
 ### Required
