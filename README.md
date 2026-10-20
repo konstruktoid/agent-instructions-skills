@@ -162,7 +162,7 @@ Current templates:
 | `python-security-reviewer.md` | `skills/python/python-secure-coding` | Needs `Bash` for `ruff` and `ty`. Consider pinning a strong model. |
 | `prose-editor.md` | `instructions/written_language_instructions.md` | `Read` and `Edit` only, no `Bash`. Candidate for a cheaper model. Needs the submodule, since it references an instructions document rather than a skill. |
 | `workflow-security-reviewer.md` | `skills/github/github-actions-security` | Needs `Bash` for `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA. Consider pinning a strong model. |
-| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the ten. Consider pinning a strong model. |
+| `bash-security-reviewer.md` | `skills/bash/bash-secure-scripting` | Needs `Bash` for `shellcheck`, `bash -n`, and for running the script under review on a failure path, which is the widest grant of the twelve. Consider pinning a strong model. |
 | `terraform-security-reviewer.md` | `skills/terraform/terraform-secure-iac` | Needs `Bash` for `terraform fmt`, `terraform validate`, `tflint`, and the repository's configuration scanner. A hook blocks `terraform apply` and `destroy`. Consider pinning a strong model. |
 | `python-security-verifier.md` | `skills/python/python-secure-coding` | Independently checks `python-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
 | `bash-security-verifier.md` | `skills/bash/bash-secure-scripting` | Independently checks `bash-security-reviewer.md`'s result in a fresh context. No `Edit`. Consider pinning a strong model. |
@@ -500,18 +500,18 @@ editing a skill, its `tasks.json` or its `assertions.json` invalidates the stamp
 eval is run again. That cannot be repaired by `regrade`, since it re-runs assertions only where the
 finished workspace survives, and a workspace is gitignored.
 
-Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes
-`evals/*/fixtures`, `evals/*/results`, and `evals/probe-sandbox` from `ruff` and `ty`. Each
-fixture carries its own tool configuration, which is what the eval measures against.
-Markdown is the exception: `.markdownlint-cli2.yaml` ignores only `evals/*/results/raw/**`,
-the verbatim transcripts and workspaces of a graded run, so a fixture's own `README.md` is
-still held to this repository's Markdown rules.
+Eval fixtures are deliberately flawed inputs, so `pyproject.toml` excludes `evals/*/fixtures`,
+`evals/*/results`, their `evals/agents/*/` counterparts, and `evals/probe-sandbox` from `ruff` and
+`ty`. Each fixture carries its own tool configuration, which is what the eval measures against.
+Markdown is the exception: `.markdownlint-cli2.yaml` ignores only `evals/*/results/raw/**` and
+`evals/agents/*/results/raw/**`, the verbatim transcripts and workspaces of a graded run, so a
+fixture's own `README.md` is still held to this repository's Markdown rules.
 
 ## Checks
 
-`.github/workflows/lint.yml` enforces the rules above on every push and pull request, in five
-jobs: the authoring rules, this repository's own Python, its eval suites, its own workflows, and
-its Markdown. Every check runs locally:
+`.github/workflows/lint.yml` enforces the rules above on every pull request and every push to
+`main`, in five jobs: the authoring rules, this repository's own Python, its eval suites, its own
+workflows, and its Markdown. Every check runs locally:
 
 ```sh
 uv run --frozen python scripts/check_skills.py         # authoring rules for every SKILL.md
@@ -555,11 +555,11 @@ must be named back by it, which is the bidirectional rule stated above. It requi
 `references/*.md` over 100 lines to carry a `## Contents` section ahead of every other section, and
 compares its entries against the headings that follow, so a list cannot drift into pointing at a
 section that has been renamed or removed. Last, it holds the prose this repository writes about
-itself, meaning `AGENTS.md`, `README.md`, `instructions/*.md`, `skills/**/*.md`,
-`agent-templates/*.md`, and the hand-written `evals/*/README.md`, to the em dash, arrow,
-inflated-vocabulary, and grammatical-person
-rules in `instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and
-table rows are exempt, because the rule allows those and a document has to be able to quote what it
+itself, meaning `AGENTS.md`, `README.md`, `SECURITY.md`, `instructions/*.md`, `skills/**/*.md`,
+`agent-templates/*.md`, and the hand-written `evals/README.md`, `evals/*/README.md` and
+`evals/agents/*/README.md`, to the em dash, arrow, inflated-vocabulary, and grammatical-person rules
+in `instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and table rows
+are exempt, because the rule allows those and a document has to be able to quote what it
 bans. The person check additionally exempts Markdown link text and double-quoted spans, which is
 where a cited title and a quoted example live. The word list carries only the entries with no
 technical meaning in this subject matter: `harness` and `elevate` stay legal, since "test harness"
