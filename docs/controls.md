@@ -22,7 +22,7 @@ their notes.
 and one agent template. No control below changes: the two new skills were written to carry the
 control-7 data-handling paragraph and the control-9 `capabilities` block. Clauses scoped to a
 control's landing ("in all eight skills") keep their count, since that is what the control
-touched; the standalone count of reference files is now thirty-five.
+touched; the standalone count of reference files is now thirty-six.
 
 ## Contents
 
@@ -434,7 +434,7 @@ prose, which is the medium of the entire threat.
 | 4, moving ref | None directly. It becomes the input to control 10, which is where it pays out |
 
 **Where it fails open.** Any capability written in prose. Any reference file, if the check reads
-only `SKILL.md`; there are thirty-five of them and they hold most of the commands. Any commit that
+only `SKILL.md`; there are thirty-six of them and they hold most of the commands. Any commit that
 edits the block and the body together. And the ordinary drift case, where the block becomes a field
 people fill in without meaning it, which is the fate of most declarations that nothing verifies.
 

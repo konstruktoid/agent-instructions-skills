@@ -475,12 +475,12 @@ have neither eval yet either; a suite for each is a follow-up.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness, and it reports none. Every latest stamp was measured on 2026-10-06, 2026-10-07 or
-2026-10-08 from a fresh clone of a committed revision outside the operator's home directory, with
-no modified files and no ancestor `CLAUDE.md`. The task and routing results in each row come from
-the same run, except in `bash-secure-scripting`, whose routing comes from a probe-only stamp.
-Runs that a usage limit cut short were discarded and the suite re-run from a
-new clone rather than graded.
+is staleness: it reports four stamps that predate the change of 2026-10-19. Every latest stamp was
+measured on 2026-10-06, 2026-10-07 or 2026-10-08 from a fresh clone of a committed revision outside
+the operator's home directory, with no modified files and no ancestor `CLAUDE.md`. The task and
+routing results in each row come from the same run, except in `bash-secure-scripting`, whose routing
+comes from a probe-only stamp. Runs that a usage limit cut short were discarded and the suite re-run
+from a new clone rather than graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |

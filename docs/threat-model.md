@@ -185,7 +185,7 @@ The highest-egress skill in the repository.
 
 ### Reference files
 
-Thirty-five files under `skills/*/*/references/`, loaded on demand through each skill's triage
+Thirty-six files under `skills/*/*/references/`, loaded on demand through each skill's triage
 table. They carry the commands cited above. They are held to the same prose and Contents-list
 checks as a `SKILL.md` (`scripts/check_skills.py:201`, `:852`) and to no capability check at all.
 
