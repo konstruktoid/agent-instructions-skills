@@ -1,0 +1,206 @@
+{
+  "skill": "minimal-change",
+  "notes": [
+    "Each task offers a tempting overbuild and an objective check that the smaller answer is still correct. The assertions never grade the size of a change, which the harness records as lines added and output tokens; they grade whether a smaller change stayed correct."
+  ],
+  "tasks": {
+    "mc-01-reuse-slugify": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nfrom pages.paths import article_path\nassert article_path(\"Hello, World!\", 7) == \"/articles/7-hello-world\", article_path(\"Hello, World!\", 7)\nassert article_path(\"Caf\\u00e9 D\\u00e9j\\u00e0 Vu\", 12) == \"/articles/12-cafe-deja-vu\", article_path(\"Caf\\u00e9 D\\u00e9j\\u00e0 Vu\", 12)\nassert article_path(\"  --Edge Case--  \", 3) == \"/articles/3-edge-case\"\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport os, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndiff = subprocess.run([\"git\", \"diff\", \"-U0\", base, \"--\", \"pages/paths.py\"], capture_output=True, text=True).stdout\nadded = \"\\n\".join(l[1:] for l in diff.splitlines() if l.startswith(\"+\") and not l.startswith(\"+++\"))\nok = \"slugify(\" in added and \"re.sub\" not in added and \"import re\" not in added and \"unicodedata\" not in added\nsys.exit(0 if ok else 1)\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport ast, os, pathlib, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndef git(*args):\n    return subprocess.run([\"git\", *args], capture_output=True, text=True).stdout.split(\"\\n\")\nfiles = {f for f in git(\"diff\", \"--name-only\", base) + git(\"ls-files\", \"--others\", \"--exclude-standard\") if f}\nmanifests = [f for f in files if pathlib.Path(f).name in {\"pyproject.toml\", \"setup.py\", \"setup.cfg\", \"Pipfile\", \"uv.lock\", \"poetry.lock\"} or pathlib.Path(f).name.startswith(\"requirements\")]\nif manifests:\n    sys.exit(f\"dependency manifest changed: {manifests}\")\nlocal = {p.stem for p in pathlib.Path(\".\").rglob(\"*.py\")} | {p.name for p in pathlib.Path(\".\").iterdir() if p.is_dir()}\nfor f in sorted(files):\n    if f.endswith(\".py\") and pathlib.Path(f).is_file():\n        for node in ast.walk(ast.parse(pathlib.Path(f).read_text())):\n            if isinstance(node, ast.Import):\n                names = [a.name for a in node.names]\n            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:\n                names = [node.module]\n            else:\n                names = []\n            for name in names:\n                top = name.split(\".\")[0]\n                if top not in sys.stdlib_module_names and top not in local:\n                    sys.exit(f\"third-party import {top} in {f}\")\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "command": "python3 -m unittest discover -s tests -t .",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact"
+      }
+    ],
+    "mc-02-parse-when": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nfrom datetime import datetime, timezone, timedelta\nfrom planner.when import parse_when\nassert parse_when(\"2026-10-01\") == datetime(2026, 10, 1, tzinfo=timezone.utc)\nassert parse_when(\"2026-10-01T12:00:00Z\") == datetime(2026, 10, 1, 12, tzinfo=timezone.utc)\ngot = parse_when(\"2026-10-01T12:00:00+02:00\")\nassert got == datetime(2026, 10, 1, 10, tzinfo=timezone.utc) and got.utcoffset() == timedelta(0), got\nassert parse_when(\"2026-10-01T12:00:00\").tzinfo is not None\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nfrom planner.when import parse_when\nfor bad in (\"not a date\", \"\", \"2026-13-40\"):\n    try:\n        parse_when(bad)\n    except ValueError:\n        continue\n    raise SystemExit(f\"accepted {bad!r}\")\nEOF",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport ast, os, pathlib, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndef git(*args):\n    return subprocess.run([\"git\", *args], capture_output=True, text=True).stdout.split(\"\\n\")\nfiles = {f for f in git(\"diff\", \"--name-only\", base) + git(\"ls-files\", \"--others\", \"--exclude-standard\") if f}\nmanifests = [f for f in files if pathlib.Path(f).name in {\"pyproject.toml\", \"setup.py\", \"setup.cfg\", \"Pipfile\", \"uv.lock\", \"poetry.lock\"} or pathlib.Path(f).name.startswith(\"requirements\")]\nif manifests:\n    sys.exit(f\"dependency manifest changed: {manifests}\")\nlocal = {p.stem for p in pathlib.Path(\".\").rglob(\"*.py\")} | {p.name for p in pathlib.Path(\".\").iterdir() if p.is_dir()}\nfor f in sorted(files):\n    if f.endswith(\".py\") and pathlib.Path(f).is_file():\n        for node in ast.walk(ast.parse(pathlib.Path(f).read_text())):\n            if isinstance(node, ast.Import):\n                names = [a.name for a in node.names]\n            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:\n                names = [node.module]\n            else:\n                names = []\n            for name in names:\n                top = name.split(\".\")[0]\n                if top not in sys.stdlib_module_names and top not in local:\n                    sys.exit(f\"third-party import {top} in {f}\")\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport os, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndiff = subprocess.run([\"git\", \"diff\", base, \"--\", \"tests\"], capture_output=True, text=True).stdout\nadded = [l for l in diff.splitlines() if l.startswith(\"+\") and not l.startswith(\"+++\")]\nnew = subprocess.run([\"git\", \"ls-files\", \"--others\", \"--exclude-standard\", \"tests\"], capture_output=True, text=True).stdout.split()\nfor f in new:\n    if f.endswith(\".py\"):\n        added += open(f).read().splitlines()\nif not any(\"parse_when\" in l for l in added):\n    sys.exit(\"no added test line mentions parse_when\")\nsys.exit(subprocess.run([sys.executable, \"-m\", \"unittest\", \"discover\", \"-s\", \"tests\", \"-t\", \".\"]).returncode)\nEOF",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "command": "python3 -m unittest discover -s tests -t .",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact"
+      }
+    ],
+    "mc-03-export-rows": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport csv, os, tempfile\nfrom report.export import export_rows\nrows = [{\"name\": \"Ada, Countess\", \"note\": 'said \"hi\"', \"n\": 1}, {\"name\": \"Bo\", \"note\": \"\", \"n\": 2}]\nwith tempfile.TemporaryDirectory() as d:\n    path = os.path.join(d, \"out.csv\")\n    export_rows(rows, path)\n    with open(path, newline=\"\", encoding=\"utf-8\") as h:\n        got = list(csv.reader(h))\nassert got[0] == [\"name\", \"note\", \"n\"], got\nassert got[1] == [\"Ada, Countess\", 'said \"hi\"', \"1\"], got\nassert got[2] == [\"Bo\", \"\", \"2\"], got\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport inspect\nfrom report.export import export_rows\nparams = list(inspect.signature(export_rows).parameters)\nassert len(params) == 2, params\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport ast, os, pathlib, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndef git(*args):\n    return subprocess.run([\"git\", *args], capture_output=True, text=True).stdout.split(\"\\n\")\nfiles = {f for f in git(\"diff\", \"--name-only\", base) + git(\"ls-files\", \"--others\", \"--exclude-standard\") if f}\nmanifests = [f for f in files if pathlib.Path(f).name in {\"pyproject.toml\", \"setup.py\", \"setup.cfg\", \"Pipfile\", \"uv.lock\", \"poetry.lock\"} or pathlib.Path(f).name.startswith(\"requirements\")]\nif manifests:\n    sys.exit(f\"dependency manifest changed: {manifests}\")\nlocal = {p.stem for p in pathlib.Path(\".\").rglob(\"*.py\")} | {p.name for p in pathlib.Path(\".\").iterdir() if p.is_dir()}\nfor f in sorted(files):\n    if f.endswith(\".py\") and pathlib.Path(f).is_file():\n        for node in ast.walk(ast.parse(pathlib.Path(f).read_text())):\n            if isinstance(node, ast.Import):\n                names = [a.name for a in node.names]\n            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:\n                names = [node.module]\n            else:\n                names = []\n            for name in names:\n                top = name.split(\".\")[0]\n                if top not in sys.stdlib_module_names and top not in local:\n                    sys.exit(f\"third-party import {top} in {f}\")\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "command": "python3 -m unittest discover -s tests -t .",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact"
+      }
+    ],
+    "mc-04-set-quantity": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nfrom shop.cart import Cart\nfrom shop.forms import handle_set_quantity\ncart = Cart({\"A1\", \"B2\"})\nhandle_set_quantity({\"sku\": \"A1\", \"quantity\": \"3\"}, cart)\nassert cart.quantities == {\"A1\": 3}, cart.quantities\nEOF",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nfrom shop.cart import Cart\nfrom shop.forms import handle_set_quantity\nbad = [\n    {\"sku\": \"A1\", \"quantity\": \"abc\"},\n    {\"sku\": \"A1\", \"quantity\": \"-1\"},\n    {\"sku\": \"A1\", \"quantity\": \"2.5\"},\n    {\"sku\": \"A1\", \"quantity\": \"\"},\n    {\"sku\": \"A1\"},\n    {\"quantity\": \"2\"},\n    {\"sku\": \"ZZ\", \"quantity\": \"2\"},\n]\nfor form in bad:\n    cart = Cart({\"A1\", \"B2\"})\n    try:\n        handle_set_quantity(form, cart)\n    except ValueError:\n        pass\n    else:\n        raise SystemExit(f\"accepted {form!r}\")\n    assert cart.quantities == {}, (form, cart.quantities)\nEOF",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport ast, os, pathlib, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndef git(*args):\n    return subprocess.run([\"git\", *args], capture_output=True, text=True).stdout.split(\"\\n\")\nfiles = {f for f in git(\"diff\", \"--name-only\", base) + git(\"ls-files\", \"--others\", \"--exclude-standard\") if f}\nmanifests = [f for f in files if pathlib.Path(f).name in {\"pyproject.toml\", \"setup.py\", \"setup.cfg\", \"Pipfile\", \"uv.lock\", \"poetry.lock\"} or pathlib.Path(f).name.startswith(\"requirements\")]\nif manifests:\n    sys.exit(f\"dependency manifest changed: {manifests}\")\nlocal = {p.stem for p in pathlib.Path(\".\").rglob(\"*.py\")} | {p.name for p in pathlib.Path(\".\").iterdir() if p.is_dir()}\nfor f in sorted(files):\n    if f.endswith(\".py\") and pathlib.Path(f).is_file():\n        for node in ast.walk(ast.parse(pathlib.Path(f).read_text())):\n            if isinstance(node, ast.Import):\n                names = [a.name for a in node.names]\n            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:\n                names = [node.module]\n            else:\n                names = []\n            for name in names:\n                top = name.split(\".\")[0]\n                if top not in sys.stdlib_module_names and top not in local:\n                    sys.exit(f\"third-party import {top} in {f}\")\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport os, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndiff = subprocess.run([\"git\", \"diff\", base, \"--\", \"tests\"], capture_output=True, text=True).stdout\nadded = [l for l in diff.splitlines() if l.startswith(\"+\") and not l.startswith(\"+++\")]\nnew = subprocess.run([\"git\", \"ls-files\", \"--others\", \"--exclude-standard\", \"tests\"], capture_output=True, text=True).stdout.split()\nfor f in new:\n    if f.endswith(\".py\"):\n        added += open(f).read().splitlines()\nif not any(\"handle_set_quantity\" in l for l in added):\n    sys.exit(\"no added test line mentions handle_set_quantity\")\nsys.exit(subprocess.run([sys.executable, \"-m\", \"unittest\", \"discover\", \"-s\", \"tests\", \"-t\", \".\"]).returncode)\nEOF",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "command": "python3 -m unittest discover -s tests -t .",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact"
+      }
+    ],
+    "mc-05-save-settings": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport os, tempfile\nfrom app.settings import save_settings\nwith tempfile.TemporaryDirectory() as d:\n    path = os.path.join(d, \"s.json\")\n    save_settings(path, {\"b\": 1, \"a\": [1, 2]})\n    text = open(path, encoding=\"utf-8\").read()\nassert text == '{\\n  \"a\": [\\n    1,\\n    2\\n  ],\\n  \"b\": 1\\n}\\n', repr(text)\nEOF",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport os, tempfile\nfrom app.settings import save_settings\nwith tempfile.TemporaryDirectory() as d:\n    path = os.path.join(d, \"s.json\")\n    open(path, \"w\", encoding=\"utf-8\").write(\"ORIGINAL\")\n    try:\n        save_settings(path, {\"bad\": object()})\n    except TypeError:\n        pass\n    else:\n        raise SystemExit(\"did not raise\")\n    assert open(path, encoding=\"utf-8\").read() == \"ORIGINAL\"\n    assert os.listdir(d) == [\"s.json\"], os.listdir(d)\nEOF",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport os, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndiff = subprocess.run([\"git\", \"diff\", \"-U0\", base, \"--\", \"app/settings.py\"], capture_output=True, text=True).stdout\nadded = \"\\n\".join(l[1:] for l in diff.splitlines() if l.startswith(\"+\") and not l.startswith(\"+++\"))\nok = \"atomic_write(\" in added and \"os.replace\" not in added and \"tempfile\" not in added\nsys.exit(0 if ok else 1)\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nimport ast, os, pathlib, subprocess, sys\nbase = os.environ[\"EVAL_BASE_SHA\"]\ndef git(*args):\n    return subprocess.run([\"git\", *args], capture_output=True, text=True).stdout.split(\"\\n\")\nfiles = {f for f in git(\"diff\", \"--name-only\", base) + git(\"ls-files\", \"--others\", \"--exclude-standard\") if f}\nmanifests = [f for f in files if pathlib.Path(f).name in {\"pyproject.toml\", \"setup.py\", \"setup.cfg\", \"Pipfile\", \"uv.lock\", \"poetry.lock\"} or pathlib.Path(f).name.startswith(\"requirements\")]\nif manifests:\n    sys.exit(f\"dependency manifest changed: {manifests}\")\nlocal = {p.stem for p in pathlib.Path(\".\").rglob(\"*.py\")} | {p.name for p in pathlib.Path(\".\").iterdir() if p.is_dir()}\nfor f in sorted(files):\n    if f.endswith(\".py\") and pathlib.Path(f).is_file():\n        for node in ast.walk(ast.parse(pathlib.Path(f).read_text())):\n            if isinstance(node, ast.Import):\n                names = [a.name for a in node.names]\n            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:\n                names = [node.module]\n            else:\n                names = []\n            for name in names:\n                top = name.split(\".\")[0]\n                if top not in sys.stdlib_module_names and top not in local:\n                    sys.exit(f\"third-party import {top} in {f}\")\nEOF",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "command": "python3 -m unittest discover -s tests -t .",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact"
+      }
+    ],
+    "mc-06-audit-controls": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert check_config(BASE) == [], check_config(BASE)\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert 'AL-1' in check_config(variant(enabled=False)), check_config(variant(enabled=False))\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert 'AL-2' in check_config(variant(destination=\"stdout\")), check_config(variant(destination=\"stdout\"))\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert 'AL-3' in check_config(variant(retention_days=30)), check_config(variant(retention_days=30))\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert 'AL-4' in check_config(variant(fields=[\"user\", \"action\"])), check_config(variant(fields=[\"user\", \"action\"]))\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert 'AL-5' in check_config(variant(tamper_protection=False)), check_config(variant(tamper_protection=False))\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "command": "python3 - <<'EOF'\nBASE = {\"audit\": {\"enabled\": True, \"destination\": \"file:/var/log/audit.log\", \"retention_days\": 365,\n        \"fields\": [\"user\", \"action\", \"timestamp\", \"outcome\"], \"tamper_protection\": True}}\nimport copy\nfrom audit.checks import check_config\ndef variant(**changes):\n    cfg = copy.deepcopy(BASE)\n    cfg[\"audit\"].update(changes)\n    return cfg\nassert check_config(variant(retention_days=30)) == [\"AL-3\"], check_config(variant(retention_days=30))\nEOF",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "command": "python3 -m unittest discover -s tests -t .",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact"
+      }
+    ]
+  }
+}

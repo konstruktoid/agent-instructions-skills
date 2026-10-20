@@ -84,6 +84,7 @@ Current instructions documents:
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 | `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
 | `agent_configuration_instructions.md` | Choosing between a project instructions file, a skill, a hook, and a subagent, writing each, and changing one without losing the behavior it was written for. |
+| `minimal_change_instructions.md` | The smallest complete change in any language: a reuse ladder applied after reading the callers, what is never cut, the scope and supply chain carve-outs, one small test for new logic, and a closing line stating what was skipped. Measured once, by `evals/minimal-change`: it wrote less source than no instruction and than a one-sentence instruction, and it added tests, but it used more output tokens than the sentence and showed no effect on reuse or error handling. |
 | `terraform_coding_instructions.md` | Passing `terraform fmt`, `terraform validate`, and `tflint` cleanly, plus the state, secret, version-pinning, and layout judgment those tools cannot enforce. |
 
 ### skills/
@@ -339,6 +340,7 @@ Then reference the file by path from the project's `CLAUDE.md` or `AGENTS.md`:
 When writing Python, follow .agent-standards/instructions/python_coding_instructions.md.
 When writing shell, follow .agent-standards/instructions/bash_coding_instructions.md.
 When writing prose, follow .agent-standards/instructions/written_language_instructions.md.
+When changing code, follow .agent-standards/instructions/minimal_change_instructions.md.
 ```
 
 A submodule pins an exact commit, which is recorded in the consuming repository and updated
@@ -499,11 +501,25 @@ output, or that its `description` routes the right tasks to it. Two measurements
   session's agent against the same prompt with no agent, and neither has been run.
   `scripts/check_evals.py` reports those two suites, and every template without a suite, as
   unmeasured.
+- **Instructions-document evals.** A suite whose `tasks.json` names an `instructions` file
+  measures a document in `instructions/` rather than a skill, in up to three arms on identical
+  fixtures: nothing, the document referenced from a project `CLAUDE.md`, and a one-sentence
+  plain instruction. It has no routing probes, since a document has no `description`. See
+  [evals/README.md](evals/README.md#instructions-document-suites). The first, `minimal-change`
+  (2026-10-20, three runs per arm over six tasks, on a committed tree), measured
+  `minimal_change_instructions.md` against no instruction and against one sentence. The document
+  passed 29 of 31 assertions, the baseline 27, and the sentence 27, and every difference came
+  from the assertions that a test was added. It wrote 49 lines of source against 62 and 56, and 57
+  lines of tests against none, but it used 8,767 output tokens against 5,683 and 4,636. On the
+  reuse, error-handling and scope tasks the arms did not differ, and one task failed in every
+  run of every arm. An earlier run of the suite gave other test and token figures, so these are
+  one draw.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
 python3 evals/run_eval.py triggers --skill <name> --model sonnet --parallel 5
 python3 evals/run_eval.py report   --skill <name>
+python3 evals/run_eval.py instructions-tasks --suite <name> --runs 3 --parallel 5
 ```
 
 Results land in `evals/<skill>/results/<date>.md`, rendered by `report` rather than written by
@@ -624,16 +640,19 @@ and "privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
 assertions cover exactly the defined tasks with unique ids, a known kind, and a `source`, that
 every `workspace_command` parses under `bash -n` and every regex compiles, that the probes number
 10 in a 5 and 5 split, and that every raw stamp holding graded runs has a rendered
-`results/<stamp>.md` beside it. A measurement that ran and was never reported is otherwise
+`results/<stamp>.md` beside it. A suite whose `tasks.json` names an `instructions` file is held to
+the same rules without a matching skill or a `trigger-eval.json`, and its declared arms and
+fixtures are checked instead. A measurement that ran and was never reported is otherwise
 invisible, which is how a five-task, three-run `github-actions-security` stamp sat unread in
 `results/raw/2026-07-28/`.
 
 Four further findings are reported separately and do not fail the run, because the fix for each is a
 paid re-run rather than an edit: a skill with no suite at all, a task no stamp has ever graded, a
 stamp older than the skill or the specification it measured, and a stamp that graded a modified
-working tree. `--strict` fails on those as well. The first is reported rather than failed for a
-reason worth stating: the structural rules require a rendered results file, so the suite that would
-answer the finding cannot be authored complete until a run has been paid for. Freshness compares the
+working tree. `--strict` fails on those as well, and `--strict-suite <name>` only on the ones for
+that suite. The first is reported rather than failed for a reason worth stating: the structural
+rules require a rendered results file, so the suite that would answer the finding cannot be
+authored complete until a run has been paid for. Freshness compares the
 commit a stamp recorded in `source-revision.json` against the commit that last changed the skill or
 the specification, so a change made later on the day of the run is still seen; a stamp with no
 recorded revision falls back to comparing dates, and a stamp that graded a modified tree measured

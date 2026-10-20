@@ -1,0 +1,58 @@
+{
+  "task": "mc-01-reuse-slugify",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-20T22:17:14.568526+00:00",
+    "seconds": 10.5
+  },
+  "base_sha": "d572011478ca482dd20c7a77825740326d6d59a1",
+  "skills_used": [],
+  "num_turns": 7,
+  "cost_usd": 0.058673899999999994,
+  "output_tokens": 966,
+  "lines_added": 7,
+  "lines_deleted": 0,
+  "doc_read": false,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "hidden-behavior",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-slugify-reused",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

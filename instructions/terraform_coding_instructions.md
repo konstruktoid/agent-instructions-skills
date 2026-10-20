@@ -22,6 +22,10 @@ Two skills build on this document and are worth applying alongside it:
   existing test approach, deciding when a test is required, and running the suite in a bounded
   verify loop. Test files are configuration, so the tooling baseline below applies to them too.
 
+For how much configuration a change should add, apply `instructions/minimal_change_instructions.md`.
+Its reuse ladder generalizes the rule below against a provisioner where a resource, a data source,
+or a provider already does the work.
+
 ## Tooling
 
 ### Required

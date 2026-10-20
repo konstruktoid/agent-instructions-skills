@@ -55,7 +55,7 @@ The statement below is what
 asks every publisher of agent-facing content to provide, so that a reader can compare the claim
 against the files.
 
-**What ships.** Ten skills under `skills/`, seven documents under `instructions/`, twelve agent
+**What ships.** Ten skills under `skills/`, eight documents under `instructions/`, twelve agent
 templates under `agent-templates/`, and the reference files each skill loads on demand. The plugin
 root is the repository root, so a plugin install also receives `scripts/`, `evals/`, and `docs/`;
 the Python in them runs in CI and in a contributor's shell, and Claude Code does not load it. There

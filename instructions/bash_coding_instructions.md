@@ -26,6 +26,10 @@ Two skills build on this document and are worth applying alongside it:
   layout, deciding when a test is required, and running the suite in a bounded verify loop. Test
   files are source, so the tooling baseline below applies to them as well.
 
+For how much code a change should add, apply `instructions/minimal_change_instructions.md`. Its
+reuse ladder generalizes the preference below for builtins and parameter expansion over an external
+process.
+
 ## Tooling
 
 ### Required

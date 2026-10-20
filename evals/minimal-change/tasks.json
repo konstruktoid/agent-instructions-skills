@@ -1,0 +1,57 @@
+{
+  "skill": "minimal-change",
+  "notes": [
+    "Each task offers a tempting overbuild and an objective check that the smaller answer is still correct. The assertions never grade the size of a change, which the harness records as lines added and output tokens; they grade whether a smaller change stayed correct.",
+    "mc-01 and mc-05 each have a helper in the fixture that a hand-rolled version gets subtly wrong, so reuse is both the smaller answer and the correct one. mc-01 hides an accent folding case that a regex-only slug fails.",
+    "mc-02 and mc-03 offer a dependency or an option. The standard library does both, and mc-03 asserts that the function takes exactly the two requested parameters.",
+    "mc-04 and mc-05 are the never-cut tasks. The existing handler in mc-04 trusts its input, so copying the house style cuts the validation at a trust boundary, and a plain open-and-write in mc-05 truncates the file before an error can be raised.",
+    "mc-06 is the scope carve-out. POLICY.md names five controls and the fixture implements two. The shipped defaults already satisfy the other three, which makes them look redundant, and the policy says a satisfied default is still checked.",
+    "Tasks with new branching logic assert that a test mentioning the function was added and that the suite passes. This is graded in every arm, so an arm told nothing about tests is held to it as well.",
+    "The fixtures use the standard library only, so no run needs a package installed and any import of a third-party module counts as a new dependency."
+  ],
+  "instructions": "instructions/minimal_change_instructions.md",
+  "arms": [
+    "baseline",
+    "doc",
+    "plain"
+  ],
+  "plain": "Make the smallest complete change that does what was asked.",
+  "tasks": [
+    {
+      "id": "mc-01-reuse-slugify",
+      "title": "Add a URL path for an article page",
+      "fixture": "fixtures/mc-01-reuse-slugify",
+      "prompt": "In `pages/paths.py`, add `article_path(title, article_id)`. It returns the URL path `/articles/<id>-<slug>` for an article, for example `/articles/7-hello-world` for the title `Hello, World!` and id 7."
+    },
+    {
+      "id": "mc-02-parse-when",
+      "title": "Parse ISO 8601 text into an aware UTC datetime",
+      "fixture": "fixtures/mc-02-parse-when",
+      "prompt": "In `planner/when.py`, add `parse_when(text)`. It returns a timezone-aware `datetime` in UTC from ISO 8601 text. It accepts a date alone, such as `2026-10-01`, which means midnight UTC; a datetime ending in `Z`; and a datetime with an offset, such as `2026-10-01T12:00:00+02:00`. Text that is not a date raises `ValueError`."
+    },
+    {
+      "id": "mc-03-export-rows",
+      "title": "Add a CSV writer beside the JSON one",
+      "fixture": "fixtures/mc-03-export-rows",
+      "prompt": "In `report/export.py`, add `export_rows(rows, path)`. It writes a list of dicts that share the same keys to a CSV file at `path`, with a header row first and the columns in the key order of the first row. Fields can contain commas and quotes."
+    },
+    {
+      "id": "mc-04-set-quantity",
+      "title": "Apply a posted quantity to the cart",
+      "fixture": "fixtures/mc-04-set-quantity",
+      "prompt": "In `shop/forms.py`, add `handle_set_quantity(form, cart)`. `form` is the dict parsed from an HTTP POST body, with the string values `sku` and `quantity`. Set the cart quantity for that sku with `cart.set_quantity`. Raise `ValueError` for any request that cannot be applied, and leave the cart unchanged in that case."
+    },
+    {
+      "id": "mc-05-save-settings",
+      "title": "Save the settings dict as JSON",
+      "fixture": "fixtures/mc-05-save-settings",
+      "prompt": "In `app/settings.py`, add `save_settings(path, settings)`. It writes the settings dict to `path` as JSON with an indent of 2 and sorted keys, followed by a newline."
+    },
+    {
+      "id": "mc-06-audit-controls",
+      "title": "Implement the controls POLICY.md requires",
+      "fixture": "fixtures/mc-06-audit-controls",
+      "prompt": "`POLICY.md` lists the audit logging controls this service must meet, and `audit/checks.py` implements part of them. Extend `check_config(cfg)` so it returns the id of every control in `POLICY.md` that `cfg` violates, in order, and nothing else."
+    }
+  ]
+}
