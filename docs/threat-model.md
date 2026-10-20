@@ -25,8 +25,8 @@ the control-9 `capabilities` block.
 The repository is both a library of Claude Code skills and its own plugin marketplace. Two facts
 from Phase 1 shape everything in Phase 2, so they are stated first:
 
-- Every plugin entry sets `"source": "./"` (`.claude-plugin/marketplace.json:11`, `:21`, `:31`,
-  `:40`), so the plugin root and the repository root are the same directory.
+- Every plugin entry sets `"source": "./"` (`.claude-plugin/marketplace.json:11`, `:22`, `:33`,
+  `:43`, `:55`), so the plugin root and the repository root are the same directory.
 - As audited, no plugin entry declared a `version`, and `README.md` stated that every commit
   counted as a new version and an update always fetched the current default branch. Control 6
   gives all four entries the same `version` and documents a tag-based release, so the second fact
@@ -187,11 +187,11 @@ The highest-egress skill in the repository.
 
 Thirty-six files under `skills/*/*/references/`, loaded on demand through each skill's triage
 table. They carry the commands cited above. They are held to the same prose and Contents-list
-checks as a `SKILL.md` (`scripts/check_skills.py:201`, `:852`) and to no capability check at all.
+checks as a `SKILL.md` (`scripts/check_skills.py:202`, `:881`) and to no capability check at all.
 
 ### Agent templates
 
-Twelve files, and the only content in the repository that declares a tool allowlist. `README.md:83`
+Twelve files, and the only content in the repository that declares a tool allowlist. `README.md:95`
 states they are templates, not installable agents. The four verifiers grant no write tool.
 
 | Path | Trigger | Tools declared | Shell | Egress |
@@ -249,7 +249,7 @@ no file in the repository defines it.
 | Path | Trigger | Permissions | Shell | Paths | Egress | Untrusted input |
 |---|---|---|---|---|---|---|
 | `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:68`, `:91`, `:128`, `:164`). `persist-credentials: false` on every checkout (`:27`, `:73`, `:96`, `:133`, `:169`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:80`-`:84`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:112`-`:121`); `docker run` of `rhysd/actionlint` pinned by digest (`:146`-`:147`); `uvx "zizmor@1.31.1"` over `.github/` (`:157`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:157`); `docker run` pulls the actionlint image (`:146`). Actions are pinned by SHA (`:25`, `:33`, `:176`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:156`) |
-| `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:984`, `:82`, `:84`, `:73`) | None | The files under check |
+| `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:75`, `:84`) | None | The files under check |
 | `scripts/check_evals.py` | CI, `lint.yml:112`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:517`) | Read-only | None | `evals/` | None | Eval suite files |
 | `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
 
@@ -274,7 +274,7 @@ Supporting eval data:
   executed at `run_eval.py:864`. Since control 4, a run refuses when a suite's file differs from
   the review baseline (`run_eval.py:794`).
 - `evals/*/fixtures/**` are deliberately flawed inputs, excluded from `ruff` and `ty`
-  (`pyproject.toml:28`, `:32`) and from secret scanning (`.github/secret_scanning.yml:12`).
+  (`pyproject.toml:28`, `:38`) and from secret scanning (`.github/secret_scanning.yml:12`).
 - `evals/probe-sandbox/` is a mixed repository holding a Dockerfile, a `docker-compose.yml`, a
   Jenkinsfile, a `.gitlab-ci.yml`, Terraform, Kubernetes manifests, an Ansible role, Go, Python
   and `scripts/backup.sh` (`evals/probe-sandbox/README.md:3`-`:9`).
@@ -618,7 +618,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 unpinned form kept below and labeled as tracking the default branch (`:218`). The team setting at
 `:268` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:746` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:653` documents the release order, and
+disagrees with the others. `README.md:656` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
