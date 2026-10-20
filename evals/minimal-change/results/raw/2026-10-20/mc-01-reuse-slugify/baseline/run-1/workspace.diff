@@ -1,5 +1,5 @@
 diff --git a/pages/paths.py b/pages/paths.py
-index 24e2bfe..631fb7a 100644
+index 24e2bfe..583d139 100644
 --- a/pages/paths.py
 +++ b/pages/paths.py
 @@ -1,5 +1,7 @@
@@ -17,23 +17,5 @@ index 24e2bfe..631fb7a 100644
 +
 +
 +def article_path(title, article_id):
-+    """Return the path of an article, e.g. /articles/7-hello-world."""
++    """Return the path of the article with the given title and id."""
 +    return f"/articles/{article_id}-{slugify(title)}"
-diff --git a/tests/test_paths.py b/tests/test_paths.py
-index 2227004..12f23f9 100644
---- a/tests/test_paths.py
-+++ b/tests/test_paths.py
-@@ -1,9 +1,12 @@
- import unittest
- 
--from pages.paths import about_path, home_path
-+from pages.paths import about_path, article_path, home_path
- 
- 
- class PathsTest(unittest.TestCase):
-     def test_static_paths(self):
-         self.assertEqual(home_path(), "/")
-         self.assertEqual(about_path(), "/about")
-+
-+    def test_article_path(self):
-+        self.assertEqual(article_path("Hello, World!", 7), "/articles/7-hello-world")

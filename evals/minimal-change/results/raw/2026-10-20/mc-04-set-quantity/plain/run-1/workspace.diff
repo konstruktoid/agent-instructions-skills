@@ -1,5 +1,5 @@
 diff --git a/shop/forms.py b/shop/forms.py
-index b420666..29e4c6d 100644
+index b420666..cde1a70 100644
 --- a/shop/forms.py
 +++ b/shop/forms.py
 @@ -5,3 +5,14 @@ def handle_add(form, cart):
@@ -9,11 +9,11 @@ index b420666..29e4c6d 100644
 +
 +
 +def handle_set_quantity(form, cart):
-+    """Set the quantity of the sku in form to the quantity in form."""
++    """Set the quantity of the sku in form; raise ValueError if it can't be applied."""
 +    sku = form.get("sku")
 +    quantity = form.get("quantity")
 +    if not isinstance(sku, str) or not cart.has_sku(sku):
-+        raise ValueError("unknown sku")
++        raise ValueError("unknown sku: %r" % (sku,))
 +    if not isinstance(quantity, str) or not (quantity.isascii() and quantity.isdigit()):
-+        raise ValueError("quantity must be a non-negative integer")
++        raise ValueError("invalid quantity: %r" % (quantity,))
 +    cart.set_quantity(sku, int(quantity))

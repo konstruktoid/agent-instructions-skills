@@ -1,3 +1,3 @@
-I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict as JSON with `indent=2` and `sort_keys=True`, then a trailing newline, using `json.dump` from the standard library. I didn't run it.
+I added `save_settings(path, settings)` to `app/settings.py`. It uses `json.dump` with `indent=2` and `sort_keys=True`, then writes a trailing newline. I haven't run it.
 
-Skipped: I added no test, since the function is plain glue with no branching. It also doesn't write atomically, so a crash mid-write could leave a truncated file.
+I added no test, since the function is a thin wrapper over `json.dump` with no logic of its own. The write isn't atomic, so a crash partway through could leave a truncated file. I left that out because you didn't ask for it.

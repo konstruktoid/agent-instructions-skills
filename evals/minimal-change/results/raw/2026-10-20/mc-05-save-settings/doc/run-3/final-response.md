@@ -1,5 +1,3 @@
-I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict to `path` as UTF-8 JSON with `indent=2` and `sort_keys=True`, then a trailing newline.
+I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict as JSON with `indent=2` and `sort_keys=True`, then a trailing newline. It uses only the standard library `json` module. I also added one test in `tests/test_settings.py` that checks the exact output text. Both tests pass (`python3 -m unittest`).
 
-I ran it once on `{'b': 1, 'a': 2}`. The file contained `'{\n  "a": 2,\n  "b": 1\n}\n'`, as expected.
-
-I added no test, since the function is plain `json.dump` glue with no logic of its own. Writing is not atomic: if the process dies mid-write, the file can be left truncated. That is acceptable for a simple settings file but would need a temp-file-and-rename if that matters.
+Skipped: the write is not atomic, so a crash mid-write could leave a truncated file. I didn't add a temp-file-and-rename step because you didn't ask for one. I also added no test for the error case where the path can't be written.

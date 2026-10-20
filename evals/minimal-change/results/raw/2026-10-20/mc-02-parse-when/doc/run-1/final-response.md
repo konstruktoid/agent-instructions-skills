@@ -1,7 +1,14 @@
-I added `parse_when(text)` to `planner/when.py`. It uses `datetime.fromisoformat` (Python 3.11 or later, which matches `requires-python`) and converts the result to UTC. A bare date gives midnight UTC, `Z` and offset forms are converted to UTC, and anything else raises `ValueError`. The tests pass (3 ran, all OK).
+I added `parse_when(text)` to `planner/when.py`. It uses the standard library's `datetime.fromisoformat`, so there is no new dependency or helper. The new tests and the existing one pass (3 tests).
 
-I also added a `ParseWhenTest` class to `tests/test_when.py`. It covers the three accepted forms and one invalid input.
+- **Date alone:** `2026-10-01` gives midnight UTC.
+- **`Z` suffix:** `2026-10-01T12:00:00Z` gives 12:00 UTC.
+- **Offset:** `2026-10-01T12:00:00+02:00` gives 10:00 UTC.
+- **Not a date:** text such as `nope` raises `ValueError`.
 
-One behaviour you didn't specify: a datetime with no offset, such as `2026-10-01T12:00:00`, is read as UTC instead of being rejected. I marked this with a `shortcut:` comment in the code. If callers need strict input, raise `ValueError` for that case.
+I also added two tests in `tests/test_when.py`: one covers the three accepted forms and one covers the `ValueError` case.
 
-Beyond that, I didn't test other invalid inputs or fractional seconds.
+What I left out or didn't check:
+- **Datetime with no offset:** you didn't specify this case. I treat it as UTC, the same as a bare date.
+- **Python version:** accepting `Z` relies on Python 3.11 or later. I ran it on 3.14 only.
+- **Other ISO forms:** `fromisoformat` also accepts some forms you didn't list, such as `20261001`. I didn't restrict it.
+- **Non-string input:** anything that isn't a string raises `TypeError`, not `ValueError`.

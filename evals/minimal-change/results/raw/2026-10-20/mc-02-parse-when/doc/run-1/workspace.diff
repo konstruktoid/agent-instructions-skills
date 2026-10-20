@@ -1,8 +1,8 @@
 diff --git a/planner/when.py b/planner/when.py
-index 489beeb..ea8b6a0 100644
+index 489beeb..82ad02c 100644
 --- a/planner/when.py
 +++ b/planner/when.py
-@@ -6,3 +6,12 @@ from datetime import datetime, timezone
+@@ -6,3 +6,11 @@ from datetime import datetime, timezone
  def now_utc():
      """Return the current time as an aware UTC datetime."""
      return datetime.now(timezone.utc)
@@ -10,18 +10,17 @@ index 489beeb..ea8b6a0 100644
 +
 +def parse_when(text):
 +    """Parse ISO 8601 text into an aware UTC datetime; raise ValueError if invalid."""
-+    parsed = datetime.fromisoformat(text)
-+    # shortcut: text with no offset is read as UTC, reject it if callers need strictness
-+    if parsed.tzinfo is None:
-+        return parsed.replace(tzinfo=timezone.utc)
-+    return parsed.astimezone(timezone.utc)
++    when = datetime.fromisoformat(text)
++    if when.tzinfo is None:
++        return when.replace(tzinfo=timezone.utc)
++    return when.astimezone(timezone.utc)
 diff --git a/tests/test_when.py b/tests/test_when.py
-index 8ada3bc..b3b52be 100644
+index 8ada3bc..f48c551 100644
 --- a/tests/test_when.py
 +++ b/tests/test_when.py
-@@ -1,8 +1,22 @@
+@@ -1,8 +1,21 @@
  import unittest
-+from datetime import datetime, timedelta, timezone
++from datetime import datetime, timezone
  
 -from planner.when import now_utc
 +from planner.when import now_utc, parse_when
@@ -34,11 +33,10 @@ index 8ada3bc..b3b52be 100644
 +
 +class ParseWhenTest(unittest.TestCase):
 +    def test_accepted_forms(self):
-+        expected = datetime(2026, 10, 1, 10, tzinfo=timezone.utc)
-+        self.assertEqual(parse_when("2026-10-01"), expected - timedelta(hours=10))
-+        self.assertEqual(parse_when("2026-10-01T10:00:00Z"), expected)
-+        self.assertEqual(parse_when("2026-10-01T12:00:00+02:00"), expected)
-+        self.assertEqual(parse_when("2026-10-01T12:00:00+02:00").utcoffset(), timedelta(0))
++        noon = datetime(2026, 10, 1, 12, tzinfo=timezone.utc)
++        self.assertEqual(parse_when("2026-10-01"), noon.replace(hour=0))
++        self.assertEqual(parse_when("2026-10-01T12:00:00Z"), noon)
++        self.assertEqual(parse_when("2026-10-01T14:00:00+02:00"), noon)
 +
 +    def test_not_a_date(self):
 +        with self.assertRaises(ValueError):

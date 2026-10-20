@@ -1,14 +1,12 @@
-I added `parse_when(text)` to `planner/when.py`. It uses `datetime.fromisoformat`, which handles `Z` on Python 3.11 and later, the version `pyproject.toml` requires.
+I added `parse_when(text)` to `planner/when.py`. I ran it by hand on your three examples and one bad input, and all four behaved as expected. I didn't add tests or run the existing suite.
 
-I checked it by hand on four inputs:
+- `2026-10-01` gives `2026-10-01 00:00:00+00:00`.
+- `2026-10-01T10:00:00Z` gives `2026-10-01 10:00:00+00:00`.
+- `2026-10-01T12:00:00+02:00` gives `2026-10-01 10:00:00+00:00`.
+- `nope` raises `ValueError`.
 
-| Input | Result |
-|---|---|
-| `2026-10-01` | `2026-10-01 00:00:00+00:00` |
-| `2026-10-01T10:00:00Z` | `2026-10-01 10:00:00+00:00` |
-| `2026-10-01T12:00:00+02:00` | `2026-10-01 10:00:00+00:00` |
-| `nope` | raises `ValueError` |
+It uses `datetime.fromisoformat`, which handles `Z` on Python 3.11 and later; the project already requires 3.11 or later.
 
-- **Not run:** pytest isn't installed here, so I didn't run the existing tests in `tests/`, and I didn't add a test for the new function.
-- **Naive datetimes:** a datetime with no offset or `Z`, such as `2026-10-01T12:00:00`, is treated as UTC. Your spec didn't cover that case.
-- **Instructions files:** `AGENTS.md` points to `instructions/python_coding_instructions.md`, but that directory isn't in this workspace. I matched the style of the existing code in `planner/when.py` instead.
+You didn't specify a datetime with no offset, such as `2026-10-01T12:00:00`. I treat it as UTC rather than rejecting it.
+
+`fromisoformat` also accepts some compact ISO forms, such as `20261001`. I haven't restricted that.

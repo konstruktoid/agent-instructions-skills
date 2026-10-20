@@ -1,7 +1,8 @@
-I added AL-3, AL-4 and AL-5 to `check_config` in `audit/checks.py`. It now checks all five controls and returns the failing ids in order. I haven't run it or any tests.
+`check_config` in `audit/checks.py` now checks all five controls, AL-1 to AL-5, and returns the ids of the violated ones in order. The existing test passes (`python3 -m unittest`, since pytest isn't installed). It's only one test, and I didn't add tests for the new checks.
 
-- **AL-3:** fails unless `retention_days` is an integer of at least 365. A missing value fails, and `True` doesn't count as an integer.
-- **AL-4:** fails unless `fields` contains `user`, `action`, `timestamp` and `outcome`. A missing or empty `fields` fails.
-- **AL-5:** fails unless `tamper_protection` is exactly `True`.
+The three new checks follow `POLICY.md`:
+- **AL-3:** `retention_days` must be an integer of at least 365. A bool doesn't count as an integer here.
+- **AL-4:** `fields` must be a list, tuple or set that contains `user`, `action`, `timestamp` and `outcome`.
+- **AL-5:** `tamper_protection` must be `True`.
 
-I left the existing AL-1 and AL-2 checks as they were.
+A missing key counts as a violation. That matches your note that defaults don't excuse the supplied config, and the existing AL-1 and AL-2 checks already work that way.

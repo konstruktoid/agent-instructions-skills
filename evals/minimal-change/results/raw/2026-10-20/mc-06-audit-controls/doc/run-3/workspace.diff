@@ -1,5 +1,5 @@
 diff --git a/audit/checks.py b/audit/checks.py
-index 652e93f..f4eea98 100644
+index 652e93f..f862619 100644
 --- a/audit/checks.py
 +++ b/audit/checks.py
 @@ -9,4 +9,11 @@ def check_config(cfg):
@@ -9,8 +9,22 @@ index 652e93f..f4eea98 100644
 +    days = audit.get("retention_days")
 +    if not isinstance(days, int) or isinstance(days, bool) or days < 365:
 +        failed.append("AL-3")
-+    if not {"user", "action", "timestamp", "outcome"}.issubset(audit.get("fields", ())):
++    if not {"user", "action", "timestamp", "outcome"} <= set(audit.get("fields", [])):
 +        failed.append("AL-4")
 +    if audit.get("tamper_protection") is not True:
 +        failed.append("AL-5")
      return failed
+diff --git a/tests/test_checks.py b/tests/test_checks.py
+index 1e7ac76..a875a53 100644
+--- a/tests/test_checks.py
++++ b/tests/test_checks.py
+@@ -6,3 +6,9 @@ from audit.checks import check_config
+ class ChecksTest(unittest.TestCase):
+     def test_disabled_and_stdout(self):
+         self.assertEqual(check_config({})[:2], ["AL-1", "AL-2"])
++
++    def test_remaining_controls(self):
++        audit = {"enabled": True, "destination": "file:x", "retention_days": 364,
++                 "fields": ["user", "action"], "tamper_protection": False}
++        self.assertEqual(check_config({"audit": audit}), ["AL-3", "AL-4", "AL-5"])
++        self.assertEqual(check_config({})[2:], ["AL-3", "AL-4", "AL-5"])

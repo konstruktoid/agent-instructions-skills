@@ -1,5 +1,5 @@
 diff --git a/app/settings.py b/app/settings.py
-index 62846c9..acef398 100644
+index 62846c9..2b39e1e 100644
 --- a/app/settings.py
 +++ b/app/settings.py
 @@ -9,3 +9,10 @@ def load_settings(path):
@@ -9,7 +9,7 @@ index 62846c9..acef398 100644
 +
 +
 +def save_settings(path, settings):
-+    """Write settings to path as indented, key-sorted JSON ending in a newline."""
++    """Write settings to path as indented, key-sorted JSON with a trailing newline."""
 +    with open(path, "w", encoding="utf-8") as handle:
 +        json.dump(settings, handle, indent=2, sort_keys=True)
 +        handle.write("\n")

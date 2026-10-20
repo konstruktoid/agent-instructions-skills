@@ -1,5 +1,5 @@
 diff --git a/audit/checks.py b/audit/checks.py
-index 652e93f..f6e5700 100644
+index 652e93f..b50ea14 100644
 --- a/audit/checks.py
 +++ b/audit/checks.py
 @@ -9,4 +9,12 @@ def check_config(cfg):
@@ -9,8 +9,8 @@ index 652e93f..f6e5700 100644
 +    days = audit.get("retention_days")
 +    if not isinstance(days, int) or isinstance(days, bool) or days < 365:
 +        failed.append("AL-3")
-+    fields = audit.get("fields")
-+    if not isinstance(fields, (list, tuple, set)) or not {"user", "action", "timestamp", "outcome"} <= set(fields):
++    fields = audit.get("fields") or []
++    if not {"user", "action", "timestamp", "outcome"} <= set(fields):
 +        failed.append("AL-4")
 +    if audit.get("tamper_protection") is not True:
 +        failed.append("AL-5")

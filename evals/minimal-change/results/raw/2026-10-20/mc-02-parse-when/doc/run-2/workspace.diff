@@ -1,5 +1,5 @@
 diff --git a/planner/when.py b/planner/when.py
-index 489beeb..2c0e961 100644
+index 489beeb..e4d284f 100644
 --- a/planner/when.py
 +++ b/planner/when.py
 @@ -6,3 +6,11 @@ from datetime import datetime, timezone
@@ -9,18 +9,18 @@ index 489beeb..2c0e961 100644
 +
 +
 +def parse_when(text):
-+    """Parse ISO 8601 text into an aware UTC datetime; naive input means UTC."""
++    """Parse ISO 8601 text into an aware UTC datetime; a bare date or naive time is UTC."""
 +    when = datetime.fromisoformat(text)
 +    if when.tzinfo is None:
 +        return when.replace(tzinfo=timezone.utc)
 +    return when.astimezone(timezone.utc)
 diff --git a/tests/test_when.py b/tests/test_when.py
-index 8ada3bc..d537560 100644
+index 8ada3bc..b33d7d1 100644
 --- a/tests/test_when.py
 +++ b/tests/test_when.py
 @@ -1,8 +1,23 @@
  import unittest
-+from datetime import datetime, timezone
++from datetime import datetime, timedelta, timezone
  
 -from planner.when import now_utc
 +from planner.when import now_utc, parse_when
@@ -32,14 +32,14 @@ index 8ada3bc..d537560 100644
 +
 +
 +class ParseWhenTest(unittest.TestCase):
-+    def test_forms_normalize_to_utc(self):
-+        want = datetime(2026, 10, 1, 10, tzinfo=timezone.utc)
-+        self.assertEqual(parse_when("2026-10-01T12:00:00+02:00"), want)
-+        self.assertEqual(parse_when("2026-10-01T10:00:00Z"), want)
-+        self.assertEqual(
-+            parse_when("2026-10-01"), datetime(2026, 10, 1, tzinfo=timezone.utc)
-+        )
++    def test_forms(self):
++        midnight = datetime(2026, 10, 1, tzinfo=timezone.utc)
++        self.assertEqual(parse_when("2026-10-01"), midnight)
++        self.assertEqual(parse_when("2026-10-01T00:00:00Z"), midnight)
++        noon = parse_when("2026-10-01T12:00:00+02:00")
++        self.assertEqual(noon, datetime(2026, 10, 1, 10, tzinfo=timezone.utc))
++        self.assertEqual(noon.utcoffset(), timedelta(0))
 +
-+    def test_rejects_non_date(self):
++    def test_invalid(self):
 +        with self.assertRaises(ValueError):
 +            parse_when("tomorrow")

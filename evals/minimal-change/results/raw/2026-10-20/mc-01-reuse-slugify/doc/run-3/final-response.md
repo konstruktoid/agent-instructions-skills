@@ -1,3 +1,5 @@
-I added `article_path(title, article_id)` to `pages/paths.py`. It reuses the existing `slugify` from `pages/textutil.py` rather than writing a second slug routine. A quick run gave `/articles/7-hello-world` for `Hello, World!` and id 7.
+I added `article_path(title, article_id)` to `pages/paths.py`. It returns `/articles/<id>-<slug>`, so `Hello, World!` with id 7 gives `/articles/7-hello-world`. The three tests pass, including the new one for that example.
 
-Skipped: I added no test, since the function is one f-string and `slugify` already has its own test. I didn't run the existing test suite.
+I reused the existing `slugify` from `pages/textutil.py` rather than writing a second slug function. The new test is in `tests/test_paths.py`.
+
+Nothing was skipped. I didn't handle an empty slug, so a title with no letters or digits gives `/articles/7-`.

@@ -1,5 +1,5 @@
 diff --git a/audit/checks.py b/audit/checks.py
-index 652e93f..636e57b 100644
+index 652e93f..d48da70 100644
 --- a/audit/checks.py
 +++ b/audit/checks.py
 @@ -9,4 +9,11 @@ def check_config(cfg):
@@ -7,23 +7,26 @@ index 652e93f..636e57b 100644
      if audit.get("destination", "stdout") == "stdout":
          failed.append("AL-2")
 +    days = audit.get("retention_days")
-+    if isinstance(days, bool) or not isinstance(days, int) or days < 365:
++    if not isinstance(days, int) or isinstance(days, bool) or days < 365:
 +        failed.append("AL-3")
-+    if not {"user", "action", "timestamp", "outcome"} <= set(audit.get("fields", [])):
++    if not {"user", "action", "timestamp", "outcome"} <= set(audit.get("fields", ())):
 +        failed.append("AL-4")
 +    if audit.get("tamper_protection") is not True:
 +        failed.append("AL-5")
      return failed
 diff --git a/tests/test_checks.py b/tests/test_checks.py
-index 1e7ac76..6a952d5 100644
+index 1e7ac76..8b9e6b1 100644
 --- a/tests/test_checks.py
 +++ b/tests/test_checks.py
-@@ -6,3 +6,8 @@ from audit.checks import check_config
+@@ -6,3 +6,11 @@ from audit.checks import check_config
  class ChecksTest(unittest.TestCase):
      def test_disabled_and_stdout(self):
          self.assertEqual(check_config({})[:2], ["AL-1", "AL-2"])
 +
-+    def test_retention_fields_tamper(self):
-+        cfg = {"audit": {"enabled": True, "destination": "file:x", "retention_days": 30,
-+                         "fields": ["user"], "tamper_protection": False}}
-+        self.assertEqual(check_config(cfg), ["AL-3", "AL-4", "AL-5"])
++    def test_compliant_and_partial(self):
++        ok = {"enabled": True, "destination": "file:/x", "retention_days": 365,
++              "fields": ["user", "action", "timestamp", "outcome", "ip"],
++              "tamper_protection": True}
++        self.assertEqual(check_config({"audit": ok}), [])
++        bad = dict(ok, retention_days=364, fields=["user"], tamper_protection=False)
++        self.assertEqual(check_config({"audit": bad}), ["AL-3", "AL-4", "AL-5"])

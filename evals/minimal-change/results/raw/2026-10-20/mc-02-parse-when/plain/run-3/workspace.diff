@@ -1,5 +1,5 @@
 diff --git a/planner/when.py b/planner/when.py
-index 489beeb..434cb7d 100644
+index 489beeb..99e0820 100644
 --- a/planner/when.py
 +++ b/planner/when.py
 @@ -6,3 +6,15 @@ from datetime import datetime, timezone
@@ -12,9 +12,9 @@ index 489beeb..434cb7d 100644
 +    """Parse ISO 8601 text into an aware UTC datetime.
 +
 +    A date alone or a datetime without an offset is taken as UTC.
-+    Raises ValueError if the text is not a date.
++    Raises ValueError if text is not a date.
 +    """
-+    parsed = datetime.fromisoformat(text)
-+    if parsed.tzinfo is None:
-+        return parsed.replace(tzinfo=timezone.utc)
-+    return parsed.astimezone(timezone.utc)
++    when = datetime.fromisoformat(text)
++    if when.tzinfo is None:
++        return when.replace(tzinfo=timezone.utc)
++    return when.astimezone(timezone.utc)

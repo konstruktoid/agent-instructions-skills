@@ -1,7 +1,9 @@
-I extended `check_config` in `audit/checks.py` to cover AL-3, AL-4 and AL-5, alongside the existing AL-1 and AL-2 checks. I haven't run it or any tests.
+I extended `check_config` in `audit/checks.py` to check AL-3, AL-4 and AL-5 as well as the existing AL-1 and AL-2. It returns the ids of all violated controls in order.
 
-- **AL-3:** it fails unless `retention_days` is an integer of at least 365. A missing value fails, and so does `True` or `False`, even though `bool` is technically an `int` in Python.
-- **AL-4:** it fails unless `fields` contains all of `user`, `action`, `timestamp` and `outcome`. A missing or empty `fields` also fails.
-- **AL-5:** it fails unless `tamper_protection` is `True`.
+I ran it by hand on two configs. The shipped defaults return `[]`, and an empty config returns all five ids. I didn't run the test suite because `pytest` isn't installed here.
 
-The ids come back in policy order.
+How the new checks behave:
+- **AL-3:** `retention_days` must be an integer of at least 365. Booleans don't count as integers.
+- **AL-4:** `fields` must be a list, tuple or set containing `user`, `action`, `timestamp` and `outcome`. Extra fields are fine.
+- **AL-5:** `tamper_protection` must be exactly `True`.
+- **Missing keys:** a missing key counts as a violation. I don't fill gaps from the defaults, since `POLICY.md` says the supplied configuration is what gets checked.

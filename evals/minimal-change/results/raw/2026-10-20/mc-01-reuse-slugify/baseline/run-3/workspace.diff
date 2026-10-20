@@ -1,5 +1,5 @@
 diff --git a/pages/paths.py b/pages/paths.py
-index 24e2bfe..c5b3849 100644
+index 24e2bfe..e15e398 100644
 --- a/pages/paths.py
 +++ b/pages/paths.py
 @@ -1,5 +1,7 @@
@@ -17,7 +17,7 @@ index 24e2bfe..c5b3849 100644
 +
 +
 +def article_path(title, article_id):
-+    """Return the path of an article: its id followed by the slug of its title."""
++    """Return the path of an article, such as ``/articles/7-hello-world``."""
 +    return f"/articles/{article_id}-{slugify(title)}"
 diff --git a/tests/test_paths.py b/tests/test_paths.py
 index 2227004..12f23f9 100644

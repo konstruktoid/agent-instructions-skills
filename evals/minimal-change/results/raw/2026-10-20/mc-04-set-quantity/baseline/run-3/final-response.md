@@ -1,11 +1,9 @@
-I added `handle_set_quantity(form, cart)` to `shop/forms.py`. The three tests pass, but I couldn't run `ruff` or `ty`: `ruff` isn't installed here, and I didn't try `ty`.
+I added `handle_set_quantity(form, cart)` to `shop/forms.py`. The existing test passes, but I wrote no tests for the new function and didn't run it directly.
 
 It raises `ValueError` before touching the cart in these cases:
-- **Bad sku:** the `sku` key is missing, or the sku isn't in the cart's catalog.
-- **Bad quantity:** the `quantity` key is missing, or the value isn't a string of ASCII digits. That rules out empty strings, `-1`, `1.5`, `+1`, padded values and non-ASCII digits.
+- **Bad sku:** `sku` is missing, isn't a string, or isn't in the cart's catalog (checked with `cart.has_sku`).
+- **Bad quantity:** `quantity` is missing, isn't a string, or isn't a non-negative integer written in plain ASCII digits. That rejects `"-1"`, `"1.5"`, `" 5"`, `"+5"`, `"1_0"`, `""` and non-ASCII digits, which `int()` would otherwise accept.
 
-Otherwise it calls `cart.set_quantity(sku, int(quantity))`. A quantity of `0` is accepted and stored as 0, not removed from the cart.
+Otherwise it calls `cart.set_quantity(sku, int(quantity))`. A quantity of `"0"` is accepted and stored as 0, not removed from the cart. I left that as is because you didn't say what zero should do.
 
-I added two tests to `tests/test_forms.py`: one for a valid set, and one that runs seven invalid forms and checks the cart stays empty.
-
-Skipped: there is no upper bound on quantity, because you didn't specify one. A stock or per-order limit would need one added.
+`AGENTS.md` points to `instructions/python_coding_instructions.md`, but that directory doesn't exist in this checkout. I matched the style of the existing `handle_add` instead.

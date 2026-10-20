@@ -21,3 +21,35 @@ index b9e6d36..7929f9a 100644
 +        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
 +        writer.writeheader()
 +        writer.writerows(rows)
+diff --git a/tests/test_export.py b/tests/test_export.py
+index f20dfd3..a0bdb37 100644
+--- a/tests/test_export.py
++++ b/tests/test_export.py
+@@ -1,9 +1,10 @@
++import csv
+ import json
+ import os
+ import tempfile
+ import unittest
+ 
+-from report.export import export_json
++from report.export import export_json, export_rows
+ 
+ 
+ class ExportJsonTest(unittest.TestCase):
+@@ -14,3 +15,15 @@ class ExportJsonTest(unittest.TestCase):
+             export_json(rows, path)
+             with open(path, encoding="utf-8") as handle:
+                 self.assertEqual(json.load(handle), rows)
++
++
++class ExportRowsTest(unittest.TestCase):
++    def test_commas_and_quotes_roundtrip(self):
++        rows = [{"b": 'say "hi", ok', "a": "x"}, {"b": "y", "a": "z"}]
++        with tempfile.TemporaryDirectory() as directory:
++            path = os.path.join(directory, "out.csv")
++            export_rows(rows, path)
++            with open(path, encoding="utf-8", newline="") as handle:
++                reader = csv.DictReader(handle)
++                self.assertEqual(reader.fieldnames, ["b", "a"])
++                self.assertEqual(list(reader), rows)

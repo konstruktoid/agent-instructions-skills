@@ -1,3 +1,3 @@
-I added `article_path(title, article_id)` to `pages/paths.py`. It builds the path with the existing `slugify` from `pages/textutil.py`, so `article_path("Hello, World!", 7)` returns `/articles/7-hello-world`.
+I added `article_path(title, article_id)` to `pages/paths.py`. It reuses the existing `slugify` from `pages/textutil.py`. A quick run with `Hello, World!` and id 7 returned `/articles/7-hello-world`.
 
-I also added a test for that example in `tests/test_paths.py`. The full suite passes (3 tests, run with `python3 -m unittest`). I didn't run the checks listed in the README's Checks section.
+I didn't run the unit tests or the README checks. I also didn't add a test for the new function.

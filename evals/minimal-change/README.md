@@ -42,5 +42,8 @@ python3 evals/run_eval.py report --skill minimal-change
 - Six tasks in one language and one model tier cannot support a claim about every repository.
 - Assertions grade correctness only where a hidden check can see it. A change that is smaller
   because it dropped something no assertion probes scores as correct.
+- Test-writing and output tokens varied a great deal between draws: an earlier run of this suite,
+  on an uncommitted tree, had the baseline write tests and the document use fewer tokens than
+  the baseline. Three runs per arm do not settle either.
 - The `doc` arm gives the agent a pointer rather than the text, so a run that never opens the
   document measures the pointer. The report counts those runs.

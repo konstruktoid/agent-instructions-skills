@@ -1,23 +1,15 @@
 diff --git a/app/settings.py b/app/settings.py
-index 62846c9..0aba1ea 100644
+index 62846c9..fc4b3dc 100644
 --- a/app/settings.py
 +++ b/app/settings.py
-@@ -1,6 +1,7 @@
- """Application settings."""
- 
- import json
-+from pathlib import Path
- 
- DEFAULTS = {"theme": "light", "page_size": 25}
- 
-@@ -9,3 +10,10 @@ def load_settings(path):
+@@ -9,3 +9,10 @@ def load_settings(path):
      """Return the settings stored at path, with defaults for anything missing."""
      with open(path, encoding="utf-8") as handle:
          return {**DEFAULTS, **json.load(handle)}
 +
 +
-+def save_settings(path: str | Path, settings: dict) -> None:
-+    """Write settings to path as JSON with sorted keys and a trailing newline."""
-+    with Path(path).open("w", encoding="utf-8") as handle:
++def save_settings(path, settings):
++    """Write settings to path as indented, key-sorted JSON followed by a newline."""
++    with open(path, "w", encoding="utf-8") as handle:
 +        json.dump(settings, handle, indent=2, sort_keys=True)
 +        handle.write("\n")

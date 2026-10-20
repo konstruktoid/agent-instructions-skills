@@ -1,3 +1,1 @@
-I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict as JSON with `indent=2` and `sort_keys=True`, then a trailing newline. It opens the file as UTF-8, the same as `load_settings`. I didn't write a test or run the function.
-
-`ruff check app` reports 14 errors, and the existing code in `app/` accounts for most of them. The one on the new function is `PTH123`, which asks for `Path.open()` instead of `open()`. I kept `open()` to match `load_settings`. The 14 errors are all `ruff check` output; I only saw the last few, so I can't say what the rest are. `ruff format --check` and `ty check` both pass.
+I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict to `path` as JSON with `indent=2` and `sort_keys=True`, then adds a trailing newline. I didn't run it or any checks.

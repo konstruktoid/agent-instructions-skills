@@ -1,24 +1,25 @@
 diff --git a/shop/forms.py b/shop/forms.py
-index b420666..8443264 100644
+index b420666..10c3507 100644
 --- a/shop/forms.py
 +++ b/shop/forms.py
-@@ -5,3 +5,14 @@ def handle_add(form, cart):
+@@ -5,3 +5,15 @@ def handle_add(form, cart):
      """Add one of the sku in form to the cart."""
      sku = form["sku"]
      cart.set_quantity(sku, cart.quantities.get(sku, 0) + 1)
 +
 +
 +def handle_set_quantity(form, cart):
-+    """Set the quantity of the sku in form; raise ValueError and leave cart unchanged if invalid."""
++    """Set the quantity of the sku in form, or raise ValueError and change nothing."""
 +    sku = form.get("sku")
 +    quantity = form.get("quantity")
-+    if not isinstance(sku, str) or not cart.has_sku(sku):
-+        raise ValueError("unknown sku")
-+    if not isinstance(quantity, str) or not (quantity.isascii() and quantity.isdigit()):
-+        raise ValueError("quantity must be a non-negative integer")
++    if sku is None or not cart.has_sku(sku):
++        raise ValueError(f"unknown sku: {sku!r}")
++    # isdecimal alone accepts non-ASCII digits that int() would convert; require ASCII.
++    if quantity is None or not (quantity.isascii() and quantity.isdecimal()):
++        raise ValueError(f"quantity must be a non-negative integer: {quantity!r}")
 +    cart.set_quantity(sku, int(quantity))
 diff --git a/tests/test_forms.py b/tests/test_forms.py
-index c375d18..aafde3f 100644
+index c375d18..a851e34 100644
 --- a/tests/test_forms.py
 +++ b/tests/test_forms.py
 @@ -1,7 +1,7 @@
@@ -30,19 +31,30 @@ index c375d18..aafde3f 100644
  
  
  class AddTest(unittest.TestCase):
-@@ -9,3 +9,15 @@ class AddTest(unittest.TestCase):
+@@ -9,3 +9,26 @@ class AddTest(unittest.TestCase):
          cart = Cart({"A1"})
          handle_add({"sku": "A1"}, cart)
          self.assertEqual(cart.quantities, {"A1": 1})
 +
 +
 +class SetQuantityTest(unittest.TestCase):
-+    def test_set_and_reject(self):
++    def test_set(self):
 +        cart = Cart({"A1"})
 +        handle_set_quantity({"sku": "A1", "quantity": "3"}, cart)
 +        self.assertEqual(cart.quantities, {"A1": 3})
-+        for form in ({"sku": "B2", "quantity": "1"}, {"sku": "A1", "quantity": "-1"},
-+                     {"sku": "A1", "quantity": "x"}, {"sku": "A1"}):
-+            with self.assertRaises(ValueError):
++
++    def test_invalid_leaves_cart_unchanged(self):
++        cart = Cart({"A1"})
++        bad = [
++            {"sku": "ZZ", "quantity": "1"},
++            {"quantity": "1"},
++            {"sku": "A1"},
++            {"sku": "A1", "quantity": "-1"},
++            {"sku": "A1", "quantity": "1.5"},
++            {"sku": "A1", "quantity": ""},
++            {"sku": "A1", "quantity": "\u0663"},
++        ]
++        for form in bad:
++            with self.subTest(form=form), self.assertRaises(ValueError):
 +                handle_set_quantity(form, cart)
-+        self.assertEqual(cart.quantities, {"A1": 3})
++        self.assertEqual(cart.quantities, {})

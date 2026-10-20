@@ -1,5 +1,5 @@
 diff --git a/shop/forms.py b/shop/forms.py
-index b420666..23c4730 100644
+index b420666..dab4658 100644
 --- a/shop/forms.py
 +++ b/shop/forms.py
 @@ -5,3 +5,14 @@ def handle_add(form, cart):
@@ -9,16 +9,16 @@ index b420666..23c4730 100644
 +
 +
 +def handle_set_quantity(form, cart):
-+    """Set the cart quantity of the sku in form to its quantity."""
++    """Set the cart quantity of the sku in form, or raise ValueError."""
 +    sku = form.get("sku")
 +    quantity = form.get("quantity")
 +    if not isinstance(sku, str) or not cart.has_sku(sku):
 +        raise ValueError("unknown sku")
-+    if not isinstance(quantity, str) or not (quantity.isascii() and quantity.isdigit()):
++    if not (isinstance(quantity, str) and quantity.isascii() and quantity.isdigit()):
 +        raise ValueError("quantity must be a non-negative integer")
 +    cart.set_quantity(sku, int(quantity))
 diff --git a/tests/test_forms.py b/tests/test_forms.py
-index c375d18..aafde3f 100644
+index c375d18..c634a29 100644
 --- a/tests/test_forms.py
 +++ b/tests/test_forms.py
 @@ -1,7 +1,7 @@
@@ -30,19 +30,24 @@ index c375d18..aafde3f 100644
  
  
  class AddTest(unittest.TestCase):
-@@ -9,3 +9,15 @@ class AddTest(unittest.TestCase):
+@@ -9,3 +9,20 @@ class AddTest(unittest.TestCase):
          cart = Cart({"A1"})
          handle_add({"sku": "A1"}, cart)
          self.assertEqual(cart.quantities, {"A1": 1})
 +
 +
 +class SetQuantityTest(unittest.TestCase):
-+    def test_set_and_reject(self):
++    def test_set(self):
 +        cart = Cart({"A1"})
 +        handle_set_quantity({"sku": "A1", "quantity": "3"}, cart)
 +        self.assertEqual(cart.quantities, {"A1": 3})
-+        for form in ({"sku": "B2", "quantity": "1"}, {"sku": "A1", "quantity": "-1"},
-+                     {"sku": "A1", "quantity": "x"}, {"sku": "A1"}):
++
++    def test_invalid_leaves_cart_unchanged(self):
++        cart = Cart({"A1"})
++        bad = [{}, {"sku": "A1"}, {"sku": "B2", "quantity": "1"},
++               {"sku": "A1", "quantity": "-1"}, {"sku": "A1", "quantity": "x"},
++               {"sku": "A1", "quantity": " 1"}, {"sku": "A1", "quantity": ""}]
++        for form in bad:
 +            with self.assertRaises(ValueError):
 +                handle_set_quantity(form, cart)
-+        self.assertEqual(cart.quantities, {"A1": 3})
++        self.assertEqual(cart.quantities, {})

@@ -1,7 +1,7 @@
-I extended `check_config` in `audit/checks.py` to cover AL-3, AL-4 and AL-5. It now returns the ids of all violated controls in order. I haven't run it or any tests.
+I extended `check_config` in `audit/checks.py` to cover AL-3, AL-4 and AL-5, so it now returns the ids of all violated controls in order. I haven't run it, and I didn't run the checks listed in the README.
 
-- **AL-3:** fails unless `retention_days` is an integer of at least 365. A missing value fails, and so does `True`/`False`, because `bool` is a subclass of `int` in Python.
-- **AL-4:** fails unless `fields` is a list, tuple or set containing `user`, `action`, `timestamp` and `outcome`. A missing or non-collection value fails.
+- **AL-3:** fails unless `retention_days` is an integer of at least 365. A boolean doesn't count as an integer, and a missing value fails.
+- **AL-4:** fails unless `fields` is a list, tuple or set containing `user`, `action`, `timestamp` and `outcome`. A missing or non-collection `fields` fails.
 - **AL-5:** fails unless `tamper_protection` is `True`.
 
-I left the existing AL-1 and AL-2 checks alone. `AGENTS.md` says to run the checks listed in the README before calling a change done, and I didn't do that either.
+I left AL-1 and AL-2 as they were. That means a config with no `destination` still fails AL-2, because the existing code treats a missing destination as `stdout`. The policy says only that `destination` is not `"stdout"`, so a missing one could be read as passing. If you want that reading, AL-2 needs changing.

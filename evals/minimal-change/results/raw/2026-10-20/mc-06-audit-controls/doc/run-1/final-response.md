@@ -1,9 +1,11 @@
-`check_config` in `audit/checks.py` now checks AL-3, AL-4 and AL-5 as well as AL-1 and AL-2. It returns the violated ids in order. The tests pass.
+I extended `check_config` in `audit/checks.py` to check AL-3, AL-4 and AL-5, so it now covers all five controls and returns the violated ids in order. The unit tests pass (2 run). They include the shipped defaults, which come back clean.
 
-- **AL-3:** `retention_days` must be an integer of at least 365. A missing value, a non-integer, or a bool (`True` counts as an int in Python) fails.
-- **AL-4:** `fields` must include `user`, `action`, `timestamp` and `outcome`. A missing `fields` fails.
-- **AL-5:** `tamper_protection` must be `True`.
+- **AL-3:** fails unless `retention_days` is an integer of at least 365. A string like `"400"` or a float fails.
+- **AL-4:** fails unless `fields` is a list, tuple or set that contains `user`, `action`, `timestamp` and `outcome`. A missing `fields` also fails.
+- **AL-5:** fails unless `tamper_protection` is `True`.
 
-I added one test to `tests/test_checks.py`. It checks that `DEFAULTS` returns no violations and that an empty config returns all five ids.
+Missing keys count as violations. The check runs against the `cfg` supplied and never falls back to `DEFAULTS`, as `POLICY.md` requires.
 
-I didn't add tests for the individual edge cases, such as a bool `retention_days` or a partial `fields` list. I didn't change the existing AL-1 and AL-2 checks.
+I added one test in `tests/test_checks.py`. It checks that `DEFAULTS` returns `[]` and that a config violating AL-3, AL-4 and AL-5 returns exactly those three ids.
+
+Skipped: the test doesn't cover each edge case, such as non-integer retention or `fields` of the wrong type.

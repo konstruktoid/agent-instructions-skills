@@ -1,5 +1,10 @@
-I added `export_rows(rows, path)` to `report/export.py`. It uses the standard `csv` module, so fields with commas and quotes are escaped correctly.
+I added `export_rows(rows, path)` to `report/export.py`. It uses `csv.DictWriter`, so it writes the header row first. The columns follow the key order of the first row. Fields containing commas or quotes are quoted and escaped correctly.
 
-I ran one check: a row with `x,y` and `q"r` came out as `"x,y"` and `"q""r"`. I didn't run any other tests.
+I ran it once on a row with a comma in one field and a quoted string in another. The output was:
 
-The header and column order come from the keys of the first row. An empty `rows` list will raise an `IndexError`, because there is no first row to take keys from. You didn't specify that case, so I left it unhandled.
+```
+a,b
+"x,y","say ""hi"""
+```
+
+I didn't run any other tests. An empty `rows` list raises `IndexError`, because the column names come from the first row. You didn't ask for empty-list handling, so I left it out.

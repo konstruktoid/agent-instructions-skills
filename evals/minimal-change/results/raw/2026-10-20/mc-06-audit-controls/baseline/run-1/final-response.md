@@ -1,12 +1,7 @@
-`check_config` in `audit/checks.py` now checks all five controls and returns the ids of the violated ones, in order (AL-1 to AL-5). The one existing test passes. I also ran the shipped defaults, which give `[]`, and an empty config, which gives all five ids. I didn't add tests for the new controls.
+I extended `check_config` in `audit/checks.py` to cover AL-3, AL-4 and AL-5. It now returns the failing ids in order. I didn't run it or any tests.
 
-The new checks follow the rules in `POLICY.md`:
-- **AL-3:** `retention_days` must be an integer of at least 365. A boolean doesn't count as an integer.
-- **AL-4:** `fields` must be a list, tuple or set containing `user`, `action`, `timestamp` and `outcome`. A missing or non-collection value fails.
-- **AL-5:** `tamper_protection` must be `True`.
+- **AL-3:** `retention_days` must be an integer of at least 365. A missing value fails, and `True` or `False` don't count as integers.
+- **AL-4:** `fields` must include `user`, `action`, `timestamp` and `outcome`. A missing `fields` fails.
+- **AL-5:** `tamper_protection` must be `True`. A missing value fails.
 
-Nothing is filled in from `audit/defaults.py`, since the policy says defaults still get checked against the supplied config. So a missing key counts as a violation.
-
-I left the existing AL-2 check alone. A config with no `destination` is still treated as `"stdout"` and fails.
-
-`pytest` isn't installed here, so I ran the tests with `python3 -m unittest`.
+I left the existing AL-1 and AL-2 checks unchanged. That means a missing `destination` still fails AL-2, because the code defaults it to `"stdout"`.

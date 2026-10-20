@@ -506,13 +506,14 @@ output, or that its `description` routes the right tasks to it. Two measurements
   fixtures: nothing, the document referenced from a project `CLAUDE.md`, and a one-sentence
   plain instruction. It has no routing probes, since a document has no `description`. See
   [evals/README.md](evals/README.md#instructions-document-suites). The first, `minimal-change`
-  (2026-10-20, three runs per arm over six tasks), measured `minimal_change_instructions.md`
-  against no instruction and against one sentence. The document passed 29 of 31 assertions, the
-  baseline 28, and the sentence 27, and every difference came from the assertions that a test
-  was added. It wrote 50 lines of source against 60 and 54, and 33 lines of tests against 28 and
-  none, but it used 6,523 output tokens against 6,624 and 4,232. On the reuse, error-handling
-  and scope tasks the arms did not differ, and one task failed in every run of every arm. That
-  stamp was measured on an uncommitted tree.
+  (2026-10-20, three runs per arm over six tasks, on a committed tree), measured
+  `minimal_change_instructions.md` against no instruction and against one sentence. The document
+  passed 29 of 31 assertions, the baseline 27, and the sentence 27, and every difference came
+  from the assertions that a test was added. It wrote 49 lines of source against 62 and 56, and 57
+  lines of tests against none, but it used 8,767 output tokens against 5,683 and 4,636. On the
+  reuse, error-handling and scope tasks the arms did not differ, and one task failed in every
+  run of every arm. An earlier run of the suite gave other test and token figures, so these are
+  one draw.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
