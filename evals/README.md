@@ -446,7 +446,8 @@ Task: `<task-id>`
 ```
 
 - **Evidence** names the transcripts, diffs, or grades that show the failure, by repository path,
-  and states what they show and nothing more. A path to a committed raw run is the usual form.
+  and states what they show and nothing more. A path to a committed raw run is the usual form,
+  and a `path:line` citation counts as the path it names.
 - **Hypotheses** holds every candidate cause, each marked supported, contradicted, or untested by
   the evidence above. A cause no run has isolated stays a hypothesis.
 - **Reproduction** states the runs that failed out of the runs attempted, such as `9 of 9 runs`,

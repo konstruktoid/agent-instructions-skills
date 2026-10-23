@@ -642,9 +642,13 @@ INCIDENT_TASK = re.compile(r"^Task: `([^`]+)`$", re.MULTILINE)
 # "reproduced" hides how often, which is what separates a one-off from a pattern.
 REPRODUCTION_COUNT = re.compile(r"\b\d+ of \d+ runs\b")
 REVISION = re.compile(r"`[0-9a-f]{7,40}`")
+# A path under one of these directories, or a file at the repository root, either one with an
+# optional `:line` suffix. A root-level name is recognized only when the root holds it, since a
+# bare file name in a code span is as likely to be a fixture's file as this repository's.
 EVIDENCE_PATH = re.compile(
-    r"`((?:evals|scripts|instructions|skills|agent-templates|docs)/[^`\s]+)`"
+    r"`((?:evals|scripts|instructions|skills|agent-templates|docs)/[^`\s:]+)(?::\d+)?`"
 )
+ROOT_EVIDENCE = re.compile(r"`([\w.-]+\.\w+)(?::\d+)?`")
 FENCE = re.compile(r"^\s*(```|~~~)")
 
 
@@ -677,7 +681,9 @@ def incident_problems(text: str, task_ids: list[str]) -> list[str]:
     body = dict(sections)
     problems: list[str] = []
 
-    paths = EVIDENCE_PATH.findall(body["Evidence"])
+    paths = EVIDENCE_PATH.findall(body["Evidence"]) + [
+        name for name in ROOT_EVIDENCE.findall(body["Evidence"]) if (REPO_ROOT / name).is_file()
+    ]
     if not paths:
         problems.append("Evidence names no path in the repository, so the failure is a claim")
     problems.extend(

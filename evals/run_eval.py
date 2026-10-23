@@ -571,7 +571,18 @@ def invoke_claude(
     stream_path.write_text(scrub(stdout), encoding="utf-8")
     if stderr.strip():
         stream_path.with_suffix(".stderr.txt").write_text(scrub(stderr), encoding="utf-8")
-    if AGENTS_MD_PLUGIN in loaded_plugins(stream_events(stream_path)):
+    plugins = loaded_plugins(stream_events(stream_path))
+    # A run that died before starting has no plugin list and is graded as aborted. One that
+    # finished without a list means the stream no longer reports plugins, and the check below
+    # would then pass without having looked.
+    if plugins is None and returncode == 0:
+        message = (
+            f"{stream_path}: the transcript reports no plugin list, so whether "
+            f"{AGENTS_MD_PLUGIN} loaded cannot be checked. Stopping rather than grading a run "
+            "whose isolation is unknown."
+        )
+        raise SystemExit(message)
+    if plugins is not None and AGENTS_MD_PLUGIN in plugins:
         message = (
             f"{stream_path}: {AGENTS_MD_PLUGIN} loaded although every run disables it, so an "
             "ancestor AGENTS.md can reach this run as instructions. Stopping rather than "
@@ -601,16 +612,19 @@ def stream_events(stream_path: Path) -> Iterator[dict[str, Any]]:
             continue
 
 
-def loaded_plugins(events: Iterable[dict[str, Any]]) -> set[str]:
-    """Return the source of every plugin the run's init event reports as loaded."""
+def loaded_plugins(events: Iterable[dict[str, Any]]) -> set[str] | None:
+    """Return the source of every plugin the run's init event reports as loaded.
+
+    None means the transcript states no plugin list at all: a run that died before it started
+    leaves that behind, and so would a change to the stream format.
+    """
     for event in events:
         if event.get("type") == "system" and event.get("subtype") == "init":
-            return {
-                str(plugin.get("source", ""))
-                for plugin in event.get("plugins") or []
-                if isinstance(plugin, dict)
-            }
-    return set()
+            plugins = event.get("plugins")
+            if not isinstance(plugins, list):
+                return None
+            return {str(plugin.get("source", "")) for plugin in plugins if isinstance(plugin, dict)}
+    return None
 
 
 def tool_uses(events: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
