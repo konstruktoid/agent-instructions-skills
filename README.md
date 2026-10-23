@@ -624,9 +624,10 @@ must be named back by it, which is the bidirectional rule stated above. It requi
 compares its entries against the headings that follow, so a list cannot drift into pointing at a
 section that has been renamed or removed. Last, it holds the prose this repository writes about
 itself, meaning `AGENTS.md`, `README.md`, `SECURITY.md`, `instructions/*.md`, `skills/**/*.md`,
-`agent-templates/*.md`, and the hand-written `evals/README.md`, `evals/*/README.md` and
-`evals/agents/*/README.md`, to the em dash, arrow, inflated-vocabulary, and grammatical-person rules
-in `instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and table rows
+`agent-templates/*.md`, the hand-written `evals/README.md`, `evals/*/README.md` and
+`evals/agents/*/README.md`, and the incident records under `evals/*/incidents/`, to the em dash,
+arrow, inflated-vocabulary, and grammatical-person rules in
+`instructions/written_language_instructions.md`. Fenced blocks, inline code spans, and table rows
 are exempt, because the rule allows those and a document has to be able to quote what it
 bans. The person check additionally exempts Markdown link text and double-quoted spans, which is
 where a cited title and a quoted example live. The word list carries only the entries with no
@@ -644,7 +645,10 @@ every `workspace_command` parses under `bash -n` and every regex compiles, that 
 the same rules without a matching skill or a `trigger-eval.json`, and its declared arms and
 fixtures are checked instead. A measurement that ran and was never reported is otherwise
 invisible, which is how a five-task, three-run `github-actions-security` stamp sat unread in
-`results/raw/2026-07-28/`.
+`results/raw/2026-07-28/`. Every incident record under a suite's `incidents/` is held to the format
+in [evals/README.md](evals/README.md#incident-records): its four sections in order, evidence paths
+that exist, a known disposition, a run count and revision unless it is still open, and a task the
+suite defines when it claims one reproduces the failure.
 
 Four further findings are reported separately and do not fail the run, because the fix for each is a
 paid re-run rather than an edit: a skill with no suite at all, a task no stamp has ever graded, a
@@ -662,7 +666,8 @@ and the `evals` job runs it with `fetch-depth: 0` so the freshness comparison ha
 
 `scripts/check_citations.py` reads the `path/to/file:123` citations this repository argues from,
 in `AGENTS.md`, `README.md`, `SECURITY.md`, `docs/*.md`, `instructions/*.md`, `skills/**/*.md`,
-`agent-templates/*.md` and the hand-written eval READMEs, and fails when one does not hold. A
+`agent-templates/*.md`, the hand-written eval READMEs and the incident records, and fails when one
+does not hold. A
 citation is evidence only while it resolves, and an edit anywhere above a cited line moves it
 without touching the document that cites it. It checks that the line number is inside the file,
 that the cited line is not blank, which is what a shifted number looks like most of the time,

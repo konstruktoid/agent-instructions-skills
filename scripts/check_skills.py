@@ -198,7 +198,7 @@ PROSE_MARKERS = (("—", "em dash"), ("→", "arrow"))
 
 # The prose this repository writes about itself. Eval fixtures are deliberately flawed
 # inputs and eval results are verbatim evidence of what an agent wrote, so neither is held
-# to this rule; the hand-written README of an eval suite is.
+# to this rule; the hand-written README of an eval suite and its incident records are.
 PROSE_GLOBS = (
     "AGENTS.md",
     "README.md",
@@ -209,6 +209,8 @@ PROSE_GLOBS = (
     "evals/README.md",
     "evals/*/README.md",
     "evals/agents/*/README.md",
+    "evals/*/incidents/*.md",
+    "evals/agents/*/incidents/*.md",
 )
 
 # Leading whitespace is allowed on both fences: a fenced block nested in a list item is

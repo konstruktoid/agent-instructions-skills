@@ -18,6 +18,11 @@ For every evals/<skill>/ suite, the structural rules are:
 - Every graded stamp dated on or after REVISION_REQUIRED_FROM records the revision it
   measured. Stamps written before the field existed are grandfathered, since a stamp cannot
   be given a provenance it never recorded.
+- Every incident record under `incidents/` has the sections Evidence, Hypotheses,
+  Reproduction, and Disposition in that order. Every repository path its Evidence names
+  exists, and it names at least one. The disposition is a known one, every disposition but
+  `open` states a run count and the revision it ran at, and only a `regression-case` names a
+  task, which tasks.json defines.
 
 Further findings are reported separately rather than as structural errors, because the
 fix for each is a paid re-run rather than an edit:
@@ -625,6 +630,109 @@ def instructions_task_problems(suite: Path, tasks: list[dict[str, Any]]) -> list
     return found
 
 
+# An incident record ties an observed agent failure to its evidence and to what was done about
+# it, in the format evals/README.md states. The link to a task runs from the record to the task
+# rather than from tasks.json to the record: editing tasks.json invalidates the suite's latest
+# stamp, and recording an incident should not cost a paid re-run.
+INCIDENTS_DIR = "incidents"
+INCIDENT_SECTIONS = ("Evidence", "Hypotheses", "Reproduction", "Disposition")
+INCIDENT_DISPOSITIONS = ("open", "regression-case", "not-reproduced", "declined")
+INCIDENT_TASK = re.compile(r"^Task: `([^`]+)`$", re.MULTILINE)
+# A rate without the revision it ran at cannot be compared with the next attempt, and a bare
+# "reproduced" hides how often, which is what separates a one-off from a pattern.
+REPRODUCTION_COUNT = re.compile(r"\b\d+ of \d+ runs\b")
+REVISION = re.compile(r"`[0-9a-f]{7,40}`")
+EVIDENCE_PATH = re.compile(
+    r"`((?:evals|scripts|instructions|skills|agent-templates|docs)/[^`\s]+)`"
+)
+FENCE = re.compile(r"^\s*(```|~~~)")
+
+
+def incident_sections(text: str) -> list[tuple[str, str]]:
+    """Return each `## ` section of a record as (heading, body), in order.
+
+    A heading inside a fenced block is quoted material, such as a transcript line, not a
+    section of the record.
+    """
+    sections: list[tuple[str, list[str]]] = []
+    fenced = False
+    for line in text.splitlines():
+        if FENCE.match(line):
+            fenced = not fenced
+        if not fenced and line.startswith("## "):
+            sections.append((line[3:].strip(), []))
+        elif sections:
+            sections[-1][1].append(line)
+    return [(heading, "\n".join(body)) for heading, body in sections]
+
+
+def incident_problems(text: str, task_ids: list[str]) -> list[str]:
+    """Return what is wrong with one incident record, or nothing when it holds the format."""
+    sections = incident_sections(text)
+    headings = [heading for heading, _ in sections if heading in INCIDENT_SECTIONS]
+    if headings != list(INCIDENT_SECTIONS):
+        return [
+            f"sections are {headings}, expected each of {list(INCIDENT_SECTIONS)} once, in order"
+        ]
+    body = dict(sections)
+    problems: list[str] = []
+
+    paths = EVIDENCE_PATH.findall(body["Evidence"])
+    if not paths:
+        problems.append("Evidence names no path in the repository, so the failure is a claim")
+    problems.extend(
+        f"Evidence path {path} is not a file or directory in the checkout"
+        for path in paths
+        if not (REPO_ROOT / path).resolve().is_relative_to(REPO_ROOT)
+        or not (REPO_ROOT / path).exists()
+    )
+
+    words = body["Disposition"].split()
+    disposition = words[0].strip("`.,") if words else ""
+    if disposition not in INCIDENT_DISPOSITIONS:
+        problems.append(f"Disposition {disposition!r} is not one of {INCIDENT_DISPOSITIONS}")
+    if disposition != "open" and not (
+        REPRODUCTION_COUNT.search(body["Reproduction"]) and REVISION.search(body["Reproduction"])
+    ):
+        problems.append(
+            "Reproduction states no 'k of N runs' with a `revision`; only an open record may "
+            "lack one"
+        )
+
+    named = INCIDENT_TASK.findall(text)
+    if disposition == "regression-case" and not named:
+        problems.append("a regression-case names the task that reproduces it in a 'Task:' line")
+    elif disposition != "regression-case" and named:
+        problems.append(f"a 'Task:' line, but only a regression-case names a task: {named}")
+    problems.extend(
+        f"Task {task_id} is not defined in tasks.json"
+        for task_id in named
+        if task_id not in task_ids
+    )
+    return problems
+
+
+def check_incidents(suite: Path, task_ids: list[str], errors: list[str]) -> None:
+    """Check every incident record under the suite's incidents/ directory."""
+    directory = suite / INCIDENTS_DIR
+    if not directory.is_dir():
+        return
+    for path in sorted(directory.iterdir()):
+        where = f"{INCIDENTS_DIR}/{path.name}"
+        if (
+            path.is_symlink()
+            or not path.is_file()
+            or path.suffix != ".md"
+            or not SAFE_NAME.fullmatch(path.stem)
+        ):
+            errors.append(f"{where}: an incident record is a plain-named .md file")
+            continue
+        errors.extend(
+            f"{where}: {problem}"
+            for problem in incident_problems(path.read_text(encoding="utf-8"), task_ids)
+        )
+
+
 def check_arm_coverage(suite: Path, arms: list[str], task_ids: list[str], stale: list[str]) -> None:
     """Report each task that some declared arm never graded to completion.
 
@@ -671,6 +779,7 @@ def check_instructions_suite(suite: Path, document: str) -> tuple[list[str], lis
         for task_id, problem in instructions_task_problems(suite, tasks)
     )
     check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
+    check_incidents(suite, task_ids, errors)
     check_results(suite, errors, require_rendered=False)
     if rendered_stamps(suite):
         check_coverage(suite, task_ids, stale)
@@ -710,6 +819,7 @@ def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[s
     task_ids = [task.get("id", "<unnamed>") for task in tasks]
     check_tasks(suite, tasks, errors)
     check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
+    check_incidents(suite, task_ids, errors)
     check_triggers(
         scalar_fields(
             object_entries(
@@ -870,6 +980,7 @@ def check_agent_suite(suite: Path, templates: dict[str, Path]) -> tuple[list[str
     check_agent_tasks(suite, tasks, errors)
     check_comparisons(docs["tasks.json"], tasks, template, errors)
     check_assertions(docs["assertions.json"].get("tasks", {}), task_ids, errors)
+    check_incidents(suite, task_ids, errors)
     # A rendered results file needs a paid run, so its absence is the unmeasured finding
     # main() reports, as for a skill with no suite, rather than a structural error.
     check_results(suite, errors, require_rendered=False)

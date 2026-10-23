@@ -49,6 +49,7 @@ evals/
     fixtures/<task-id>/  The starting repository for one task
     results/<date>.md    The rendered results
     results/raw/<date>/  Transcripts, workspaces, and per-run grades
+    incidents/<name>.md  An observed failure, its evidence, and what was done about it
   agents/<template>/     A suite for one agent template, described below
 ```
 
@@ -412,6 +413,53 @@ noticing, and a task derived from that incident is what makes the removal fail r
 quietly. Write it the same way as any other: a prompt that reproduces the starting condition, a
 fixture that carries the defect, and assertions whose `source` field names the skill lines that
 address it.
+
+### Incident records
+
+A failure becomes a task only after it is written down, because the decision whether it deserves
+one depends on evidence that is easy to lose and easy to overstate. Each record is one Markdown
+file at `incidents/<name>.md` in the suite the failure belongs to, with four sections in this
+order:
+
+```markdown
+# One line stating the failure
+
+Task: `<task-id>`
+
+## Evidence
+
+## Hypotheses
+
+## Reproduction
+
+## Disposition
+```
+
+- **Evidence** names the transcripts, diffs, or grades that show the failure, by repository path,
+  and states what they show and nothing more. A path to a committed raw run is the usual form.
+- **Hypotheses** holds every candidate cause, each marked supported, contradicted, or untested by
+  the evidence above. A cause no run has isolated stays a hypothesis.
+- **Reproduction** states the runs that failed out of the runs attempted, such as `9 of 9 runs`,
+  and the revision they ran at, in backticks. A rate from three runs cannot rule out a failure
+  that occurs one time in ten, so an attempt that saw nothing says how many runs it saw nothing
+  in.
+- **Disposition** opens with one word. `regression-case` means a task in this suite reproduces
+  the failure, and the record names it on its `Task:` line. `open` means the record is written
+  and nothing is decided, which is the one disposition that may lack a reproduction count.
+  `not-reproduced` means an attempt was made and saw no failure. `declined` means the failure
+  reproduced and no task or rule is warranted, such as a single cause outside what the suite
+  measures. What follows the word is the reason, and the next action when there is one.
+
+The record points at the task, and `tasks.json` does not point back. Editing `tasks.json` makes the
+suite's latest stamp stale, and the evals job in `lint.yml` then fails the pull request until a
+paid run renews it, so a link in that direction would put a price on writing a record.
+
+`scripts/check_evals.py` checks the shape and the links: the four sections in order, at least one
+evidence path and every one of them present in the checkout, a known disposition, a count and a
+revision under every disposition but `open`, and a `Task:` line on a `regression-case` and nowhere
+else, naming a task the suite defines. It cannot check that the evidence shows what the record
+says it shows, or that the named task fails the way the incident did. Those are a reviewer's to
+confirm, and a record is reviewed as the configuration it argues for.
 
 ## Limitations that apply to every result here
 
