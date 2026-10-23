@@ -408,7 +408,17 @@ where leaving the model to the session is the intended outcome rather than an ov
   run per pull request: report which measurements have gone stale against the content they
   graded, so an unmeasured edit is visible rather than prevented.
 - Turn each incident a rule would have prevented into a permanent case in that suite, so the rule
-  cannot be removed or weakened without a visible failure.
+  cannot be removed or weakened without a visible failure. Record the incident before deciding
+  anything, in four parts: the evidence, as paths to the transcript, diff, or log that shows the
+  failure; the hypotheses for its cause, kept apart from what the evidence shows; the reproduction,
+  as the runs that failed out of the runs attempted at a named revision; and the disposition, which
+  is a regression case, open, not reproduced, or declined. Agent behavior varies between runs, so
+  a failure seen once in ten runs is usually absent from three, and an attempt that saw nothing is
+  stated with its count rather than read as proof the failure is gone. `evals/README.md` states
+  the record format this library uses.
+- Treat a lesson an agent saved to its own memory as a rule nobody has measured. It goes through
+  the same record before it becomes shared guidance, since memory carries it into every later
+  session of one agent and a reviewed instructions file carries it into everyone's.
 - Keep approval with a person. An agent may write configuration, and the ruleset that requires a
   review is what stops it approving its own change. Separation of duties is enforced by the
   platform rather than by an instruction telling the agent not to.

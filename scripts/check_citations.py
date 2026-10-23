@@ -67,6 +67,8 @@ CITING_GLOBS = (
     "agent-templates/*.md",
     "evals/README.md",
     "evals/*/README.md",
+    "evals/*/incidents/*.md",
+    "evals/agents/*/incidents/*.md",
 )
 
 # A fixture is a planted copy of a real file, so indexing one makes real citations ambiguous.
