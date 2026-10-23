@@ -21,7 +21,10 @@ Measured effect: in `evals/minimal-change`, an agent following this document wro
 one with no instruction and than one given the single sentence "Make the smallest complete change",
 and it added tests. It used more output tokens than the sentence, and it did not change how the
 agent reused existing helpers, handled errors, or covered a stated scope. Read the rules on reuse
-and error handling as guidance that has not been shown to alter behavior.
+and error handling as guidance that has not been shown to alter behavior. The run with no
+instruction was later found to have loaded the evaluating repository's own `AGENTS.md`, so the
+comparison against it is unconfirmed until that run is repeated; the comparison with the sentence
+is unaffected.
 
 ## The Reuse Ladder
 

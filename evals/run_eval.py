@@ -132,6 +132,16 @@ HTTP_TOO_MANY = 429
 # from the operator's own `~/.claude/CLAUDE.md`, which is an ancestor of any checkout in $HOME.
 ANCESTOR_INSTRUCTION_FILES = ("CLAUDE.md", "CLAUDE.local.md", ".claude/CLAUDE.md")
 
+# Claude Code ships AGENTS.md support as a builtin plugin, which loads an AGENTS.md from the
+# working directory or any ancestor when the project has no CLAUDE.md. Neither of the two
+# settings above turns it off, so this repository's own AGENTS.md reached every baseline run of
+# the 2026-10-20 minimal-change stamp, and would reach both conditions of every skill suite,
+# since neither has a CLAUDE.md. Each run disables the plugin, and `invoke_claude` stops the
+# measurement if a transcript shows it loaded anyway. The probe that established this is in
+# evals/minimal-change/incidents/baseline-reads-checkout.md.
+AGENTS_MD_PLUGIN = "cc-plugin-agents-md@builtin"
+RUN_SETTINGS = json.dumps({"enabledPlugins": {AGENTS_MD_PLUGIN: False}})
+
 # Probes run against a small mixed repository rather than an empty directory. An empty
 # directory makes an agent stop and report that there is nothing to work on, which
 # suppresses the routing decision the probe exists to observe.
@@ -407,6 +417,8 @@ def claude_command(
         "--no-session-persistence",
         "--max-budget-usd",
         str(budget),
+        "--settings",
+        RUN_SETTINGS,
     ]
     if plugin_dir is not None:
         command += ["--plugin-dir", str(plugin_dir)]
@@ -559,6 +571,13 @@ def invoke_claude(
     stream_path.write_text(scrub(stdout), encoding="utf-8")
     if stderr.strip():
         stream_path.with_suffix(".stderr.txt").write_text(scrub(stderr), encoding="utf-8")
+    if AGENTS_MD_PLUGIN in loaded_plugins(stream_events(stream_path)):
+        message = (
+            f"{stream_path}: {AGENTS_MD_PLUGIN} loaded although every run disables it, so an "
+            "ancestor AGENTS.md can reach this run as instructions. Stopping rather than "
+            "grading a run that measured guidance nobody chose."
+        )
+        raise SystemExit(message)
 
     return {
         "returncode": returncode,
@@ -580,6 +599,18 @@ def stream_events(stream_path: Path) -> Iterator[dict[str, Any]]:
             yield json.loads(stripped)
         except json.JSONDecodeError:
             continue
+
+
+def loaded_plugins(events: Iterable[dict[str, Any]]) -> set[str]:
+    """Return the source of every plugin the run's init event reports as loaded."""
+    for event in events:
+        if event.get("type") == "system" and event.get("subtype") == "init":
+            return {
+                str(plugin.get("source", ""))
+                for plugin in event.get("plugins") or []
+                if isinstance(plugin, dict)
+            }
+    return set()
 
 
 def tool_uses(events: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:

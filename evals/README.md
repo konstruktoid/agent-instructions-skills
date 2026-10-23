@@ -25,7 +25,7 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
-Open work, as of 2026-10-20:
+Open work, as of 2026-10-23:
 
 - A suite for each of the four skills without one. The two bash skills, `bash-secure-scripting`
   and `bash-testing`, already have suites, so they are not on this list.
@@ -33,6 +33,8 @@ Open work, as of 2026-10-20:
   2026-10-19: `bash-secure-scripting`, `github-actions-security`, `python-secure-coding`, and the
   `python-security-verifier` template.
 - A first run of the `requirements-analyst` and `evidence-synthesizer` suites.
+- A re-run of `minimal-change`, whose 2026-10-20 baseline had this repository's `AGENTS.md` loaded
+  as instructions. Every comparison against that baseline is in question until it is repeated.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
   of a skill.
 
@@ -73,6 +75,14 @@ therefore refuse to start while any of those files exists above `evals/`. Run fr
 outside those directories, or pass `--allow-ancestor-instructions` to measure anyway, in which
 case the paths are recorded in `source-revision.json` and the rendered report states that the
 baseline ran with that guidance.
+
+`AGENTS.md` takes a different route. Claude Code loads it through a builtin plugin,
+`cc-plugin-agents-md`, from the working directory or an ancestor, and only where the project has
+no `CLAUDE.md`. That spares the `doc` and `plain` arms and exposes every other condition, so this
+repository's own `AGENTS.md` was loaded into the baseline arm of the 2026-10-20 minimal-change
+stamp. Refusing to start would rule out every run from a checkout of this repository, so each run
+disables the plugin through `--settings` instead, and the harness stops when a transcript shows it
+loaded anyway. `evals/minimal-change/incidents/baseline-reads-checkout.md` holds the evidence.
 
 Assertions are of two kinds, and neither asks for a judgment: a `workspace_command` runs in
 the finished workspace and passes on exit 0, and a regex kind matches against the run's
