@@ -30,15 +30,15 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 ## Hypotheses
 
 - **The closing line gives a never-cut item an exit.** Supported. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:128`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:65`). All three `doc` runs used the
+  line naming what was skipped (`instructions/minimal_change_instructions.md:131`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:68`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
 - **The agent did not recognize the data-loss risk.** Contradicted for the `doc` arm, whose three
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
   document: no run in any arm opened `app/fsutil.py`, although the document requires that search
-  before choosing a rung (`:30`). Reusing `atomic_write` would have passed both assertions.
+  before choosing a rung (`:33`). Reusing `atomic_write` would have passed both assertions.
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
 
