@@ -357,19 +357,62 @@ def prepare_run_home(run_dir: Path) -> Path:
     return home
 
 
+# The Claude Code variables a run keeps from the caller's environment: those that choose the
+# model provider or authenticate to it. Every other variable whose name starts with CLAUDE is
+# dropped, because a harness launched from inside a Claude Code session inherits that session's
+# own: `CLAUDE_EFFORT` sets the reasoning effort, `CLAUDE_CODE_SYNC_SKILLS` adds account skills,
+# and a probe on 2026-10-24 found an inherited environment adding two skills and three event
+# types to a run's transcript. A provider variable missing from this list fails a run at
+# authentication, which is loud, where an inherited one changes a measurement in silence. The
+# names are those https://code.claude.com/docs/en/env-vars documents for providers,
+# credentials, and mTLS; CLAUDE_CONFIG_DIR is set per run by isolated_environment.
+INHERITED_CLAUDE_VARIABLES = frozenset(
+    {
+        "CLAUDE_CODE_USE_BEDROCK",
+        "CLAUDE_CODE_USE_VERTEX",
+        "CLAUDE_CODE_USE_FOUNDRY",
+        "CLAUDE_CODE_USE_ANTHROPIC_AWS",
+        "CLAUDE_CODE_USE_MANTLE",
+        "CLAUDE_CODE_SKIP_BEDROCK_AUTH",
+        "CLAUDE_CODE_SKIP_VERTEX_AUTH",
+        "CLAUDE_CODE_SKIP_FOUNDRY_AUTH",
+        "CLAUDE_CODE_SKIP_ANTHROPIC_AWS_AUTH",
+        "CLAUDE_CODE_SKIP_MANTLE_AUTH",
+        "CLAUDE_CODE_SKIP_AWS_CRED_CACHE",
+        "CLAUDE_CODE_AWS_CHAIN_RESOLVE_TIMEOUT_MS",
+        "CLAUDE_CODE_DISABLE_AUTH_REFRESH_LOCK",
+        "CLAUDE_CODE_OAUTH_TOKEN",
+        "CLAUDE_CODE_OAUTH_REFRESH_TOKEN",
+        "CLAUDE_CODE_OAUTH_SCOPES",
+        "CLAUDE_CODE_API_KEY_HELPER_TTL_MS",
+        "CLAUDE_CODE_CERT_STORE",
+        "CLAUDE_CODE_CLIENT_CERT",
+        "CLAUDE_CODE_CLIENT_KEY",
+        "CLAUDE_CODE_CLIENT_KEY_PASSPHRASE",
+        "CLAUDE_CODE_DISABLE_MTLS_RELOAD_ON_STALE_CONNECTION",
+    }
+)
+
+
 def run_environment(home: Path | None = None) -> dict[str, str]:
     """Return the environment for a run, with any harness tool directory on PATH.
 
     `EVAL_TOOL_BIN` lets the caller provision `ansible-lint`, `zizmor`, or
     `actionlint` outside the user's own PATH and still have runs find them. Passing
-    `home` confines the run's tool state to that directory; omitting it leaves the
-    ambient environment alone, which is what the harness's own git calls want.
+    `home` confines the run's tool state to that directory and drops the caller's Claude
+    Code variables outside INHERITED_CLAUDE_VARIABLES; omitting it leaves the ambient
+    environment alone, which is what the harness's own git calls want.
     """
     env = dict(os.environ)
     tool_bin = env.get("EVAL_TOOL_BIN")
     if tool_bin:
         env["PATH"] = f"{tool_bin}{os.pathsep}{env['PATH']}"
     if home is not None:
+        env = {
+            name: value
+            for name, value in env.items()
+            if not name.startswith("CLAUDE") or name in INHERITED_CLAUDE_VARIABLES
+        }
         env.update(isolated_environment(home))
     return env
 

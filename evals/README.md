@@ -84,6 +84,16 @@ stamp. Refusing to start would rule out every run from a checkout of this reposi
 disables the plugin through `--settings` instead, and the harness stops when a transcript shows it
 loaded anyway. `evals/minimal-change/incidents/baseline-reads-checkout.md` holds the evidence.
 
+The caller's environment is the third route. A harness started from inside a Claude Code session
+inherits that session's variables, and they reach every run: from a cloud session on 2026-10-24,
+a run picked up two of the session's skills and three event types its transcript would not
+otherwise contain. Each run therefore drops every variable whose name starts with `CLAUDE`, except
+the provider, credential, and mTLS variables listed in `INHERITED_CLAUDE_VARIABLES` in
+`run_eval.py`. A provider variable missing from that list fails a run at authentication rather
+than changing it quietly. The stamps from 2026-09-13 to 2026-10-20 were all started from inside a
+session and show neither effect, which rules out those two and not a setting a transcript does
+not record, such as the reasoning effort.
+
 Assertions are of two kinds, and neither asks for a judgment: a `workspace_command` runs in
 the finished workspace and passes on exit 0, and a regex kind matches against the run's
 transcript, its Bash commands, or its final message. Each carries a `source` field naming the
