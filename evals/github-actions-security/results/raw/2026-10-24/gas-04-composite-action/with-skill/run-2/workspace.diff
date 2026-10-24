@@ -1,0 +1,96 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 05f2c82..68ca19b 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -6,6 +6,10 @@ on:
+ 
+ permissions: {}
+ 
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: true
++
+ jobs:
+   test:
+     name: Test
+@@ -26,3 +30,23 @@ jobs:
+ 
+       - name: Run the test suite
+         run: python -m pytest
++
++  test-windows:
++    name: Test (Windows)
++    runs-on: windows-latest
++    timeout-minutes: 10
++    permissions:
++      contents: read
++    steps:
++      - name: Checkout repository
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
++        with:
++          persist-credentials: false
++
++      - name: Set up the toolchain
++        uses: ./actions/setup-toolchain
++        with:
++          version: "3.13"
++
++      - name: Run the test suite
++        run: python -m pytest
+diff --git a/README.md b/README.md
+index 399a783..203413d 100644
+--- a/README.md
++++ b/README.md
+@@ -6,4 +6,11 @@ Shares one composite action across the repository's workflows.
+ 
+ | Action | Purpose |
+ |--------|---------|
+-| `actions/setup-toolchain` | Installs the toolchain and restores the build cache. |
++| `actions/setup-toolchain` | Installs the toolchain, lints with ruff, and restores the build cache. The cache key includes the runner OS, the toolchain version, and a hash of `uv.lock`, so a lockfile change invalidates it. |
++
++## Workflows
++
++| Workflow | Job | Runner |
++|----------|-----|--------|
++| `ci` | `test` | `ubuntu-latest` |
++| `ci` | `test-windows` | `windows-latest` |
+diff --git a/actions/setup-toolchain/action.yml b/actions/setup-toolchain/action.yml
+index 5d5a38d..93bc1cc 100644
+--- a/actions/setup-toolchain/action.yml
++++ b/actions/setup-toolchain/action.yml
+@@ -1,6 +1,6 @@
+ ---
+ name: Setup toolchain
+-description: Installs the language toolchain and restores the build cache.
++description: Installs the language toolchain, lints with ruff, and restores the build cache.
+ 
+ inputs:
+   version:
+@@ -10,12 +10,23 @@ inputs:
+ runs:
+   using: composite
+   steps:
+-    - uses: actions/setup-python@v5
++    # v7.1.0 was published 2026-10-22, inside the 7-day cooldown; v7.0.0 is the newest release that clears it.
++    - name: Install Python
++      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+       with:
+         python-version: ${{ inputs.version }}
+-    - uses: actions/cache@v4
++
++    - name: Lint with ruff
++      uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
++
++    - name: Restore build cache
++      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+       with:
+         path: ~/.cache/build
+-        key: build-${{ inputs.version }}
+-    - run: echo "Installed ${{ inputs.version }}"
++        key: build-${{ runner.os }}-${{ inputs.version }}-${{ hashFiles('uv.lock') }}
++
++    - name: Report installed version
++      env:
++        TOOLCHAIN_VERSION: ${{ inputs.version }}
++      run: echo "Installed $TOOLCHAIN_VERSION"
+       shell: bash

@@ -1,0 +1,94 @@
+diff --git a/.github/dependabot.yml b/.github/dependabot.yml
+new file mode 100644
+index 0000000..7bb64f3
+--- /dev/null
++++ b/.github/dependabot.yml
+@@ -0,0 +1,12 @@
++version: 2
++updates:
++  - package-ecosystem: github-actions
++    directory: /
++    schedule:
++      interval: weekly
++    cooldown:
++      default-days: 7
++    groups:
++      github-actions:
++        patterns:
++          - "*"
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 9524188..1cdf6e6 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -18,7 +18,7 @@ jobs:
+       contents: read
+     steps:
+       - name: Checkout repository
+-        uses: actions/checkout@v5
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+         with:
+           persist-credentials: false
+       - name: Lint
+@@ -32,10 +32,10 @@ jobs:
+       contents: read
+     steps:
+       - name: Checkout repository
+-        uses: actions/checkout@v5
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+         with:
+           persist-credentials: false
+       - name: Set up uv
+-        uses: astral-sh/setup-uv@v6
++        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+       - name: Test
+         run: make test
+diff --git a/.github/workflows/codeql.yml b/.github/workflows/codeql.yml
+index 69351f0..a097807 100644
+--- a/.github/workflows/codeql.yml
++++ b/.github/workflows/codeql.yml
+@@ -17,12 +17,12 @@ jobs:
+       security-events: write
+     steps:
+       - name: Checkout repository
+-        uses: actions/checkout@v5
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+         with:
+           persist-credentials: false
+       - name: Initialize CodeQL
+-        uses: github/codeql-action/init@v3
++        uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+         with:
+           languages: python
+       - name: Analyze
+-        uses: github/codeql-action/analyze@v3
++        uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+diff --git a/README.md b/README.md
+index c948b06..f31d6cc 100644
+--- a/README.md
++++ b/README.md
+@@ -2,4 +2,24 @@
+ 
+ Runs lint, tests, and a scheduled CodeQL analysis.
+ 
+-Actions are referenced by major version tag. There is no Dependabot configuration.
++## How action updates are handled
++
++Every action in `.github/workflows/` is pinned to a full 40-character commit SHA,
++with the release version in a trailing comment (for example `# v7.0.1`). Tags are
++mutable, so a SHA is the only reference that cannot change underneath us.
++
++Dependabot (`.github/dependabot.yml`) keeps those pins current:
++
++- It checks the `github-actions` ecosystem weekly.
++- All action updates are grouped into a single pull request.
++- A 7-day cooldown delays brand-new releases, so a compromised release is likely
++  to be found and yanked before we adopt it.
++- Dependabot rewrites both the SHA and the version comment.
++
++When reviewing an update pull request, read the upstream diff between the old and
++new SHAs rather than trusting the version number, and read the release notes for
++any major-version bump. Security alerts for SHA-pinned actions may not fire, so
++merge these pull requests promptly rather than leaving them open.
++
++Do not edit action versions by hand. When adding a new action, pin it to the SHA
++of its latest release and add the version comment.

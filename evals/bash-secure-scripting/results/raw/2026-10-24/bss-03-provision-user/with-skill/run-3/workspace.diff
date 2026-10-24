@@ -1,0 +1,269 @@
+diff --git a/README.md b/README.md
+index 570db44..17687ea 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,36 @@
+ 
+ Account provisioning for the application hosts.
+ 
+-`sbin/provision-user.sh USERNAME` creates the local account and its database user. It runs
++`sbin/provision-user.sh` creates local accounts and their database users. It runs
+ as root from `etc/cron.d/provision`. Database administrator credentials live in
+-`etc/db.conf`.
++`etc/db.conf`, which must be owned by root (or the invoking user) and not writable
++by group or others.
++
++## Usage
++
++```
++sbin/provision-user.sh [--shell SHELL] USERNAME
++sbin/provision-user.sh [--shell SHELL] --from-file FILE
++```
++
++- `--from-file FILE` provisions every account named in `FILE`, one name per line.
++  Blank lines and lines starting with `#` are ignored. Give either `USERNAME` or
++  `--from-file`, not both.
++- `--shell SHELL` sets the login shell of the accounts created. It must be an
++  absolute path that is executable and listed in `/etc/shells`. Without it,
++  `useradd` uses the system default.
++
++Account names must match `^[a-z_][a-z0-9_-]{0,31}$`; anything else is rejected.
++
++For each account provisioned the script prints one line:
++
++```
++provisioned alice (shell: /bin/bash)
++```
++
++A failure on one account is reported on stderr and does not stop the rest of the
++batch; the script then exits non-zero. Exit codes: 0 success, 1 at least one account
++failed, 64 usage, 65 invalid shell or empty file, 66 unreadable file, 78 bad config.
++
++Generated passwords are not printed or written to `/var/log/provision.log`; the log
++records only the account name, shell, and time.
+diff --git a/sbin/provision-user.sh b/sbin/provision-user.sh
+index 3427aa2..f4e66fd 100755
+--- a/sbin/provision-user.sh
++++ b/sbin/provision-user.sh
+@@ -1,16 +1,213 @@
+ #!/bin/bash
+-# Create an application account and its database user.
++#
++# Create application accounts and their database users.
++#
++# Usage: provision-user.sh [--shell SHELL] (USERNAME | --from-file FILE)
++#
++# Requires Bash 4.4 or later (inherit_errexit).
+ 
+-. etc/db.conf
++set -Eeuo pipefail
++shopt -s inherit_errexit
+ 
+-USERNAME=$1
++# Runs as root from cron: do not trust the caller's environment.
++PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
++export PATH
++export LC_ALL=C
++export TMPDIR=/var/tmp
++umask 077
+ 
+-useradd -m $USERNAME
++readonly PROGNAME="${0##*/}"
++SCRIPT_DIR="$(cd -- "${BASH_SOURCE[0]%/*}" && pwd -P)"
++readonly SCRIPT_DIR
++readonly DB_CONF="${SCRIPT_DIR}/../etc/db.conf"
++readonly LOG_FILE='/var/log/provision.log'
++readonly NAME_RE='^[a-z_][a-z0-9_-]{0,31}$'
+ 
+-PASSWORD=$RANDOM$RANDOM$RANDOM
++# Script scope: the EXIT trap runs after main has returned.
++defaults_file=''
+ 
+-echo "$USERNAME:$PASSWORD" | chpasswd
++err() {
++  printf '%s: %s\n' "${PROGNAME}" "$*" >&2
++}
+ 
+-mysql -u admin -p$DB_ADMIN_PASSWORD -e "CREATE USER '$USERNAME'@'%' IDENTIFIED BY '$PASSWORD';"
++cleanup() {
++  if [[ -n ${defaults_file} ]]; then
++    rm -f -- "${defaults_file}"
++  fi
++  return 0
++}
+ 
+-echo "provisioned $USERNAME with password $PASSWORD" >> /var/log/provision.log
++# Clean up, then die of the signal so the caller sees 128+n.
++on_signal() {
++  local sig="$1"
++  cleanup
++  trap - EXIT "${sig}"
++  kill -s "${sig}" -- "$$"
++}
++
++usage() {
++  err "usage: ${PROGNAME} [--shell SHELL] (USERNAME | --from-file FILE)"
++}
++
++# Refuses a file that someone other than root or the current user could have
++# changed, since it is sourced as code.
++require_trusted_file() {
++  local file="$1" owner mode
++  if [[ ! -f ${file} || -L ${file} ]]; then
++    err "not a regular file: ${file}"
++    return 1
++  fi
++  owner="$(stat -c '%u' -- "${file}")"
++  mode="$(stat -c '%a' -- "${file}")"
++  if [[ ${owner} != 0 && ${owner} != "${EUID}" ]]; then
++    err "untrusted owner on ${file}"
++    return 1
++  fi
++  if ((8#${mode} & 8#022)); then
++    err "${file} is group- or world-writable"
++    return 1
++  fi
++}
++
++# Writes a mysql option file holding the admin credentials, so the password
++# never appears in the process table.
++write_defaults_file() {
++  local pw="${DB_ADMIN_PASSWORD}"
++  pw="${pw//\\/\\\\}"
++  pw="${pw//\"/\\\"}"
++  # Installed before mktemp assigns it; cleanup tolerates the empty value.
++  defaults_file="$(mktemp)"
++  printf '[client]\nuser=admin\npassword="%s"\n' "${pw}" >"${defaults_file}"
++}
++
++# Prints a 32-character alphanumeric password from /dev/urandom.
++generate_password() {
++  local secret
++  secret="$(LC_ALL=C tr -dc 'A-Za-z0-9' < <(head -c 512 /dev/urandom))"
++  secret="${secret:0:32}"
++  if ((${#secret} != 32)); then
++    err 'could not generate a password'
++    return 1
++  fi
++  printf '%s' "${secret}"
++}
++
++# Creates the local account and the database user for one name.
++# Arguments: username, login shell (may be empty for the system default)
++# Returns: 0 on success, non-zero on failure. Failures are checked explicitly
++# because errexit is off when the caller tests this function in a condition.
++provision_one() {
++  local username="$1" shell="$2" password
++  local -a useradd_args=(-m)
++
++  if [[ ! ${username} =~ ${NAME_RE} ]]; then
++    err "invalid account name: ${username}"
++    return 2
++  fi
++  if [[ -n ${shell} ]]; then
++    useradd_args+=(-s "${shell}")
++  fi
++
++  password="$(generate_password)" || return 1
++  useradd "${useradd_args[@]}" -- "${username}" || return 1
++  printf '%s:%s\n' "${username}" "${password}" | chpasswd || return 1
++  # The name is allowlisted above and the password is alphanumeric, so neither
++  # can break out of the SQL string. The statement goes in on stdin.
++  printf "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';\n" "${username}" "${password}" |
++    mysql --defaults-extra-file="${defaults_file}" || return 1
++
++  # The password is deliberately not logged or printed.
++  printf '%s provisioned %s shell=%s\n' "$(date -u +%FT%TZ)" "${username}" \
++    "${shell:-default}" >>"${LOG_FILE}" || return 1
++  printf 'provisioned %s (shell: %s)\n' "${username}" "${shell:-default}"
++}
++
++main() {
++  local shell='' from_file='' username='' line
++  local -a names=()
++  local -i failed=0
++
++  while (($#)); do
++    case $1 in
++      --shell)
++        (($# >= 2)) || { usage; return 64; }
++        shell="$2"
++        shift 2
++        ;;
++      --from-file)
++        (($# >= 2)) || { usage; return 64; }
++        from_file="$2"
++        shift 2
++        ;;
++      --)
++        shift
++        break
++        ;;
++      -*)
++        err "unknown option: $1"
++        usage
++        return 64
++        ;;
++      *)
++        break
++        ;;
++    esac
++  done
++
++  if [[ -n ${from_file} ]]; then
++    (($# == 0)) || { usage; return 64; }
++  else
++    (($# == 1)) || { usage; return 64; }
++    names+=("$1")
++  fi
++
++  if [[ -n ${shell} ]]; then
++    if [[ ${shell} != /* ]] || ! grep -qxF -- "${shell}" /etc/shells || [[ ! -x ${shell} ]]; then
++      err "shell is not an executable entry in /etc/shells: ${shell}"
++      return 65
++    fi
++  fi
++
++  if [[ -n ${from_file} ]]; then
++    if [[ ! -r ${from_file} ]]; then
++      err "cannot read: ${from_file}"
++      return 66
++    fi
++    # `|| [[ -n ${line} ]]` keeps a last line with no trailing newline.
++    while IFS= read -r line || [[ -n ${line} ]]; do
++      line="${line%$'\r'}"
++      if [[ -z ${line} || ${line} == '#'* ]]; then
++        continue
++      fi
++      names+=("${line}")
++    done <"${from_file}"
++    if ((${#names[@]} == 0)); then
++      err "no account names in ${from_file}"
++      return 65
++    fi
++  fi
++
++  require_trusted_file "${DB_CONF}" || return 78
++  # shellcheck source=../etc/db.conf
++  source "${DB_CONF}"
++  if [[ -z ${DB_ADMIN_PASSWORD:-} ]]; then
++    err "DB_ADMIN_PASSWORD is not set in ${DB_CONF}"
++    return 78
++  fi
++
++  trap cleanup EXIT
++  trap 'on_signal INT' INT
++  trap 'on_signal TERM' TERM
++  write_defaults_file
++
++  for username in "${names[@]}"; do
++    if ! provision_one "${username}" "${shell}"; then
++      err "failed to provision: ${username}"
++      failed+=1
++    fi
++  done
++
++  ((failed == 0)) || return 1
++}
++
++main "$@"

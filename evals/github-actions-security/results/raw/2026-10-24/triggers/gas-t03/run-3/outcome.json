@@ -1,0 +1,18 @@
+{
+  "id": "gas-t03",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "cost_usd": 0.18210600000000002,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T19:19:33.318514+00:00",
+    "seconds": 36.4
+  },
+  "aborted": false,
+  "rate_limited": false
+}

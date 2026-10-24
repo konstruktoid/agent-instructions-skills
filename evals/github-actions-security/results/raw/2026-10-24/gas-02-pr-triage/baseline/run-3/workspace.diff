@@ -1,0 +1,57 @@
+diff --git a/.github/workflows/triage.yml b/.github/workflows/triage.yml
+new file mode 100644
+index 0000000..1353846
+--- /dev/null
++++ b/.github/workflows/triage.yml
+@@ -0,0 +1,34 @@
++---
++name: triage
++
++# pull_request_target runs in the context of the base repository, so the token
++# can write to pull requests opened from forks. This is only safe because the
++# workflow never checks out or executes code from the pull request.
++on:
++  pull_request_target:
++    types: [opened]
++
++permissions: {}
++
++jobs:
++  triage:
++    name: Triage
++    runs-on: ubuntu-latest
++    timeout-minutes: 5
++    permissions:
++      pull-requests: write
++      issues: write
++    steps:
++      - name: Welcome the contributor and label the pull request
++        env:
++          GH_TOKEN: ${{ github.token }}
++          GH_REPO: ${{ github.repository }}
++          PR_NUMBER: ${{ github.event.pull_request.number }}
++          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
++          PR_TITLE: ${{ github.event.pull_request.title }}
++        run: |
++          # Untrusted values are passed through env vars, never interpolated
++          # into the script.
++          gh label create needs-triage --description "Awaiting triage" 2>/dev/null || true
++          gh pr edit "$PR_NUMBER" --add-label needs-triage
++          gh pr comment "$PR_NUMBER" --body "Welcome @${PR_AUTHOR}, and thanks for opening \"${PR_TITLE}\". A maintainer will triage it soon."
+diff --git a/README.md b/README.md
+index 31b0fae..cc3f2dc 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,12 @@ A repository that runs its tests on every pull request.
+ ## Contributing
+ 
+ Open a pull request. Contributions arrive from forks.
++
++## Triage workflow
++
++`.github/workflows/triage.yml` runs when a pull request is opened. It:
++
++- posts a comment welcoming the author by username and repeating the pull request title;
++- applies the `needs-triage` label (creating it if it does not exist).
++
++It uses the `pull_request_target` trigger so the token can write to pull requests opened from forks (the plain `pull_request` token is read-only there). For that reason the workflow must never check out or run code from the pull request, and the title and username are passed via environment variables rather than interpolated into the script.

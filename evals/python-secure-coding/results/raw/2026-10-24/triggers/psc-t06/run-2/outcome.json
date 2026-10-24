@@ -1,0 +1,16 @@
+{
+  "id": "psc-t06",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.094518,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T19:26:25.517963+00:00",
+    "seconds": 14.0
+  },
+  "aborted": false,
+  "rate_limited": false
+}

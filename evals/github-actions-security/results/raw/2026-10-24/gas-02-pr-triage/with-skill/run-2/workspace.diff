@@ -1,0 +1,76 @@
+diff --git a/.github/workflows/triage.yml b/.github/workflows/triage.yml
+new file mode 100644
+index 0000000..af769a4
+--- /dev/null
++++ b/.github/workflows/triage.yml
+@@ -0,0 +1,41 @@
++---
++name: triage
++
++# pull_request_target is deliberate: a pull_request run from a fork gets a
++# read-only token, so it could not comment or label. This workflow never checks
++# out or executes pull request code and reads only event metadata, which it
++# passes through env: rather than interpolating into the script.
++on:
++  pull_request_target:
++    types: [opened]
++
++permissions: {}
++
++concurrency:
++  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
++  cancel-in-progress: false
++
++jobs:
++  triage:
++    name: Triage
++    runs-on: ubuntu-latest
++    timeout-minutes: 5
++    permissions:
++      pull-requests: write  # comment on and label the pull request
++    steps:
++      - name: Welcome the contributor and apply the label
++        env:
++          GH_TOKEN: ${{ github.token }}
++          GH_REPO: ${{ github.repository }}
++          PR_NUMBER: ${{ github.event.pull_request.number }}
++          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
++          PR_TITLE: ${{ github.event.pull_request.title }}
++        run: |
++          set -eu
++          printf 'Welcome @%s, and thank you for your contribution!\n\nSummary: "%s"\n\nA maintainer will triage this pull request soon.\n' \
++            "$PR_AUTHOR" "$PR_TITLE" > "$RUNNER_TEMP/comment.md"
++          gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/comment.md"
++          # Create the label if the repository lacks it; ignore "already exists".
++          gh label create needs-triage --color FBCA04 \
++            --description "Awaiting maintainer triage" || true
++          gh pr edit "$PR_NUMBER" --add-label needs-triage
+diff --git a/README.md b/README.md
+index 31b0fae..a1efd49 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,12 @@ A repository that runs its tests on every pull request.
+ ## Contributing
+ 
+ Open a pull request. Contributions arrive from forks.
++
++## Triage workflow
++
++`.github/workflows/triage.yml` runs when a pull request is opened. It:
++
++- posts a comment that welcomes the contributor by username and repeats the pull request title as a summary, and
++- applies the `needs-triage` label (creating it if it does not exist).
++
++It uses the `pull_request_target` trigger so that it also works for pull requests opened from forks, where the plain `pull_request` trigger only gives a read-only token. This is safe only because the workflow never checks out or runs pull request code. It uses event metadata only, passed through environment variables, and its token has just `pull-requests: write`. Keep it that way: do not add a checkout of the pull request head or any step that executes contributed code.
+diff --git a/zizmor.yml b/zizmor.yml
+new file mode 100644
+index 0000000..b46be6d
+--- /dev/null
++++ b/zizmor.yml
+@@ -0,0 +1,6 @@
++rules:
++  dangerous-triggers:
++    ignore:
++      # Fork PRs need a write token to comment and label. The workflow never
++      # checks out or runs pull request code; see the comment in the workflow.
++      - triage.yml

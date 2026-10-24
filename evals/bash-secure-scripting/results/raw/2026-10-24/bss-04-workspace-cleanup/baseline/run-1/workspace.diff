@@ -1,0 +1,98 @@
+diff --git a/README.md b/README.md
+index 0d04e04..532fc12 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,16 @@
+ 
+ Housekeeping scripts for the CI workers.
+ 
+-`bin/clean-workspaces.sh` removes stale build workspaces under `workspaces/`. The root and
+-the age threshold are hardcoded, so a worker with a different layout needs its own copy of
+-the script.
++`bin/clean-workspaces.sh [--dry-run] [WORKSPACE_ROOT [DAYS]]` removes workspaces under
++`WORKSPACE_ROOT` whose newest file is more than `DAYS` days old.
++
++- `WORKSPACE_ROOT` defaults to `workspaces`, `DAYS` defaults to `7`.
++- `-n`, `--dry-run` prints what would be removed (`would remove <dir> (age Nd)`) and
++  removes nothing.
++- Symlinked directories are skipped.
++
++Examples:
++
++    bin/clean-workspaces.sh                          # defaults
++    bin/clean-workspaces.sh --dry-run /srv/ci/ws 3   # preview a 3-day cleanup
++    bin/clean-workspaces.sh /srv/ci/ws 3
+diff --git a/bin/clean-workspaces.sh b/bin/clean-workspaces.sh
+index a6c30b3..c9ac767 100755
+--- a/bin/clean-workspaces.sh
++++ b/bin/clean-workspaces.sh
+@@ -1,19 +1,58 @@
+ #!/bin/bash
+ # Remove stale CI workspaces.
++#
++# Usage: clean-workspaces.sh [--dry-run] [WORKSPACE_ROOT [DAYS]]
+ 
+-WORKSPACE_ROOT=workspaces
+-DAYS=7
++set -euo pipefail
+ 
+-cd $WORKSPACE_ROOT
++usage() {
++  echo "usage: ${0##*/} [-n|--dry-run] [WORKSPACE_ROOT [DAYS]]" >&2
++  exit 2
++}
+ 
+-for dir in $(ls); do
+-  if [ -d $dir ]; then
+-    LAST=`find $dir -type f -printf '%T@\n' | sort -n | tail -1`
+-    AGE=$(( ( $(date +%s) - ${LAST%.*} ) / 86400 ))
+-    if [ $AGE -gt $DAYS ]; then
+-      echo "removing $dir (age ${AGE}d)"
+-      rm -rf $dir/*
+-      rmdir $dir
++DRY_RUN=0
++POSITIONAL=()
++while [ $# -gt 0 ]; do
++  case $1 in
++    -n|--dry-run) DRY_RUN=1 ;;
++    -h|--help) usage ;;
++    --) shift; POSITIONAL+=("$@"); break ;;
++    -?*) echo "unknown option: $1" >&2; usage ;;
++    *) POSITIONAL+=("$1") ;;
++  esac
++  shift
++done
++[ ${#POSITIONAL[@]} -le 2 ] || usage
++
++WORKSPACE_ROOT=${POSITIONAL[0]:-workspaces}
++DAYS=${POSITIONAL[1]:-7}
++
++case $DAYS in
++  ''|*[!0-9]*) echo "DAYS must be a non-negative integer: $DAYS" >&2; exit 2 ;;
++esac
++if [ ! -d "$WORKSPACE_ROOT" ] || [ -L "$WORKSPACE_ROOT" ]; then
++  echo "not a directory: $WORKSPACE_ROOT" >&2
++  exit 1
++fi
++
++cd -- "$WORKSPACE_ROOT"
++
++now=$(date +%s)
++for dir in */; do
++  dir=${dir%/}
++  # skip the unmatched glob and symlinks (never follow them out of the root)
++  [ -d "$dir" ] && [ ! -L "$dir" ] || continue
++
++  last=$(find "$dir" -type f -printf '%T@\n' | sort -n | tail -1)
++  [ -n "$last" ] || last=$(stat -c %Y -- "$dir")   # no files: use the dir's own mtime
++  age=$(( ( now - ${last%.*} ) / 86400 ))
++
++  if [ "$age" -gt "$DAYS" ]; then
++    if [ "$DRY_RUN" -eq 1 ]; then
++      echo "would remove $dir (age ${age}d)"
++    else
++      echo "removing $dir (age ${age}d)"
++      rm -rf -- "$dir"
+     fi
+   fi
+ done

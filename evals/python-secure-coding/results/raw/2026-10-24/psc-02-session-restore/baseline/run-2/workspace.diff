@@ -1,0 +1,104 @@
+diff --git a/README.md b/README.md
+index 3455485..7d7a977 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,12 @@ from sessionsvc.store import load_session
+ session = load_session(blob)
+ ```
+ 
+-Sessions never expire.
++Sessions expire after `SESSION_TTL` (3600 seconds, one hour).
++
++- `save_session` records an `issued_at` timestamp with each session.
++- The resume blob is base64-encoded JSON: `{"issued_at": <unix seconds>, "session": {...}}`.
++  `load_session` raises `SessionExpiredError` if `issued_at` is missing or older than the TTL.
++- `purge_expired()` deletes expired entries from the on-disk cache and is called on every restore.
++
++Note: `issued_at` in a client-supplied blob is only trustworthy if the blob is authenticated
++(e.g. signed by the server); this service does not sign blobs.
+diff --git a/src/sessionsvc/store.py b/src/sessionsvc/store.py
+index e637fb1..e3d3b2e 100644
+--- a/src/sessionsvc/store.py
++++ b/src/sessionsvc/store.py
+@@ -1,29 +1,74 @@
+ """Restore client sessions from a resume blob."""
+ 
++import ast
+ import base64
+-import pickle
++import json
++import re
++import time
+ from pathlib import Path
+ 
+ CACHE_DIR = Path("/tmp/sessioncache")
++SESSION_TTL = 3600  # seconds
++
++_SESSION_ID = re.compile(r"[A-Za-z0-9_-]{1,128}")
++
++
++class SessionExpiredError(ValueError):
++    """Raised when a session is older than SESSION_TTL or has no valid issued_at."""
++
++
++def _is_expired(issued_at: object, now: float) -> bool:
++    if isinstance(issued_at, bool) or not isinstance(issued_at, (int, float)):
++        return True
++    return now - issued_at > SESSION_TTL or issued_at > now + 60
+ 
+ 
+ def load_session(blob: str) -> dict:
+-    """Restore a session from the base64 resume blob a client sent."""
+-    raw = base64.b64decode(blob)
+-    return pickle.loads(raw)
++    """Restore a session from the base64 resume blob a client sent.
++
++    The blob is base64-encoded JSON: {"issued_at": <unix seconds>, "session": {...}}.
++    Raises SessionExpiredError if the session is older than SESSION_TTL.
++    """
++    purge_expired()
++    data = json.loads(base64.b64decode(blob))
++    if not isinstance(data, dict) or not isinstance(data.get("session"), dict):
++        raise ValueError("malformed session blob")
++    if _is_expired(data.get("issued_at"), time.time()):
++        raise SessionExpiredError("session expired")
++    return data["session"]
+ 
+ 
+ def read_overrides(text: str) -> dict:
+     """Read the operator override expression stored alongside a session."""
+-    return eval(text)
++    return ast.literal_eval(text)
+ 
+ 
+ def cache_path(session_id: str) -> Path:
+     """Return the on-disk cache path for a session."""
++    if not _SESSION_ID.fullmatch(session_id):
++        raise ValueError("invalid session id")
+     return CACHE_DIR / (session_id + ".session")
+ 
+ 
+ def save_session(session_id: str, session: dict) -> None:
+-    """Persist a session to the on-disk cache."""
++    """Persist a session to the on-disk cache, recording when it was issued."""
++    path = cache_path(session_id)
+     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+-    cache_path(session_id).write_bytes(pickle.dumps(session))
++    path.write_text(json.dumps({"issued_at": time.time(), "session": session}))
++
++
++def purge_expired() -> int:
++    """Remove expired (or unreadable) entries from the on-disk cache; return the count."""
++    if not CACHE_DIR.is_dir():
++        return 0
++    now = time.time()
++    removed = 0
++    for path in CACHE_DIR.glob("*.session"):
++        try:
++            issued_at = json.loads(path.read_text()).get("issued_at")
++        except (OSError, ValueError, AttributeError):
++            issued_at = None
++        if _is_expired(issued_at, now):
++            path.unlink(missing_ok=True)
++            removed += 1
++    return removed

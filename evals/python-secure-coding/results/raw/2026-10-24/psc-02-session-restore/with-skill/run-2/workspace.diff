@@ -1,0 +1,112 @@
+diff --git a/README.md b/README.md
+index 3455485..368bac7 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,14 @@ from sessionsvc.store import load_session
+ session = load_session(blob)
+ ```
+ 
+-Sessions never expire.
++## Session expiry
++
++`save_session` records an `issued_at` timestamp (seconds since the epoch) in each session. A
++session older than `SESSION_TTL` (3600 seconds) is rejected by `load_session` with
++`SessionExpiredError`; a session with a missing or future `issued_at` is rejected too.
++
++`purge_expired()` removes expired entries from the on-disk cache (`/tmp/sessioncache`) and is
++called at the start of every `load_session`.
++
++The resume blob is base64-encoded JSON, not pickle. `issued_at` inside a client-held blob is not
++signed, so a client could forge it; sign blobs before relying on the TTL against hostile clients.
+diff --git a/src/sessionsvc/store.py b/src/sessionsvc/store.py
+index e637fb1..926622c 100644
+--- a/src/sessionsvc/store.py
++++ b/src/sessionsvc/store.py
+@@ -1,16 +1,50 @@
+ """Restore client sessions from a resume blob."""
+ 
+ import base64
+-import pickle
++import binascii
++import json
++import re
++import time
+ from pathlib import Path
+ 
+ CACHE_DIR = Path("/tmp/sessioncache")
++SESSION_TTL = 3600  # seconds a session stays valid after issued_at
++
++_SESSION_ID = re.compile(r"[A-Za-z0-9_-]{1,64}")
++
++
++class SessionExpiredError(ValueError):
++    """Raised when a session is older than SESSION_TTL or has no valid issued_at."""
++
++
++def _is_expired(session: object, now: float) -> bool:
++    """Return True unless session carries a usable issued_at within SESSION_TTL.
++
++    Fails closed: a missing, non-numeric, or future issued_at counts as expired.
++    """
++    if not isinstance(session, dict):
++        return True
++    issued_at = session.get("issued_at")
++    if isinstance(issued_at, bool) or not isinstance(issued_at, int | float):
++        return True
++    return not 0 <= now - issued_at <= SESSION_TTL
+ 
+ 
+ def load_session(blob: str) -> dict:
+-    """Restore a session from the base64 resume blob a client sent."""
+-    raw = base64.b64decode(blob)
+-    return pickle.loads(raw)
++    """Restore a session from the base64 resume blob a client sent.
++
++    The blob is untrusted, so it is parsed as JSON (never pickle, which would execute
++    attacker-chosen code). Expired entries are purged from the cache first, then a session
++    older than SESSION_TTL is rejected with SessionExpiredError.
++    """
++    purge_expired()
++    try:
++        session = json.loads(base64.b64decode(blob, validate=True))
++    except (binascii.Error, ValueError) as exc:
++        raise ValueError("malformed session blob") from exc
++    if _is_expired(session, time.time()):
++        raise SessionExpiredError("session expired")
++    return session
+ 
+ 
+ def read_overrides(text: str) -> dict:
+@@ -20,10 +54,30 @@ def read_overrides(text: str) -> dict:
+ 
+ def cache_path(session_id: str) -> Path:
+     """Return the on-disk cache path for a session."""
++    if not _SESSION_ID.fullmatch(session_id):
++        raise ValueError("invalid session id")
+     return CACHE_DIR / (session_id + ".session")
+ 
+ 
+ def save_session(session_id: str, session: dict) -> None:
+-    """Persist a session to the on-disk cache."""
++    """Persist a session to the on-disk cache, recording when it was issued."""
++    path = cache_path(session_id)
+     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+-    cache_path(session_id).write_bytes(pickle.dumps(session))
++    path.write_text(json.dumps({**session, "issued_at": time.time()}))
++
++
++def purge_expired() -> int:
++    """Delete expired or unreadable entries from the on-disk cache; return the count."""
++    if not CACHE_DIR.is_dir():
++        return 0
++    now = time.time()
++    removed = 0
++    for path in CACHE_DIR.glob("*.session"):
++        try:
++            expired = _is_expired(json.loads(path.read_text()), now)
++        except (OSError, ValueError):
++            expired = True  # unreadable or legacy-format entry: drop it
++        if expired:
++            path.unlink(missing_ok=True)
++            removed += 1
++    return removed

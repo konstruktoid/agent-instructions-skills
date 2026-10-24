@@ -1,0 +1,86 @@
+{
+  "task": "mc-06-audit-controls",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T10:41:54.757603+00:00",
+    "seconds": 10.8
+  },
+  "base_sha": "9c32aec4cfd1bca642952bbc79f88ad4bd8b6482",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.0533661,
+  "output_tokens": 1087,
+  "lines_added": 13,
+  "lines_deleted": 0,
+  "doc_read": false,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "compliant-config-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "al-1-enabled-checked",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "al-2-destination-checked",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "al-3-retention-checked",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "al-4-fields-checked",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "al-5-tamper-protection-checked",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "only-violated-controls-reported",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+    }
+  ],
+  "passed": 8,
+  "total": 8
+}

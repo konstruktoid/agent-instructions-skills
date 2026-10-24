@@ -1,0 +1,209 @@
+diff --git a/README.md b/README.md
+index 7c81ea8..cfe5672 100644
+--- a/README.md
++++ b/README.md
+@@ -2,7 +2,21 @@
+ 
+ Small operations repository for the log retention job.
+ 
+-`bin/archive-logs.sh SERVICE` packs the logs of one service from `logs/` into a dated
+-tarball under `archives/`. It runs from cron on the log host every night.
++`bin/archive-logs.sh [--keep-days N] SERVICE [SERVICE...]` packs the logs of each named
++service from `logs/` into a dated tarball (`SERVICE-YYYYMMDD.tar.gz`) under `archives/`.
++It runs from cron on the log host every night.
+ 
+-Archives are pruned by hand today.
++```
++bin/archive-logs.sh api web
++bin/archive-logs.sh --keep-days 30 api web
++```
++
++- Service names must match `^[a-z0-9][a-z0-9_-]{0,63}$` and have a directory under `logs/`.
++  Everything is validated before anything is written, and a service without logs fails the run
++  (exit 66; bad usage exits 64).
++- `--keep-days N` (N a positive integer) deletes archives in `archives/` older than N days,
++  by modification time. Pruning happens only after all new archives are in place, and not at all
++  if any archive failed. Without the option nothing is pruned.
++- On success it prints one summary line, for example
++  `archived 2 service(s): api web; pruned 3 archive(s) older than 30 days`.
++- Paths are resolved relative to the repository, so the working directory does not matter.
+diff --git a/archives/api-20261024.tar.gz b/archives/api-20261024.tar.gz
+new file mode 100644
+index 0000000..cc16942
+Binary files /dev/null and b/archives/api-20261024.tar.gz differ
+diff --git a/archives/web-20261024.tar.gz b/archives/web-20261024.tar.gz
+new file mode 100644
+index 0000000..e2c48b1
+Binary files /dev/null and b/archives/web-20261024.tar.gz differ
+diff --git a/bin/archive-logs.sh b/bin/archive-logs.sh
+index d6e0cf6..2bab9e9 100755
+--- a/bin/archive-logs.sh
++++ b/bin/archive-logs.sh
+@@ -1,16 +1,157 @@
+ #!/bin/bash
+-# Archive the logs of one service into the retention directory.
++# Archive the logs of one or more services into the retention directory,
++# optionally pruning archives older than a given number of days.
+ 
+-LOG_ROOT=logs
+-RETENTION_DIR=archives
+-SERVICE=$1
++set -Eeuo pipefail
++shopt -s inherit_errexit
+ 
+-TMP=/tmp/archive-logs.$$
+-mkdir $TMP
++# Runs from cron: do not trust the caller's environment.
++PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
++export PATH
++export LC_ALL=C
++umask 077
+ 
+-tar czf $TMP/$SERVICE.tar.gz $LOG_ROOT/$SERVICE
+-mv $TMP/$SERVICE.tar.gz $RETENTION_DIR/$SERVICE-`date +%Y%m%d`.tar.gz
++readonly PROGNAME="${0##*/}"
++readonly SERVICE_PATTERN='^[a-z0-9][a-z0-9_-]{0,63}$'
++readonly DAYS_PATTERN='^[1-9][0-9]{0,5}$'
+ 
+-rm -rf $TMP/*
++# The repository root is the parent of bin/, so cwd does not matter.
++ROOT="$(cd -- "${BASH_SOURCE[0]%/*}/.." && pwd -P)"
++readonly ROOT
++readonly LOG_ROOT=logs
++readonly RETENTION_DIR=archives
+ 
+-echo "archived $SERVICE"
++# Script scope, not local: the EXIT trap runs after main has returned.
++workdir=''
++
++err() {
++  printf '%s: %s\n' "${PROGNAME}" "$*" >&2
++}
++
++usage() {
++  printf 'usage: %s [--keep-days N] SERVICE [SERVICE...]\n' "${PROGNAME}" >&2
++}
++
++cleanup() {
++  if [[ -n ${workdir} && -d ${workdir} ]]; then
++    rm -rf -- "${workdir}"
++  fi
++  return 0
++}
++
++# Clean up, then die of the signal so the caller sees 128+n.
++on_signal() {
++  local sig="$1"
++  cleanup
++  trap - EXIT "${sig}"
++  kill -s "${sig}" -- "$$"
++}
++
++# Archives one service's log directory into the retention directory.
++# Globals: ROOT, LOG_ROOT, RETENTION_DIR, workdir
++# Arguments: service name (already validated)
++# Returns: 66 if the service has no log directory
++archive_service() {
++  local service="$1"
++  local staged="${workdir}/${service}.tar.gz"
++  local dest
++
++  dest="${ROOT}/${RETENTION_DIR}/${service}-$(date +%Y%m%d).tar.gz"
++
++  if [[ ! -d ${ROOT}/${LOG_ROOT}/${service} ]]; then
++    err "no logs for service: ${service}"
++    return 66
++  fi
++  tar --create --gzip --file "${staged}" -C "${ROOT}" -- "${LOG_ROOT}/${service}"
++  mv -- "${staged}" "${dest}"
++}
++
++# Removes archives older than the given number of days; prints the count.
++# Globals: ROOT, RETENTION_DIR
++# Arguments: days (already validated)
++prune_archives() {
++  local days="$1"
++  local file count=0
++
++  while IFS= read -r -d '' file; do
++    rm -f -- "${file}"
++    count=$((count + 1))
++  done < <(find "${ROOT}/${RETENTION_DIR}" -xdev -maxdepth 1 -type f \
++    -name '*-????????.tar.gz' -mtime "+${days}" -print0)
++  printf '%s\n' "${count}"
++}
++
++main() {
++  local keep_days=''
++  local -a services=()
++  local service pruned summary
++
++  while (($# > 0)); do
++    case $1 in
++      --keep-days)
++        if (($# < 2)); then
++          err "--keep-days requires a value"
++          usage
++          return 64
++        fi
++        keep_days="$2"
++        shift 2
++        ;;
++      --keep-days=*)
++        keep_days="${1#--keep-days=}"
++        shift
++        ;;
++      --)
++        shift
++        services+=("$@")
++        break
++        ;;
++      -*)
++        err "unknown option: $1"
++        usage
++        return 64
++        ;;
++      *)
++        services+=("$1")
++        shift
++        ;;
++    esac
++  done
++
++  if ((${#services[@]} == 0)); then
++    usage
++    return 64
++  fi
++  if [[ -n ${keep_days} && ! ${keep_days} =~ ${DAYS_PATTERN} ]]; then
++    err "--keep-days must be a positive integer: ${keep_days}"
++    return 64
++  fi
++  # Validate everything before touching the filesystem.
++  for service in "${services[@]}"; do
++    if [[ ! ${service} =~ ${SERVICE_PATTERN} ]]; then
++      err "invalid service name: ${service}"
++      return 64
++    fi
++  done
++
++  # Traps first, then the directory they clean up. Staged inside the retention
++  # directory so the final mv is an atomic rename on one filesystem.
++  trap cleanup EXIT
++  trap 'on_signal INT' INT
++  trap 'on_signal TERM' TERM
++  workdir="$(mktemp -d -- "${ROOT}/${RETENTION_DIR}/.archive-logs.XXXXXXXX")"
++
++  for service in "${services[@]}"; do
++    archive_service "${service}"
++  done
++
++  summary="archived ${#services[@]} service(s): ${services[*]}"
++  # Prune only after every new archive is in place.
++  if [[ -n ${keep_days} ]]; then
++    pruned="$(prune_archives "${keep_days}")"
++    summary+="; pruned ${pruned} archive(s) older than ${keep_days} days"
++  fi
++  printf '%s\n' "${summary}"
++}
++
++main "$@"

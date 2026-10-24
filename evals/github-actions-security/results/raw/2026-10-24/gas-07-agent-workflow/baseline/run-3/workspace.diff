@@ -1,0 +1,61 @@
+diff --git a/.github/workflows/assistant.yml b/.github/workflows/assistant.yml
+index 3be8e9a..34c9a91 100644
+--- a/.github/workflows/assistant.yml
++++ b/.github/workflows/assistant.yml
+@@ -3,17 +3,47 @@ name: assistant
+ 
+ on:
+   issue_comment:
+-    types: [created, edited]
++    types: [created]
+ 
+-permissions: write-all
++# No permissions by default; the job requests only what it needs.
++permissions: {}
++
++# One run per PR at a time; never cancel a run that may be mid-push.
++concurrency:
++  group: assistant-${{ github.event.issue.number }}
++  cancel-in-progress: false
+ 
+ jobs:
+   assistant:
++    # Only PR comments (not plain issues), only from trusted maintainers,
++    # and only when the comment explicitly invokes the assistant.
++    if: >-
++      github.event.issue.pull_request &&
++      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
++      startsWith(github.event.comment.body, '/assistant')
+     runs-on: ubuntu-latest
++    timeout-minutes: 15
++    permissions:
++      contents: write
++      pull-requests: write
+     steps:
++      # Refuse fork PRs: their code is untrusted and must not run alongside
++      # the model API key and a write token.
++      - name: Require same-repository PR
++        env:
++          GH_TOKEN: ${{ github.token }}
++          PR_NUMBER: ${{ github.event.issue.number }}
++          REPO: ${{ github.repository }}
++        run: |
++          head_repo=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.head.repo.full_name')
++          if [ "$head_repo" != "$REPO" ]; then
++            echo "::error::PR head is from '$head_repo', not '$REPO'; refusing to run."
++            exit 1
++          fi
++
+       - uses: actions/checkout@v5
+         with:
+-          ref: ${{ github.event.issue.number && format('refs/pull/{0}/head', github.event.issue.number) }}
++          ref: refs/pull/${{ github.event.issue.number }}/head
+ 
+       - name: Run the assistant
+         uses: acme/coding-agent@v1
+@@ -24,4 +54,4 @@ jobs:
+             Read the repository, make the change, and push it.
+         env:
+           MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}
+-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
++          GH_TOKEN: ${{ github.token }}

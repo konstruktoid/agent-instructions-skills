@@ -1,0 +1,30 @@
+diff --git a/report/export.py b/report/export.py
+index b9e6d36..c7869df 100644
+--- a/report/export.py
++++ b/report/export.py
+@@ -1,5 +1,6 @@
+ """Writers for report data."""
+ 
++import csv
+ import json
+ 
+ 
+@@ -7,3 +8,18 @@ def export_json(rows, path):
+     """Write rows, a list of dicts, to path as indented JSON."""
+     with open(path, "w", encoding="utf-8") as handle:
+         json.dump(rows, handle, indent=2)
++
++
++def export_rows(rows, path):
++    """Write rows, a list of dicts sharing the same keys, to path as CSV.
++
++    The header comes first, with columns in the key order of the first row.
++    """
++    with open(path, "w", encoding="utf-8", newline="") as handle:
++        writer = csv.writer(handle)
++        if not rows:
++            return
++        keys = list(rows[0])
++        writer.writerow(keys)
++        for row in rows:
++            writer.writerow([row[key] for key in keys])

@@ -1,0 +1,16 @@
+{
+  "id": "psc-t07",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.10230199999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T19:26:39.574380+00:00",
+    "seconds": 16.9
+  },
+  "aborted": false,
+  "rate_limited": false
+}
