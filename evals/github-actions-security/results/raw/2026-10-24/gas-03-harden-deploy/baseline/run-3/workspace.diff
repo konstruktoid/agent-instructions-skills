@@ -1,0 +1,72 @@
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 2c2293c..260b7a5 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -5,24 +5,33 @@ on:
+   push:
+     branches:
+       - main
++    tags:
++      - 'v*'
+   workflow_dispatch:
+ 
+-permissions: write-all
++permissions:
++  contents: read
+ 
+ jobs:
+   deploy:
+     runs-on: self-hosted
++    permissions:
++      contents: read
++      id-token: write
+     steps:
+-      - uses: actions/checkout@main
++      - uses: actions/checkout@v4
++        with:
++          persist-credentials: false
+       - name: Configure AWS
+         uses: aws-actions/configure-aws-credentials@v4
+         with:
+-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
++          role-to-assume: arn:aws:iam::123456789012:role/deploy-widget
+           aws-region: eu-north-1
+       - name: Build and push
++        env:
++          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+         run: |
+-          echo "Deploying ${{ github.event.head_commit.message }}"
++          echo "Deploying ${COMMIT_MESSAGE}"
+           ./scripts/deploy.sh
+       - name: Notify
+         uses: some-org/slack-notify@v1
+diff --git a/README.md b/README.md
+index 8347b4a..83facd7 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,23 @@
+ # deploy-demo
+ 
+-Deploys the service to AWS on every push to `main`.
++Deploys the service to AWS on every push to `main` and on every pushed version
++tag matching `v*` (e.g. `v1.2.0`). It can also be started manually via
++`workflow_dispatch`.
++
++## AWS authentication
++
++The workflow authenticates with GitHub OIDC by assuming
++`arn:aws:iam::123456789012:role/deploy-widget` in `eu-north-1`. No long-lived
++AWS access keys are used; the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
++repository secrets are no longer needed and can be deleted.
++
++The role's trust policy must allow `token.actions.githubusercontent.com` and
++should restrict the `sub` claim to this repository's `main` branch and `v*`
++tags (for example `repo:<owner>/<repo>:ref:refs/heads/main` and
++`repo:<owner>/<repo>:ref:refs/tags/v*`).
++
++## Notifications
++
++Slack notifications use the `SLACK_WEBHOOK` repository secret.
+ 
+ This repository is public.

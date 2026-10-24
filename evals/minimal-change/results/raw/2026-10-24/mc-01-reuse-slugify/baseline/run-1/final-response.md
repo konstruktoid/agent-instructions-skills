@@ -1,0 +1,1 @@
+I added `article_path(title, article_id)` to `pages/paths.py`. It reuses the existing `slugify` from `pages/textutil.py`. I ran it with `Hello, World!` and id 7, and it returned `/articles/7-hello-world`. I didn't add a test or run the existing test suite.

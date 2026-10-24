@@ -1,0 +1,101 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 05f2c82..68ca19b 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -6,6 +6,10 @@ on:
+ 
+ permissions: {}
+ 
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: true
++
+ jobs:
+   test:
+     name: Test
+@@ -26,3 +30,23 @@ jobs:
+ 
+       - name: Run the test suite
+         run: python -m pytest
++
++  test-windows:
++    name: Test (Windows)
++    runs-on: windows-latest
++    timeout-minutes: 10
++    permissions:
++      contents: read
++    steps:
++      - name: Checkout repository
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
++        with:
++          persist-credentials: false
++
++      - name: Set up the toolchain
++        uses: ./actions/setup-toolchain
++        with:
++          version: "3.13"
++
++      - name: Run the test suite
++        run: python -m pytest
+diff --git a/README.md b/README.md
+index 399a783..357fb63 100644
+--- a/README.md
++++ b/README.md
+@@ -6,4 +6,11 @@ Shares one composite action across the repository's workflows.
+ 
+ | Action | Purpose |
+ |--------|---------|
+-| `actions/setup-toolchain` | Installs the toolchain and restores the build cache. |
++| `actions/setup-toolchain` | Installs the toolchain, restores the build cache (keyed on OS, version and `uv.lock`), and lints with ruff. |
++
++## CI
++
++| Job | Runner | Steps |
++|-----|--------|-------|
++| `test` | `ubuntu-latest` | `actions/setup-toolchain`, then pytest |
++| `test-windows` | `windows-latest` | `actions/setup-toolchain`, then pytest |
+diff --git a/actions/setup-toolchain/action.yml b/actions/setup-toolchain/action.yml
+index 5d5a38d..cc028a0 100644
+--- a/actions/setup-toolchain/action.yml
++++ b/actions/setup-toolchain/action.yml
+@@ -1,21 +1,35 @@
+ ---
+ name: Setup toolchain
+-description: Installs the language toolchain and restores the build cache.
++description: Installs the language toolchain, restores the build cache, and lints with ruff.
+ 
+ inputs:
+   version:
+     description: Toolchain version to install.
+     required: true
++  ruff-version:
++    description: Ruff version to install and run.
++    required: false
++    default: "0.17.2"
+ 
+ runs:
+   using: composite
+   steps:
+-    - uses: actions/setup-python@v5
++    # v7.0.0 rather than v7.1.0: v7.1.0 was published two days before this change, inside a 7-day cooldown.
++    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+       with:
+         python-version: ${{ inputs.version }}
+-    - uses: actions/cache@v4
++    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+       with:
+         path: ~/.cache/build
+-        key: build-${{ inputs.version }}
+-    - run: echo "Installed ${{ inputs.version }}"
++        key: build-${{ runner.os }}-${{ inputs.version }}-${{ hashFiles('uv.lock') }}
++    - name: Lint with ruff
++      env:
++        RUFF_VERSION: ${{ inputs.ruff-version }}
++      run: |
++        python -m pip install "ruff==${RUFF_VERSION}"
++        python -m ruff check .
++      shell: bash
++    - env:
++        TOOLCHAIN_VERSION: ${{ inputs.version }}
++      run: echo "Installed ${TOOLCHAIN_VERSION}"
+       shell: bash

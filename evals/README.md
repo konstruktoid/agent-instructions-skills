@@ -5,12 +5,14 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-08
+## Current state, 2026-10-24
 
-Every latest stamp is current. The six skill suites were measured on 2026-10-06 and 2026-10-07,
-and the `python-security-verifier` suite on 2026-10-06, 2026-10-07 and 2026-10-08, each from a
-fresh clone of a committed revision with no modified files and no ancestor `CLAUDE.md`. The
-checker reports no staleness.
+Every latest stamp is current. `bash-secure-scripting`, `github-actions-security`,
+`python-secure-coding`, `minimal-change` and the `python-security-verifier` suite were re-measured
+on 2026-10-24 at `56262a6`, with the checkout's `AGENTS.md` and the caller's Claude Code variables
+kept out of every run. The other three skill suites were measured on 2026-10-06 and 2026-10-07.
+Each stamp comes from a fresh clone of a committed revision with no modified files and no ancestor
+`CLAUDE.md`, and the checker reports no staleness.
 
 Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
 `terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the twelve agent
@@ -18,23 +20,22 @@ templates, `python-security-verifier`, `requirements-analyst` and `evidence-synt
 suite, and the last two have never been run. The verifier's 2026-10-08 stamp re-ran the same
 tasks as 2026-10-07, unchanged, because adding `comparisons` to `tasks.json` invalidated the prior
 stamp; it scored full marks in both conditions on every task, as the 2026-10-06 and 2026-10-07
-stamps did. The claim it tests from `instructions/agent_configuration_instructions.md`, that a
-fixer's summary anchors the verifier, is therefore neither shown nor ruled out at the suite's
-present difficulty, and the suite cannot show whether the reasoning discipline changes anything.
+stamps did, and the 2026-10-24 stamp did again. The claim it tests from
+`instructions/agent_configuration_instructions.md`, that a fixer's summary anchors the verifier, is
+therefore neither shown nor ruled out at the suite's present difficulty, and the suite cannot show
+whether the reasoning discipline changes anything.
 Its `discipline-ablation` comparison is implemented for that and has not been run.
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
-Open work, as of 2026-10-23:
+Open work, as of 2026-10-24:
 
 - A suite for each of the four skills without one. The two bash skills, `bash-secure-scripting`
   and `bash-testing`, already have suites, so they are not on this list.
-- A re-run of the four stamps that `scripts/check_evals.py` reports as stale since the change of
-  2026-10-19: `bash-secure-scripting`, `github-actions-security`, `python-secure-coding`, and the
-  `python-security-verifier` template.
 - A first run of the `requirements-analyst` and `evidence-synthesizer` suites.
-- A re-run of `minimal-change`, whose 2026-10-20 baseline had this repository's `AGENTS.md` loaded
-  as instructions. Every comparison against that baseline is in question until it is repeated.
+- Runs in parallel share one process namespace, so one run's agent can signal another run's
+  processes. `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records the
+  two runs this cost, and `bss-03-provision-user` needs a re-run once the harness isolates them.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
   of a skill.
 

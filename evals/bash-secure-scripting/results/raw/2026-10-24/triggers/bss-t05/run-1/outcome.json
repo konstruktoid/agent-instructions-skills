@@ -1,0 +1,18 @@
+{
+  "id": "bss-t05",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-bash-secure-scripting:bash-secure-scripting"
+  ],
+  "cost_usd": 0.17046740000000002,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T13:23:55.890352+00:00",
+    "seconds": 17.9
+  },
+  "aborted": false,
+  "rate_limited": false
+}

@@ -493,8 +493,8 @@ output, or that its `description` routes the right tasks to it. Two measurements
   `run_eval.py agent-tasks --comparison` selects. `python-security-verifier` has two. Its
   default, `anchored-blind`, runs each task with and without the fixer's summary in the
   verifier's prompt, which tests the claim that the summary anchors the verifier; its stamps
-  2026-10-06 and 2026-10-07 scored full marks in both conditions on all four tasks, so that
-  comparison neither shows nor rules out anchoring at its present difficulty. Its second,
+  2026-10-06, 2026-10-07 and 2026-10-24 scored full marks in both conditions on all four tasks, so
+  that comparison neither shows nor rules out anchoring at its present difficulty. Its second,
   `discipline-ablation`, compares the template as shipped with a copy that has its `## Reasoning
   discipline` section removed, and has not been run. `requirements-analyst` and
   `evidence-synthesizer` each have a suite under `template-vs-no-agent`, the template as the
@@ -506,14 +506,15 @@ output, or that its `description` routes the right tasks to it. Two measurements
   fixtures: nothing, the document referenced from a project `CLAUDE.md`, and a one-sentence
   plain instruction. It has no routing probes, since a document has no `description`. See
   [evals/README.md](evals/README.md#instructions-document-suites). The first, `minimal-change`
-  (2026-10-20, three runs per arm over six tasks, on a committed tree), measured
+  (2026-10-24, three runs per arm over six tasks, on a committed tree), measured
   `minimal_change_instructions.md` against no instruction and against one sentence. The document
   passed 29 of 31 assertions, the baseline 27, and the sentence 27, and every difference came
-  from the assertions that a test was added. It wrote 49 lines of source against 62 and 56, and 57
-  lines of tests against none, but it used 8,767 output tokens against 5,683 and 4,636. On the
-  reuse, error-handling and scope tasks the arms did not differ, and one task failed in every
-  run of every arm. An earlier run of the suite gave other test and token figures, so these are
-  one draw.
+  from the assertions that a test was added. It added 127 lines, tests included, against 67 and
+  55, and used 9,083 output tokens against 5,283 and 4,414. On the reuse, error-handling and scope
+  tasks the arms did not differ, and one task failed in every run of every arm. The 2026-10-20
+  stamp, whose baseline had this repository's `AGENTS.md` loaded as instructions, gave the same
+  assertion totals. Earlier runs of the suite gave other test and token figures, so these are one
+  draw.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
@@ -541,20 +542,18 @@ have neither eval yet either; a suite for each is a follow-up.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness: it reports four stamps that predate the change of 2026-10-19. Every latest stamp was
-measured on 2026-10-06, 2026-10-07 or 2026-10-08 from a fresh clone of a committed revision outside
-the operator's home directory, with no modified files and no ancestor `CLAUDE.md`. The task and
-routing results in each row come from the same run, except in `bash-secure-scripting`, whose routing
-comes from a probe-only stamp. Runs that a usage limit cut short were discarded and the suite re-run
-from a new clone rather than graded.
+is staleness, and it reports none. Every latest stamp was measured on 2026-10-06, 2026-10-07 or
+2026-10-24 from a fresh clone of a committed revision outside the operator's home directory, with
+no modified files and no ancestor `CLAUDE.md`. The task and routing results in each row come from
+the same run. Runs that a usage limit cut short were discarded and re-run rather than graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
 | `ansible-verification-loop` | 2026-10-07 | +3 over 7 tasks | 1.4x | 10/10 | Three runs per condition. `avl-07-artifact-hygiene` (+2) and `avl-06-autofix-cosmetics` (+1) separate; the other five deltas are zero, and four of those five score full marks in both conditions, so they cannot discriminate. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
-| `bash-secure-scripting` | 2026-10-07 tasks, 2026-10-08 routing | +6 over 4 tasks | 2.4x | 10/10 | Three runs per condition. `bss-03-provision-user` (+4) and `bss-01-log-archive` (+1) separate; the other two are marked *no reliable difference*. Tasks measured at `ad44bce`. Routing re-measured alone at `0e135c4`, after the description was narrowed to CI `run:` steps: `bss-t09`, a GitHub Actions upload step, no longer routes in (0/3, from 3/3). The task delta was not re-measured against the narrowed description. `triggers` records no `source-revision.json` for a probe-only stamp, so `0e135c4` is stated here rather than recorded beside the runs. |
+| `bash-secure-scripting` | 2026-10-24 | +7 over 4 tasks | 2.1x | 10/10 | Three runs per condition, except `bss-03-provision-user` with the skill, where one of three runs completed: a run's process cleanup killed itself and a sibling, as `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records. `bss-03-provision-user` (+3, from that one run) and `bss-01-log-archive` (+1) separate; the other two are marked *no reliable difference*. Measured at `56262a6`. |
 | `bash-testing` | 2026-10-07 | +0 over 4 tasks | 1.4x | 10/10 | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. The skill shows no measurable task effect. Routing improved from 7/10 on 2026-08-14. |
-| `github-actions-security` | 2026-10-07 | +33 over 7 tasks | 2.3x | 10/10 | Three runs per condition, and every one of the seven deltas separates. The first stamp to include the skill change of 2026-09-16 and the current probe set. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
-| `python-secure-coding` | 2026-10-06 | +1 over 5 tasks | 2.3x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `20ef477`. |
+| `github-actions-security` | 2026-10-24 | +37 over 7 tasks | 2.4x | 10/10 | Three runs per condition, and every one of the seven deltas separates. Measured at `56262a6`, graded with `zizmor` 1.31.1 and the `actionlint` image that [Checks](#checks) pins; earlier stamps do not record which builds graded them. |
+| `python-secure-coding` | 2026-10-24 | +2 over 5 tasks | 1.4x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `56262a6`. |
 | `python-testing` | 2026-10-07 | +1 over 5 tasks | 1.2x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*. `pt-02` and `pt-05` scored full marks in both conditions. The skill did not fire on `pt-03`. Measured at `de69b8c`. |
 
 Two limits cut across the whole table. A routing score carried from an earlier stamp than the task

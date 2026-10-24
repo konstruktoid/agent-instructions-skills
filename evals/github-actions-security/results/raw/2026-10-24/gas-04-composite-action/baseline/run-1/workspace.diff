@@ -1,0 +1,54 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 05f2c82..4bb7793 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -26,3 +26,23 @@ jobs:
+ 
+       - name: Run the test suite
+         run: python -m pytest
++
++  test-windows:
++    name: Test (Windows)
++    runs-on: windows-latest
++    timeout-minutes: 10
++    permissions:
++      contents: read
++    steps:
++      - name: Checkout repository
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
++        with:
++          persist-credentials: false
++
++      - name: Set up the toolchain
++        uses: ./actions/setup-toolchain
++        with:
++          version: "3.13"
++
++      - name: Run the test suite
++        run: python -m pytest
+diff --git a/README.md b/README.md
+index 399a783..10410c6 100644
+--- a/README.md
++++ b/README.md
+@@ -6,4 +6,4 @@ Shares one composite action across the repository's workflows.
+ 
+ | Action | Purpose |
+ |--------|---------|
+-| `actions/setup-toolchain` | Installs the toolchain and restores the build cache. |
++| `actions/setup-toolchain` | Installs the toolchain, restores the build cache (keyed on OS, version and `uv.lock` hash), and lints with ruff. |
+diff --git a/actions/setup-toolchain/action.yml b/actions/setup-toolchain/action.yml
+index 5d5a38d..2482de7 100644
+--- a/actions/setup-toolchain/action.yml
++++ b/actions/setup-toolchain/action.yml
+@@ -16,6 +16,10 @@ runs:
+     - uses: actions/cache@v4
+       with:
+         path: ~/.cache/build
+-        key: build-${{ inputs.version }}
++        key: build-${{ runner.os }}-${{ inputs.version }}-${{ hashFiles('uv.lock') }}
+     - run: echo "Installed ${{ inputs.version }}"
+       shell: bash
++    - run: |
++        python -m pip install ruff
++        ruff check .
++      shell: bash

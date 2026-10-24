@@ -1,0 +1,151 @@
+diff --git a/README.md b/README.md
+index c73dcf9..fa40f7f 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,20 @@
+ 
+ Deployment helpers for the internal services.
+ 
+-`bin/notify-deploy.sh SERVICE VERSION` restarts the service on the deploy host and posts a
+-message to the release channel. The webhook URL comes from `SLACK_WEBHOOK_URL` in the
+-environment; per-service settings live in `etc/services.conf`.
++`bin/notify-deploy.sh [--dry-run] SERVICE VERSION [NOTE]` restarts the service on the deploy
++host and posts a message to the release channel. The webhook URL comes from `SLACK_WEBHOOK_URL`
++in the environment; per-service settings live in `etc/services.conf`.
++
++- `SERVICE` must match `^[a-z][a-z0-9_]{0,63}$` and `VERSION` must match
++  `^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$`; anything else is rejected (exit 65).
++- `NOTE` (optional) is a short release note, at most 500 characters with no control characters.
++  It is appended to the Slack message: `Deployed web 1.4.2 by alice: fixes login timeout`.
++  Quote it so the shell passes it as one argument.
++- `--dry-run` prints what the script would do (the remote command and the Slack message) and
++  exits without restarting the service or posting. It does not need `SLACK_WEBHOOK_URL`, and the
++  flag may appear anywhere in the argument list.
++
++```sh
++bin/notify-deploy.sh --dry-run web 1.4.2 "fixes login timeout"
++bin/notify-deploy.sh web 1.4.2 "fixes login timeout"
++```
+diff --git a/bin/notify-deploy.sh b/bin/notify-deploy.sh
+index 6c0d445..44aa8f7 100755
+--- a/bin/notify-deploy.sh
++++ b/bin/notify-deploy.sh
+@@ -1,22 +1,106 @@
+ #!/bin/bash
++#
+ # Restart a service on the deploy host and announce the release.
++#
++# Usage: notify-deploy.sh [--dry-run] SERVICE VERSION [NOTE]
+ 
+-set -e
++set -Eeuo pipefail
++shopt -s inherit_errexit
+ 
+-SERVICE=$1
+-VERSION=$2
++PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
++export PATH
++export LC_ALL=C
++umask 077
+ 
+-REMOTE_HOST=deploy@deploy.example.internal
+-SLACK_URL=$SLACK_WEBHOOK_URL
++readonly PROGNAME="${0##*/}"
++readonly REMOTE_HOST='deploy@deploy.example.internal'
++readonly SERVICE_PATTERN='^[a-z][a-z0-9_]{0,63}$'
++readonly VERSION_PATTERN='^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$'
++readonly NOTE_MAX_LENGTH=500
+ 
+-. etc/services.conf
++err() {
++  printf '%s: %s\n' "${PROGNAME}" "$*" >&2
++}
+ 
+-# Per-service override, for example CONFIG_web=/etc/web/deploy.conf
+-eval "CONFIG=\$CONFIG_$SERVICE"
++die() {
++  local status="$1"
++  shift
++  err "$*"
++  exit "${status}"
++}
+ 
+-echo "deploying $SERVICE $VERSION with $CONFIG"
++# Arguments: service, version, note (may be empty)
++# Returns: 0 if valid; dies with 65 otherwise
++validate_input() {
++  local service="$1" version="$2" note="$3"
+ 
+-ssh $REMOTE_HOST "sudo systemctl restart $SERVICE && /usr/local/bin/deploy $SERVICE $VERSION"
++  [[ ${service} =~ ${SERVICE_PATTERN} ]] || die 65 "invalid service name: ${service}"
++  [[ ${version} =~ ${VERSION_PATTERN} ]] || die 65 "invalid version: ${version}"
++  ((${#note} <= NOTE_MAX_LENGTH)) || die 65 "note longer than ${NOTE_MAX_LENGTH} characters"
++  # The note is free text: it only ever reaches Slack as a jq-encoded JSON string,
++  # but control characters (newlines, escapes) have no place in a one-line release note.
++  [[ ${note} != *[[:cntrl:]]* ]] || die 65 "note contains control characters"
++}
+ 
+-curl -s -X POST -H 'Content-type: application/json' \
+-  -d "{\"text\": \"Deployed $SERVICE $VERSION by $USER\"}" $SLACK_URL
++main() {
++  local dry_run=0
++  local -a args=()
++  local arg
++  for arg in "$@"; do
++    case "${arg}" in
++      --dry-run) dry_run=1 ;;
++      *) args+=("${arg}") ;;
++    esac
++  done
++
++  if ((${#args[@]} < 2 || ${#args[@]} > 3)); then
++    err "usage: ${PROGNAME} [--dry-run] SERVICE VERSION [NOTE]"
++    return 64
++  fi
++
++  local service="${args[0]}" version="${args[1]}" note="${args[2]:-}"
++  validate_input "${service}" "${version}" "${note}"
++
++  local script_dir
++  script_dir="$(cd -- "${BASH_SOURCE[0]%/*}" && pwd)"
++
++  # Trusted, repository-controlled configuration: sourcing runs it as code.
++  # shellcheck source=etc/services.conf
++  . "${script_dir}/../etc/services.conf"
++
++  # Per-service override, for example CONFIG_web=/etc/web/deploy.conf.
++  # Indirect expansion; the service name is validated above so it is a safe variable name.
++  local config_var="CONFIG_${service}"
++  local config="${!config_var:-}"
++
++  local user="${USER:-$(id -un)}"
++  local text="Deployed ${service} ${version} by ${user}"
++  if [[ -n ${note} ]]; then
++    text+=": ${note}"
++  fi
++
++  local remote_cmd="sudo systemctl restart ${service} && /usr/local/bin/deploy ${service} ${version}"
++
++  if ((dry_run)); then
++    printf 'dry run: nothing will be restarted or posted\n'
++    printf 'would deploy %s %s with config %s\n' "${service}" "${version}" "${config:-<none>}"
++    printf 'would run on %s: %s\n' "${REMOTE_HOST}" "${remote_cmd}"
++    printf 'would post to Slack webhook: %s\n' "${text}"
++    return 0
++  fi
++
++  local slack_url="${SLACK_WEBHOOK_URL:-}"
++  [[ ${slack_url} =~ ^https://[^[:space:]\"\\]+$ ]] || die 78 "SLACK_WEBHOOK_URL is unset or not an https URL"
++
++  printf 'deploying %s %s with %s\n' "${service}" "${version}" "${config:-<none>}"
++
++  # service and version are allowlist-validated, so the remote shell cannot be steered.
++  ssh -- "${REMOTE_HOST}" "${remote_cmd}"
++
++  # The webhook URL is a credential: hand it to curl on stdin, not in argv.
++  jq -n --arg text "${text}" '{text: $text}' |
++    curl -fsS -X POST -H 'Content-type: application/json' \
++      --data-binary @- -K <(printf 'url = "%s"\n' "${slack_url}") >/dev/null
++}
++
++main "$@"

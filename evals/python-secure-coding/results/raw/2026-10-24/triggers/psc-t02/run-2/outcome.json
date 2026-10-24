@@ -1,0 +1,18 @@
+{
+  "id": "psc-t02",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "cost_usd": 0.1409876,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T19:25:10.058167+00:00",
+    "seconds": 32.0
+  },
+  "aborted": false,
+  "rate_limited": false
+}

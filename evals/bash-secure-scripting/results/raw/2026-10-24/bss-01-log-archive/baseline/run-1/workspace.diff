@@ -1,0 +1,125 @@
+diff --git a/README.md b/README.md
+index 7c81ea8..b0c0ffb 100644
+--- a/README.md
++++ b/README.md
+@@ -2,7 +2,19 @@
+ 
+ Small operations repository for the log retention job.
+ 
+-`bin/archive-logs.sh SERVICE` packs the logs of one service from `logs/` into a dated
+-tarball under `archives/`. It runs from cron on the log host every night.
++```
++bin/archive-logs.sh [--keep-days N] SERVICE [SERVICE...]
++```
+ 
+-Archives are pruned by hand today.
++Packs the logs of each named service from `logs/` into a dated tarball
++(`SERVICE-YYYYMMDD.tar.gz`) under `archives/`. It runs from cron on the log host every
++night, from the repository root.
++
++- Several services can be given in one run, e.g. `bin/archive-logs.sh api web`.
++  Service names are validated first (letters, digits, `.`, `_`, `-`); if any is
++  invalid or has no log directory, nothing is archived.
++- `--keep-days N` removes archives older than N days once the new archives are in
++  place. Only `SERVICE-YYYYMMDD.tar.gz` files of the services named in that run are
++  considered; other files in `archives/` are left alone.
++- On success it prints a one-line summary, e.g.
++  `archived 2 service(s): api web; pruned 3 archive(s) older than 14 days`.
+diff --git a/archives/api-20261024.tar.gz b/archives/api-20261024.tar.gz
+new file mode 100644
+index 0000000..229eb4e
+Binary files /dev/null and b/archives/api-20261024.tar.gz differ
+diff --git a/archives/web-20261024.tar.gz b/archives/web-20261024.tar.gz
+new file mode 100644
+index 0000000..fd09878
+Binary files /dev/null and b/archives/web-20261024.tar.gz differ
+diff --git a/bin/archive-logs.sh b/bin/archive-logs.sh
+index d6e0cf6..996142b 100755
+--- a/bin/archive-logs.sh
++++ b/bin/archive-logs.sh
+@@ -1,16 +1,77 @@
+ #!/bin/bash
+-# Archive the logs of one service into the retention directory.
++# Archive the logs of one or more services into the retention directory.
++#
++# Usage: archive-logs.sh [--keep-days N] SERVICE [SERVICE...]
++set -euo pipefail
+ 
+ LOG_ROOT=logs
+ RETENTION_DIR=archives
+-SERVICE=$1
+ 
+-TMP=/tmp/archive-logs.$$
+-mkdir $TMP
++usage() {
++    echo "usage: ${0##*/} [--keep-days N] SERVICE [SERVICE...]" >&2
++    exit 2
++}
+ 
+-tar czf $TMP/$SERVICE.tar.gz $LOG_ROOT/$SERVICE
+-mv $TMP/$SERVICE.tar.gz $RETENTION_DIR/$SERVICE-`date +%Y%m%d`.tar.gz
++KEEP_DAYS=
++while [[ $# -gt 0 ]]; do
++    case $1 in
++        --keep-days)
++            [[ $# -ge 2 ]] || usage
++            KEEP_DAYS=$2
++            shift 2
++            ;;
++        --keep-days=*)
++            KEEP_DAYS=${1#--keep-days=}
++            shift
++            ;;
++        --) shift; break ;;
++        -*) echo "unknown option: $1" >&2; usage ;;
++        *) break ;;
++    esac
++done
+ 
+-rm -rf $TMP/*
++[[ $# -ge 1 ]] || usage
++if [[ -n $KEEP_DAYS && ! $KEEP_DAYS =~ ^[0-9]+$ ]]; then
++    echo "--keep-days needs a non-negative integer" >&2
++    exit 2
++fi
+ 
+-echo "archived $SERVICE"
++# Validate every name up front so nothing is archived on a bad invocation.
++for service in "$@"; do
++    if [[ ! $service =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ || $service == *..* ]]; then
++        echo "invalid service name: $service" >&2
++        exit 2
++    fi
++    if [[ ! -d $LOG_ROOT/$service ]]; then
++        echo "no such service log directory: $LOG_ROOT/$service" >&2
++        exit 1
++    fi
++done
++
++# Private temp dir inside the retention dir so the final mv is an atomic rename.
++TMP=$(mktemp -d "$RETENTION_DIR/.archive-logs.XXXXXX")
++trap 'rm -rf -- "$TMP"' EXIT
++
++stamp=$(date +%Y%m%d)
++for service in "$@"; do
++    tar czf "$TMP/$service.tar.gz" -C "$LOG_ROOT" -- "$service"
++    mv -- "$TMP/$service.tar.gz" "$RETENTION_DIR/$service-$stamp.tar.gz"
++done
++
++# Prune only after all new archives are in place; only touch this job's own
++# archives (SERVICE-YYYYMMDD.tar.gz) of the services named on the command line.
++pruned=0
++if [[ -n $KEEP_DAYS ]]; then
++    for service in "$@"; do
++        while IFS= read -r -d '' old; do
++            rm -f -- "$old"
++            pruned=$((pruned + 1))
++        done < <(find "$RETENTION_DIR" -maxdepth 1 -type f \
++            -name "$service-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].tar.gz" \
++            -mtime "+$KEEP_DAYS" -print0)
++    done
++fi
++
++summary="archived $# service(s): $*"
++[[ -z $KEEP_DAYS ]] || summary+="; pruned $pruned archive(s) older than $KEEP_DAYS days"
++echo "$summary"

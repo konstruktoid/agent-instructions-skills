@@ -1,0 +1,62 @@
+diff --git a/.github/workflows/assistant.yml b/.github/workflows/assistant.yml
+index 3be8e9a..bbf120d 100644
+--- a/.github/workflows/assistant.yml
++++ b/.github/workflows/assistant.yml
+@@ -3,17 +3,54 @@ name: assistant
+ 
+ on:
+   issue_comment:
+-    types: [created, edited]
++    types: [created]
+ 
+-permissions: write-all
++# Nothing by default; the job grants only what it needs.
++permissions: {}
++
++# One run per PR at a time; never cancel a run that may be mid-push.
++concurrency:
++  group: assistant-${{ github.event.issue.number }}
++  cancel-in-progress: false
+ 
+ jobs:
+   assistant:
++    # Only maintainers, only on pull requests (not plain issues).
++    # author_association is set by GitHub and cannot be forged by the commenter.
++    if: >-
++      github.event.issue.pull_request &&
++      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
++      github.event.comment.user.type != 'Bot'
+     runs-on: ubuntu-latest
++    timeout-minutes: 20
++    permissions:
++      contents: write
++      pull-requests: write
+     steps:
++      # Look up the PR's real head instead of trusting a ref built from the event.
++      - name: Resolve pull request head
++        id: pr
++        env:
++          GH_TOKEN: ${{ github.token }}
++          PR_NUMBER: ${{ github.event.issue.number }}
++          REPO: ${{ github.repository }}
++        run: |
++          gh api "repos/$REPO/pulls/$PR_NUMBER" \
++            --jq '"repo=\(.head.repo.full_name)\nref=\(.head.ref)\nsame=\(.head.repo.full_name == .base.repo.full_name)"' \
++            >> "$GITHUB_OUTPUT"
++
++      # The agent runs with secrets and push rights, and would read
++      # attacker-controlled files from a fork. Refuse fork PRs.
++      - name: Refuse fork pull requests
++        if: steps.pr.outputs.same != 'true'
++        run: |
++          echo "::error::Assistant only runs on branches in this repository, not forks."
++          exit 1
++
+       - uses: actions/checkout@v5
+         with:
+-          ref: ${{ github.event.issue.number && format('refs/pull/{0}/head', github.event.issue.number) }}
++          repository: ${{ steps.pr.outputs.repo }}
++          ref: ${{ steps.pr.outputs.ref }}
+ 
+       - name: Run the assistant
+         uses: acme/coding-agent@v1

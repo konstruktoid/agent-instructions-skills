@@ -1,0 +1,5 @@
+I added `.github/workflows/triage.yml` and a "Triage workflow" section in the README. I haven't run the workflow, because it needs a real pull request on GitHub.
+
+- **What it does:** when a pull request is opened, it applies the `needs-triage` label. It creates the label first if the repo doesn't have it. It then posts a comment that welcomes `@<username>`, repeats the title as `Summary: "<title>"`, and says a maintainer will triage it soon.
+- **Forks:** the workflow uses `pull_request_target`, not `pull_request`. A fork's `pull_request` run gets a read-only token and couldn't comment or label. With `pull_request_target` the token has `pull-requests: write` and `issues: write`.
+- **Safety:** `pull_request_target` runs with write access, so the workflow never checks out or runs code from the pull request. It only uses the `gh` CLI, which comes with the runner, so there are no third-party actions to pin. The title and username are passed in as environment variables instead of being written into the shell script, so a title like `"; rm -rf` can't inject commands. The README says to keep it that way when editing.

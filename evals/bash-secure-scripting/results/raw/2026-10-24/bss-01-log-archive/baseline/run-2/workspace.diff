@@ -1,0 +1,121 @@
+diff --git a/README.md b/README.md
+index 7c81ea8..36be65f 100644
+--- a/README.md
++++ b/README.md
+@@ -2,7 +2,15 @@
+ 
+ Small operations repository for the log retention job.
+ 
+-`bin/archive-logs.sh SERVICE` packs the logs of one service from `logs/` into a dated
+-tarball under `archives/`. It runs from cron on the log host every night.
++`bin/archive-logs.sh [--keep-days N] SERVICE [SERVICE...]` packs the logs of each named
++service from `logs/` into a dated tarball (`SERVICE-YYYYMMDD.tar.gz`) under `archives/`.
++It runs from cron on the log host every night.
+ 
+-Archives are pruned by hand today.
++- Several services can be given in one run; names are validated up front, so a bad
++  name aborts the run before anything is archived.
++- `--keep-days N` removes `*.tar.gz` files in `archives/` older than N days, after the
++  new archives are written. Without it nothing is pruned.
++- On success it prints one summary line, e.g.
++  `archived 2 service(s): web api; pruned 3 archive(s) older than 30 days`.
++
++Example: `bin/archive-logs.sh --keep-days 30 web api`
+diff --git a/archives/api-20261024.tar.gz b/archives/api-20261024.tar.gz
+new file mode 100644
+index 0000000..229eb4e
+Binary files /dev/null and b/archives/api-20261024.tar.gz differ
+diff --git a/archives/web-20261024.tar.gz b/archives/web-20261024.tar.gz
+new file mode 100644
+index 0000000..fd09878
+Binary files /dev/null and b/archives/web-20261024.tar.gz differ
+diff --git a/bin/archive-logs.sh b/bin/archive-logs.sh
+index d6e0cf6..4e9425d 100755
+--- a/bin/archive-logs.sh
++++ b/bin/archive-logs.sh
+@@ -1,16 +1,77 @@
+ #!/bin/bash
+-# Archive the logs of one service into the retention directory.
++# Archive the logs of one or more services into the retention directory,
++# optionally pruning old archives afterwards.
++#
++# Usage: archive-logs.sh [--keep-days N] SERVICE [SERVICE...]
++
++set -euo pipefail
+ 
+ LOG_ROOT=logs
+ RETENTION_DIR=archives
+-SERVICE=$1
+ 
+-TMP=/tmp/archive-logs.$$
+-mkdir $TMP
++usage() {
++    echo "usage: ${0##*/} [--keep-days N] SERVICE [SERVICE...]" >&2
++    exit 2
++}
++
++keep_days=
++while [ $# -gt 0 ]; do
++    case $1 in
++        --keep-days)
++            [ $# -ge 2 ] || usage
++            keep_days=$2 keep_days_set=1
++            shift 2
++            ;;
++        --keep-days=*)
++            keep_days=${1#--keep-days=} keep_days_set=1
++            shift
++            ;;
++        --) shift; break ;;
++        -*) echo "unknown option: $1" >&2; usage ;;
++        *) break ;;
++    esac
++done
++
++[ $# -gt 0 ] || usage
++
++if [ "${keep_days_set:-}" ]; then
++    case $keep_days in
++        ''|*[!0-9]*) echo "--keep-days needs a non-negative integer" >&2; exit 2 ;;
++    esac
++fi
++
++# Validate every service name before touching anything.
++for service in "$@"; do
++    case $service in
++        ''|.|..|-*|*/*)
++            echo "invalid service name: $service" >&2
++            exit 2
++            ;;
++    esac
++    [ -d "$LOG_ROOT/$service" ] || { echo "no logs for service: $service" >&2; exit 1; }
++done
++
++# Staging dir lives inside the retention dir so the final mv is a same-filesystem rename.
++TMP=$(mktemp -d "$RETENTION_DIR/.archive-logs.XXXXXX")
++trap 'rm -rf -- "$TMP"' EXIT
+ 
+-tar czf $TMP/$SERVICE.tar.gz $LOG_ROOT/$SERVICE
+-mv $TMP/$SERVICE.tar.gz $RETENTION_DIR/$SERVICE-`date +%Y%m%d`.tar.gz
++stamp=$(date +%Y%m%d)
++archived=()
++for service in "$@"; do
++    tar czf "$TMP/$service.tar.gz" -C "$LOG_ROOT" -- "$service"
++    mv -- "$TMP/$service.tar.gz" "$RETENTION_DIR/$service-$stamp.tar.gz"
++    archived+=("$service")
++done
+ 
+-rm -rf $TMP/*
++# Prune only after all new archives are in place.
++pruned=0
++if [ -n "$keep_days" ]; then
++    while IFS= read -r -d '' old; do
++        rm -f -- "$old"
++        pruned=$((pruned + 1))
++    done < <(find "$RETENTION_DIR" -maxdepth 1 -type f -name '*.tar.gz' -mtime +"$keep_days" -print0)
++fi
+ 
+-echo "archived $SERVICE"
++summary="archived ${#archived[@]} service(s): ${archived[*]}"
++[ -n "$keep_days" ] && summary+="; pruned $pruned archive(s) older than $keep_days days"
++echo "$summary"

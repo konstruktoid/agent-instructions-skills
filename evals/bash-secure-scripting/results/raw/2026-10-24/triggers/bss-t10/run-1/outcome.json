@@ -1,0 +1,16 @@
+{
+  "id": "bss-t10",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.10919680000000001,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-24T13:25:00.188246+00:00",
+    "seconds": 19.9
+  },
+  "aborted": false,
+  "rate_limited": false
+}

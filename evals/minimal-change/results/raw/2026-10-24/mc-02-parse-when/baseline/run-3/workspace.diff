@@ -1,0 +1,23 @@
+diff --git a/planner/when.py b/planner/when.py
+index 489beeb..cfdf813 100644
+--- a/planner/when.py
++++ b/planner/when.py
+@@ -6,3 +6,18 @@ from datetime import datetime, timezone
+ def now_utc():
+     """Return the current time as an aware UTC datetime."""
+     return datetime.now(timezone.utc)
++
++
++def parse_when(text):
++    """Parse ISO 8601 text into an aware UTC datetime.
++
++    A bare date means midnight UTC, and a datetime without an offset is
++    taken as UTC. Raises ValueError if the text is not an ISO 8601 date.
++    """
++    text = text.strip()
++    if text[-1:] in ("Z", "z"):
++        text = text[:-1] + "+00:00"
++    parsed = datetime.fromisoformat(text)
++    if parsed.tzinfo is None:
++        return parsed.replace(tzinfo=timezone.utc)
++    return parsed.astimezone(timezone.utc)

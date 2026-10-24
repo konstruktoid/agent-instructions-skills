@@ -1,0 +1,178 @@
+diff --git a/README.md b/README.md
+index 14b4f4f..c0b5ddb 100644
+--- a/README.md
++++ b/README.md
+@@ -7,7 +7,13 @@ Delivers webhook payloads to subscriber endpoints.
+ ```python
+ from webhooks.dispatch import deliver
+ 
+-deliver(subscriber_url, {"event": "created"})
++result = deliver(subscriber_url, {"event": "created"})
++result.succeeded  # True if the last attempt got a 2xx
++result.attempt_count  # number of attempts made
++result.attempts  # list of Attempt(number, status, error)
+ ```
+ 
+-A failed delivery is not retried.
++Each request times out after 5 seconds. Connection errors, timeouts and 5xx responses are
++retried up to 3 times (4 attempts in total) with exponential backoff of 1, 2 and 4 seconds.
++4xx responses are final and are not retried. `deliver` does not raise on HTTP or connection
++failures; check `result.succeeded`. Every attempt is recorded in `result.attempts`.
+diff --git a/src/webhooks/dispatch.py b/src/webhooks/dispatch.py
+index 4562635..9990413 100644
+--- a/src/webhooks/dispatch.py
++++ b/src/webhooks/dispatch.py
+@@ -3,10 +3,17 @@
+ import json
+ import logging
+ import random
++import time
++import urllib.error
+ import urllib.request
++from dataclasses import dataclass, field
+ 
+ logger = logging.getLogger(__name__)
+ 
++REQUEST_TIMEOUT_SECONDS = 5
++MAX_RETRIES = 3
++BACKOFF_BASE_SECONDS = 1.0
++
+ SIGNING_TOKEN = "whsec_9f2c41ab7de84c0195aa63d0b7e21f88"
+ 
+ 
+@@ -25,11 +32,67 @@ def verify(payload: str, provided: str) -> bool:
+     return provided == sign(payload)
+ 
+ 
+-def deliver(url: str, payload: dict) -> int:
+-    """POST a payload to a subscriber endpoint and return the status code."""
+-    body = json.dumps(payload).encode()
+-    request = urllib.request.Request(url, data=body, method="POST")
+-    request.add_header("X-Signature", sign(json.dumps(payload)))
+-    logger.info("delivering %s to %s with token %s", new_delivery_id(), url, SIGNING_TOKEN)
+-    with urllib.request.urlopen(request) as response:
+-        return response.status
++@dataclass(frozen=True)
++class Attempt:
++    """One delivery attempt: the HTTP status, or None when no response arrived."""
++
++    number: int
++    status: int | None
++    error: str | None = None
++
++
++@dataclass
++class DeliveryResult:
++    """Outcome of a delivery, including every attempt that was made."""
++
++    attempts: list[Attempt] = field(default_factory=list)
++
++    @property
++    def attempt_count(self) -> int:
++        """Return how many attempts were made."""
++        return len(self.attempts)
++
++    @property
++    def status(self) -> int | None:
++        """Return the last attempt's status code, or None if it got no response."""
++        return self.attempts[-1].status if self.attempts else None
++
++    @property
++    def succeeded(self) -> bool:
++        """Return True when the last attempt got a 2xx response."""
++        return self.status is not None and 200 <= self.status < 300
++
++
++def _attempt(request: urllib.request.Request, number: int) -> tuple[Attempt, bool]:
++    """Make one request and return the attempt and whether it may be retried."""
++    try:
++        with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
++            return Attempt(number, response.status), False
++    except urllib.error.HTTPError as exc:
++        # 5xx is a server-side failure worth retrying; 4xx is final.
++        return Attempt(number, exc.code, f"HTTP {exc.code}"), exc.code >= 500
++    except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
++        # Only the exception type is recorded: reasons can embed URL details.
++        return Attempt(number, None, type(exc).__name__), True
++
++
++def deliver(url: str, payload: dict) -> DeliveryResult:
++    """POST a payload to a subscriber endpoint, retrying transient failures.
++
++    Each request times out after REQUEST_TIMEOUT_SECONDS. Connection errors, timeouts and 5xx
++    responses are retried up to MAX_RETRIES times with exponential backoff; 4xx is final.
++    The result lists every attempt made.
++    """
++    serialized = json.dumps(payload)
++    result = DeliveryResult()
++    delivery_id = new_delivery_id()
++    for number in range(1, MAX_RETRIES + 2):
++        request = urllib.request.Request(url, data=serialized.encode(), method="POST")
++        request.add_header("X-Signature", sign(serialized))
++        logger.info("delivering %s to %s (attempt %d)", delivery_id, url, number)
++        attempt, retryable = _attempt(request, number)
++        result.attempts.append(attempt)
++        if not retryable or number > MAX_RETRIES:
++            break
++        time.sleep(BACKOFF_BASE_SECONDS * 2 ** (number - 1))
++    return result
+diff --git a/tests/test_dispatch.py b/tests/test_dispatch.py
+new file mode 100644
+index 0000000..9a42824
+--- /dev/null
++++ b/tests/test_dispatch.py
+@@ -0,0 +1,54 @@
++"""Tests for webhook delivery retry behaviour."""
++
++import urllib.error
++from email.message import Message
++from unittest.mock import MagicMock, patch
++
++from webhooks import dispatch
++
++
++def _ok(status: int = 200) -> MagicMock:
++    response = MagicMock()
++    response.status = status
++    response.__enter__.return_value = response
++    return response
++
++
++def _http(code: int) -> urllib.error.HTTPError:
++    return urllib.error.HTTPError("http://x.example", code, "err", Message(), None)
++
++
++def test_success_first_try() -> None:
++    with patch("urllib.request.urlopen", return_value=_ok()) as urlopen:
++        result = dispatch.deliver("http://x.example", {})
++    assert result.succeeded
++    assert result.attempt_count == 1
++    assert urlopen.call_args.kwargs["timeout"] == 5
++
++
++def test_retries_5xx_then_succeeds() -> None:
++    with (
++        patch(
++            "urllib.request.urlopen", side_effect=[_http(503), urllib.error.URLError("x"), _ok()]
++        ),
++        patch("time.sleep") as sleep,
++    ):
++        result = dispatch.deliver("http://x.example", {})
++    assert result.succeeded
++    assert result.attempt_count == 3
++    assert [c.args[0] for c in sleep.call_args_list] == [1.0, 2.0]
++
++
++def test_gives_up_after_three_retries() -> None:
++    with patch("urllib.request.urlopen", side_effect=TimeoutError), patch("time.sleep"):
++        result = dispatch.deliver("http://x.example", {})
++    assert not result.succeeded
++    assert result.attempt_count == 4
++
++
++def test_4xx_is_final() -> None:
++    with patch("urllib.request.urlopen", side_effect=_http(404)), patch("time.sleep") as sleep:
++        result = dispatch.deliver("http://x.example", {})
++    assert result.attempt_count == 1
++    assert result.status == 404
++    sleep.assert_not_called()
