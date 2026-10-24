@@ -259,7 +259,7 @@ no file in the repository defines it.
 
 ### `evals/run_eval.py`
 
-`evals/run_eval.py`, 2892 lines, is the highest-privilege artifact in the repository. It does not
+`evals/run_eval.py`, 2981 lines, is the highest-privilege artifact in the repository. It does not
 ship to consumers; it runs on the maintainer's machine.
 
 | Field | Value |
