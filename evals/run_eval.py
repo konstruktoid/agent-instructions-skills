@@ -968,7 +968,7 @@ def require_reviewed_graders(skill: str, *, reviewed: bool) -> None:
         lines += ["", "Commands that are new or changed against the baseline:"]
         lines += [f"  {command}" for command in sorted(commands)]
     if changed:
-        lines += ["", f"Paths that differ, shown by `git diff {baseline} -- <path>`:"]
+        lines += ["", f"Changed paths (`git diff {baseline} -- <path>`, or open if untracked):"]
         lines += [f"  {path}" for path in changed]
     lines += [
         "",
