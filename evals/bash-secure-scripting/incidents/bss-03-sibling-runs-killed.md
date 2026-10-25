@@ -43,6 +43,13 @@ attempt has been made to reproduce it.
 
 open. The 2026-10-24 stamp keeps the aborted runs, so its `bss-03-provision-user` `with-skill`
 cell rests on one run rather than three. The cause sits outside what the suite measures: parallel
-runs share one process namespace, so one run's agent can signal another run's processes. The next
-action is a decision on the harness, a process namespace per run or serial runs for any task whose
-fixture starts processes, and then a re-run of the task.
+runs share one process namespace, so one run's agent can signal another run's processes.
+
+A process namespace per run is not available on the operator's machine, where
+`kernel.apparmor_restrict_unprivileged_userns` is 1 and `unshare --user --pid` fails, and relaxing
+that setting would weaken a host control to fix a measurement. The harness instead sends the
+prompt on stdin: `claude_command` in `evals/run_eval.py` returns a `ClaudeCommand` whose argument
+list no longer holds it. A probe sampled the `claude -p` process of a run 26 times and found the
+prompt in none. A sibling run's tool shells still carry their commands as arguments, so a broad
+pattern can still end another run's tool call, as the `Exit code 137` in run 1 shows, though not
+the run itself. The next action is a re-run of the suite with the changed harness.

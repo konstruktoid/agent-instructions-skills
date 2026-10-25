@@ -33,9 +33,11 @@ Open work, as of 2026-10-24:
 - A suite for each of the four skills without one. The two bash skills, `bash-secure-scripting`
   and `bash-testing`, already have suites, so they are not on this list.
 - A first run of the `requirements-analyst` and `evidence-synthesizer` suites.
-- Runs in parallel share one process namespace, so one run's agent can signal another run's
-  processes. `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records the
-  two runs this cost, and `bss-03-provision-user` needs a re-run once the harness isolates them.
+- A re-run of `bash-secure-scripting`, whose 2026-10-24 stamp has one graded `with-skill` run of
+  `bss-03-provision-user` in three. Runs in parallel share one process namespace, and
+  `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records how one run's
+  `kill` ended its sibling and itself, and the harness change that keeps the prompt off the
+  process table.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
   of a skill.
 
