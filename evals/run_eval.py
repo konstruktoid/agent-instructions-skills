@@ -434,14 +434,27 @@ class RunPermissions(NamedTuple):
 TRIGGER_PERMISSIONS = RunPermissions(tools=TRIGGER_TOOLS, mode=None)
 
 
+class ClaudeCommand(NamedTuple):
+    """The `claude -p` argument list for one run, and the prompt `invoke_claude` sends it on stdin.
+
+    The prompt stays out of the argument list because runs share a process table, and an agent
+    that kills by a pattern from its task, as
+    `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records, would otherwise
+    match every concurrent run of that task.
+    """
+
+    argv: list[str]
+    prompt: str
+
+
 def claude_command(
     prompt: str,
     model: str,
     plugin_dir: Path | None,
     permissions: RunPermissions,
     budget: float,
-) -> list[str]:
-    """Build the `claude -p` argument list for one run.
+) -> ClaudeCommand:
+    """Build the `claude -p` command for one run.
 
     `--setting-sources project` keeps the user's own settings, and the plugins
     enabled there, out of both conditions, so the with-skill plugin is the only
@@ -450,7 +463,6 @@ def claude_command(
     command = [
         "claude",
         "-p",
-        prompt,
         "--model",
         model,
         "--setting-sources",
@@ -472,7 +484,7 @@ def claude_command(
     # to the full tool surface and letting it act without prompting are two decisions.
     if permissions.mode is not None:
         command += ["--permission-mode", permissions.mode]
-    return command
+    return ClaudeCommand(command, prompt)
 
 
 def scrub_rules() -> list[tuple[re.Pattern[str], str]]:
@@ -581,7 +593,7 @@ def as_text(stream: str | bytes | None) -> str:
 
 
 def invoke_claude(
-    command: Sequence[str],
+    command: ClaudeCommand,
     cwd: Path,
     stream_path: Path,
     home: Path,
@@ -593,7 +605,8 @@ def invoke_claude(
         # The command is built by claude_command from checked-in eval data, and
         # runs with shell=False, so no shell metacharacter reaches an interpreter.
         completed = subprocess.run(  # noqa: S603
-            command,
+            command.argv,
+            input=command.prompt,
             cwd=cwd,
             env=run_environment(home),
             capture_output=True,
@@ -1338,7 +1351,7 @@ def run_one_agent_task(job: Job) -> dict[str, Any]:
     # Runs the session as the copied template, which is what puts its system prompt, its
     # tool allowlist and its hooks in charge of the run.
     if setup.installed:
-        command += ["--agent", job["template"]]
+        command.argv.extend(["--agent", job["template"]])
     timeout = int(task.get("timeout_seconds", RUN_TIMEOUT_SECONDS))
     record = invoke_claude(command, workspace, run_dir / "run.jsonl", home, timeout)
     facts = transcript_facts(run_dir / "run.jsonl")
