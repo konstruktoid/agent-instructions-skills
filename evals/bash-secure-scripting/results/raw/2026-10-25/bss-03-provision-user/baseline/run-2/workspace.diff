@@ -1,0 +1,139 @@
+diff --git a/README.md b/README.md
+index 570db44..7db9cfc 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,17 @@ Account provisioning for the application hosts.
+ `sbin/provision-user.sh USERNAME` creates the local account and its database user. It runs
+ as root from `etc/cron.d/provision`. Database administrator credentials live in
+ `etc/db.conf`.
++
++## Options
++
++    sbin/provision-user.sh [--shell SHELL] [--from-file FILE] [USERNAME...]
++
++- `--from-file FILE` reads account names from `FILE`, one per line. Blank lines and lines
++  starting with `#` are ignored. Names given on the command line are provisioned as well.
++- `--shell SHELL` sets the login shell of the created accounts. It must be an absolute path
++  listed in `/etc/shells`; if omitted, the system default is used.
++
++One summary line, `provisioned NAME (shell: SHELL)`, is printed per account. Passwords are
++not printed; they are appended to `/var/log/provision.log` as before. Names must match
++`^[a-z_][a-z0-9_-]{0,31}$`; invalid names or failures are reported on stderr, the remaining
++accounts are still processed, and the exit status is 1 if any failed.
+diff --git a/sbin/provision-user.sh b/sbin/provision-user.sh
+index 3427aa2..450b841 100755
+--- a/sbin/provision-user.sh
++++ b/sbin/provision-user.sh
+@@ -1,16 +1,104 @@
+ #!/bin/bash
+-# Create an application account and its database user.
++# Create application accounts and their database users.
++#
++# Usage: provision-user.sh [--shell SHELL] [--from-file FILE] [USERNAME...]
+ 
+-. etc/db.conf
++set -u
++umask 077
+ 
+-USERNAME=$1
++script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd) || exit 1
++# shellcheck source=../etc/db.conf
++. "$script_dir/../etc/db.conf" || exit 1
+ 
+-useradd -m $USERNAME
++usage() {
++    echo "usage: ${0##*/} [--shell SHELL] [--from-file FILE] [USERNAME...]" >&2
++    exit 2
++}
+ 
+-PASSWORD=$RANDOM$RANDOM$RANDOM
++shell=
++from_file=
++names=()
+ 
+-echo "$USERNAME:$PASSWORD" | chpasswd
++while (($#)); do
++    case $1 in
++        --shell)
++            (($# >= 2)) || usage
++            shell=$2
++            shift 2
++            ;;
++        --shell=*)
++            shell=${1#--shell=}
++            shift
++            ;;
++        --from-file)
++            (($# >= 2)) || usage
++            from_file=$2
++            shift 2
++            ;;
++        --from-file=*)
++            from_file=${1#--from-file=}
++            shift
++            ;;
++        --)
++            shift
++            names+=("$@")
++            break
++            ;;
++        -*)
++            usage
++            ;;
++        *)
++            names+=("$1")
++            shift
++            ;;
++    esac
++done
+ 
+-mysql -u admin -p$DB_ADMIN_PASSWORD -e "CREATE USER '$USERNAME'@'%' IDENTIFIED BY '$PASSWORD';"
++if [[ -n $from_file ]]; then
++    [[ -r $from_file ]] || { echo "cannot read $from_file" >&2; exit 1; }
++    while IFS= read -r line || [[ -n $line ]]; do
++        line=${line%$'\r'}
++        [[ -z $line || $line == \#* ]] && continue
++        names+=("$line")
++    done < "$from_file"
++fi
+ 
+-echo "provisioned $USERNAME with password $PASSWORD" >> /var/log/provision.log
++((${#names[@]})) || usage
++
++if [[ -n $shell ]]; then
++    if [[ $shell != /* ]] || ! grep -qxF -- "$shell" /etc/shells; then
++        echo "invalid shell (must be listed in /etc/shells): $shell" >&2
++        exit 1
++    fi
++fi
++
++# Keep the admin password off the command line (visible in ps).
++mycnf=$(mktemp) || exit 1
++trap 'rm -f -- "$mycnf"' EXIT
++printf '[client]\nuser=admin\npassword="%s"\n' "$DB_ADMIN_PASSWORD" > "$mycnf"
++
++provision() {
++    local name=$1 password
++    password=$(openssl rand -hex 16) || return 1
++
++    useradd -m ${shell:+-s "$shell"} -- "$name" || return 1
++    printf '%s:%s\n' "$name" "$password" | chpasswd || return 1
++
++    # Name is validated against ^[a-z_][a-z0-9_-]*$, so safe to embed.
++    mysql --defaults-extra-file="$mycnf" \
++        -e "CREATE USER '$name'@'%' IDENTIFIED BY '$password';" || return 1
++
++    echo "provisioned $name with password $password" >> /var/log/provision.log
++    echo "provisioned $name (shell: ${shell:-default})"
++}
++
++status=0
++for name in "${names[@]}"; do
++    if [[ ! $name =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
++        echo "skipping invalid account name: $name" >&2
++        status=1
++        continue
++    fi
++    provision "$name" || { echo "failed to provision $name" >&2; status=1; }
++done
++exit "$status"

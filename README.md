@@ -542,15 +542,16 @@ have neither eval yet either; a suite for each is a follow-up.
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness, and it reports none. Every latest stamp was measured on 2026-10-06, 2026-10-07 or
-2026-10-24 from a fresh clone of a committed revision outside the operator's home directory, with
-no modified files and no ancestor `CLAUDE.md`. The task and routing results in each row come from
-the same run. Runs that a usage limit cut short were discarded and re-run rather than graded.
+is staleness, and it reports none. Every latest stamp was measured on 2026-10-06, 2026-10-07,
+2026-10-24 or 2026-10-25 from a fresh clone of a committed revision outside the operator's home
+directory, with no modified files and no ancestor `CLAUDE.md`. The task and routing results in each
+row come from the same run. Runs that a usage limit cut short were discarded and re-run rather than
+graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
 | `ansible-verification-loop` | 2026-10-07 | +3 over 7 tasks | 1.4x | 10/10 | Three runs per condition. `avl-07-artifact-hygiene` (+2) and `avl-06-autofix-cosmetics` (+1) separate; the other five deltas are zero, and four of those five score full marks in both conditions, so they cannot discriminate. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
-| `bash-secure-scripting` | 2026-10-24 | +7 over 4 tasks | 2.1x | 10/10 | Three runs per condition, except `bss-03-provision-user` with the skill, where one of three runs completed: a run's process cleanup killed itself and a sibling, as `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records. `bss-03-provision-user` (+3, from that one run) and `bss-01-log-archive` (+1) separate; the other two are marked *no reliable difference*. Measured at `56262a6`. |
+| `bash-secure-scripting` | 2026-10-25 | +6.5 over 4 tasks | 2.9x | 10/10 | Three runs per condition. One `bss-03-provision-user` run with the skill ended with background work outstanding and is excluded from its median. `bss-01-log-archive` (+1), `bss-03-provision-user` (+2.5) and `bss-04-workspace-cleanup` (+2) separate; `bss-02-deploy-notify` is marked *no reliable difference*. Measured at `9c1e137`. |
 | `bash-testing` | 2026-10-07 | +0 over 4 tasks | 1.4x | 10/10 | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. The skill shows no measurable task effect. Routing improved from 7/10 on 2026-08-14. |
 | `github-actions-security` | 2026-10-24 | +37 over 7 tasks | 2.4x | 10/10 | Three runs per condition, and every one of the seven deltas separates. Measured at `56262a6`, graded with `zizmor` 1.31.1 and the `actionlint` image that [Checks](#checks) pins; earlier stamps do not record which builds graded them. |
 | `python-secure-coding` | 2026-10-24 | +2 over 5 tasks | 1.4x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `56262a6`. |
@@ -558,8 +559,7 @@ the same run. Runs that a usage limit cut short were discarded and re-run rather
 
 Two limits cut across the whole table. A routing score carried from an earlier stamp than the task
 result was measured against an earlier revision of that skill's `description`, so it does not
-transfer forward on its own; every row above but `bash-secure-scripting` re-ran the probes in the
-same run as its tasks, and that row's routing is newer than its tasks rather than older. And a
+transfer forward on its own; every row above re-ran the probes in the same run as its tasks. And a
 task delta is a measurement of the skill revision that ran, not of the file as it stands now:
 editing a skill, its `tasks.json` or its `assertions.json` invalidates the stamp above it until the
 eval is run again. That cannot be repaired by `regrade`, since it re-runs assertions only where the

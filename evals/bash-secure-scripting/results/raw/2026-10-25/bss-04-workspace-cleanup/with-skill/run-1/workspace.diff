@@ -1,0 +1,173 @@
+diff --git a/README.md b/README.md
+index 0d04e04..cb71a35 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,29 @@
+ 
+ Housekeeping scripts for the CI workers.
+ 
+-`bin/clean-workspaces.sh` removes stale build workspaces under `workspaces/`. The root and
+-the age threshold are hardcoded, so a worker with a different layout needs its own copy of
+-the script.
++## `bin/clean-workspaces.sh`
++
++Removes stale build workspaces: each direct subdirectory of the workspace root whose newest
++file is more than the age threshold old (an empty directory is aged by its own mtime).
++Symlinks in the root are never followed or removed.
++
++```
++bin/clean-workspaces.sh [-n|--dry-run] [-r|--root DIR] [-d|--days N]
++```
++
++| Option | Default | Meaning |
++|---|---|---|
++| `-r`, `--root DIR` | `workspaces` | Workspace root (relative to the current directory, or absolute) |
++| `-d`, `--days N` | `7` | Remove workspaces older than `N` days (non-negative integer) |
++| `-n`, `--dry-run` | off | List what would be removed (`would remove <dir> (age Nd)`) and remove nothing |
++| `-h`, `--help` | | Show usage |
++
++Examples:
++
++```
++bin/clean-workspaces.sh --dry-run                       # preview with the defaults
++bin/clean-workspaces.sh --root /srv/ci/workspaces --days 14
++```
++
++Exit status: `0` on success, `1` if a removal failed, `64` for a usage error (bad option,
++non-numeric `--days`, or a root that resolves to `/`), `66` if the root is not a directory.
+diff --git a/bin/clean-workspaces.sh b/bin/clean-workspaces.sh
+index a6c30b3..5a1bbae 100755
+--- a/bin/clean-workspaces.sh
++++ b/bin/clean-workspaces.sh
+@@ -1,19 +1,117 @@
+ #!/bin/bash
+-# Remove stale CI workspaces.
++#
++# Remove stale CI workspaces: direct subdirectories of a root whose newest file
++# is older than a number of days.
+ 
+-WORKSPACE_ROOT=workspaces
+-DAYS=7
++set -Eeuo pipefail
++shopt -s inherit_errexit
+ 
+-cd $WORKSPACE_ROOT
++PATH='/usr/local/bin:/usr/bin:/bin'
++export PATH
++export LC_ALL=C
+ 
+-for dir in $(ls); do
+-  if [ -d $dir ]; then
+-    LAST=`find $dir -type f -printf '%T@\n' | sort -n | tail -1`
+-    AGE=$(( ( $(date +%s) - ${LAST%.*} ) / 86400 ))
+-    if [ $AGE -gt $DAYS ]; then
+-      echo "removing $dir (age ${AGE}d)"
+-      rm -rf $dir/*
+-      rmdir $dir
+-    fi
++readonly PROGNAME="${0##*/}"
++readonly DEFAULT_ROOT=workspaces
++readonly DEFAULT_DAYS=7
++
++err() {
++  printf '%s: %s\n' "${PROGNAME}" "$*" >&2
++}
++
++usage() {
++  cat <<USAGE
++Usage: ${PROGNAME} [-n|--dry-run] [-r|--root DIR] [-d|--days N]
++
++Remove workspaces under DIR whose newest file is more than N days old.
++
++  -r, --root DIR   workspace root (default: ${DEFAULT_ROOT})
++  -d, --days N     age threshold in days (default: ${DEFAULT_DAYS})
++  -n, --dry-run    list what would be removed, remove nothing
++  -h, --help       show this help
++USAGE
++}
++
++# Prints the age in whole days of the newest file under a directory, or of the
++# directory itself when it holds no files. Run from the workspace root.
++# Arguments: directory name
++workspace_age_days() {
++  local dir="$1"
++  local last now
++
++  last="$(find "${dir}" -type f -printf '%T@\n' | sort -n | tail -n 1)"
++  if [[ -z ${last} ]]; then
++    last="$(find "${dir}" -maxdepth 0 -printf '%T@\n')"
++  fi
++  now="$(date +%s)"
++  printf '%d\n' $(((now - ${last%.*}) / 86400))
++}
++
++main() {
++  local root="${DEFAULT_ROOT}"
++  local days="${DEFAULT_DAYS}"
++  local dry_run=0
++  local dir age status=0
++
++  while (($# > 0)); do
++    case "$1" in
++      -n | --dry-run) dry_run=1 ;;
++      -r | --root | -d | --days)
++        if (($# < 2)); then
++          err "option $1 requires a value"
++          return 64
++        fi
++        if [[ $1 == -r || $1 == --root ]]; then root="$2"; else days="$2"; fi
++        shift
++        ;;
++      -h | --help)
++        usage
++        return 0
++        ;;
++      *)
++        err "unknown argument: $1"
++        usage >&2
++        return 64
++        ;;
++    esac
++    shift
++  done
++
++  if [[ ! ${days} =~ ^[0-9]+$ ]]; then
++    err "--days must be a non-negative integer: ${days}"
++    return 64
++  fi
++  # Force base 10 so a value such as 08 is not read as octal.
++  days=$((10#${days}))
++
++  if [[ -z ${root} || ! -d ${root} ]]; then
++    err "workspace root is not a directory: ${root}"
++    return 66
++  fi
++  cd -- "${root}"
++  if [[ $(pwd -P) == / ]]; then
++    err "refusing to clean the filesystem root"
++    return 64
+   fi
+-done
++
++  # Direct children only; -type d does not match symlinks, so a link cannot
++  # redirect the removal outside the root.
++  while IFS= read -r -d '' dir; do
++    dir="${dir#./}"
++    age="$(workspace_age_days "./${dir}")"
++    if ((age > days)); then
++      if ((dry_run)); then
++        printf 'would remove %s (age %dd)\n' "${dir}" "${age}"
++      else
++        printf 'removing %s (age %dd)\n' "${dir}" "${age}"
++        if ! rm -rf -- "./${dir}"; then
++          err "failed to remove ${dir}"
++          status=1
++        fi
++      fi
++    fi
++  done < <(find . -mindepth 1 -maxdepth 1 -type d -print0)
++
++  return "${status}"
++}
++
++main "$@"

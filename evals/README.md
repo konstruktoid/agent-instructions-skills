@@ -5,12 +5,13 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-24
+## Current state, 2026-10-25
 
-Every latest stamp is current. `bash-secure-scripting`, `github-actions-security`,
+Every latest stamp is current. `bash-secure-scripting` was re-measured on 2026-10-25 at
+`9c1e137`, after the harness change that sends the prompt on stdin. `github-actions-security`,
 `python-secure-coding`, `minimal-change` and the `python-security-verifier` suite were re-measured
-on 2026-10-24 at `56262a6`, with the checkout's `AGENTS.md` and the caller's Claude Code variables
-kept out of every run. The other three skill suites were measured on 2026-10-06 and 2026-10-07.
+on 2026-10-24 at `56262a6`. Every run kept the checkout's `AGENTS.md` and the caller's Claude
+Code variables out. The other three skill suites were measured on 2026-10-06 and 2026-10-07.
 Each stamp comes from a fresh clone of a committed revision with no modified files and no ancestor
 `CLAUDE.md`, and the checker reports no staleness.
 
@@ -28,16 +29,11 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
-Open work, as of 2026-10-24:
+Open work, as of 2026-10-25:
 
 - A suite for each of the four skills without one. The two bash skills, `bash-secure-scripting`
   and `bash-testing`, already have suites, so they are not on this list.
 - A first run of the `requirements-analyst` and `evidence-synthesizer` suites.
-- A re-run of `bash-secure-scripting`, whose 2026-10-24 stamp has one graded `with-skill` run of
-  `bss-03-provision-user` in three. Runs in parallel share one process namespace, and
-  `evals/bash-secure-scripting/incidents/bss-03-sibling-runs-killed.md` records how one run's
-  `kill` ended its sibling and itself, and the harness change that keeps the prompt off the
-  process table.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
   of a skill.
 

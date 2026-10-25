@@ -1,0 +1,16 @@
+{
+  "id": "bss-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0695332,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-25T18:04:16.789860+00:00",
+    "seconds": 15.8
+  },
+  "aborted": false,
+  "rate_limited": false
+}
