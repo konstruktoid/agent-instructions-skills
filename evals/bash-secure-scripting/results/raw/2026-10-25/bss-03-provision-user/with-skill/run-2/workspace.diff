@@ -1,0 +1,274 @@
+diff --git a/.shellcheckrc b/.shellcheckrc
+new file mode 100644
+index 0000000..957b6f6
+--- /dev/null
++++ b/.shellcheckrc
+@@ -0,0 +1 @@
++source-path=SCRIPTDIR/..
+diff --git a/README.md b/README.md
+index 570db44..a807fc6 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,27 @@
+ 
+ Account provisioning for the application hosts.
+ 
+-`sbin/provision-user.sh USERNAME` creates the local account and its database user. It runs
+-as root from `etc/cron.d/provision`. Database administrator credentials live in
++`sbin/provision-user.sh` creates a local account and its database user for each name given. It
++runs as root from `etc/cron.d/provision`. Database administrator credentials live in
+ `etc/db.conf`.
++
++```
++sbin/provision-user.sh [--shell SHELL] [--from-file FILE] [USERNAME ...]
++```
++
++- `USERNAME ...`: accounts to provision. Names must match `^[a-z_][a-z0-9_-]{0,31}$`.
++- `--from-file FILE`: also read account names from `FILE`, one per line. Blank lines and lines
++  starting with `#` are ignored. May be combined with `USERNAME` arguments.
++- `--shell SHELL`: login shell for the accounts created. Must be an absolute path listed in
++  `/etc/shells`. Without it, `useradd` uses the system default.
++
++All names and the shell are validated before any account is created. Each account is then
++provisioned in turn and a `provisioned NAME (shell: SHELL)` line is printed on success. A failure
++is reported on stderr, the remaining accounts are still attempted, and the exit status is 1 if any
++failed. A failure after `useradd` leaves the local account in place.
++
++Each account gets a random password, set locally and on the database user. The password is not
++printed or logged; `/var/log/provision.log` records only the time and account name.
++
++Exit statuses: 0 success, 1 an account failed, 64 usage, 65 invalid name or shell, 66 unreadable
++file, 77 not root, 78 configuration missing.
+diff --git a/sbin/provision-user.sh b/sbin/provision-user.sh
+index 3427aa2..dfd9168 100755
+--- a/sbin/provision-user.sh
++++ b/sbin/provision-user.sh
+@@ -1,16 +1,220 @@
+ #!/bin/bash
+-# Create an application account and its database user.
++#
++# Create application accounts and their database users.
++#
++# Usage: provision-user.sh [--shell SHELL] [--from-file FILE] [USERNAME ...]
+ 
+-. etc/db.conf
++set -Eeuo pipefail
++shopt -s inherit_errexit
+ 
+-USERNAME=$1
++# Runs as root from cron: do not trust the caller's environment.
++PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
++export PATH
++export LC_ALL=C
++export TMPDIR=/var/tmp
++umask 077
+ 
+-useradd -m $USERNAME
++readonly PROGNAME="${0##*/}"
++SCRIPT_DIR="$(cd -- "${0%/*}" && pwd -P)"
++readonly SCRIPT_DIR
++readonly DB_CONF="${SCRIPT_DIR}/../etc/db.conf"
++readonly LOG_FILE='/var/log/provision.log'
++readonly SHELLS_FILE='/etc/shells'
+ 
+-PASSWORD=$RANDOM$RANDOM$RANDOM
++# Script scope: the EXIT trap runs after main has returned.
++defaults_file=''
+ 
+-echo "$USERNAME:$PASSWORD" | chpasswd
++err() {
++  printf '%s: %s\n' "${PROGNAME}" "$*" >&2
++}
+ 
+-mysql -u admin -p$DB_ADMIN_PASSWORD -e "CREATE USER '$USERNAME'@'%' IDENTIFIED BY '$PASSWORD';"
++cleanup() {
++  if [[ -n ${defaults_file} && -e ${defaults_file} ]]; then
++    rm -f -- "${defaults_file}"
++  fi
++  return 0
++}
+ 
+-echo "provisioned $USERNAME with password $PASSWORD" >> /var/log/provision.log
++# Clean up, then die of the signal so the caller sees 128+n.
++on_signal() {
++  local sig="$1"
++  cleanup
++  trap - EXIT "${sig}"
++  kill -s "${sig}" -- "$$"
++}
++
++usage() {
++  err "usage: ${PROGNAME} [--shell SHELL] [--from-file FILE] [USERNAME ...]"
++}
++
++# Succeeds if the name is a safe local account name; also keeps it safe to
++# embed in the SQL below.
++valid_username() {
++  [[ $1 =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]
++}
++
++# Succeeds if the shell is listed verbatim in /etc/shells.
++valid_shell() {
++  local candidate="$1"
++  local line
++  [[ ${candidate} == /* && -x ${candidate} ]] || return 1
++  while IFS= read -r line; do
++    [[ ${line} == "${candidate}" ]] && return 0
++  done <"${SHELLS_FILE}"
++  return 1
++}
++
++# Writes a mysql option file holding the admin credential, so the password is
++# never on a command line.
++make_defaults_file() {
++  local escaped="${DB_ADMIN_PASSWORD//\\/\\\\}"
++  escaped="${escaped//\"/\\\"}"
++  defaults_file="$(mktemp)"
++  printf '[client]\nuser=admin\npassword="%s"\n' "${escaped}" >"${defaults_file}"
++}
++
++# 32 alphanumeric characters from /dev/urandom.
++generate_password() {
++  local secret
++  secret="$(LC_ALL=C tr -dc 'A-Za-z0-9' < <(head -c 512 /dev/urandom))"
++  secret="${secret:0:32}"
++  ((${#secret} == 32)) || return 1
++  printf '%s' "${secret}"
++}
++
++# Arguments: username, login shell (may be empty for the system default)
++# Returns: 0 on success, 1 on failure
++provision_one() {
++  local username="$1"
++  local login_shell="$2"
++  local password
++  local -a useradd_cmd=(useradd -m)
++
++  if [[ -n ${login_shell} ]]; then
++    useradd_cmd+=(-s "${login_shell}")
++  fi
++
++  password="$(generate_password)" || {
++    err "${username}: could not generate a password"
++    return 1
++  }
++
++  "${useradd_cmd[@]}" -- "${username}" || {
++    err "${username}: useradd failed"
++    return 1
++  }
++
++  printf '%s:%s\n' "${username}" "${password}" | chpasswd || {
++    err "${username}: chpasswd failed; local account exists"
++    return 1
++  }
++
++  printf "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';\n" "${username}" "${password}" |
++    mysql --defaults-extra-file="${defaults_file}" || {
++    err "${username}: database user creation failed; local account exists"
++    return 1
++  }
++
++  # The password is deliberately not logged or printed.
++  printf '%s provisioned %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${username}" >>"${LOG_FILE}" || true
++  printf 'provisioned %s (shell: %s)\n' "${username}" "${login_shell:-default}"
++}
++
++main() {
++  local login_shell=''
++  local from_file=''
++  local -a names=()
++  local name line failed=0
++
++  while (($#)); do
++    case $1 in
++      --shell)
++        (($# >= 2)) || { usage; return 64; }
++        login_shell="$2"
++        shift 2
++        ;;
++      --from-file)
++        (($# >= 2)) || { usage; return 64; }
++        from_file="$2"
++        shift 2
++        ;;
++      --)
++        shift
++        names+=("$@")
++        break
++        ;;
++      -*)
++        usage
++        return 64
++        ;;
++      *)
++        names+=("$1")
++        shift
++        ;;
++    esac
++  done
++
++  if [[ -n ${from_file} ]]; then
++    [[ -f ${from_file} && -r ${from_file} ]] || {
++      err "cannot read account file: ${from_file}"
++      return 66
++    }
++    while IFS= read -r line || [[ -n ${line} ]]; do
++      line="${line%$'\r'}"
++      [[ -z ${line} || ${line} == '#'* ]] && continue
++      names+=("${line}")
++    done <"${from_file}"
++  fi
++
++  if ((${#names[@]} == 0)); then
++    usage
++    return 64
++  fi
++
++  # Validate everything before changing anything.
++  for name in "${names[@]}"; do
++    valid_username "${name}" || {
++      err "invalid username: ${name}"
++      return 65
++    }
++  done
++  if [[ -n ${login_shell} ]]; then
++    valid_shell "${login_shell}" || {
++      err "shell not permitted (absolute path listed in ${SHELLS_FILE} required): ${login_shell}"
++      return 65
++    }
++  fi
++
++  ((EUID == 0)) || {
++    err 'must run as root'
++    return 77
++  }
++
++  [[ -f ${DB_CONF} && ! -L ${DB_CONF} ]] || {
++    err "missing or unsafe config: ${DB_CONF}"
++    return 78
++  }
++  # shellcheck source=etc/db.conf
++  . "${DB_CONF}"
++  [[ -n ${DB_ADMIN_PASSWORD:-} ]] || {
++    err 'DB_ADMIN_PASSWORD is not set'
++    return 78
++  }
++
++  # Traps before the mktemp inside make_defaults_file.
++  trap cleanup EXIT
++  trap 'on_signal INT' INT
++  trap 'on_signal TERM' TERM
++  make_defaults_file
++
++  for name in "${names[@]}"; do
++    provision_one "${name}" "${login_shell}" || failed=$((failed + 1))
++  done
++
++  if ((failed > 0)); then
++    err "${failed} of ${#names[@]} account(s) failed"
++    return 1
++  fi
++}
++
++main "$@"

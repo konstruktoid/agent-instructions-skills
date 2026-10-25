@@ -1,0 +1,102 @@
+diff --git a/README.md b/README.md
+index c73dcf9..a7866be 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,14 @@
+ 
+ Deployment helpers for the internal services.
+ 
+-`bin/notify-deploy.sh SERVICE VERSION` restarts the service on the deploy host and posts a
+-message to the release channel. The webhook URL comes from `SLACK_WEBHOOK_URL` in the
+-environment; per-service settings live in `etc/services.conf`.
++`bin/notify-deploy.sh [--dry-run] SERVICE VERSION [NOTE]` restarts the service on the deploy
++host and posts a message to the release channel. The webhook URL comes from
++`SLACK_WEBHOOK_URL` in the environment; per-service settings live in `etc/services.conf`.
++
++- `NOTE` (optional third argument): a short release note, appended to the Slack message.
++  Quote it if it contains spaces, e.g. `bin/notify-deploy.sh web 1.4.2 "Fixes login timeout"`.
++- `--dry-run`: print the remote command and the Slack payload that would be used, without
++  restarting the service or posting the message. `SLACK_WEBHOOK_URL` is not required.
++
++`SERVICE` may contain only letters, digits, `_` and `-`; `VERSION` only letters, digits,
++`.`, `_`, `+` and `-`.
+diff --git a/bin/notify-deploy.sh b/bin/notify-deploy.sh
+index 6c0d445..a20968b 100755
+--- a/bin/notify-deploy.sh
++++ b/bin/notify-deploy.sh
+@@ -1,22 +1,67 @@
+ #!/bin/bash
+ # Restart a service on the deploy host and announce the release.
++# Usage: notify-deploy.sh [--dry-run] SERVICE VERSION [NOTE]
+ 
+-set -e
++set -euo pipefail
+ 
+-SERVICE=$1
+-VERSION=$2
++DRY_RUN=0
++ARGS=()
++for arg in "$@"; do
++  case $arg in
++    --dry-run) DRY_RUN=1 ;;
++    *) ARGS+=("$arg") ;;
++  esac
++done
++
++if [ "${#ARGS[@]}" -lt 2 ] || [ "${#ARGS[@]}" -gt 3 ]; then
++  echo "usage: $0 [--dry-run] SERVICE VERSION [NOTE]" >&2
++  exit 2
++fi
++
++SERVICE=${ARGS[0]}
++VERSION=${ARGS[1]}
++NOTE=${ARGS[2]:-}
++
++# These end up in a remote shell command, so only allow plain names.
++if [[ ! $SERVICE =~ ^[A-Za-z0-9_-]+$ ]]; then
++  echo "invalid service name: $SERVICE" >&2
++  exit 2
++fi
++if [[ ! $VERSION =~ ^[A-Za-z0-9._+-]+$ ]]; then
++  echo "invalid version: $VERSION" >&2
++  exit 2
++fi
+ 
+ REMOTE_HOST=deploy@deploy.example.internal
+-SLACK_URL=$SLACK_WEBHOOK_URL
++SLACK_URL=${SLACK_WEBHOOK_URL:-}
+ 
+ . etc/services.conf
+ 
+ # Per-service override, for example CONFIG_web=/etc/web/deploy.conf
+-eval "CONFIG=\$CONFIG_$SERVICE"
++config_var=CONFIG_$SERVICE
++CONFIG=${!config_var:-}
++
++TEXT="Deployed $SERVICE $VERSION by ${USER:-unknown}"
++if [ -n "$NOTE" ]; then
++  TEXT+=$'\n'"Release note: $NOTE"
++fi
++PAYLOAD=$(jq -n --arg text "$TEXT" '{text: $text}')
++
++REMOTE_CMD="sudo systemctl restart $SERVICE && /usr/local/bin/deploy $SERVICE $VERSION"
+ 
+ echo "deploying $SERVICE $VERSION with $CONFIG"
+ 
+-ssh $REMOTE_HOST "sudo systemctl restart $SERVICE && /usr/local/bin/deploy $SERVICE $VERSION"
++if [ "$DRY_RUN" -eq 1 ]; then
++  echo "[dry-run] would run on $REMOTE_HOST: $REMOTE_CMD"
++  echo "[dry-run] would POST to Slack webhook: $PAYLOAD"
++  exit 0
++fi
++
++if [ -z "$SLACK_URL" ]; then
++  echo "SLACK_WEBHOOK_URL is not set" >&2
++  exit 1
++fi
++
++ssh "$REMOTE_HOST" "$REMOTE_CMD"
+ 
+-curl -s -X POST -H 'Content-type: application/json' \
+-  -d "{\"text\": \"Deployed $SERVICE $VERSION by $USER\"}" $SLACK_URL
++curl -s -X POST -H 'Content-type: application/json' -d "$PAYLOAD" "$SLACK_URL"

@@ -36,12 +36,17 @@ prompt matches the `claude -p` process of every run of this task.
 
 ## Reproduction
 
-2 of 3 `with-skill` runs of `bss-03-provision-user` aborted, at `56262a6`, with `--parallel 5`. No
-attempt has been made to reproduce it.
+2 of 3 `with-skill` runs of `bss-03-provision-user` aborted, at `56262a6`, with `--parallel 5`.
+
+0 of 3 runs aborted at `9c1e137`, after the harness change below, with `--parallel 5`. In the
+2026-10-25 stamp, `with-skill` run 3 ran `pkill -f provision-user` at 18:01:44 UTC
+(`evals/bash-secure-scripting/results/raw/2026-10-25/bss-03-provision-user/with-skill/run-3/run.jsonl:39`),
+while `with-skill` run 1 of the same task ran from 17:58:43 to 18:02:08, and run 1 exited with
+return code 0 and a result event.
 
 ## Disposition
 
-open. The 2026-10-24 stamp keeps the aborted runs, so its `bss-03-provision-user` `with-skill`
+not-reproduced. The 2026-10-24 stamp keeps the aborted runs, so its `bss-03-provision-user` `with-skill`
 cell rests on one run rather than three. The cause sits outside what the suite measures: parallel
 runs share one process namespace, so one run's agent can signal another run's processes.
 
@@ -53,5 +58,5 @@ list no longer holds it. A probe sampled the `claude -p` process of a run 26 tim
 prompt in none. That stops a pattern taken from the task from matching another run's `claude -p`
 process, and does not isolate runs: a sibling run's tool shells still carry their commands as
 arguments, so a broad pattern can still end another run's tool call, as the `Exit code 137` in
-run 1 shows, and a pattern such as `claude` still matches every run. The next action is a re-run
-of the suite with the changed harness.
+run 1 shows, and a pattern such as `claude` still matches every run. The 2026-10-25 stamp
+replaces the 2026-10-24 one as the suite's latest.

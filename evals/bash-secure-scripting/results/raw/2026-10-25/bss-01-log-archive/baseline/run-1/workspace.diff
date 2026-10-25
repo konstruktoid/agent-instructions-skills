@@ -1,0 +1,135 @@
+diff --git a/README.md b/README.md
+index 7c81ea8..2436094 100644
+--- a/README.md
++++ b/README.md
+@@ -2,7 +2,16 @@
+ 
+ Small operations repository for the log retention job.
+ 
+-`bin/archive-logs.sh SERVICE` packs the logs of one service from `logs/` into a dated
+-tarball under `archives/`. It runs from cron on the log host every night.
++`bin/archive-logs.sh [--keep-days N] SERVICE [SERVICE...]` packs the logs of each named
++service from `logs/` into a dated tarball (`SERVICE-YYYYMMDD.tar.gz`) under `archives/`.
++It runs from cron on the log host every night, from the repository root.
+ 
+-Archives are pruned by hand today.
++    bin/archive-logs.sh api web
++    bin/archive-logs.sh --keep-days 30 api web
++
++- Service names are validated first; if any is invalid or has no log directory,
++  nothing is archived and the script exits non-zero.
++- `--keep-days N` removes archives in `archives/` older than N days (by modification
++  time, any service) after the new archives are written. Without it nothing is pruned.
++- On success it prints a one-line summary, e.g.
++  `archived 2 service(s): api web; pruned 3 archive(s) older than 30 days`.
+diff --git a/archives/api-20261025.tar.gz b/archives/api-20261025.tar.gz
+new file mode 100644
+index 0000000..b6357cf
+Binary files /dev/null and b/archives/api-20261025.tar.gz differ
+diff --git a/archives/web-20261025.tar.gz b/archives/web-20261025.tar.gz
+new file mode 100644
+index 0000000..fee7e82
+Binary files /dev/null and b/archives/web-20261025.tar.gz differ
+diff --git a/bin/archive-logs.sh b/bin/archive-logs.sh
+index d6e0cf6..4e8309e 100755
+--- a/bin/archive-logs.sh
++++ b/bin/archive-logs.sh
+@@ -1,16 +1,90 @@
+ #!/bin/bash
+-# Archive the logs of one service into the retention directory.
++# Archive the logs of one or more services into the retention directory.
++#
++# Usage: archive-logs.sh [--keep-days N] SERVICE [SERVICE...]
++
++set -euo pipefail
+ 
+ LOG_ROOT=logs
+ RETENTION_DIR=archives
+-SERVICE=$1
+ 
+-TMP=/tmp/archive-logs.$$
+-mkdir $TMP
++usage() {
++    echo "usage: ${0##*/} [--keep-days N] SERVICE [SERVICE...]" >&2
++    exit 2
++}
++
++keep_days=
++services=()
++
++while (($#)); do
++    case $1 in
++        --keep-days)
++            (($# >= 2)) || usage
++            keep_days=$2
++            shift 2
++            ;;
++        --keep-days=*)
++            keep_days=${1#--keep-days=}
++            shift
++            ;;
++        --)
++            shift
++            services+=("$@")
++            break
++            ;;
++        -*)
++            echo "unknown option: $1" >&2
++            usage
++            ;;
++        *)
++            services+=("$1")
++            shift
++            ;;
++    esac
++done
++
++((${#services[@]})) || usage
++
++if [[ -n $keep_days && ! $keep_days =~ ^[0-9]+$ ]]; then
++    echo "--keep-days needs a non-negative integer, got: $keep_days" >&2
++    exit 2
++fi
++
++# Validate everything up front so a bad name does not leave a partial run.
++for service in "${services[@]}"; do
++    if [[ ! $service =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]*$ || $service == *..* ]]; then
++        echo "invalid service name: $service" >&2
++        exit 2
++    fi
++    if [[ ! -d $LOG_ROOT/$service ]]; then
++        echo "no logs for service: $service" >&2
++        exit 1
++    fi
++done
++
++[[ -d $RETENTION_DIR ]] || { echo "missing directory: $RETENTION_DIR" >&2; exit 1; }
++
++tmp=$(mktemp -d "${TMPDIR:-/tmp}/archive-logs.XXXXXX")
++trap 'rm -rf -- "$tmp"' EXIT
++
++stamp=$(date +%Y%m%d)
+ 
+-tar czf $TMP/$SERVICE.tar.gz $LOG_ROOT/$SERVICE
+-mv $TMP/$SERVICE.tar.gz $RETENTION_DIR/$SERVICE-`date +%Y%m%d`.tar.gz
++for service in "${services[@]}"; do
++    tar czf "$tmp/$service.tar.gz" -- "$LOG_ROOT/$service"
++    mv -- "$tmp/$service.tar.gz" "$RETENTION_DIR/$service-$stamp.tar.gz"
++done
+ 
+-rm -rf $TMP/*
++pruned=0
++if [[ -n $keep_days ]]; then
++    while IFS= read -r -d '' old; do
++        rm -f -- "$old"
++        pruned=$((pruned + 1))
++    done < <(find "$RETENTION_DIR" -maxdepth 1 -type f -name '*-????????.tar.gz' \
++                  -mtime "+$keep_days" -print0)
++fi
+ 
+-echo "archived $SERVICE"
++summary="archived ${#services[@]} service(s): ${services[*]}"
++if [[ -n $keep_days ]]; then
++    summary+="; pruned $pruned archive(s) older than $keep_days days"
++fi
++echo "$summary"
