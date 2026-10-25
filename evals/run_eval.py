@@ -820,10 +820,19 @@ def transcript_facts(stream_path: Path) -> dict[str, Any]:
 # reviewed; the local branch is the fallback for a checkout with no remote.
 GRADER_BASELINE_REFS = ("origin/main", "main")
 
-# The files that decide what `run_grader` executes. `assertions.json` holds the strings
-# themselves, and `run_eval.py` decides whether, where and as what they run, so a change to
-# either one is a change to what a contributor can make this machine do.
-GRADER_SOURCES = ("evals/{skill}/assertions.json", "evals/run_eval.py")
+# The files that decide what a run and its graders execute. `assertions.json` holds the
+# strings themselves, and `run_eval.py` decides whether, where and as what they run. An
+# assertion such as `make test` or `./bin/archive-logs.sh` runs a file the fixture supplies,
+# a suite's patches are applied to the workspace before grading, and `tasks.json` picks the
+# fixture and patch and writes the prompt an agent with Bash acts on. A change to any of them
+# is a change to what a contributor can make this machine do.
+GRADER_SOURCES = (
+    "evals/{skill}/assertions.json",
+    "evals/{skill}/tasks.json",
+    "evals/{skill}/fixtures",
+    "evals/{skill}/patches",
+    "evals/run_eval.py",
+)
 
 
 def resolve_grader_baseline() -> str | None:
@@ -937,13 +946,14 @@ def require_reviewed_graders(skill: str, *, reviewed: bool) -> None:
         reason = f"the comparison against {baseline} could not be made"
         commands = set()
     else:
-        reason = f"{', '.join(changed)} differs from {baseline}"
+        reason = f"{len(changed)} grader-bearing path(s) differ from {baseline}"
         current = shell_assertions(load_json(EVALS_DIR / skill / "assertions.json"))
         previous = baseline_shell_assertions(baseline, skill)
         commands = current if previous is None else current - previous
 
     if reviewed:
-        print(f"grader review waived with --graders-reviewed: {reason}")
+        named = f": {', '.join(changed)}" if changed else ""
+        print(f"grader review waived with --graders-reviewed: {reason}{named}")
         return
 
     lines = [
@@ -957,15 +967,12 @@ def require_reviewed_graders(skill: str, *, reviewed: bool) -> None:
     if commands:
         lines += ["", "Commands that are new or changed against the baseline:"]
         lines += [f"  {command}" for command in sorted(commands)]
-        subject = "them"
-    elif baseline is not None and changed:
-        lines += ["", "No shell assertion changed; the difference is in the harness itself."]
-        subject = "the change"
-    else:
-        subject = "the suite"
+    if changed:
+        lines += ["", f"Paths that differ, shown by `git diff {baseline} -- <path>`:"]
+        lines += [f"  {path}" for path in changed]
     lines += [
         "",
-        f"Read {subject}, then re-run with --graders-reviewed.",
+        f"Read {'the above' if changed else 'the suite'}, then re-run with --graders-reviewed.",
         "",
     ]
     raise SystemExit("\n".join(lines))
