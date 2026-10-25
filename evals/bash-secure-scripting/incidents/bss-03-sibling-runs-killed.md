@@ -50,6 +50,8 @@ A process namespace per run is not available on the operator's machine, where
 that setting would weaken a host control to fix a measurement. The harness instead sends the
 prompt on stdin: `claude_command` in `evals/run_eval.py` returns a `ClaudeCommand` whose argument
 list no longer holds it. A probe sampled the `claude -p` process of a run 26 times and found the
-prompt in none. A sibling run's tool shells still carry their commands as arguments, so a broad
-pattern can still end another run's tool call, as the `Exit code 137` in run 1 shows, though not
-the run itself. The next action is a re-run of the suite with the changed harness.
+prompt in none. That stops a pattern taken from the task from matching another run's `claude -p`
+process, and does not isolate runs: a sibling run's tool shells still carry their commands as
+arguments, so a broad pattern can still end another run's tool call, as the `Exit code 137` in
+run 1 shows, and a pattern such as `claude` still matches every run. The next action is a re-run
+of the suite with the changed harness.
