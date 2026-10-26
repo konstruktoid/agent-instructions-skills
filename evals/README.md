@@ -15,11 +15,11 @@ Code variables out. The other three skill suites were measured on 2026-10-06 and
 Each stamp comes from a fresh clone of a committed revision with no modified files and no ancestor
 `CLAUDE.md`, and the checker reports no staleness.
 
-Four skills have no suite at all, `github-repository-security`, `github-organization-governance`,
-`terraform-secure-iac`, and `terraform-testing`, so nothing measures them. Of the twelve agent
-templates, `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a
-suite, and the last two were first run on 2026-10-26 at `52d4ed8`, where neither separated from
-its no-agent arm. The verifier's 2026-10-08 stamp re-ran the same
+Three skills have no suite at all, `github-repository-security`, `github-organization-governance`,
+and `terraform-testing`, so nothing measures them. `terraform-secure-iac` has a suite that has not
+been run. Of the twelve agent templates, `python-security-verifier`, `requirements-analyst` and
+`evidence-synthesizer` have a suite, and the last two were first run on 2026-10-26 at `52d4ed8`,
+where neither separated from its no-agent arm. The verifier's 2026-10-08 stamp re-ran the same
 tasks as 2026-10-07, unchanged, because adding `comparisons` to `tasks.json` invalidated the prior
 stamp; it scored full marks in both conditions on every task, as the 2026-10-06 and 2026-10-07
 stamps did, and the 2026-10-24 stamp did again. The claim it tests from
@@ -32,8 +32,9 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 Open work, as of 2026-10-26:
 
-- A suite for each of the four skills without one. The two bash skills, `bash-secure-scripting`
-  and `bash-testing`, already have suites, so they are not on this list.
+- A first run of `terraform-secure-iac`, and a suite for each of the three skills without one.
+  The two bash skills, `bash-secure-scripting` and `bash-testing`, already have suites, so they
+  are not on this list.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
   of a skill.
 
@@ -239,6 +240,9 @@ export EVAL_TOOL_BIN=/tmp/eval-bin
 # ansible-galaxy. `uv tool install ansible-lint` does not expose it, since it publishes
 # only its own entry point, so ansible-core is installed as a tool of its own.
 uv tool install ansible-core
+
+# terraform-secure-iac grades with terraform, from the system package manager, and with checkov.
+uv tool install checkov
 
 python3 evals/run_eval.py tasks    --skill python-secure-coding --model sonnet --parallel 5
 python3 evals/run_eval.py triggers --skill python-secure-coding --model sonnet --parallel 5

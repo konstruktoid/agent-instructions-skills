@@ -1,0 +1,60 @@
+{
+  "skill": "terraform-secure-iac",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "One out-of-scope probe is the case the skill's 'When NOT to use this' section names: a formatting-only change with no security-relevant content. Another belongs to terraform-testing.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "tsi-t01",
+      "expect": "trigger",
+      "prompt": "Add an S3 backend block to this Terraform root so the team stops sharing state over Slack."
+    },
+    {
+      "id": "tsi-t02",
+      "expect": "trigger",
+      "prompt": "The Terraform module takes the API token as a plain variable and echoes it in an output. Clean that up."
+    },
+    {
+      "id": "tsi-t03",
+      "expect": "trigger",
+      "prompt": "Review the IAM role our Terraform pipeline assumes before we let it apply to production."
+    },
+    {
+      "id": "tsi-t04",
+      "expect": "trigger",
+      "prompt": "Our Terraform modules point at a Git repository with no ref. Fix the module sources and the provider constraints."
+    },
+    {
+      "id": "tsi-t05",
+      "expect": "trigger",
+      "prompt": "Write the Terraform for a KMS key and an RDS instance whose master password Terraform never sees."
+    },
+    {
+      "id": "tsi-t06",
+      "expect": "no-trigger",
+      "prompt": "Run terraform fmt over the repository and fix the indentation in the README's HCL examples."
+    },
+    {
+      "id": "tsi-t07",
+      "expect": "no-trigger",
+      "prompt": "Add a terraform test file that checks the module's subnet_count variable rejects zero."
+    },
+    {
+      "id": "tsi-t08",
+      "expect": "no-trigger",
+      "prompt": "Convert this CloudFormation template's parameters section to use SSM parameter types."
+    },
+    {
+      "id": "tsi-t09",
+      "expect": "no-trigger",
+      "prompt": "Our Ansible role writes AWS credentials into ~/.aws/credentials on the build host. Move them to an instance profile."
+    },
+    {
+      "id": "tsi-t10",
+      "expect": "no-trigger",
+      "prompt": "Explain the difference between terraform plan and terraform apply -refresh-only. No code changes needed."
+    }
+  ]
+}

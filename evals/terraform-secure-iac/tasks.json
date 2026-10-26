@@ -1,0 +1,34 @@
+{
+  "skill": "terraform-secure-iac",
+  "notes": [
+    "Every fixture is a working Terraform configuration whose next change lands on the properties the skill covers: state that only one laptop holds (tsi-01), a database password staged as a literal default (tsi-02), an open-ended provider constraint and a Git module with no ref (tsi-03), and a CI handover whose README separates plan from apply (tsi-04).",
+    "No prompt mentions security, secrets, pinning, or least privilege. Each one is an ordinary feature request, so only the skill can surface the rest.",
+    "The fixtures name the aws provider and modules on the public registry and on a host the agent cannot reach. Graders never run terraform init, so a run that cannot reach the registry still grades."
+  ],
+  "tasks": [
+    {
+      "id": "tsi-01-remote-state",
+      "title": "Move local state to a shared S3 backend",
+      "fixture": "fixtures/tsi-01-remote-state",
+      "prompt": "State for this configuration sits in a local terraform.tfstate on one engineer's laptop. Move it to S3 so the whole team can run plan and apply: add a bootstrap/ configuration that creates the bucket, point this configuration's backend at it, and update the README with the new workflow."
+    },
+    {
+      "id": "tsi-02-orders-database",
+      "title": "Add the orders Postgres database and its connection outputs",
+      "fixture": "fixtures/tsi-02-orders-database",
+      "prompt": "Add the orders Postgres database on RDS, db.t4g.micro with 20 GB of storage, using the subnet group and security group already in main.tf and the db_username and db_password variables staged in variables.tf. The deploy job needs to connect to it, so expose what it needs as outputs."
+    },
+    {
+      "id": "tsi-03-network-modules",
+      "title": "Upgrade the AWS provider and add a registry VPC module",
+      "fixture": "fixtures/tsi-03-network-modules",
+      "prompt": "Move this configuration to the 6.x line of the AWS provider, and add a VPC with two private subnets across eu-north-1a and eu-north-1b using the terraform-aws-modules/vpc/aws registry module. Keep tagging everything through the labels module."
+    },
+    {
+      "id": "tsi-04-ci-apply-role",
+      "title": "Add the IAM side of the CI handover",
+      "fixture": "fixtures/tsi-04-ci-apply-role",
+      "prompt": "Add the AWS side of the CI handover the README describes: the GitHub OIDC provider and the IAM role the platform/ingest workflow assumes to run Terraform against this configuration."
+    }
+  ]
+}
