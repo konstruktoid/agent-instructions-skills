@@ -1,0 +1,47 @@
+{
+  "task": "es-03-control",
+  "condition": "agent",
+  "comparison": "template-vs-no-agent",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-26T14:36:09.612824+00:00",
+    "seconds": 17.5
+  },
+  "base_sha": "d34ffdfd3e7e72453f18f0cfe230621caa5e3226",
+  "skills_used": [],
+  "num_turns": 5,
+  "cost_usd": 0.0259121,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "conclusion-supported",
+      "kind": "final_regex",
+      "source": "agent-templates/evidence-synthesizer.md Reasoning discipline: for each conclusion, identify the evidence that supports it",
+      "passed": true,
+      "evidence": "match: '\\nCONCLUSION: SUPPORTED'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/evidence-synthesizer.md frontmatter: no Edit, a synthesizer reads sources and does not change them",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/evidence-synthesizer.md frontmatter: no Edit, a synthesizer reads sources and does not change them",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 3,
+  "total": 3
+}

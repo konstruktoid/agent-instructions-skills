@@ -1,0 +1,54 @@
+{
+  "task": "ra-02-public-rename",
+  "condition": "agent",
+  "comparison": "template-vs-no-agent",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-26T14:34:14.609350+00:00",
+    "seconds": 24.2
+  },
+  "base_sha": "6e9afdc9ce91cd2aaedb39631902eca5707db121",
+  "skills_used": [],
+  "num_turns": 8,
+  "cost_usd": 0.0405167,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "open-decisions-nonzero",
+      "kind": "final_regex",
+      "source": "agent-templates/requirements-analyst.md Scope: surface contradictions and decisions that only the requester can make",
+      "passed": true,
+      "evidence": "match: '\\nOPEN-DECISIONS: 2'"
+    },
+    {
+      "id": "names-public-surface",
+      "kind": "final_regex",
+      "source": "agent-templates/requirements-analyst.md Scope: identify the current behavior, affected paths and constraints",
+      "passed": true,
+      "evidence": "match: '__init__'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/requirements-analyst.md Role: do not modify files",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/requirements-analyst.md Role: do not modify files",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}
