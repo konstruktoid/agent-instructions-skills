@@ -1,0 +1,54 @@
+{
+  "task": "ra-03-control",
+  "condition": "agent",
+  "comparison": "template-vs-no-agent",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-26T14:34:36.083146+00:00",
+    "seconds": 28.0
+  },
+  "base_sha": "bdba6d64d2af7d91b5be3dae8d718ed132942029",
+  "skills_used": [],
+  "num_turns": 7,
+  "cost_usd": 0.0430079,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "open-decisions-zero",
+      "kind": "final_regex",
+      "source": "agent-templates/requirements-analyst.md Scope: do not expand the request, and report only decisions that remain unresolved",
+      "passed": true,
+      "evidence": "match: '\\nOPEN-DECISIONS: 0'"
+    },
+    {
+      "id": "names-version-attribute",
+      "kind": "final_regex",
+      "source": "agent-templates/requirements-analyst.md Scope: identify the current behavior, affected paths and constraints",
+      "passed": true,
+      "evidence": "match: '__version__'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/requirements-analyst.md Role: do not modify files",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/requirements-analyst.md Role: do not modify files",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

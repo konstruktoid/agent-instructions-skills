@@ -498,9 +498,9 @@ output, or that its `description` routes the right tasks to it. Two measurements
   `discipline-ablation`, compares the template as shipped with a copy that has its `## Reasoning
   discipline` section removed, and has not been run. `requirements-analyst` and
   `evidence-synthesizer` each have a suite under `template-vs-no-agent`, the template as the
-  session's agent against the same prompt with no agent, and neither has been run.
-  `scripts/check_evals.py` reports those two suites, and every template without a suite, as
-  unmeasured.
+  session's agent against the same prompt with no agent; their first runs, on 2026-10-26, scored
+  alike, at full marks on all but `es-04-embedded-instruction`. `scripts/check_evals.py` reports
+  every template without a suite as unmeasured.
 - **Instructions-document evals.** A suite whose `tasks.json` names an `instructions` file
   measures a document in `instructions/` rather than a skill, in up to three arms on identical
   fixtures: nothing, the document referenced from a project `CLAUDE.md`, and a one-sentence

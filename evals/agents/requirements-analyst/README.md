@@ -6,7 +6,9 @@ ambiguous request misses, without inventing questions for a request that has non
 
 ## Current state
 
-Never run. `scripts/check_evals.py` reports the suite as unmeasured. Nothing here is a result.
+First run on 2026-10-26 at `52d4ed8`, in `results/2026-10-26.md`. Every run of both conditions
+scored full marks on all four tasks, so the suite did not discriminate: the finding is no
+detectable effect at this difficulty, and the fixtures are what should change.
 
 Four tasks with three runs per condition detect only a large effect. If a run is made and the
 conditions score alike, the finding is "no detectable effect", not "no effect".

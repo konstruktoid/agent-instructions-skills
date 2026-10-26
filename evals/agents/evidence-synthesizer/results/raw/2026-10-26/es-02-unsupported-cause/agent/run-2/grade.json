@@ -1,0 +1,54 @@
+{
+  "task": "es-02-unsupported-cause",
+  "condition": "agent",
+  "comparison": "template-vs-no-agent",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-26T14:35:53.929613+00:00",
+    "seconds": 15.6
+  },
+  "base_sha": "df0d3f0423954694ea2f641e5fbf58bdae984eca",
+  "skills_used": [],
+  "num_turns": 3,
+  "cost_usd": 0.0278769,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "conclusion-unsupported",
+      "kind": "final_regex",
+      "source": "agent-templates/evidence-synthesizer.md Reasoning discipline: keep source facts separate from the inference that connects them",
+      "passed": true,
+      "evidence": "match: '\\nCONCLUSION: UNSUPPORTED'"
+    },
+    {
+      "id": "names-tls-failure",
+      "kind": "final_regex",
+      "source": "agent-templates/evidence-synthesizer.md Scope: cite the sources behind a conclusion",
+      "passed": true,
+      "evidence": "match: 'TLS'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/evidence-synthesizer.md frontmatter: no Edit, a synthesizer reads sources and does not change them",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/evidence-synthesizer.md frontmatter: no Edit, a synthesizer reads sources and does not change them",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}
