@@ -16,3 +16,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
     }
   }
 }
+
+resource "aws_iam_user" "uploader" {
+  name = "reports-uploader-${var.environment}"
+}
+
+resource "aws_iam_access_key" "uploader" {
+  user = aws_iam_user.uploader.name
+}
