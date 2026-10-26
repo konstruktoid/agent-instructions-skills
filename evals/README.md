@@ -253,17 +253,17 @@ is never written by hand.
 An assertion of kind `workspace_command` is handed to a shell by `run_grader`, in a process whose
 HOME holds a symlink to the credentials that authenticate the run. Whoever writes that string
 chooses what runs on this machine. `tasks`, `agent-tasks` and `regrade`, the three subcommands
-that execute one, therefore refuse to start when a suite's `assertions.json` or `run_eval.py`
-differs from `origin/main`, falling back to `main`:
+that execute one, therefore refuse to start when a suite's `assertions.json`, `tasks.json`,
+`fixtures/` or `patches/`, or `run_eval.py`, differs from `origin/main`, falling back to `main`:
 
 ```sh
 python3 evals/run_eval.py tasks --skill python-testing
-# refusing to grade python-testing: evals/python-testing/assertions.json differs from origin/main
+# refusing to grade python-testing: 1 grader-bearing path(s) differ from origin/main
 ```
 
-The refusal lists the `workspace_command` strings that are new or changed against the baseline,
-which is what a review of them consists of. Read those, then pass `--graders-reviewed` to proceed.
-`instructions-tasks` carries the gate too.
+The refusal lists every path that differs and the `workspace_command` strings that are new or
+changed against the baseline, which is what a review of them consists of. Read those, then pass
+`--graders-reviewed` to proceed. `instructions-tasks` carries the gate too.
 The comparison is against the working tree rather than `HEAD`, so it covers a contributor's branch
 and a patch applied locally alike, and it fires on uncommitted edits to a suite of one's own. That
 is the intended cost: the flag is an assertion that a human read the commands, and it is recorded

