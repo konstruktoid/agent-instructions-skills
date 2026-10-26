@@ -1,0 +1,43 @@
+Read state and start with the terraform grader
+
+---
+
+terraform is installed, check fmt and do the first run
+
+---
+
+delete the old failed clone
+
+---
+
+fix the graders and regrade
+
+---
+
+harden tsi-01 first, then rerun
+
+---
+
+clean all generated tmp files if any
+
+---
+
+commit and rerun
+
+---
+
+delete the old results dir when it finishes
+
+---
+
+<task-notification>
+<task-id>btdnht02l</task-id>
+<tool-use-id>toolu_01DdysMiWhMsCux4tZuYuC4x</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/e996f944-9093-4573-9f52-106e24c6ff00/tasks/btdnht02l.output</output-file>
+<status>completed</status>
+<summary>Background command "Clone aa09ae6 and run tasks, triggers, report" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+add and commit ./entire on it's own branch
