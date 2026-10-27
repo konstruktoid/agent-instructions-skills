@@ -34,6 +34,9 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   Never Cut" lists error handling that prevents data loss (`:67`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
+  Contradicted as the cause by the 2026-10-27 stamp: with the closing line forbidden to report a
+  missing never-cut item, at `81191a3`, all three `doc` runs read the whole document and still left
+  the safeguard out, and two of them still listed the partial or truncated file as skipped.
 - **The agent did not recognize the data-loss risk.** Contradicted for the `doc` arm, whose three
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
@@ -59,6 +62,13 @@ out, run 2 as "a failed write can leave a partial file", and no `baseline` or `p
 it. Across both stamps that is 18 of 18 runs failing, 6 of 6 `doc` runs naming the risk, and 0 of
 12 other runs naming it.
 
+9 of 9 runs failed both again at `81191a3`, in the 2026-10-27 stamp, which carries the targeted
+change `962e2ff` (`evals/minimal-change/results/2026-10-27.md`). That stamp ran in a cloud
+container on Claude Code 2.1.311, where the two earlier stamps ran on the maintainer's machine on
+2.1.305 and 2.1.310, and its runs start with 19 built-in skills where theirs started with 17. Every
+arm saw the same environment, so the comparison within the stamp holds; a comparison across stamps
+mixes the change with the machine.
+
 ## Disposition
 
 regression-case. `mc-05-save-settings` already reproduces the failure, so no new fixture is
@@ -75,6 +85,15 @@ only write its own temporary file, which that assertion rejects; the search hypo
 separate change. The other five tasks keep their `doc` medians, and the `baseline` and `plain` arms,
 which never see the document, are unaffected.
 
-The next action is a full run of the suite at the revision that carries `962e2ff`, three runs per
-arm, so the stamp covers every task in every arm. If the prediction fails, the closing line was
-not the cause, and the reading of the list as a rule about removal is the next change to test.
+The prediction failed. In the 2026-10-27 stamp `failed-save-keeps-old-file` passed in 0 of 3
+`doc` runs, against at least 2 predicted, and two of the three closing lines still list the
+partial or truncated file as skipped; the third lists the error handling it did not add. Each of
+the three read the whole document, the new paragraph included. The rest of the prediction held:
+the other five tasks kept their medians in every arm, the arms kept their order by lines of
+non-test source added (the document 49, the sentence 54, the baseline 60), and the `doc` arm added
+tests in 14 of 18 runs, against 16 of 18 on 2026-10-24.
+
+The closing line is therefore not the cause, and `962e2ff` changes nothing a run can measure. The
+next action is to revert it, since a rule with no measured effect adds length the document's own
+standard does not allow, and then to test the reading of the list as a rule about removal, as one
+change at a time.
