@@ -1,6 +1,6 @@
 ---
 name: terraform-testing
-description: Adds or updates automated coverage for a Terraform change by first discovering the repository's existing approach, native terraform test HCL, Terratest, or plan-and-policy assertions, matching it rather than imposing a new one, deciding whether the change needs a test at all, and running the suite in a bounded verify loop. Use when a Terraform change adds or changes a module input or output, changes resource behavior, fixes a bug, or touches variable validation, and when deciding where a new test belongs in an unfamiliar Terraform repository.
+description: Adds or updates automated coverage for a Terraform change by first discovering the repository's existing approach, native terraform test HCL, Terratest, or plan-and-policy assertions, matching it rather than imposing a new one, deciding whether the change needs a test at all, and running the suite in a bounded verify loop. Use when a Terraform change that adds or changes a module input or output, changes resource behavior, fixes a bug, or adds variable validation should be locked in by a test, and when deciding where a new test belongs in an unfamiliar Terraform repository. Not for hardening state, secrets, execution credentials, or module and provider sources, which belong to terraform-secure-iac.
 capabilities:
   tools:
     - Bash
