@@ -130,7 +130,7 @@ held: every task kept its median in every arm, the `doc` arm wrote 53 lines of n
 against 57 for the sentence and 57 for the baseline, its `mc-03-export-rows` runs wrote 9, 9 and 11
 lines against 9, 9 and 9 before, and it added tests in 17 of 18 runs. The wording cost nothing and
 changed nothing, so the reading of the list as a rule about removal is not the cause either, and
-the change is reverted.
+`9a86eb9` reverts the change.
 
 Two hypotheses remain: the skipped search for `atomic_write`, and the safeguard filed under
 unrequested scope. Two changes to the document's text have now moved nothing, so the next step is
