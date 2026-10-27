@@ -41,6 +41,11 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   before choosing a rung (`:32`). Reusing `atomic_write` would have passed both assertions.
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
+- **"What Is Never Cut" reads as a rule about removing safeguards, not about writing new code.** Its
+  opening says a smaller change never "removes" these, and the Quality Checklist asks that they
+  are "intact", while `save_settings` is new code with no safeguard to remove. Untested, and partly
+  contradicted: in `mc-04-set-quantity` the `doc` arm adds validation to a new handler in 5 of 5
+  assertions in both stamps, so the list does reach new code for validation at least.
 
 ## Reproduction
 
@@ -57,7 +62,19 @@ it. Across both stamps that is 18 of 18 runs failing, 6 of 6 `doc` runs naming t
 ## Disposition
 
 regression-case. `mc-05-save-settings` already reproduces the failure, so no new fixture is
-needed. The next action is a targeted change to the document stating that an item on the never-cut
-list is never moved into the closing line as skipped, followed by
-`run_eval.py instructions-tasks --suite minimal-change --task mc-05-save-settings --runs 3` against
-the changed revision. That change and its run have not been made.
+needed. The targeted change is `962e2ff`, which tests the first hypothesis alone: "Closing the
+Reply" and the Quality Checklist now say the closing line never reports a missing never-cut item,
+which is unfinished work. Nothing else in the document changed, so the skipped search, the
+request's wording, and the reading of the list as a rule about removal stay untested, and a result
+can be attributed to this rule.
+
+What the change predicts, stated before any run of it: in the `doc` arm, `failed-save-keeps-old-file`
+passes in at least 2 of 3 runs, and no closing line lists the write's safety as skipped.
+`existing-atomic-write-reused` may still fail, since an agent that never opens `app/fsutil.py` can
+only write its own temporary file, which that assertion rejects; the search hypothesis is a
+separate change. The other five tasks keep their `doc` medians, and the `baseline` and `plain` arms,
+which never see the document, are unaffected.
+
+The next action is a full run of the suite at the revision that carries `962e2ff`, three runs per
+arm, so the stamp covers every task in every arm. If the prediction fails, the closing line was
+not the cause, and the reading of the list as a rule about removal is the next change to test.
