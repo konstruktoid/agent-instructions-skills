@@ -97,3 +97,16 @@ The closing line is therefore not the cause, and `962e2ff` changes nothing a run
 `85a5a3b` reverts it, since a rule with no measured effect adds length the document's own standard
 does not allow. The next action is to test the reading of the list as a rule about removal, as one
 change on its own.
+
+That change is `54c5754`: "What Is Never Cut" now says a smaller change never removes these items
+from code that has them and never leaves them out of code it adds, and the Quality Checklist line
+says the same. Nothing else in the document differs from `main`.
+
+What it predicts, stated before any run of it: in the `doc` arm, `failed-save-keeps-old-file`
+passes in at least 2 of 3 runs, and no closing line lists the write's safety as skipped.
+`existing-atomic-write-reused` may still fail, as before. The other five tasks keep their `doc`
+medians, and the `baseline` and `plain` arms are unaffected. The `doc` arm may add more non-test
+source than its 49 lines on 2026-10-27, most likely in `mc-03-export-rows`, which also writes a
+file; that would be the change's cost, not a failure of it. If `failed-save-keeps-old-file` still
+passes in fewer than 2 runs, neither wording is the cause, and the skipped search for the existing
+helper is the remaining hypothesis.
