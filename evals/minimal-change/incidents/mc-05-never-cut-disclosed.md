@@ -93,7 +93,7 @@ the other five tasks kept their medians in every arm, the arms kept their order 
 non-test source added (the document 49, the sentence 54, the baseline 60), and the `doc` arm added
 tests in 14 of 18 runs, against 16 of 18 on 2026-10-24.
 
-The closing line is therefore not the cause, and `962e2ff` changes nothing a run can measure. The
-next action is to revert it, since a rule with no measured effect adds length the document's own
-standard does not allow, and then to test the reading of the list as a rule about removal, as one
-change at a time.
+The closing line is therefore not the cause, and `962e2ff` changes nothing a run can measure.
+`85a5a3b` reverts it, since a rule with no measured effect adds length the document's own standard
+does not allow. The next action is to test the reading of the list as a rule about removal, as one
+change on its own.
