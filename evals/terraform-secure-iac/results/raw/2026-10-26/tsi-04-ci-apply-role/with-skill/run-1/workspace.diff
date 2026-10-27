@@ -1,0 +1,286 @@
+diff --git a/.terraform.lock.hcl b/.terraform.lock.hcl
+new file mode 100644
+index 0000000..b4be423
+--- /dev/null
++++ b/.terraform.lock.hcl
+@@ -0,0 +1,26 @@
++# This file is maintained automatically by "terraform init".
++# Manual edits may be lost in future updates.
++
++provider "registry.terraform.io/hashicorp/aws" {
++  version     = "6.70.0"
++  constraints = "~> 6.0"
++  hashes = [
++    "h1:HCr4MYgxlkFBOAeWKOoktNNzZaQX8ZZY4YTxmL/1V/Y=",
++    "zh:068ca7ed4fc77e3d63d7fac54515a426a32f3dc143b55a6ad00963fe68289955",
++    "zh:2d8c016b3809ab32f536b01bf2c98fcbdeb066b7b7e50f756ff6ff1e0b0539c7",
++    "zh:450d960b60ea81268bd355600340787254f750d76e0075208a6fb903d7336b09",
++    "zh:50447833cce21288ffc331342f9d83854e80515e2d86e8f5776a07ce18866b20",
++    "zh:58acc041b080778ded75320e241ebcf6cf2ed145bede644b86a4784ce46086c6",
++    "zh:7e899a44a1da95fefb1b04b231cf7cdb5871f482f60a710ede78bf25ac265724",
++    "zh:8b141d13f4b84d7a47bc5a4855d0fc985191317b3249603532d4de03db5741c5",
++    "zh:9035357f7d065ce8d35a9b05337977910683219c0f13fa09155d28f9b32e23a7",
++    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
++    "zh:9ba0990a876d2641a185ca88263719afc4d5ac43533bdb147437f0073d2cd74d",
++    "zh:a8773c7a02e1b3290df89351ee493fd8b74f807f92a7f69534e05901d4515761",
++    "zh:ab0ebb298578eeeffe0fbf0a8b27ce99acd4419b7049272f1ab87e8c47229407",
++    "zh:b88a3f22127bfb17604adc53e9bdb8ed0eddf4b9b77bf19871cba2e7fcd5b4a3",
++    "zh:c7b1fb41e7f086b670f78932ede2b539903a8d71bac06f55f14a1a33d09a1ccf",
++    "zh:df482bd93f51125f78feab7742aae1d7f22c7108ee2dc47787c4a1d611e6ccfd",
++    "zh:fca401ffaa42d5f350d667123569de51a23de8c30b87ce0bd9d86fc80835fd4d",
++  ]
++}
+diff --git a/ci_access.tf b/ci_access.tf
+new file mode 100644
+index 0000000..3b6bbfa
+--- /dev/null
++++ b/ci_access.tf
+@@ -0,0 +1,248 @@
++locals {
++  ci_repository   = "platform/ingest"
++  state_bucket    = "ingest-terraform-state"
++  state_key       = "ingest/terraform.tfstate"
++  ci_role_arns    = [aws_iam_role.ci_plan.arn, aws_iam_role.ci_apply.arn]
++  ci_oidc_url     = "token.actions.githubusercontent.com"
++  ci_session_secs = 3600
++}
++
++resource "aws_iam_openid_connect_provider" "github" {
++  url            = "https://${local.ci_oidc_url}"
++  client_id_list = ["sts.amazonaws.com"]
++}
++
++# Plan role: assumable only by pull_request runs of the ingest repository.
++data "aws_iam_policy_document" "ci_plan_trust" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.ci_oidc_url}:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.ci_oidc_url}:sub"
++      values   = ["repo:${local.ci_repository}:pull_request"]
++    }
++  }
++}
++
++# Apply role: assumable only by runs on the main branch of the ingest repository.
++data "aws_iam_policy_document" "ci_apply_trust" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.ci_oidc_url}:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.ci_oidc_url}:sub"
++      values   = ["repo:${local.ci_repository}:ref:refs/heads/main"]
++    }
++  }
++}
++
++resource "aws_iam_role" "ci_plan" {
++  name                 = "ingest-ci-plan"
++  assume_role_policy   = data.aws_iam_policy_document.ci_plan_trust.json
++  max_session_duration = local.ci_session_secs
++}
++
++resource "aws_iam_role" "ci_apply" {
++  name                 = "ingest-ci-apply"
++  assume_role_policy   = data.aws_iam_policy_document.ci_apply_trust.json
++  max_session_duration = local.ci_session_secs
++}
++
++# Read access to the managed resources, needed by both roles to refresh state.
++data "aws_iam_policy_document" "ci_read" {
++  statement {
++    sid       = "ReadBucket"
++    actions   = ["s3:Get*", "s3:ListBucket"]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++
++  statement {
++    sid = "ReadQueue"
++    actions = [
++      "sqs:GetQueueAttributes",
++      "sqs:GetQueueUrl",
++      "sqs:ListQueueTags",
++    ]
++    resources = [aws_sqs_queue.events.arn]
++  }
++
++  statement {
++    sid = "ReadTable"
++    actions = [
++      "dynamodb:DescribeTable",
++      "dynamodb:DescribeContinuousBackups",
++      "dynamodb:DescribeTimeToLive",
++      "dynamodb:ListTagsOfResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++
++  # The CI roles are in this configuration, so refresh must read them. They get
++  # no IAM write: changes to this file are applied by an administrator.
++  statement {
++    sid = "ReadCiIdentity"
++    actions = [
++      "iam:GetRole",
++      "iam:ListRolePolicies",
++      "iam:ListAttachedRolePolicies",
++      "iam:ListInstanceProfilesForRole",
++    ]
++    resources = local.ci_role_arns
++  }
++
++  statement {
++    sid       = "ReadOidcProvider"
++    actions   = ["iam:GetOpenIDConnectProvider"]
++    resources = [aws_iam_openid_connect_provider.github.arn]
++  }
++
++  statement {
++    sid       = "ReadCiRolePolicies"
++    actions   = ["iam:GetRolePolicy"]
++    resources = local.ci_role_arns
++  }
++
++  statement {
++    sid       = "ReadState"
++    actions   = ["s3:GetObject"]
++    resources = ["arn:aws:s3:::${local.state_bucket}/${local.state_key}"]
++  }
++
++  statement {
++    sid       = "ListStateBucket"
++    actions   = ["s3:ListBucket"]
++    resources = ["arn:aws:s3:::${local.state_bucket}"]
++
++    condition {
++      test     = "StringEquals"
++      variable = "s3:prefix"
++      values   = [local.state_key]
++    }
++  }
++}
++
++# Native S3 locking writes and removes a lock object next to the state.
++data "aws_iam_policy_document" "ci_state_lock" {
++  statement {
++    sid       = "StateLock"
++    actions   = ["s3:PutObject", "s3:DeleteObject"]
++    resources = ["arn:aws:s3:::${local.state_bucket}/${local.state_key}.tflock"]
++  }
++}
++
++data "aws_iam_policy_document" "ci_apply_write" {
++  statement {
++    sid = "WriteState"
++    actions = [
++      "s3:PutObject",
++    ]
++    resources = ["arn:aws:s3:::${local.state_bucket}/${local.state_key}"]
++  }
++
++  statement {
++    sid = "ManageBucket"
++    actions = [
++      "s3:CreateBucket",
++      "s3:DeleteBucket",
++      "s3:PutBucketTagging",
++      "s3:PutBucketVersioning",
++      "s3:PutEncryptionConfiguration",
++      "s3:PutBucketPublicAccessBlock",
++      "s3:PutBucketPolicy",
++      "s3:DeleteBucketPolicy",
++      "s3:PutBucketOwnershipControls",
++      "s3:PutLifecycleConfiguration",
++    ]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++
++  statement {
++    sid = "ManageQueue"
++    actions = [
++      "sqs:CreateQueue",
++      "sqs:DeleteQueue",
++      "sqs:SetQueueAttributes",
++      "sqs:TagQueue",
++      "sqs:UntagQueue",
++    ]
++    resources = [aws_sqs_queue.events.arn]
++  }
++
++  statement {
++    sid = "ManageTable"
++    actions = [
++      "dynamodb:CreateTable",
++      "dynamodb:DeleteTable",
++      "dynamodb:UpdateTable",
++      "dynamodb:UpdateContinuousBackups",
++      "dynamodb:UpdateTimeToLive",
++      "dynamodb:TagResource",
++      "dynamodb:UntagResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++}
++
++resource "aws_iam_role_policy" "ci_plan_read" {
++  name   = "read"
++  role   = aws_iam_role.ci_plan.id
++  policy = data.aws_iam_policy_document.ci_read.json
++}
++
++resource "aws_iam_role_policy" "ci_plan_state_lock" {
++  name   = "state-lock"
++  role   = aws_iam_role.ci_plan.id
++  policy = data.aws_iam_policy_document.ci_state_lock.json
++}
++
++resource "aws_iam_role_policy" "ci_apply_read" {
++  name   = "read"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.ci_read.json
++}
++
++resource "aws_iam_role_policy" "ci_apply_state_lock" {
++  name   = "state-lock"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.ci_state_lock.json
++}
++
++resource "aws_iam_role_policy" "ci_apply_write" {
++  name   = "write"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.ci_apply_write.json
++}
++
++output "ci_plan_role_arn" {
++  description = "Role the pull_request plan job assumes through GitHub OIDC."
++  value       = aws_iam_role.ci_plan.arn
++}
++
++output "ci_apply_role_arn" {
++  description = "Role the main-branch apply job assumes through GitHub OIDC."
++  value       = aws_iam_role.ci_apply.arn
++}

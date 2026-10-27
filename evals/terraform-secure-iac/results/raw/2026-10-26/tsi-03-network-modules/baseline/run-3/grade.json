@@ -1,0 +1,109 @@
+{
+  "task": "tsi-03-network-modules",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-26T20:56:12.786473+00:00",
+    "seconds": 17.2
+  },
+  "base_sha": "f568adbf860ccc959e4132983a673a456e242835",
+  "skills_used": [],
+  "num_turns": 5,
+  "cost_usd": 0.0578147,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+      "passed": true,
+      "evidence": "match: 'terraform tofu; terraform fmt'"
+    },
+    {
+      "id": "validate-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "validate-result-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+      "passed": true,
+      "evidence": "match: 'validat'"
+    },
+    {
+      "id": "no-state-or-plan-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-provider-6",
+      "kind": "workspace_command",
+      "source": "task prompt: move the AWS provider to the 6.x line",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-vpc-module",
+      "kind": "workspace_command",
+      "source": "task prompt: add the registry VPC module",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "provider-upper-bounded",
+      "kind": "workspace_command",
+      "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "required-version-set",
+      "kind": "workspace_command",
+      "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "vpc-module-exact-version",
+      "kind": "workspace_command",
+      "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "git-module-pinned-or-reported",
+      "kind": "workspace_command",
+      "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "lockfile-present-or-reported",
+      "kind": "workspace_command",
+      "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 8,
+  "total": 12
+}

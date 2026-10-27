@@ -5,7 +5,7 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-26
+## Current state, 2026-10-27
 
 Every latest stamp is current. `bash-secure-scripting` was re-measured on 2026-10-25 at
 `9c1e137`, after the harness change that sends the prompt on stdin. `github-actions-security`,
@@ -15,11 +15,22 @@ Code variables out. The other three skill suites were measured on 2026-10-06 and
 Each stamp comes from a fresh clone of a committed revision with no modified files and no ancestor
 `CLAUDE.md`, and the checker reports no staleness.
 
+`terraform-secure-iac` was first run on 2026-10-26 at `aa09ae6`, three runs per condition. The
+skill gained 3 assertions on `tsi-03-network-modules` (9/12 to 12/12) and 1 on
+`tsi-01-remote-state` (17/18 to 18/18, with one with-skill run truncated and excluded). The other
+two tasks show no difference: the baseline kept the database password out of state in two of
+three `tsi-02-orders-database` runs, and the one failing run per condition on
+`tsi-04-ci-apply-role` built the OIDC condition key from a variable, which two graders do not
+match. Two trigger probes misrouted, formatting HCL in a README and writing a `terraform test`
+file, so the skill's description overlaps `terraform-testing`'s. No run could finish
+`terraform validate`, because the provider downloads in the harness sandbox and then fails to
+instantiate, so `validate-result-reported` measures whether the agent said so.
+
 Three skills have no suite at all, `github-repository-security`, `github-organization-governance`,
-and `terraform-testing`, so nothing measures them. `terraform-secure-iac` has a suite that has not
-been run. Of the twelve agent templates, `python-security-verifier`, `requirements-analyst` and
-`evidence-synthesizer` have a suite, and the last two were first run on 2026-10-26 at `52d4ed8`,
-where neither separated from its no-agent arm. The verifier's 2026-10-08 stamp re-ran the same
+and `terraform-testing`, so nothing measures them. Of the twelve agent templates,
+`python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a suite, and
+the last two were first run on 2026-10-26 at `52d4ed8`, where neither separated from its no-agent
+arm. The verifier's 2026-10-08 stamp re-ran the same
 tasks as 2026-10-07, unchanged, because adding `comparisons` to `tasks.json` invalidated the prior
 stamp; it scored full marks in both conditions on every task, as the 2026-10-06 and 2026-10-07
 stamps did, and the 2026-10-24 stamp did again. The claim it tests from
@@ -30,11 +41,13 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 `scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
 
-Open work, as of 2026-10-26:
+Open work, as of 2026-10-27:
 
-- A first run of `terraform-secure-iac`, and a suite for each of the three skills without one.
-  The two bash skills, `bash-secure-scripting` and `bash-testing`, already have suites, so they
-  are not on this list.
+- A suite for each of the three skills without one. The two bash skills,
+  `bash-secure-scripting` and `bash-testing`, and `terraform-secure-iac` already have suites, so
+  they are not on this list.
+- Two `terraform-secure-iac` graders, `trust-audience-pinned` and `apply-trust-pinned-to-main`,
+  miss a condition key built from a variable. Fixing them invalidates the 2026-10-26 stamp.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
   of a skill.
 

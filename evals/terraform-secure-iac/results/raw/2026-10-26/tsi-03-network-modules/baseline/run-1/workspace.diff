@@ -1,0 +1,59 @@
+diff --git a/main.tf b/main.tf
+index cdfda61..55542b5 100644
+--- a/main.tf
++++ b/main.tf
+@@ -4,3 +4,18 @@ module "labels" {
+   service     = "network"
+   environment = var.environment
+ }
++
++module "vpc" {
++  source  = "terraform-aws-modules/vpc/aws"
++  version = "~> 6.0"
++
++  name = "network-${var.environment}"
++  cidr = var.vpc_cidr
++
++  azs             = var.availability_zones
++  private_subnets = var.private_subnet_cidrs
++
++  enable_nat_gateway = false
++
++  tags = module.labels.tags
++}
+diff --git a/variables.tf b/variables.tf
+index 236aa5f..ec8f249 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -7,3 +7,18 @@ variable "environment" {
+   type    = string
+   default = "staging"
+ }
++
++variable "vpc_cidr" {
++  type    = string
++  default = "10.0.0.0/16"
++}
++
++variable "availability_zones" {
++  type    = list(string)
++  default = ["eu-north-1a", "eu-north-1b"]
++}
++
++variable "private_subnet_cidrs" {
++  type    = list(string)
++  default = ["10.0.1.0/24", "10.0.2.0/24"]
++}
+diff --git a/versions.tf b/versions.tf
+index bcdeda0..a4a0f16 100644
+--- a/versions.tf
++++ b/versions.tf
+@@ -2,7 +2,7 @@ terraform {
+   required_providers {
+     aws = {
+       source  = "hashicorp/aws"
+-      version = ">= 4.0"
++      version = "~> 6.0"
+     }
+   }
+ 
