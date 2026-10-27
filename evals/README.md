@@ -387,7 +387,9 @@ edit cannot fix any of them:
   smaller than its task list, which the results file has no way to say.
 - A stamp older than the skill directory, `tasks.json`, or `assertions.json` it measured.
   README.md states that such a stamp does not carry forward, and the check is what makes that
-  rule visible rather than remembered.
+  rule visible rather than remembered. Task runs are judged by the newest stamp that graded
+  tasks, and trigger runs by the newest stamp that routed probes, against the skill and
+  `trigger-eval.json`, so a later trigger-only stamp cannot hide stale task results.
 - A stamp that graded a modified working tree, described below. It measured source that is in
   no commit, so nothing can reproduce it and the comparison above cannot certify it.
 
