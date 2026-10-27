@@ -1,0 +1,59 @@
+diff --git a/shop/forms.py b/shop/forms.py
+index b420666..e5dddd1 100644
+--- a/shop/forms.py
++++ b/shop/forms.py
+@@ -5,3 +5,17 @@ def handle_add(form, cart):
+     """Add one of the sku in form to the cart."""
+     sku = form["sku"]
+     cart.set_quantity(sku, cart.quantities.get(sku, 0) + 1)
++
++
++def handle_set_quantity(form, cart):
++    """Set the quantity of the sku in form, raising ValueError if it cannot be applied."""
++    try:
++        sku = form["sku"]
++        quantity = int(form["quantity"])
++    except (KeyError, TypeError) as error:
++        raise ValueError("sku and quantity are required") from error
++    if not cart.has_sku(sku):
++        raise ValueError(f"unknown sku: {sku!r}")
++    if quantity < 0:
++        raise ValueError("quantity must not be negative")
++    cart.set_quantity(sku, quantity)
+diff --git a/tests/test_forms.py b/tests/test_forms.py
+index c375d18..70333be 100644
+--- a/tests/test_forms.py
++++ b/tests/test_forms.py
+@@ -1,7 +1,7 @@
+ import unittest
+ 
+ from shop.cart import Cart
+-from shop.forms import handle_add
++from shop.forms import handle_add, handle_set_quantity
+ 
+ 
+ class AddTest(unittest.TestCase):
+@@ -9,3 +9,23 @@ class AddTest(unittest.TestCase):
+         cart = Cart({"A1"})
+         handle_add({"sku": "A1"}, cart)
+         self.assertEqual(cart.quantities, {"A1": 1})
++
++
++class SetQuantityTest(unittest.TestCase):
++    def test_set(self):
++        cart = Cart({"A1"})
++        handle_set_quantity({"sku": "A1", "quantity": "3"}, cart)
++        self.assertEqual(cart.quantities, {"A1": 3})
++
++    def test_invalid_leaves_cart_unchanged(self):
++        cart = Cart({"A1"})
++        for form in (
++            {"sku": "A1", "quantity": "x"},
++            {"sku": "A1", "quantity": "-1"},
++            {"sku": "A1"},
++            {"sku": "ZZ", "quantity": "1"},
++        ):
++            with self.subTest(form=form):
++                with self.assertRaises(ValueError):
++                    handle_set_quantity(form, cart)
++        self.assertEqual(cart.quantities, {})

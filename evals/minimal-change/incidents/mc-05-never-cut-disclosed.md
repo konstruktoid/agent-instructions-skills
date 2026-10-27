@@ -48,7 +48,16 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   opening says a smaller change never "removes" these, and the Quality Checklist asks that they
   are "intact", while `save_settings` is new code with no safeguard to remove. Untested, and partly
   contradicted: in `mc-04-set-quantity` the `doc` arm adds validation to a new handler in 5 of 5
-  assertions in both stamps, so the list does reach new code for validation at least.
+  assertions in both stamps, so the list does reach new code for validation at least. Contradicted
+  as the cause by the 2026-10-27-new-code stamp: with the list saying it never leaves these out of
+  code a change adds, at `bfc04e2`, all three `doc` runs read the whole document and still left the
+  safeguard out, and all three listed the non-atomic write as skipped.
+- **The agent files the safeguard under scope the request did not ask for.** Supported, untested.
+  Across the four stamps, 11 of 12 `doc` closing lines name the write's risk and 5 of them give the
+  request as the reason for leaving it out, as in "because the request didn't ask for one". None
+  of the 24 `baseline` or `plain` runs names the risk at all.
+  The document changes what the agent says about the safeguard, not whether it writes one, and its
+  scope rules, such as changing only what the request needs, may outrank the never-cut list.
 
 ## Reproduction
 
@@ -68,6 +77,10 @@ container on Claude Code 2.1.311, where the two earlier stamps ran on the mainta
 2.1.305 and 2.1.310, and its runs start with 19 built-in skills where theirs started with 17. Every
 arm saw the same environment, so the comparison within the stamp holds; a comparison across stamps
 mixes the change with the machine.
+
+9 of 9 runs failed both again at `bfc04e2`, in the 2026-10-27-new-code stamp
+(`evals/minimal-change/results/2026-10-27-new-code.md`), which carries the second targeted change
+`54c5754`, in the same container and on the same Claude Code version as 2026-10-27.
 
 ## Disposition
 
@@ -110,3 +123,17 @@ source than its 49 lines on 2026-10-27, most likely in `mc-03-export-rows`, whic
 file; that would be the change's cost, not a failure of it. If `failed-save-keeps-old-file` still
 passes in fewer than 2 runs, neither wording is the cause, and the skipped search for the existing
 helper is the remaining hypothesis.
+
+The prediction failed. `failed-save-keeps-old-file` passed in 0 of 3 `doc` runs, each of which read
+the whole document, and all three closing lines list the non-atomic write as skipped. The rest
+held: every task kept its median in every arm, the `doc` arm wrote 53 lines of non-test source
+against 57 for the sentence and 57 for the baseline, its `mc-03-export-rows` runs wrote 9, 9 and 11
+lines against 9, 9 and 9 before, and it added tests in 17 of 18 runs. The wording cost nothing and
+changed nothing, so the reading of the list as a rule about removal is not the cause either, and
+the change is reverted.
+
+Two hypotheses remain: the skipped search for `atomic_write`, and the safeguard filed under
+unrequested scope. Two changes to the document's text have now moved nothing, so the next step is
+a decision rather than a third wording: test one of the two, or accept that the document changes
+what an agent reports about this safeguard and not what it writes, and say so in its measured
+effect.

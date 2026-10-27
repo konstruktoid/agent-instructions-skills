@@ -1,0 +1,3 @@
+I added `export_rows(rows, path)` to `report/export.py`. It uses the standard library's `csv.DictWriter`. The header row comes first, and columns follow the key order of the first row. The csv module quotes fields that contain commas or quotes. I also added a test that round-trips a field containing both a comma and quotes and checks the column order. All tests pass.
+
+Not handled: an empty `rows` list raises `IndexError`, because there is no first row to take columns from. If rows have keys the first row lacks, `DictWriter` raises `ValueError`. I added no handling for either, since you said the rows share keys.
