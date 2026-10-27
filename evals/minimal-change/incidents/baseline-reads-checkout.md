@@ -67,12 +67,20 @@ the change described under Disposition, answered UNKNOWN in 3 of 3 runs. With th
 3 of 3 runs loaded the `AGENTS.md` above a baseline-shaped workspace, with the harness flags as of
 `4247742`. 0 of 3 did once each run disabled the plugin.
 
+In the suite itself, 0 of 54 runs loaded the plugin at `56262a6`, which carries the fix, in the
+2026-10-24 stamp (`evals/minimal-change/results/2026-10-24.md`), and 0 of its 18 `baseline` runs
+read anything outside their workspace.
+
 ## Disposition
 
-open. The cause is established and fixed in the harness: `claude_command` in `evals/run_eval.py`
-now disables `cc-plugin-agents-md@builtin` for every run, and `invoke_claude` stops a measurement
-whose transcript shows the plugin loaded anyway. What stays open is the effect on the published
-result: every comparison against the 2026-10-20 baseline measured an arm that had this repository's
-`AGENTS.md` as instructions, and whether the numbers move without it is unmeasured. The next action
-is a re-run of the suite with the changed harness, which needs `--graders-reviewed` because
-`evals/run_eval.py` differs from `origin/main`.
+fixed. The cause was in the harness, not in anything a suite task can reproduce, and it is fixed
+there: `claude_command` in `evals/run_eval.py` disables `cc-plugin-agents-md@builtin` for every
+run, and `invoke_claude` stops a measurement whose transcript shows the plugin loaded, or shows no
+plugin list at all.
+
+The 2026-10-24 stamp, without the exposure, repeats the 2026-10-20 result. Every task has the same
+median in every arm, the same assertions fail, and the order of the arms by lines of non-test
+source added is unchanged: the document 49 and 50, the sentence 56 and 55, the baseline 62 and 67.
+At three runs per arm the exposure moved nothing the suite can detect, and the claim in
+`instructions/minimal_change_instructions.md` stands. Counting lines outside test files is this
+record's split, not a column of the report, which counts tests in its lines added.

@@ -47,6 +47,7 @@ python3 evals/run_eval.py report --skill minimal-change
   the baseline. Three runs per arm do not settle either.
 - The 2026-10-20 `baseline` had this repository's `AGENTS.md` loaded as instructions, through
   Claude Code's builtin AGENTS.md plugin, so it was not an agent without instruction. The `doc`
-  and `plain` arms were not exposed. See `incidents/baseline-reads-checkout.md`.
+  and `plain` arms were not exposed. The 2026-10-24 stamp ran without the exposure and gave the
+  same result. See `incidents/baseline-reads-checkout.md`.
 - The `doc` arm gives the agent a pointer rather than the text, so a run that never opens the
   document measures the pointer. The report counts those runs.
