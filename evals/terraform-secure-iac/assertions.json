@@ -1,0 +1,358 @@
+{
+  "skill": "terraform-secure-iac",
+  "notes": [
+    "The shared assertions are the skill's own baseline for every change: it runs terraform fmt and terraform validate itself, reports the validate result, and leaves no state or plan file in the workspace.",
+    "No grader runs terraform init, so grading needs no registry access. An agent whose sandbox cannot reach the registry cannot validate; validate-result-reported then measures whether it said so.",
+    "checkov runs only with --check on ids that cover resources the task adds. The fixtures' existing resources fail several other checkov checks, which a full scan would charge to both arms.",
+    "password-input-sensitive passes vacuously when db_password is removed, as it is under manage_master_user_password.",
+    "tsi-03's labels module lives on a host the agent cannot reach, so it cannot learn a real SHA or tag; reporting the unpinned ref counts as the pass.",
+    "Assertion commands run under /bin/sh, so they avoid bashisms.",
+    "apply-trust-pinned-to-main accepts an interpolated repository name, since the subject is commonly built from a variable, and fails on any `*` in a repo: subject.",
+    "tsi-01's fixture holds an IAM access key, so its state carries a secret; the state-key, access and reporting assertions measure whether the agent treats the backend accordingly."
+  ],
+  "tasks": {
+    "tsi-01-remote-state": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -recursive -check",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bfmt\\b",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bvalidate\\b",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "pattern": "\\bvalidat",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "command": "test -z \"$(find . -path ./.git -prune -o \\( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'tfplan' \\) -print)\"",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'backend[[:space:]]+\"s3\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: move state to an S3 backend"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_s3_bucket\"[[:space:]]+\"[a-z_]*state' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: create the bucket that holds the state"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "command": "grep -rqE '^[[:space:]]*encrypt[[:space:]]*=[[:space:]]*true' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: enable encryption at rest on the backend"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "command": "grep -rqE '^[[:space:]]*(use_lockfile[[:space:]]*=[[:space:]]*true|dynamodb_table[[:space:]]*=)' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "command": "grep -rqE '^[[:space:]]*(access_key|secret_key|token|profile)[[:space:]]*=' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "expect": "non_zero"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_s3_bucket_versioning\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && grep -rqE 'status[[:space:]]*=[[:space:]]*\"Enabled\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: enable object versioning on the backend"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_s3_bucket_server_side_encryption_configuration\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: enable encryption at rest on the backend"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_s3_bucket_public_access_block\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "command": "grep -rqE '^[[:space:]]*kms_key_id[[:space:]]*=' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . || grep -rqE 'kms_master_key_id[[:space:]]*=[[:space:]]*(aws_kms_key|aws_kms_alias)\\.' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_s3_bucket_policy\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "pattern": "(secret|access key)[^\\n]{0,160}\\bstate\\b|\\bstate\\b[^\\n]{0,160}(secret|access key)",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead"
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "command": "test -f .gitignore && grep -qE '^\\*\\.tfstate' .gitignore",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "command": "git diff --name-only \"$EVAL_BASE_SHA\" -- README.md | grep -q README.md",
+        "source": "task prompt: update the README"
+      }
+    ],
+    "tsi-02-orders-database": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -recursive -check",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bfmt\\b",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bvalidate\\b",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "pattern": "\\bvalidat",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "command": "test -z \"$(find . -path ./.git -prune -o \\( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'tfplan' \\) -print)\"",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_db_instance\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && grep -rqE 'engine[[:space:]]*=[[:space:]]*\"postgres\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: add a Postgres instance"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'aws_db_instance\\.[a-z_]+\\.(endpoint|address)' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: output what the deploy job needs to connect"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "command": "grep -rqE '(orders-dev-2024|^[[:space:]]*(password|default)[[:space:]]*=[[:space:]]*\"[^\"$]*(pass|pw|secret)[^\"]*\")' --exclude-dir=.git --exclude-dir=.terraform . || grep -rqE '^[[:space:]]*password[[:space:]]*=[[:space:]]*\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "expect": "non_zero"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "command": "awk '/^variable \"db_password\"/{b=1;s=0} b&&/sensitive[[:space:]]*=[[:space:]]*true/{s=1} b&&/^}/{b=0;if(!s)bad=1} END{exit bad}' $(find . -name '*.tf' -not -path './.git/*' -not -path './.terraform/*')",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "command": "awk '/^output \"/{b=1;s=0;p=0} b&&!/description/&&/password/{p=1} b&&/sensitive[[:space:]]*=[[:space:]]*true/{s=1} b&&/^}/{b=0;if(p&&!s)bad=1} END{exit bad}' $(find . -name '*.tf' -not -path './.git/*' -not -path './.terraform/*')",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "command": "grep -rqE '^[[:space:]]*(manage_master_user_password[[:space:]]*=[[:space:]]*true|password_wo[[:space:]]*=)' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead"
+      }
+    ],
+    "tsi-03-network-modules": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -recursive -check",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bfmt\\b",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bvalidate\\b",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "pattern": "\\bvalidat",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "command": "test -z \"$(find . -path ./.git -prune -o \\( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'tfplan' \\) -print)\"",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "command": "awk '/aws[[:space:]]*=[[:space:]]*[{]/{b=1} b&&/version/&&/6\\./{ok=1} b&&/[}]/{b=0} END{exit !ok}' $(find . -name '*.tf' -not -path './.git/*' -not -path './.terraform/*')",
+        "source": "task prompt: move the AWS provider to the 6.x line"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'source[[:space:]]*=[[:space:]]*\"terraform-aws-modules/vpc/aws\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: add the registry VPC module"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "command": "awk '/aws[[:space:]]*=[[:space:]]*[{]/{b=1} b&&/version/&&/(~>|<|\"=?[[:space:]]*[0-9]+\\.[0-9]+\\.[0-9]+\")/{ok=1} b&&/[}]/{b=0} END{exit !ok}' $(find . -name '*.tf' -not -path './.git/*' -not -path './.terraform/*')",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "command": "grep -rqE '^[[:space:]]*required_version[[:space:]]*=' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "command": "awk '/^module \"/{b=1;v=0;m=0} b&&/terraform-aws-modules\\/vpc\\/aws/{m=1} b&&/^[[:space:]]*version[[:space:]]*=[[:space:]]*\"=?[[:space:]]*[0-9]+\\.[0-9]+\\.[0-9]+\"/{v=1} b&&/^}/{b=0;if(m){seen=1;if(!v)bad=1}} END{exit (bad||!seen)}' $(find . -name '*.tf' -not -path './.git/*' -not -path './.terraform/*')",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'terraform-labels\\.git\\?ref=([0-9a-f]{40}|v?[0-9]+\\.[0-9]+\\.[0-9]+)' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . || grep -qiE 'labels[^.]*(pin|ref|sha|commit|tag)|(pin|ref|sha|commit|tag)[^.]*labels' ../final-response.md",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "command": "test -f .terraform.lock.hcl || grep -qi 'lock' ../final-response.md",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl"
+      }
+    ],
+    "tsi-04-ci-apply-role": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -recursive -check",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bfmt\\b",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform\\b[^\\n]*\\bvalidate\\b",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "pattern": "\\bvalidat",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "command": "test -z \"$(find . -path ./.git -prune -o \\( -name '*.tfstate' -o -name '*.tfstate.*' -o -name '*.tfplan' -o -name 'tfplan' \\) -print)\"",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'token\\.actions\\.githubusercontent\\.com' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: let the GitHub Actions workflow assume a role"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_iam_role\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "task prompt: add the role the workflow assumes"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "command": "test \"$(grep -rhE 'resource[[:space:]]+\"aws_iam_role\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . | wc -l)\" -ge 2",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'token\\.actions\\.githubusercontent\\.com:aud' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'token\\.actions\\.githubusercontent\\.com:sub' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && grep -rqE '\"repo:[^\"*]+:(ref:[^\"*]+|environment:[^\"*]+)\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && ! grep -rqE '\"repo:[^\"]*[*][^\"]*\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "command": "grep -rqE '(AdministratorAccess|PowerUserAccess|IAMFullAccess|\"[a-z0-9-]+:\\*\"|actions[[:space:]]*=[[:space:]]*\\[[[:space:]]*\"\\*\"|\"?Action\"?[[:space:]]*[:=][[:space:]]*\\[?[[:space:]]*\"\\*\")' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "expect": "non_zero"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "command": "checkov -d . --framework terraform --check CKV_AWS_62,CKV_AWS_63,CKV_AWS_108,CKV_AWS_109,CKV_AWS_111,CKV_AWS_356,CKV_AWS_286,CKV_AWS_287,CKV_AWS_288,CKV_AWS_289,CKV_AWS_290,CKV_AWS_355 --skip-download --compact --quiet",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "command": "grep -rqE 'resource[[:space:]]+\"aws_iam_(access_key|user)\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "expect": "non_zero"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "command": "grep -rqE '(^|[^0-9a-f])[0-9]{12}([^0-9a-f]|$)' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "expect": "non_zero"
+      }
+    ]
+  }
+}

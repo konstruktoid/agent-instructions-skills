@@ -1,0 +1,201 @@
+diff --git a/ci.tf b/ci.tf
+new file mode 100644
+index 0000000..0e5bad1
+--- /dev/null
++++ b/ci.tf
+@@ -0,0 +1,195 @@
++# AWS side of the CI handover: GitHub OIDC trust plus the roles the
++# platform/ingest workflow assumes. Two roles: plan (pull requests, read-only)
++# and apply (merges to main, scoped write on this configuration's resources).
++
++locals {
++  github_repo = "platform/ingest"
++  state_arn   = "arn:aws:s3:::ingest-terraform-state"
++}
++
++resource "aws_iam_openid_connect_provider" "github" {
++  url            = "https://token.actions.githubusercontent.com"
++  client_id_list = ["sts.amazonaws.com"]
++}
++
++data "aws_iam_policy_document" "plan_trust" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:sub"
++      values   = ["repo:${local.github_repo}:pull_request"]
++    }
++  }
++}
++
++data "aws_iam_policy_document" "apply_trust" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:sub"
++      values   = ["repo:${local.github_repo}:ref:refs/heads/main"]
++    }
++  }
++}
++
++# --- Shared: state backend access -------------------------------------------
++
++data "aws_iam_policy_document" "state_read" {
++  statement {
++    actions   = ["s3:ListBucket"]
++    resources = [local.state_arn]
++  }
++  statement {
++    actions   = ["s3:GetObject"]
++    resources = ["${local.state_arn}/ingest/terraform.tfstate"]
++  }
++  # use_lockfile = true: locking writes/deletes a .tflock object next to state.
++  statement {
++    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
++    resources = ["${local.state_arn}/ingest/terraform.tfstate.tflock"]
++  }
++}
++
++data "aws_iam_policy_document" "state_write" {
++  statement {
++    actions   = ["s3:PutObject"]
++    resources = ["${local.state_arn}/ingest/terraform.tfstate"]
++  }
++}
++
++# --- Plan role --------------------------------------------------------------
++
++resource "aws_iam_role" "ci_plan" {
++  name                 = "ingest-ci-plan"
++  assume_role_policy   = data.aws_iam_policy_document.plan_trust.json
++  max_session_duration = 3600
++}
++
++data "aws_iam_policy_document" "plan" {
++  source_policy_documents = [data.aws_iam_policy_document.state_read.json]
++
++  statement {
++    actions = [
++      "s3:GetBucket*",
++      "s3:GetEncryptionConfiguration",
++      "s3:GetLifecycleConfiguration",
++      "s3:GetReplicationConfiguration",
++      "s3:GetAccelerateConfiguration",
++      "s3:GetAnalyticsConfiguration",
++      "s3:GetInventoryConfiguration",
++      "s3:GetMetricsConfiguration",
++      "s3:GetIntelligentTieringConfiguration",
++      "s3:GetObjectLockConfiguration",
++      "s3:ListBucket",
++    ]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++  statement {
++    actions   = ["sqs:GetQueueAttributes", "sqs:GetQueueUrl", "sqs:ListQueueTags"]
++    resources = [aws_sqs_queue.events.arn]
++  }
++  statement {
++    actions = [
++      "dynamodb:DescribeTable",
++      "dynamodb:DescribeContinuousBackups",
++      "dynamodb:DescribeTimeToLive",
++      "dynamodb:ListTagsOfResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++  statement {
++    actions   = ["sqs:ListQueues", "s3:ListAllMyBuckets", "dynamodb:ListTables"]
++    resources = ["*"]
++  }
++}
++
++resource "aws_iam_role_policy" "ci_plan" {
++  name   = "plan"
++  role   = aws_iam_role.ci_plan.id
++  policy = data.aws_iam_policy_document.plan.json
++}
++
++# --- Apply role -------------------------------------------------------------
++
++resource "aws_iam_role" "ci_apply" {
++  name                 = "ingest-ci-apply"
++  assume_role_policy   = data.aws_iam_policy_document.apply_trust.json
++  max_session_duration = 3600
++}
++
++data "aws_iam_policy_document" "apply" {
++  source_policy_documents = [
++    data.aws_iam_policy_document.plan.json,
++    data.aws_iam_policy_document.state_write.json,
++  ]
++
++  statement {
++    sid = "ManageIngestResources"
++    actions = [
++      "s3:CreateBucket",
++      "s3:DeleteBucket",
++      "s3:PutBucket*",
++      "s3:DeleteBucket*",
++      "s3:PutEncryptionConfiguration",
++      "s3:PutLifecycleConfiguration",
++      "s3:PutAccelerateConfiguration",
++    ]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++  statement {
++    actions = [
++      "sqs:CreateQueue",
++      "sqs:DeleteQueue",
++      "sqs:SetQueueAttributes",
++      "sqs:TagQueue",
++      "sqs:UntagQueue",
++    ]
++    resources = [aws_sqs_queue.events.arn]
++  }
++  statement {
++    actions = [
++      "dynamodb:CreateTable",
++      "dynamodb:DeleteTable",
++      "dynamodb:UpdateTable",
++      "dynamodb:UpdateContinuousBackups",
++      "dynamodb:UpdateTimeToLive",
++      "dynamodb:TagResource",
++      "dynamodb:UntagResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++}
++
++resource "aws_iam_role_policy" "ci_apply" {
++  name   = "apply"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.apply.json
++}
++
++output "ci_plan_role_arn" {
++  value = aws_iam_role.ci_plan.arn
++}
++
++output "ci_apply_role_arn" {
++  value = aws_iam_role.ci_apply.arn
++}

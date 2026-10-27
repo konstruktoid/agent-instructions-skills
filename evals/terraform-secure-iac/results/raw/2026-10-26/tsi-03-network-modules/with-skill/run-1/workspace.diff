@@ -1,0 +1,57 @@
+diff --git a/main.tf b/main.tf
+index cdfda61..cf1ead6 100644
+--- a/main.tf
++++ b/main.tf
+@@ -4,3 +4,16 @@ module "labels" {
+   service     = "network"
+   environment = var.environment
+ }
++
++module "vpc" {
++  source  = "terraform-aws-modules/vpc/aws"
++  version = "6.7.3"
++
++  name = "network-${var.environment}"
++  cidr = var.vpc_cidr
++
++  azs             = ["eu-north-1a", "eu-north-1b"]
++  private_subnets = var.private_subnet_cidrs
++
++  tags = module.labels.tags
++}
+diff --git a/variables.tf b/variables.tf
+index 236aa5f..e9f99d8 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -7,3 +7,15 @@ variable "environment" {
+   type    = string
+   default = "staging"
+ }
++
++variable "vpc_cidr" {
++  type        = string
++  description = "IPv4 CIDR block of the VPC."
++  default     = "10.0.0.0/16"
++}
++
++variable "private_subnet_cidrs" {
++  type        = list(string)
++  description = "IPv4 CIDR blocks of the private subnets, one per availability zone in the order eu-north-1a, eu-north-1b."
++  default     = ["10.0.1.0/24", "10.0.2.0/24"]
++}
+diff --git a/versions.tf b/versions.tf
+index bcdeda0..a57677a 100644
+--- a/versions.tf
++++ b/versions.tf
+@@ -1,8 +1,10 @@
+ terraform {
++  required_version = ">= 1.10"
++
+   required_providers {
+     aws = {
+       source  = "hashicorp/aws"
+-      version = ">= 4.0"
++      version = "~> 6.0"
+     }
+   }
+ 
