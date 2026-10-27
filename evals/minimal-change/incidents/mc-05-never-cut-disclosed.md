@@ -30,15 +30,15 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 ## Hypotheses
 
 - **The closing line gives a never-cut item an exit.** Supported. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:131`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:68`). All three `doc` runs used the
+  line naming what was skipped (`instructions/minimal_change_instructions.md:130`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:67`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
 - **The agent did not recognize the data-loss risk.** Contradicted for the `doc` arm, whose three
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
   document: no run in any arm opened `app/fsutil.py`, although the document requires that search
-  before choosing a rung (`:33`). Reusing `atomic_write` would have passed both assertions.
+  before choosing a rung (`:32`). Reusing `atomic_write` would have passed both assertions.
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
 
@@ -47,6 +47,12 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 9 of 9 runs failed both assertions at `c0616b1`, three per arm, with the `sonnet` model. The task
 was written to catch this failure before any run, so the reproduction is the suite's own first
 measurement rather than a later attempt from the record.
+
+9 of 9 runs failed both again at `56262a6`, in the 2026-10-24 stamp, where the baseline no longer
+had this repository's `AGENTS.md` loaded. All three `doc` runs again named the risk and left it
+out, run 2 as "a failed write can leave a partial file", and no `baseline` or `plain` run named
+it. Across both stamps that is 18 of 18 runs failing, 6 of 6 `doc` runs naming the risk, and 0 of
+12 other runs naming it.
 
 ## Disposition
 
