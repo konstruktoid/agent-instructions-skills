@@ -1,0 +1,33 @@
+fix the overlap between the two terraform skill descriptions
+
+---
+
+run the trigger evals
+
+---
+
+<task-notification>
+<task-id>bfevkez9n</task-id>
+<tool-use-id>toolu_014uopYMc2g3YpLCgX5XiGJy</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/caa39e70-9dc4-4dac-8b6b-e4e15345c8f2/tasks/bfevkez9n.output</output-file>
+<status>completed</status>
+<summary>Background command "python3 evals/run_eval.py triggers --skill terraform-secure-iac --runs 3 --parallel 6 &gt; /tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/cfa9c41d-00af-4345-889c-ac333a5635df/scratchpad/triggers.log 2&gt;&amp;1; echo exit=$?; tail -30 /tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/cfa9c41d-00af-4345-889c-ac333a5635df/scratchpad/triggers.log" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b3yjly4fr</task-id>
+<tool-use-id>toolu_0142TnNmdSAzSCrBKj2CmNwk</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/caa39e70-9dc4-4dac-8b6b-e4e15345c8f2/tasks/b3yjly4fr.output</output-file>
+<status>completed</status>
+<summary>Background command "S=/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/cfa9c41d-00af-4345-889c-ac333a5635df/scratchpad; rsync -a --exclude=.venv --exclude='evals/*/results/raw/*/*/run-*' /home/tsj/Code/Git/agent-instructions-skills/ $S/repo/ &amp;&amp; cd $S/repo &amp;&amp; git status --short &amp;&amp; python3 evals/run_eval.py triggers --skill terraform-secure-iac --runs 3 --parallel 6 &gt; $S/triggers.log 2&gt;&amp;1; echo exit=$?; tail -15 $S/triggers.log" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+copy the results in and update the README
+
+---
+
+commit this with a minimal commit message on a new branch and open a PR with a minimal subject and text body
