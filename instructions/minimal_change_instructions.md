@@ -133,6 +133,11 @@ check that was not run, a requirement that looked larger than the need. A reply 
 report says that. The line exists so a reviewer finds the omissions without reconstructing them
 from the diff.
 
+The line reports omissions these rules allow, and never one they forbid. An item from
+[What Is Never Cut](#what-is-never-cut) that the change lacks is unfinished work, not a skip to
+report: add it before replying. When it cannot be added, say that the change is incomplete and why,
+rather than listing the item as skipped.
+
 ## Quality Checklist
 
 Before considering a change complete, verify that:
@@ -150,4 +155,5 @@ Before considering a change complete, verify that:
   dependency the code already used was reported.
 - New non-trivial logic has one small test, or the reply says why it has none.
 - Each deliberate shortcut carries a `shortcut:` comment naming its limit and its upgrade condition.
-- The reply ends with what was skipped or not checked.
+- The reply ends with what was skipped or not checked, and nothing on that list is an item from
+  What Is Never Cut.
