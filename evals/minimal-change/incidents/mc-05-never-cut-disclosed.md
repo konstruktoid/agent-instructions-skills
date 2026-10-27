@@ -29,14 +29,15 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 
 ## Hypotheses
 
-- **The closing line gives a never-cut item an exit.** Supported. "Closing the Reply" asks for a
+- **The closing line gives a never-cut item an exit.** Supported by the 2026-10-20 and 2026-10-24
+  stamps, then contradicted as the cause by the 2026-10-27 stamp. "Closing the Reply" asks for a
   line naming what was skipped (`instructions/minimal_change_instructions.md:133`), and "What Is
   Never Cut" lists error handling that prevents data loss (`:70`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
-  rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
-  Contradicted as the cause by the 2026-10-27 stamp: with the closing line forbidden to report a
-  missing never-cut item, at `81191a3`, all three `doc` runs read the whole document and still left
-  the safeguard out, and two of them still listed the partial or truncated file as skipped.
+  rule, reported it. Not isolated: no arm had the closing rule without the never-cut list. In the
+  2026-10-27 stamp, with the closing line forbidden to report a missing never-cut item, at
+  `81191a3`, all three `doc` runs read the whole document and still left the safeguard out, and two
+  of them still listed the partial or truncated file as skipped.
 - **The agent did not recognize the data-loss risk.** Contradicted for the `doc` arm, whose three
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
@@ -45,19 +46,19 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
 - **"What Is Never Cut" reads as a rule about removing safeguards, not about writing new code.** Its
-  opening says a smaller change never "removes" these, and the Quality Checklist asks that they
-  are "intact", while `save_settings` is new code with no safeguard to remove. Untested, and partly
-  contradicted: in `mc-04-set-quantity` the `doc` arm adds validation to a new handler in 5 of 5
-  assertions in both stamps, so the list does reach new code for validation at least. Contradicted
-  as the cause by the 2026-10-27-new-code stamp: with the list saying it never leaves these out of
-  code a change adds, at `bfc04e2`, all three `doc` runs read the whole document and still left the
-  safeguard out, and all three listed the non-atomic write as skipped.
+  opening says a smaller change never "removes" these, and the Quality Checklist asks that they are
+  "intact", while `save_settings` is new code with no safeguard to remove. Partly contradicted
+  before any test: in `mc-04-set-quantity` the `doc` arm adds validation to a new handler in 5 of 5
+  assertions in both stamps, so the list does reach new code for validation at least. Then
+  contradicted as the cause by the 2026-10-27-new-code stamp: with the list saying it never leaves
+  these out of code a change adds, at `bfc04e2`, all three `doc` runs read the whole document and
+  still left the safeguard out, and all three listed the non-atomic write as skipped.
 - **The agent files the safeguard under scope the request did not ask for.** Supported, untested.
   Across the four stamps, 11 of 12 `doc` closing lines name the write's risk and 5 of them give the
-  request as the reason for leaving it out, as in "because the request didn't ask for one". None
-  of the 24 `baseline` or `plain` runs names the risk at all.
-  The document changes what the agent says about the safeguard, not whether it writes one, and its
-  scope rules, such as changing only what the request needs, may outrank the never-cut list.
+  request as the reason for leaving it out, as in "because the request didn't ask for one". None of
+  the 24 `baseline` or `plain` runs names the risk at all. The document changes what the agent says
+  about the safeguard, not whether it writes one, and its scope rules, such as changing only what
+  the request needs, may outrank the never-cut list.
 
 ## Reproduction
 
