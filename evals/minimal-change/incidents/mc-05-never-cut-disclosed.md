@@ -30,8 +30,8 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 ## Hypotheses
 
 - **The closing line gives a never-cut item an exit.** Supported. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:131`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:68`). All three `doc` runs used the
+  line naming what was skipped (`instructions/minimal_change_instructions.md:130`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:67`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
   Contradicted as the cause by the 2026-10-27 stamp: with the closing line forbidden to report a

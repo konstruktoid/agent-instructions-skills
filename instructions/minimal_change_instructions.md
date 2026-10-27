@@ -58,8 +58,7 @@ same result.
 
 ## What Is Never Cut
 
-A smaller change never removes these from code that has them, and never leaves them out of code it
-adds. Each is part of doing the work, not an extra on top of it.
+A smaller change never removes these. Each is part of doing the work, not an extra on top of it.
 
 - Validation at a trust boundary: user input, requests and responses that cross a network, files
   from outside the repository, and the arguments of an interface that callers outside the repository
@@ -146,7 +145,7 @@ Before considering a change complete, verify that:
 - Every item a benchmark, standard, or explicit request required is present, and none was removed
   as unnecessary.
 - Validation at trust boundaries, error handling that prevents data loss, security controls, and
-  accessibility are intact in the code the change touches and present in the code it adds.
+  accessibility are intact.
 - No dependency was newly used or added that is unmaintained, vulnerable, or unpinned, and a flawed
   dependency the code already used was reported.
 - New non-trivial logic has one small test, or the reply says why it has none.
