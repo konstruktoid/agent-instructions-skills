@@ -30,8 +30,8 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 ## Hypotheses
 
 - **The closing line gives a never-cut item an exit.** Supported. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:130`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:67`). All three `doc` runs used the
+  line naming what was skipped (`instructions/minimal_change_instructions.md:133`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:70`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
   Contradicted as the cause by the 2026-10-27 stamp: with the closing line forbidden to report a
@@ -41,7 +41,7 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
   document: no run in any arm opened `app/fsutil.py`, although the document requires that search
-  before choosing a rung (`:32`). Reusing `atomic_write` would have passed both assertions.
+  before choosing a rung (`:35`). Reusing `atomic_write` would have passed both assertions.
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
 - **"What Is Never Cut" reads as a rule about removing safeguards, not about writing new code.** Its
@@ -133,7 +133,8 @@ changed nothing, so the reading of the list as a rule about removal is not the c
 `9a86eb9` reverts the change.
 
 Two hypotheses remain: the skipped search for `atomic_write`, and the safeguard filed under
-unrequested scope. Two changes to the document's text have now moved nothing, so the next step is
-a decision rather than a third wording: test one of the two, or accept that the document changes
-what an agent reports about this safeguard and not what it writes, and say so in its measured
-effect.
+unrequested scope. Two changes to the document's text have now moved nothing, and both remaining
+hypotheses would be a third. The decision is to stop there: the "Measured effect" paragraph of
+`instructions/minimal_change_instructions.md` now says that the document makes an agent name this
+risk and not add the safeguard, and the task stays as the regression case that a later change,
+of any kind, has to pass.

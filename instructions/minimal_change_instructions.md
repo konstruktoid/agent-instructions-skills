@@ -20,8 +20,11 @@ it.
 Measured effect: in `evals/minimal-change`, an agent following this document wrote less source than
 one with no instruction and than one given the single sentence "Make the smallest complete change",
 and it added tests. It used more output tokens than the sentence, and it did not change how the
-agent reused existing helpers, handled errors, or covered a stated scope. Read the rules on reuse
-and error handling as guidance that has not been shown to alter behavior. The first run with no
+agent reused existing helpers, handled errors, or covered a stated scope. Where a change needed a
+safeguard against data loss, an agent following this document named the risk in its closing line
+in 11 of 12 runs, against none of 24 without it, and still left the safeguard out, and two rewordings
+of the rules it skipped changed neither. Read the rules on reuse and error handling as guidance that
+has not been shown to alter behavior. The first run with no
 instruction had loaded the evaluating repository's own `AGENTS.md`; a repeat without it gave the
 same result.
 
