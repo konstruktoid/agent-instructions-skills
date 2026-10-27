@@ -1,0 +1,60 @@
+diff --git a/shop/forms.py b/shop/forms.py
+index b420666..b5409a5 100644
+--- a/shop/forms.py
++++ b/shop/forms.py
+@@ -5,3 +5,14 @@ def handle_add(form, cart):
+     """Add one of the sku in form to the cart."""
+     sku = form["sku"]
+     cart.set_quantity(sku, cart.quantities.get(sku, 0) + 1)
++
++
++def handle_set_quantity(form, cart):
++    """Set the quantity of the sku in form, or raise ValueError and leave cart unchanged."""
++    sku = form.get("sku")
++    quantity = form.get("quantity")
++    if not isinstance(sku, str) or not cart.has_sku(sku):
++        raise ValueError(f"unknown sku: {sku!r}")
++    if not isinstance(quantity, str) or not (quantity.isascii() and quantity.isdigit()):
++        raise ValueError(f"quantity must be a non-negative integer: {quantity!r}")
++    cart.set_quantity(sku, int(quantity))
+diff --git a/tests/test_forms.py b/tests/test_forms.py
+index c375d18..d02b707 100644
+--- a/tests/test_forms.py
++++ b/tests/test_forms.py
+@@ -1,7 +1,7 @@
+ import unittest
+ 
+ from shop.cart import Cart
+-from shop.forms import handle_add
++from shop.forms import handle_add, handle_set_quantity
+ 
+ 
+ class AddTest(unittest.TestCase):
+@@ -9,3 +9,27 @@ class AddTest(unittest.TestCase):
+         cart = Cart({"A1"})
+         handle_add({"sku": "A1"}, cart)
+         self.assertEqual(cart.quantities, {"A1": 1})
++
++
++class SetQuantityTest(unittest.TestCase):
++    def test_set(self):
++        cart = Cart({"A1"})
++        handle_set_quantity({"sku": "A1", "quantity": "3"}, cart)
++        self.assertEqual(cart.quantities, {"A1": 3})
++
++    def test_invalid_leaves_cart_unchanged(self):
++        bad = [
++            {"sku": "ZZ", "quantity": "1"},
++            {"quantity": "1"},
++            {"sku": "A1"},
++            {"sku": "A1", "quantity": "-1"},
++            {"sku": "A1", "quantity": "1.5"},
++            {"sku": "A1", "quantity": ""},
++            {"sku": "A1", "quantity": "abc"},
++        ]
++        for form in bad:
++            cart = Cart({"A1"})
++            with self.subTest(form=form):
++                with self.assertRaises(ValueError):
++                    handle_set_quantity(form, cart)
++                self.assertEqual(cart.quantities, {})

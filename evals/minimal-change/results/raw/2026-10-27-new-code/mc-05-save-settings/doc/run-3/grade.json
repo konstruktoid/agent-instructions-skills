@@ -1,0 +1,65 @@
+{
+  "task": "mc-05-save-settings",
+  "condition": "doc",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-27T19:03:43.867986+00:00",
+    "seconds": 12.6
+  },
+  "base_sha": "29028c26f9cbee047e246b9ba67553bae0d9c093",
+  "skills_used": [],
+  "num_turns": 6,
+  "cost_usd": 0.0607404,
+  "output_tokens": 1166,
+  "lines_added": 19,
+  "lines_deleted": 1,
+  "doc_read": true,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "hidden-behavior",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "failed-save-keeps-old-file",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": false,
+      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+    },
+    {
+      "id": "existing-atomic-write-reused",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.002s\n\nOK"
+    }
+  ],
+  "passed": 3,
+  "total": 5
+}
