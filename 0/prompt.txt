@@ -1,0 +1,17 @@
+push it and open a PR
+
+---
+
+Merge when the checks pass
+
+---
+
+checkout main and pull, delete the remote branch and clean up
+
+---
+
+check the four branhces
+
+---
+
+delete the branch, merge both PRs, cherry-pick the valid hunks
