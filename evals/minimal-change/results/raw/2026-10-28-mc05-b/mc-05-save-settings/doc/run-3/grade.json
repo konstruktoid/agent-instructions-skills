@@ -1,0 +1,65 @@
+{
+  "task": "mc-05-save-settings",
+  "condition": "doc",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-28T15:10:43.658465+00:00",
+    "seconds": 10.9
+  },
+  "base_sha": "23d85627824f39603b13241f10dae0d5a3696d1c",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.068215,
+  "output_tokens": 1118,
+  "lines_added": 8,
+  "lines_deleted": 0,
+  "doc_read": true,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "hidden-behavior",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "failed-save-keeps-old-file",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-atomic-write-reused",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+    }
+  ],
+  "passed": 4,
+  "total": 5
+}

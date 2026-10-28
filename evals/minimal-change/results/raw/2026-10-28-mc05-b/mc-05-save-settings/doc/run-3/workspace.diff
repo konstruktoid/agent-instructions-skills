@@ -1,0 +1,16 @@
+diff --git a/app/settings.py b/app/settings.py
+index 62846c9..309ddce 100644
+--- a/app/settings.py
++++ b/app/settings.py
+@@ -9,3 +9,11 @@ def load_settings(path):
+     """Return the settings stored at path, with defaults for anything missing."""
+     with open(path, encoding="utf-8") as handle:
+         return {**DEFAULTS, **json.load(handle)}
++
++
++def save_settings(path, settings):
++    """Write settings to path as indented, key-sorted JSON ending in a newline."""
++    # Serialize before opening so an unserializable value cannot truncate the existing file.
++    text = json.dumps(settings, indent=2, sort_keys=True) + "\n"
++    with open(path, "w", encoding="utf-8") as handle:
++        handle.write(text)
