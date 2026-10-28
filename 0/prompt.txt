@@ -1,0 +1,89 @@
+read state and see progress and future work
+
+---
+
+check ccr-bd0208cd-1xhrko
+
+---
+
+and the fix the state file
+
+---
+
+check the minimal-change freshness finding
+
+---
+
+read and get the full story
+
+---
+
+run recommended runs
+
+---
+
+<task-notification>
+<task-id>b427nmvfp</task-id>
+<tool-use-id>toolu_01JrBZDUDrZojV9wag7NZBW4</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/124aaef7-356d-4928-b333-accc84ad2a76/tasks/b427nmvfp.output</output-file>
+<status>completed</status>
+<summary>Background command "Clone to scratchpad and start the mc-05 rerun" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+Status?
+
+---
+
+report on the mc-05 results
+
+---
+
+ensure all documentation is up-to-date and run docs tests
+
+---
+
+run 3 more doc runs of mc-05, and ensure docs are in sync with the code
+
+---
+
+<task-notification>
+<task-id>btvit0xdr</task-id>
+<tool-use-id>toolu_011dtcW9Ht1Xu8rYUBfLbWc9</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/124aaef7-356d-4928-b333-accc84ad2a76/tasks/btvit0xdr.output</output-file>
+<status>completed</status>
+<summary>Background command "Start the second mc-05 rerun in the scratch clone" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+copy both stamps in and update the claims
+
+---
+
+<task-notification>
+<task-id>bk1a095zi</task-id>
+<tool-use-id>toolu_01YBLsJJWooEo1iMwsjANYH7</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/124aaef7-356d-4928-b333-accc84ad2a76/tasks/bk1a095zi.output</output-file>
+<status>completed</status>
+<summary>Background command "Remove dirty stamp and rerun it from a clean clone" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>b7kn220zi</task-id>
+<tool-use-id>toolu_01J8vHCui7Mu8A2FxZD5Len9</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/124aaef7-356d-4928-b333-accc84ad2a76/tasks/b7kn220zi.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for the clean rerun to finish" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+delete the scratch clones
+
+---
+
+commit this, minimal commit message
