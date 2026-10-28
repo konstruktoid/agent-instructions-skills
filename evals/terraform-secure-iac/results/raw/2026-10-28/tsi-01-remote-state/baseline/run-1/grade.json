@@ -1,0 +1,151 @@
+{
+  "task": "tsi-01-remote-state",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-28T09:18:05.716497+00:00",
+    "seconds": 79.5
+  },
+  "base_sha": "90257801a79a973c7d2899de0ba5816ce2ea040e",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.1083921,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+      "passed": true,
+      "evidence": "match: 'terraform fmt'"
+    },
+    {
+      "id": "validate-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+      "passed": true,
+      "evidence": "match: 'terraform && (cd bootstrap && terraform init -backend=false >/dev/null && terraform validate; cd .. && terraform init -backend=false >/dev/null && terraform validate'"
+    },
+    {
+      "id": "validate-result-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+      "passed": true,
+      "evidence": "match: 'validat'"
+    },
+    {
+      "id": "no-state-or-plan-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-s3-backend",
+      "kind": "workspace_command",
+      "source": "task prompt: move state to an S3 backend",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-bootstrap-bucket",
+      "kind": "workspace_command",
+      "source": "task prompt: create the bucket that holds the state",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "backend-encrypted",
+      "kind": "workspace_command",
+      "source": "references/state.md: enable encryption at rest on the backend",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "backend-locking",
+      "kind": "workspace_command",
+      "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "backend-no-credentials",
+      "kind": "workspace_command",
+      "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+      "passed": true,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "state-bucket-versioned",
+      "kind": "workspace_command",
+      "source": "references/state.md: enable object versioning on the backend",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-bucket-encrypted",
+      "kind": "workspace_command",
+      "source": "references/state.md: enable encryption at rest on the backend",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-bucket-public-access-blocked",
+      "kind": "workspace_command",
+      "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-key-customer-managed",
+      "kind": "workspace_command",
+      "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-bucket-access-restricted",
+      "kind": "workspace_command",
+      "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "secret-in-state-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+      "passed": true,
+      "evidence": "match: \"state holds the uploader's IAM secret\""
+    },
+    {
+      "id": "state-gitignored",
+      "kind": "workspace_command",
+      "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docs-updated",
+      "kind": "workspace_command",
+      "source": "task prompt: update the README",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 18,
+  "total": 18
+}

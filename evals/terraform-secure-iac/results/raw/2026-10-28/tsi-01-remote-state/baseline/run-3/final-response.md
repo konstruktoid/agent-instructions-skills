@@ -1,0 +1,8 @@
+I've added the `bootstrap/` configuration, pointed this configuration at an S3 backend, and rewritten the README. It is not validated or applied: `terraform fmt` passes, but `terraform validate` couldn't run because the AWS provider plugin failed to start in this sandbox.
+
+- **`bootstrap/`** creates the state bucket and a KMS key. The state holds the uploader's secret access key, so the bucket is encrypted with that key and has versioning on. It also blocks public access, allows TLS only, expires old state versions after 90 days, and has `prevent_destroy`. The bucket name defaults to `reports-tfstate-<account id>`. Its own state stays local, since it can't live in a bucket that doesn't exist yet.
+- **`backend.tf`** uses S3 with `encrypt` and S3's native lockfile, so no DynamoDB table is needed (Terraform 1.10+). The bucket and KMS key are not hardcoded; each person passes them to `terraform init` with `-backend-config`. `terraform output init_command` in `bootstrap/` prints the exact command.
+- **`README.md`** now covers the one-time bootstrap, migrating the existing state, the daily workflow, and the IAM and KMS permissions each team member needs. It also warns that anyone who can read the bucket can read the secret key.
+- **`.gitignore`** is new and excludes `.terraform/`, `*.tfstate*` and plan files.
+
+To migrate, the engineer who holds the laptop state runs `bootstrap` once, then runs the `init_command` in the repo root and answers "yes" to copy the state across. After that, `terraform plan` should show no changes. Delete the local `terraform.tfstate*` files only once the object is confirmed in S3.
