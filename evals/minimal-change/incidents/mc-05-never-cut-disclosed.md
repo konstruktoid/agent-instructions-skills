@@ -60,6 +60,13 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   about the safeguard, not whether it writes one, and its scope rules, such as changing only what
   the request needs, may outrank the never-cut list.
 
+- **The Claude Code version moved the result.** Supported by the timing, untested. The `doc` arm
+  failed `failed-save-keeps-old-file` in 12 of 12 runs on Claude Code 2.1.305, 2.1.310 and 2.1.311,
+  and passed it in 6 of 6 on 2.1.312, while the rules of the document at `a5d8770` are word for
+  word those at `c0616b1` and `56262a6`, whose six `doc` runs all failed it. No stamp ran one
+  revision on two versions, so the version, the draw, and anything else that changed between the
+  stamps cannot be separated.
+
 ## Reproduction
 
 9 of 9 runs failed both assertions at `c0616b1`, three per arm, with the `sonnet` model. The task
@@ -82,6 +89,16 @@ mixes the change with the machine.
 9 of 9 runs failed both again at `bfc04e2`, in the 2026-10-27-new-code stamp
 (`evals/minimal-change/results/2026-10-27-new-code.md`), which carries the second targeted change
 `54c5754`, in the same container and on the same Claude Code version as 2026-10-27.
+
+The failure did not reproduce in the `doc` arm at `a5d8770`, in the 2026-10-28-mc05 and
+2026-10-28-mc05-b stamps (`evals/minimal-change/results/2026-10-28-mc05.md` and
+`evals/minimal-change/results/2026-10-28-mc05-b.md`), each on a clean tree, with three runs per
+arm of `mc-05-save-settings` alone, on Claude Code 2.1.312. `failed-save-keeps-old-file` passed in
+6 of 6 `doc` runs and in 0 of 12 `baseline` and `plain` runs. Four of the six `doc` runs wrote a
+temporary file and called `os.replace`. The other two, run 3 of each stamp, built the JSON text
+before opening `path` and then wrote to it directly, and their closing lines name the non-atomic
+write as skipped because the request did not ask for it. `existing-atomic-write-reused` failed in
+18 of 18 runs, and none opened `app/fsutil.py`.
 
 ## Disposition
 
@@ -139,3 +156,11 @@ hypotheses would be a third. The decision is to stop there: the "Measured effect
 `instructions/minimal_change_instructions.md` now says that the document makes an agent name this
 risk and not add the safeguard, and the task stays as the regression case that a later change,
 of any kind, has to pass.
+
+Revised 2026-10-28. At `a5d8770`, `failed-save-keeps-old-file` no longer fails in the `doc` arm,
+and `existing-atomic-write-reused` fails in every arm as before. The task stays the regression
+case, now for the second assertion alone. The "Measured effect" paragraph states both counts and
+that the cause is not established, and it no longer says the document leaves the safeguard out.
+The document is not credited with the change, because the rules are unchanged since the stamps that
+failed and Claude Code moved from 2.1.311 to 2.1.312. Telling the version from the draw takes one
+revision measured on two versions.

@@ -1,0 +1,587 @@
+[
+  {
+    "task": "mc-05-save-settings",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:36.439651+00:00",
+      "seconds": 7.3
+    },
+    "base_sha": "57f361fd6c5600adb08c4241448f408e3e28fbfd",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0470556,
+    "output_tokens": 620,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:36.432759+00:00",
+      "seconds": 9.2
+    },
+    "base_sha": "57f361fd6c5600adb08c4241448f408e3e28fbfd",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0470156,
+    "output_tokens": 616,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:36.430913+00:00",
+      "seconds": 6.8
+    },
+    "base_sha": "57f361fd6c5600adb08c4241448f408e3e28fbfd",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0472156,
+    "output_tokens": 634,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:36.506013+00:00",
+      "seconds": 16.2
+    },
+    "base_sha": "2504566fcdf1a54282a6ff18cdd5bd7221a404e8",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0702544,
+    "output_tokens": 1328,
+    "lines_added": 10,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:36.498317+00:00",
+      "seconds": 13.1
+    },
+    "base_sha": "2504566fcdf1a54282a6ff18cdd5bd7221a404e8",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.07289980000000001,
+    "output_tokens": 1428,
+    "lines_added": 11,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:43.658465+00:00",
+      "seconds": 10.9
+    },
+    "base_sha": "23d85627824f39603b13241f10dae0d5a3696d1c",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.068215,
+    "output_tokens": 1118,
+    "lines_added": 8,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:44.089938+00:00",
+      "seconds": 7.2
+    },
+    "base_sha": "f5e7ca098c24807d55c35af3b7ce105c7589424b",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.047981899999999994,
+    "output_tokens": 607,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:46.031621+00:00",
+      "seconds": 7.1
+    },
+    "base_sha": "776a19bb966e4241989974e4446386df8b9a7d15",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.048167100000000004,
+    "output_tokens": 624,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T15:10:49.946974+00:00",
+      "seconds": 7.4
+    },
+    "base_sha": "852729948d6d68aea723d943ffec8ebd6d58cad2",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0480449,
+    "output_tokens": 613,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  }
+]

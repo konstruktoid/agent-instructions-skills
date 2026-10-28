@@ -20,13 +20,13 @@ it.
 Measured effect: in `evals/minimal-change`, an agent following this document wrote less source than
 one with no instruction and than one given the single sentence "Make the smallest complete change",
 and it added tests. It used more output tokens than the sentence, and it did not change how the
-agent reused existing helpers, handled errors, or covered a stated scope. In `mc-05-save-settings`,
-the one task whose change needs a safeguard against data loss, an agent following this document
-named the risk in its closing line in 11 of 12 runs, against none of 24 without it, and still left
-the safeguard out; two rewordings of the never-cut rules did not change that. Read the rules on
-reuse and error handling as guidance that has not been shown to alter behavior. The first run with no
-instruction had loaded the evaluating repository's own `AGENTS.md`; a repeat without it gave the
-same result.
+agent reused existing helpers or covered a stated scope. In `mc-05-save-settings`, the one task
+whose change needs a safeguard against data loss, it left the safeguard out in 12 of 12 runs on
+Claude Code 2.1.305 to 2.1.311, then kept the old file on a failed save in 6 of 6 runs on 2.1.312,
+against 0 of 12 without the document; the Claude Code version changed with the result, so the cause
+is not established. Read the rules on reuse and error handling as guidance that has not been shown
+to alter behavior. The first run with no instruction had loaded the evaluating repository's own
+`AGENTS.md`; a repeat without it gave the same result.
 
 ## The Reuse Ladder
 

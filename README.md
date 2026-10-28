@@ -481,10 +481,10 @@ output, or that its `description` routes the right tasks to it. Two measurements
   skill's own Verify and Verification checklist sections. Every task runs twice against an
   identical fixture copy, once with the skill available and once without. The only difference
   between the two runs is a single-skill plugin passed with `--plugin-dir`, so a delta is
-  attributable to the skill. Six of the ten skills have a suite.
+  attributable to the skill. Seven of the ten skills have a suite.
   `github-repository-security` and `github-organization-governance` have none, because a task
   for either acts on a live GitHub organization rather than on a fixture directory, and
-  `terraform-secure-iac` and `terraform-testing` have none yet;
+  `terraform-testing` has none yet;
   `scripts/check_evals.py` reports each of them as unmeasured.
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
@@ -530,23 +530,23 @@ improvement, the results file says so. See [evals/README.md](evals/README.md) fo
 conditions are isolated, what an assertion may and may not be, and the limitations that apply
 to every number in there.
 
-Six of the ten skills define both evals and have results committed. The table records the
+Seven of the ten skills define both evals and have results committed. The table records the
 latest stamp for each of those, what it measured, and the limitation that keeps that number
 from standing as a general claim about the skill. `github-repository-security` and
 `github-organization-governance` have neither eval yet: both act on live GitHub settings, so
 a task eval needs a fixture that stands in for an organization, and until that exists there is
-no measurement of what either skill changes. `terraform-secure-iac` and `terraform-testing`
-have neither eval yet either; a suite for each is a follow-up.
+no measurement of what either skill changes. `terraform-testing`
+has neither eval yet either; a suite for it is a follow-up.
 
-`scripts/check_evals.py` holds the six suites to the structure described here, and separates
+`scripts/check_evals.py` holds the seven suites to the structure described here, and separates
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
 every committed results file regenerates byte-identically from the artifacts under
 `results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness, and it reports none. Every latest stamp was measured on 2026-10-06, 2026-10-07,
-2026-10-24 or 2026-10-25 from a fresh clone of a committed revision outside the operator's home
-directory, with no modified files and no ancestor `CLAUDE.md`. The task and routing results in each
-row come from the same run. Runs that a usage limit cut short were discarded and re-run rather than
-graded.
+is staleness, and it reports none for these seven skills. Every latest stamp was measured on
+2026-10-06, 2026-10-07, 2026-10-24, 2026-10-25 or 2026-10-28 from a fresh clone of a committed
+revision outside the operator's home directory, with no modified files and no ancestor `CLAUDE.md`.
+The task and routing results in each row come from the same run. Runs that a usage limit cut short
+were discarded and re-run rather than graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
@@ -556,6 +556,7 @@ graded.
 | `github-actions-security` | 2026-10-24 | +37 over 7 tasks | 2.4x | 10/10 | Three runs per condition, and every one of the seven deltas separates. Measured at `56262a6`, graded with `zizmor` 1.31.1 and the `actionlint` image that [Checks](#checks) pins; earlier stamps do not record which builds graded them. |
 | `python-secure-coding` | 2026-10-24 | +2 over 5 tasks | 1.4x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `56262a6`. |
 | `python-testing` | 2026-10-07 | +1 over 5 tasks | 1.2x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*. `pt-02` and `pt-05` scored full marks in both conditions. The skill did not fire on `pt-03`. Measured at `de69b8c`. |
+| `terraform-secure-iac` | 2026-10-28 | +2 over 4 tasks | 1.8x | 10/10 | Three runs per condition. `tsi-03-network-modules` (+1) separates; the other three deltas are marked *no reliable difference*. `validate-actually-run` fails in the grader sandbox in both conditions, so it does not discriminate. Measured at `6c6960f`. |
 
 Two limits cut across the whole table. A routing score carried from an earlier stamp than the task
 result was measured against an earlier revision of that skill's `description`, so it does not

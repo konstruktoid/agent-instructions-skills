@@ -259,7 +259,7 @@ no file in the repository defines it.
 
 ### `evals/run_eval.py`
 
-`evals/run_eval.py`, 2981 lines, is the highest-privilege artifact in the repository. It does not
+`evals/run_eval.py`, 3002 lines, is the highest-privilege artifact in the repository. It does not
 ship to consumers; it runs on the maintainer's machine.
 
 | Field | Value |
@@ -624,7 +624,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 unpinned form kept below and labeled as tracking the default branch (`:261`). The team setting at
 `:319` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:748` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:731` documents the release order, and
+disagrees with the others. `README.md:732` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
