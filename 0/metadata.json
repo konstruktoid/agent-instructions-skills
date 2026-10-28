@@ -1,0 +1,44 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M628NHQMWZ9K65TT9XYR256A",
+  "session_id": "d1c4e3cc-f2a9-4417-acb9-787cc1e7bb99",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-28T22:04:12.412614185Z",
+  "branch": "docs-sync-followup",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "README.md",
+    "docs/controls.md",
+    "docs/threat-model.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "70833a0ba317",
+  "checkpoint_transcript_start": 1039,
+  "transcript_lines_at_start": 1039,
+  "compact_transcript_start": 143,
+  "token_usage": {
+    "input_tokens": 28,
+    "cache_creation_tokens": 12009,
+    "cache_read_tokens": 2356457,
+    "output_tokens": 8344,
+    "api_call_count": 12
+  },
+  "redaction": {
+    "replacements": 4,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 4,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  },
+  "session_metrics": {
+    "turn_count": 22
+  }
+}
