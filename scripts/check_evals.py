@@ -661,7 +661,7 @@ def instructions_task_problems(suite: Path, tasks: list[dict[str, Any]]) -> list
 # stamp, and recording an incident should not cost a paid re-run.
 INCIDENTS_DIR = "incidents"
 INCIDENT_SECTIONS = ("Evidence", "Hypotheses", "Reproduction", "Disposition")
-INCIDENT_DISPOSITIONS = ("open", "regression-case", "not-reproduced", "declined")
+INCIDENT_DISPOSITIONS = ("open", "regression-case", "fixed", "not-reproduced", "declined")
 INCIDENT_TASK = re.compile(r"^Task: `([^`]+)`$", re.MULTILINE)
 # A rate without the revision it ran at cannot be compared with the next attempt, and a bare
 # "reproduced" hides how often, which is what separates a one-off from a pattern.

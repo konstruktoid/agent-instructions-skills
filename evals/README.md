@@ -488,9 +488,11 @@ Task: `<task-id>`
 - **Disposition** opens with one word. `regression-case` means a task in this suite reproduces
   the failure, and the record names it on its `Task:` line. `open` means the record is written
   and nothing is decided, which is the one disposition that may lack a reproduction count.
-  `not-reproduced` means an attempt was made and saw no failure. `declined` means the failure
-  reproduced and no task or rule is warranted, such as a single cause outside what the suite
-  measures. What follows the word is the reason, and the next action when there is one.
+  `fixed` means the cause lay outside anything a task in the suite can reproduce, such as the
+  harness, and was fixed where it lies; the record names the change and the check that stops it
+  returning. `not-reproduced` means an attempt was made and saw no failure. `declined` means the
+  failure reproduced and no task or rule is warranted, such as a single cause outside what the
+  suite measures. What follows the word is the reason, and the next action when there is one.
 
 The record points at the task, and `tasks.json` does not point back. Editing `tasks.json` makes the
 suite's latest stamp stale, and the evals job in `lint.yml` then fails the pull request until a

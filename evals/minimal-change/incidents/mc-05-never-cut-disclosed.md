@@ -29,18 +29,36 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 
 ## Hypotheses
 
-- **The closing line gives a never-cut item an exit.** Supported. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:131`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:68`). All three `doc` runs used the
+- **The closing line gives a never-cut item an exit.** Supported by the 2026-10-20 and 2026-10-24
+  stamps, then contradicted as the cause by the 2026-10-27 stamp. "Closing the Reply" asks for a
+  line naming what was skipped (`instructions/minimal_change_instructions.md:133`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:70`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
-  rule, reported it. Not isolated: no arm had the closing rule without the never-cut list.
+  rule, reported it. Not isolated: no arm had the closing rule without the never-cut list. In the
+  2026-10-27 stamp, with the closing line forbidden to report a missing never-cut item, at
+  `81191a3`, all three `doc` runs read the whole document and still left the safeguard out, and two
+  of them still listed the partial or truncated file as skipped.
 - **The agent did not recognize the data-loss risk.** Contradicted for the `doc` arm, whose three
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
   document: no run in any arm opened `app/fsutil.py`, although the document requires that search
-  before choosing a rung (`:33`). Reusing `atomic_write` would have passed both assertions.
+  before choosing a rung (`:35`). Reusing `atomic_write` would have passed both assertions.
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
+- **"What Is Never Cut" reads as a rule about removing safeguards, not about writing new code.** Its
+  opening says a smaller change never "removes" these, and the Quality Checklist asks that they are
+  "intact", while `save_settings` is new code with no safeguard to remove. Partly contradicted
+  before any test: in `mc-04-set-quantity` the `doc` arm adds validation to a new handler in 5 of 5
+  assertions in both stamps, so the list does reach new code for validation at least. Then
+  contradicted as the cause by the 2026-10-27-new-code stamp: with the list saying it never leaves
+  these out of code a change adds, at `bfc04e2`, all three `doc` runs read the whole document and
+  still left the safeguard out, and all three listed the non-atomic write as skipped.
+- **The agent files the safeguard under scope the request did not ask for.** Supported, untested.
+  Across the four stamps, 11 of 12 `doc` closing lines name the write's risk and 5 of them give the
+  request as the reason for leaving it out, as in "because the request didn't ask for one". None of
+  the 24 `baseline` or `plain` runs names the risk at all. The document changes what the agent says
+  about the safeguard, not whether it writes one, and its scope rules, such as changing only what
+  the request needs, may outrank the never-cut list.
 
 ## Reproduction
 
@@ -48,10 +66,76 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 was written to catch this failure before any run, so the reproduction is the suite's own first
 measurement rather than a later attempt from the record.
 
+9 of 9 runs failed both again at `56262a6`, in the 2026-10-24 stamp, where the baseline no longer
+had this repository's `AGENTS.md` loaded. All three `doc` runs again named the risk and left it
+out, run 2 as "a failed write can leave a partial file", and no `baseline` or `plain` run named
+it. Across both stamps that is 18 of 18 runs failing, 6 of 6 `doc` runs naming the risk, and 0 of
+12 other runs naming it.
+
+9 of 9 runs failed both again at `81191a3`, in the 2026-10-27 stamp, which carries the targeted
+change `962e2ff` (`evals/minimal-change/results/2026-10-27.md`). That stamp ran in a cloud
+container on Claude Code 2.1.311, where the two earlier stamps ran on the maintainer's machine on
+2.1.305 and 2.1.310, and its runs start with 19 built-in skills where theirs started with 17. Every
+arm saw the same environment, so the comparison within the stamp holds; a comparison across stamps
+mixes the change with the machine.
+
+9 of 9 runs failed both again at `bfc04e2`, in the 2026-10-27-new-code stamp
+(`evals/minimal-change/results/2026-10-27-new-code.md`), which carries the second targeted change
+`54c5754`, in the same container and on the same Claude Code version as 2026-10-27.
+
 ## Disposition
 
 regression-case. `mc-05-save-settings` already reproduces the failure, so no new fixture is
-needed. The next action is a targeted change to the document stating that an item on the never-cut
-list is never moved into the closing line as skipped, followed by
-`run_eval.py instructions-tasks --suite minimal-change --task mc-05-save-settings --runs 3` against
-the changed revision. That change and its run have not been made.
+needed. The targeted change is `962e2ff`, which tests the first hypothesis alone: "Closing the
+Reply" and the Quality Checklist now say the closing line never reports a missing never-cut item,
+which is unfinished work. Nothing else in the document changed, so the skipped search, the
+request's wording, and the reading of the list as a rule about removal stay untested, and a result
+can be attributed to this rule.
+
+What the change predicts, stated before any run of it: in the `doc` arm, `failed-save-keeps-old-file`
+passes in at least 2 of 3 runs, and no closing line lists the write's safety as skipped.
+`existing-atomic-write-reused` may still fail, since an agent that never opens `app/fsutil.py` can
+only write its own temporary file, which that assertion rejects; the search hypothesis is a
+separate change. The other five tasks keep their `doc` medians, and the `baseline` and `plain` arms,
+which never see the document, are unaffected.
+
+The prediction failed. In the 2026-10-27 stamp `failed-save-keeps-old-file` passed in 0 of 3
+`doc` runs, against at least 2 predicted, and two of the three closing lines still list the
+partial or truncated file as skipped; the third lists the error handling it did not add. Each of
+the three read the whole document, the new paragraph included. The rest of the prediction held:
+the other five tasks kept their medians in every arm, the arms kept their order by lines of
+non-test source added (the document 49, the sentence 54, the baseline 60), and the `doc` arm added
+tests in 14 of 18 runs, against 16 of 18 on 2026-10-24.
+
+The closing line is therefore not the cause, and `962e2ff` changes nothing a run can measure.
+`85a5a3b` reverts it, since a rule with no measured effect adds length the document's own standard
+does not allow. The next action is to test the reading of the list as a rule about removal, as one
+change on its own.
+
+That change is `54c5754`: "What Is Never Cut" now says a smaller change never removes these items
+from code that has them and never leaves them out of code it adds, and the Quality Checklist line
+says the same. Nothing else in the document differs from `main`.
+
+What it predicts, stated before any run of it: in the `doc` arm, `failed-save-keeps-old-file`
+passes in at least 2 of 3 runs, and no closing line lists the write's safety as skipped.
+`existing-atomic-write-reused` may still fail, as before. The other five tasks keep their `doc`
+medians, and the `baseline` and `plain` arms are unaffected. The `doc` arm may add more non-test
+source than its 49 lines on 2026-10-27, most likely in `mc-03-export-rows`, which also writes a
+file; that would be the change's cost, not a failure of it. If `failed-save-keeps-old-file` still
+passes in fewer than 2 runs, neither wording is the cause, and the skipped search for the existing
+helper is the remaining hypothesis.
+
+The prediction failed. `failed-save-keeps-old-file` passed in 0 of 3 `doc` runs, each of which read
+the whole document, and all three closing lines list the non-atomic write as skipped. The rest
+held: every task kept its median in every arm, the `doc` arm wrote 53 lines of non-test source
+against 57 for the sentence and 57 for the baseline, its `mc-03-export-rows` runs wrote 9, 9 and 11
+lines against 9, 9 and 9 before, and it added tests in 17 of 18 runs. The wording cost nothing and
+changed nothing, so the reading of the list as a rule about removal is not the cause either, and
+`9a86eb9` reverts the change.
+
+Two hypotheses remain: the skipped search for `atomic_write`, and the safeguard filed under
+unrequested scope. Two changes to the document's text have now moved nothing, and both remaining
+hypotheses would be a third. The decision is to stop there: the "Measured effect" paragraph of
+`instructions/minimal_change_instructions.md` now says that the document makes an agent name this
+risk and not add the safeguard, and the task stays as the regression case that a later change,
+of any kind, has to pass.

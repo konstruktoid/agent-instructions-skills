@@ -1,0 +1,43 @@
+diff --git a/app/settings.py b/app/settings.py
+index 62846c9..acef398 100644
+--- a/app/settings.py
++++ b/app/settings.py
+@@ -9,3 +9,10 @@ def load_settings(path):
+     """Return the settings stored at path, with defaults for anything missing."""
+     with open(path, encoding="utf-8") as handle:
+         return {**DEFAULTS, **json.load(handle)}
++
++
++def save_settings(path, settings):
++    """Write settings to path as indented, key-sorted JSON ending in a newline."""
++    with open(path, "w", encoding="utf-8") as handle:
++        json.dump(settings, handle, indent=2, sort_keys=True)
++        handle.write("\n")
+diff --git a/tests/test_settings.py b/tests/test_settings.py
+index 7b571ba..a395e66 100644
+--- a/tests/test_settings.py
++++ b/tests/test_settings.py
+@@ -3,7 +3,7 @@ import os
+ import tempfile
+ import unittest
+ 
+-from app.settings import load_settings
++from app.settings import load_settings, save_settings
+ 
+ 
+ class LoadTest(unittest.TestCase):
+@@ -13,3 +13,14 @@ class LoadTest(unittest.TestCase):
+             with open(path, "w", encoding="utf-8") as handle:
+                 json.dump({"theme": "dark"}, handle)
+             self.assertEqual(load_settings(path)["page_size"], 25)
++
++
++class SaveTest(unittest.TestCase):
++    def test_writes_sorted_indented_json_with_newline(self):
++        with tempfile.TemporaryDirectory() as directory:
++            path = os.path.join(directory, "s.json")
++            save_settings(path, {"theme": "dark", "page_size": 10})
++            with open(path, encoding="utf-8") as handle:
++                self.assertEqual(
++                    handle.read(), '{\n  "page_size": 10,\n  "theme": "dark"\n}\n'
++                )
