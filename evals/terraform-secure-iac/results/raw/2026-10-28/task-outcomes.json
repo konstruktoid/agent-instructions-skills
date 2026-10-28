@@ -1,0 +1,2936 @@
+[
+  {
+    "task": "tsi-01-remote-state",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:18:05.716497+00:00",
+      "seconds": 79.5
+    },
+    "base_sha": "90257801a79a973c7d2899de0ba5816ce2ea040e",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.1083921,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform && (cd bootstrap && terraform init -backend=false >/dev/null && terraform validate; cd .. && terraform init -backend=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "source": "task prompt: move state to an S3 backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "source": "task prompt: create the bucket that holds the state",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable object versioning on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+        "passed": true,
+        "evidence": "match: \"state holds the uploader's IAM secret\""
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 18,
+    "total": 18
+  },
+  {
+    "task": "tsi-01-remote-state",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:18:05.719291+00:00",
+      "seconds": 55.7
+    },
+    "base_sha": "90257801a79a973c7d2899de0ba5816ce2ea040e",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0889588,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive && terraform init -backend=false -input=false >/dev/null && terraform validate; cd bootstrap && terraform init -input=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "source": "task prompt: move state to an S3 backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "source": "task prompt: create the bucket that holds the state",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable object versioning on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+        "passed": true,
+        "evidence": "match: \"state holds the uploader's secret access key\""
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 17,
+    "total": 18
+  },
+  {
+    "task": "tsi-01-remote-state",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:18:05.721442+00:00",
+      "seconds": 45.5
+    },
+    "base_sha": "90257801a79a973c7d2899de0ba5816ce2ea040e",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.1059201,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform && terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform && terraform fmt -recursive && (cd bootstrap && terraform init -backend=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "source": "task prompt: move state to an S3 backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "source": "task prompt: create the bucket that holds the state",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable object versioning on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+        "passed": true,
+        "evidence": "match: \"state bucket and a KMS key. The state holds the uploader's secret access key\""
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 18,
+    "total": 18
+  },
+  {
+    "task": "tsi-01-remote-state",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:18:05.717826+00:00",
+      "seconds": 271.6
+    },
+    "base_sha": "90257801a79a973c7d2899de0ba5816ce2ea040e",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 10,
+    "cost_usd": 0.1695952,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive -check -diff; (cd bootstrap && terraform init -backend=false -input=false >/dev/null && terraform validate); terraform init -backend=false -input=false >/dev/null && terraform'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "source": "task prompt: move state to an S3 backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "source": "task prompt: create the bucket that holds the state",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable object versioning on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+        "passed": true,
+        "evidence": "match: \"state:** this stays local, since the bucket doesn't exist yet. It holds no secret\""
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 18,
+    "total": 18
+  },
+  {
+    "task": "tsi-01-remote-state",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:18:51.353721+00:00",
+      "seconds": 66.6
+    },
+    "base_sha": "5e1fef880e55f1899feeb9ef78a43c70d413f330",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1479908,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform init -backend=false -input=false >/dev/null 2>&1; terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "source": "task prompt: move state to an S3 backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "source": "task prompt: create the bucket that holds the state",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable object versioning on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+        "passed": true,
+        "evidence": "match: \"Secret in state:** the uploader's secret access key sits in cleartext in state\""
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 18,
+    "total": 18
+  },
+  {
+    "task": "tsi-01-remote-state",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:19:01.608859+00:00",
+      "seconds": 148.1
+    },
+    "base_sha": "a8eeb8ef3c55b444c31d7e57e303482644aa7692",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 10,
+    "cost_usd": 0.1738104,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive -check -diff; terraform init -backend=false -input=false 2>&1 | tail -3; terraform validate; (cd bootstrap && terraform init -backend=false -input=false 2>&1 | tail -3; terraf'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-s3-backend",
+        "kind": "workspace_command",
+        "source": "task prompt: move state to an S3 backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-bootstrap-bucket",
+        "kind": "workspace_command",
+        "source": "task prompt: create the bucket that holds the state",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-locking",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable state locking so two runs cannot write concurrently",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "backend-no-credentials",
+        "kind": "workspace_command",
+        "source": "references/state.md: supply backend credentials through the environment or default chain, never a reviewed file",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-versioned",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable object versioning on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-encrypted",
+        "kind": "workspace_command",
+        "source": "references/state.md: enable encryption at rest on the backend",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-bucket-public-access-blocked",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-key-customer-managed",
+        "kind": "workspace_command",
+        "source": "references/state.md: use a customer-managed key where the backend and the threat model call for one",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-bucket-access-restricted",
+        "kind": "workspace_command",
+        "source": "references/state.md: restrict backend access to the CI identity and a small set of administrators",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-in-state-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager could hold instead",
+        "passed": true,
+        "evidence": "match: \"Secret key in state.** The uploader's IAM secret access key is in state\""
+      },
+      {
+        "id": "state-gitignored",
+        "kind": "workspace_command",
+        "source": "references/state.md: add *.tfstate and *.tfstate.* to .gitignore",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docs-updated",
+        "kind": "workspace_command",
+        "source": "task prompt: update the README",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 17,
+    "total": 18
+  },
+  {
+    "task": "tsi-02-orders-database",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:19:25.366255+00:00",
+      "seconds": 27.5
+    },
+    "base_sha": "70cf286e9e0971d3d4ff50ca1d97901454d20c52",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.06378519999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -check && (terraform init -backend=false -input=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "source": "task prompt: add a Postgres instance",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "source": "task prompt: output what the deploy job needs to connect",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "tsi-02-orders-database",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:19:53.005111+00:00",
+      "seconds": 66.8
+    },
+    "base_sha": "eb13493d10dc0f54595373f101f90ad4337fa10d",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0759924,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -check; terraform init -backend=false >/dev/null 2>&1 && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "source": "task prompt: add a Postgres instance",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "source": "task prompt: output what the deploy job needs to connect",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tsi-02-orders-database",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:19:58.173714+00:00",
+      "seconds": 34.8
+    },
+    "base_sha": "7be98022bfb31949999e48a08360d92aa8fde88e",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0666147,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -check && (terraform init -backend=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "source": "task prompt: add a Postgres instance",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "source": "task prompt: output what the deploy job needs to connect",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "tsi-02-orders-database",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:20:33.137071+00:00",
+      "seconds": 43.5
+    },
+    "base_sha": "a912892d960379cf895e639de458d020ccaea289",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.12279570000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive -check -diff; terraform init -backend=false -input=false 2>&1 | tail -5; terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "source": "task prompt: add a Postgres instance",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "source": "task prompt: output what the deploy job needs to connect",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tsi-02-orders-database",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:20:59.966528+00:00",
+      "seconds": 46.6
+    },
+    "base_sha": "fde21fd06a4d12cf7ee253bc71b0081dabdc13c9",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1261227,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive -check -diff; terraform init -backend=false -input=false 2>&1 | tail -3; terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "source": "task prompt: add a Postgres instance",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "source": "task prompt: output what the deploy job needs to connect",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tsi-02-orders-database",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:21:16.766979+00:00",
+      "seconds": 43.9
+    },
+    "base_sha": "f119c704346984fd8a247fd6ca143caf1b61faf2",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.1076125,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive -check -diff; terraform init -backend=false -input=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-postgres-instance",
+        "kind": "workspace_command",
+        "source": "task prompt: add a Postgres instance",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-connection-output",
+        "kind": "workspace_command",
+        "source": "task prompt: output what the deploy job needs to connect",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-literal-password",
+        "kind": "workspace_command",
+        "source": "references/secrets.md: keep secrets out of configuration",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "password-input-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "secret-output-sensitive",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "password-kept-out-of-state",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tsi-03-network-modules",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:21:29.798283+00:00",
+      "seconds": 19.3
+    },
+    "base_sha": "ab66f8db12fa8a4dc608e6e3593eff327eb10e24",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0667197,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "source": "task prompt: move the AWS provider to the 6.x line",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "source": "task prompt: add the registry VPC module",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 12
+  },
+  {
+    "task": "tsi-03-network-modules",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:21:46.661800+00:00",
+      "seconds": 16.5
+    },
+    "base_sha": "c7ef72af9d964beae437c14605954ffa353c251e",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0615281,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -check; terraform init -backend=false 2>&1 | tail -15; terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "source": "task prompt: move the AWS provider to the 6.x line",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "source": "task prompt: add the registry VPC module",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 12
+  },
+  {
+    "task": "tsi-03-network-modules",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:21:49.284089+00:00",
+      "seconds": 21.0
+    },
+    "base_sha": "52836a72d2f5243e1e20899e5070d7377c4b9795",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0695323,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -check && terraform init -backend=false 2>&1 | tail -15 && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "source": "task prompt: move the AWS provider to the 6.x line",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "source": "task prompt: add the registry VPC module",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 12
+  },
+  {
+    "task": "tsi-03-network-modules",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:00.745987+00:00",
+      "seconds": 32.7
+    },
+    "base_sha": "072f9da80c439c0ea006f15def6fb244d863500b",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 9,
+    "cost_usd": 0.1288006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "source": "task prompt: move the AWS provider to the 6.x line",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "source": "task prompt: add the registry VPC module",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "tsi-03-network-modules",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:03.312004+00:00",
+      "seconds": 42.9
+    },
+    "base_sha": "18bdd89872d111332747b135a5aa2ea8f81d4be3",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 16,
+    "cost_usd": 0.163143,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "source": "task prompt: move the AWS provider to the 6.x line",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "source": "task prompt: add the registry VPC module",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "tsi-03-network-modules",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:10.432052+00:00",
+      "seconds": 30.1
+    },
+    "base_sha": "4828387d77d5c2516cf104fa3c4fda96fa08aea0",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 11,
+    "cost_usd": 0.1337703,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-provider-6",
+        "kind": "workspace_command",
+        "source": "task prompt: move the AWS provider to the 6.x line",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-vpc-module",
+        "kind": "workspace_command",
+        "source": "task prompt: add the registry VPC module",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "provider-upper-bounded",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: pin every provider with a version constraint",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "required-version-set",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: set required_version for Terraform itself",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "vpc-module-exact-version",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: for a registry module, set an exact version, not a range",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "git-module-pinned-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: append ?ref= with a full commit SHA or a protected release tag; never an omitted ref",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "lockfile-present-or-reported",
+        "kind": "workspace_command",
+        "source": "references/modules-supply-chain.md: commit .terraform.lock.hcl",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "tsi-04-ci-apply-role",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:33.524751+00:00",
+      "seconds": 47.7
+    },
+    "base_sha": "b0fa1d5d55fc7dcbec10ebd796edd577b891ed70",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.10536459999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform && terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform && terraform fmt -check && terraform init -backend=false -input=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "source": "task prompt: let the GitHub Actions workflow assume a role",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "source": "task prompt: add the role the workflow assumes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+        "passed": true,
+        "evidence": "exit 0\nterraform scan results:\n\nPassed checks: 24, Failed checks: 0, Skipped checks: 0"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "passed": true,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tsi-04-ci-apply-role",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:37.498437+00:00",
+      "seconds": 54.9
+    },
+    "base_sha": "c529795c5d87b681d97797b1182afea296628c79",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.111965,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform-secure-iac/results/raw/2026-10-28/tsi-04-ci-apply-role/baseline/run-2/workspace && (terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform-secure-iac/results/raw/2026-10-28/tsi-04-ci-apply-role/baseline/run-2/workspace && (terraform fmt -check && terraform init -backend=false >/dev/null && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "source": "task prompt: let the GitHub Actions workflow assume a role",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "source": "task prompt: add the role the workflow assumes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+        "passed": false,
+        "evidence": "exit 1\nterraform scan results:\n\nPassed checks: 27, Failed checks: 1, Skipped checks: 0\n\nCheck: CKV_AWS_356: \"Ensure no IAM policies documents allow \"*\" as a statement's resource for restrictable actions\"\n\tFAILED for resource: aws_iam_policy_document.plan\n\tFile: /ci.tf:120-146"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "passed": true,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "tsi-04-ci-apply-role",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:40.696746+00:00",
+      "seconds": 43.4
+    },
+    "base_sha": "793d98069c00b976aec0470f9a14242754d1cc27",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.10084879999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -check 2>&1 | head; terraform init -backend=false >/dev/null 2>&1 && terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "source": "task prompt: let the GitHub Actions workflow assume a role",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "source": "task prompt: add the role the workflow assumes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+        "passed": true,
+        "evidence": "exit 0\nterraform scan results:\n\nPassed checks: 32, Failed checks: 0, Skipped checks: 0"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "passed": true,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tsi-04-ci-apply-role",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:22:46.360220+00:00",
+      "seconds": 110.1
+    },
+    "base_sha": "0811c7b378ff4cdc9451401fc219f97790d7ce83",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 11,
+    "cost_usd": 0.20757250000000002,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform tflint trivy checkov; terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform fmt -recursive -check -diff && terraform init -backend=false -input=false 2>&1 | tail -5; terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "source": "task prompt: let the GitHub Actions workflow assume a role",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "source": "task prompt: add the role the workflow assumes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+        "passed": true,
+        "evidence": "exit 0\nterraform scan results:\n\nPassed checks: 20, Failed checks: 0, Skipped checks: 0"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "passed": true,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tsi-04-ci-apply-role",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:23:21.386734+00:00",
+      "seconds": 45.6
+    },
+    "base_sha": "2dd7b94fae1fdc278559637da6a1bb954e70cf58",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1517627,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "source": "task prompt: let the GitHub Actions workflow assume a role",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "source": "task prompt: add the role the workflow assumes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+        "passed": true,
+        "evidence": "exit 0\nterraform scan results:\n\nPassed checks: 20, Failed checks: 0, Skipped checks: 0"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "passed": true,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "tsi-04-ci-apply-role",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-10-28T09:23:24.294099+00:00",
+      "seconds": 116.6
+    },
+    "base_sha": "91c4f5a0de84d35c0d906b1caaff2737a1c154ef",
+    "skills_used": [
+      "eval-terraform-secure-iac:terraform-secure-iac"
+    ],
+    "num_turns": 12,
+    "cost_usd": 0.21789140000000004,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+        "passed": true,
+        "evidence": "match: 'terraform fmt'"
+      },
+      {
+        "id": "validate-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+        "passed": true,
+        "evidence": "match: 'terraform-secure-iac/results/raw/2026-10-28/tsi-04-ci-apply-role/with-skill/run-3/workspace/ci-identity && terraform init -backend=false -input=false 2>&1 | tail -5; terraform validate'"
+      },
+      {
+        "id": "validate-result-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+        "passed": true,
+        "evidence": "match: 'validat'"
+      },
+      {
+        "id": "no-state-or-plan-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-github-oidc",
+        "kind": "workspace_command",
+        "source": "task prompt: let the GitHub Actions workflow assume a role",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "feature-role",
+        "kind": "workspace_command",
+        "source": "task prompt: add the role the workflow assumes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-role-separate",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "trust-audience-pinned",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "apply-trust-pinned-to-main",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-admin-or-wildcard-action",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "iam-checks-clean",
+        "kind": "workspace_command",
+        "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+        "passed": true,
+        "evidence": "exit 0\nterraform scan results:\n\nPassed checks: 14, Failed checks: 0, Skipped checks: 0"
+      },
+      {
+        "id": "no-static-keys",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+        "passed": true,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-account-identifier",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+        "passed": true,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  }
+]

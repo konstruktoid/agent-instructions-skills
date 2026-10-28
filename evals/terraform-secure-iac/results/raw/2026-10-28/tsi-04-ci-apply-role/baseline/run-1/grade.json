@@ -1,0 +1,123 @@
+{
+  "task": "tsi-04-ci-apply-role",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-28T09:22:33.524751+00:00",
+    "seconds": 47.7
+  },
+  "base_sha": "b0fa1d5d55fc7dcbec10ebd796edd577b891ed70",
+  "skills_used": [],
+  "num_turns": 5,
+  "cost_usd": 0.10536459999999999,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+      "passed": true,
+      "evidence": "match: 'terraform && terraform fmt'"
+    },
+    {
+      "id": "validate-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+      "passed": true,
+      "evidence": "match: 'terraform && terraform fmt -check && terraform init -backend=false -input=false >/dev/null && terraform validate'"
+    },
+    {
+      "id": "validate-result-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+      "passed": true,
+      "evidence": "match: 'validat'"
+    },
+    {
+      "id": "no-state-or-plan-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-github-oidc",
+      "kind": "workspace_command",
+      "source": "task prompt: let the GitHub Actions workflow assume a role",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-role",
+      "kind": "workspace_command",
+      "source": "task prompt: add the role the workflow assumes",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "plan-role-separate",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: plan uses read-only credentials where the workflow separates them",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "trust-audience-pinned",
+      "kind": "workspace_command",
+      "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "apply-trust-pinned-to-main",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-admin-or-wildcard-action",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: the identity apply runs as holds only the permissions the configuration needs",
+      "passed": true,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "iam-checks-clean",
+      "kind": "workspace_command",
+      "source": "references/execution-identity.md: start from nothing and add permissions as a plan fails for lack of them",
+      "passed": true,
+      "evidence": "exit 0\nterraform scan results:\n\nPassed checks: 24, Failed checks: 0, Skipped checks: 0"
+    },
+    {
+      "id": "no-static-keys",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: credentials are short-lived where the platform supports it",
+      "passed": true,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-account-identifier",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: nothing committed carries real account identifiers",
+      "passed": true,
+      "evidence": "exit 1"
+    }
+  ],
+  "passed": 14,
+  "total": 14
+}

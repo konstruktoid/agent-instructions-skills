@@ -1,0 +1,102 @@
+{
+  "task": "tsi-02-orders-database",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-28T09:19:25.366255+00:00",
+    "seconds": 27.5
+  },
+  "base_sha": "70cf286e9e0971d3d4ff50ca1d97901454d20c52",
+  "skills_used": [],
+  "num_turns": 3,
+  "cost_usd": 0.06378519999999999,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: terraform fmt -check clean on every file touched",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform fmt yourself, do not merely describe it",
+      "passed": true,
+      "evidence": "match: 'terraform fmt'"
+    },
+    {
+      "id": "validate-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself",
+      "passed": true,
+      "evidence": "match: 'terraform fmt -check && (terraform init -backend=false -input=false >/dev/null && terraform validate'"
+    },
+    {
+      "id": "validate-result-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md bounded loop: report the clean result, or the check that could not be got clean and why",
+      "passed": true,
+      "evidence": "match: 'validat'"
+    },
+    {
+      "id": "no-state-or-plan-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no state file or plan file is committed or left in the working tree",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-postgres-instance",
+      "kind": "workspace_command",
+      "source": "task prompt: add a Postgres instance",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "feature-connection-output",
+      "kind": "workspace_command",
+      "source": "task prompt: output what the deploy job needs to connect",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-literal-password",
+      "kind": "workspace_command",
+      "source": "references/secrets.md: keep secrets out of configuration",
+      "passed": true,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "password-input-sensitive",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: every variable carrying a secret is marked sensitive",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "secret-output-sensitive",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: every secret-derived output is marked sensitive",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "password-kept-out-of-state",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no secret value is written to state that an external manager or an ephemeral resource could hold instead",
+      "passed": false,
+      "evidence": "exit 1"
+    }
+  ],
+  "passed": 10,
+  "total": 11
+}

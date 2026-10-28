@@ -1,0 +1,16 @@
+{
+  "id": "tsi-t07",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0954538,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-28T09:27:15.109901+00:00",
+    "seconds": 11.1
+  },
+  "aborted": false,
+  "rate_limited": false
+}

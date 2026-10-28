@@ -7,7 +7,7 @@
     "password-input-sensitive passes vacuously when db_password is removed, as it is under manage_master_user_password.",
     "tsi-03's labels module lives on a host the agent cannot reach, so it cannot learn a real SHA or tag; reporting the unpinned ref counts as the pass.",
     "Assertion commands run under /bin/sh, so they avoid bashisms.",
-    "apply-trust-pinned-to-main accepts an interpolated repository name, since the subject is commonly built from a variable, and fails on any `*` in a repo: subject.",
+    "trust-audience-pinned and apply-trust-pinned-to-main accept an interpolated condition key, as in `${local.oidc_host}:aud`, since agents build the key from a local holding the host name, and feature-github-oidc separately requires the literal host. apply-trust-pinned-to-main also accepts an interpolated repository name and fails on any `*` in a repo: subject.",
     "tsi-01's fixture holds an IAM access key, so its state carries a secret; the state-key, access and reporting assertions measure whether the agent treats the backend accordingly."
   ],
   "tasks": {
@@ -317,13 +317,13 @@
       {
         "id": "trust-audience-pinned",
         "kind": "workspace_command",
-        "command": "grep -rqE 'token\\.actions\\.githubusercontent\\.com:aud' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "command": "grep -rqE '(token\\.actions\\.githubusercontent\\.com|\\$\\{[^}]+\\}):aud' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
         "source": "references/execution-identity.md: prefer credentials issued per run through an OIDC exchange"
       },
       {
         "id": "apply-trust-pinned-to-main",
         "kind": "workspace_command",
-        "command": "grep -rqE 'token\\.actions\\.githubusercontent\\.com:sub' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && grep -rqE '\"repo:[^\"*]+:(ref:[^\"*]+|environment:[^\"*]+)\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && ! grep -rqE '\"repo:[^\"]*[*][^\"]*\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
+        "command": "grep -rqE '(token\\.actions\\.githubusercontent\\.com|\\$\\{[^}]+\\}):sub' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && grep -rqE '\"repo:[^\"*]+:(ref:[^\"*]+|environment:[^\"*]+)\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform . && ! grep -rqE '\"repo:[^\"]*[*][^\"]*\"' --include='*.tf' --exclude-dir=.git --exclude-dir=.terraform .",
         "source": "SKILL.md checklist: the identity apply runs as holds only what the configuration needs"
       },
       {

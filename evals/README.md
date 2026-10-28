@@ -5,27 +5,30 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-27
+## Current state, 2026-10-28
 
-Every latest stamp is current. `bash-secure-scripting` was re-measured on 2026-10-25 at
-`9c1e137`, after the harness change that sends the prompt on stdin. `github-actions-security`,
-`python-secure-coding`, `minimal-change` and the `python-security-verifier` suite were re-measured
-on 2026-10-24 at `56262a6`. Every run kept the checkout's `AGENTS.md` and the caller's Claude
-Code variables out. The other three skill suites were measured on 2026-10-06 and 2026-10-07.
+Every latest stamp is current. `terraform-secure-iac` was re-measured on 2026-10-28 at `6c6960f`.
+`bash-secure-scripting` was re-measured on 2026-10-25 at `9c1e137`, after the harness change that
+sends the prompt on stdin. `github-actions-security`, `python-secure-coding`, `minimal-change`
+and the `python-security-verifier` suite were re-measured on 2026-10-24 at `56262a6`. Every run
+kept the checkout's `AGENTS.md` and the caller's Claude Code variables out. The other three skill
+suites were measured on 2026-10-06 and 2026-10-07.
 Each stamp comes from a fresh clone of a committed revision with no modified files and no ancestor
 `CLAUDE.md`, and the checker reports no staleness.
 
-`terraform-secure-iac` was first run on 2026-10-26 at `aa09ae6`, three runs per condition. The
-skill gained 3 assertions on `tsi-03-network-modules` (9/12 to 12/12) and 1 on
-`tsi-01-remote-state` (17/18 to 18/18, with one with-skill run truncated and excluded). The other
-two tasks show no difference: the baseline kept the database password out of state in two of
-three `tsi-02-orders-database` runs, and the one failing run per condition on
-`tsi-04-ci-apply-role` built the OIDC condition key from a variable, which two graders do not
-match. Two trigger probes misrouted, formatting HCL in a README and writing a `terraform test`
-file, so the skill's description overlapped `terraform-testing`'s. After each description gained
-a clause naming the other skill, a trigger-only run on 2026-10-27, three passes per probe, routed
-all ten correctly. That stamp ran from `e2674b7` with the two description edits uncommitted, not
-from a fresh clone, so it needs repeating from the commit that carries them. No run could finish
+`terraform-secure-iac` was first run on 2026-10-26 at `aa09ae6` and re-measured on 2026-10-28
+at `6c6960f`, three runs per condition both times. The second run, from a fresh clone, gives
+18/18 against 18/18 on `tsi-01-remote-state`, 10/11 against 11/11 on `tsi-02-orders-database`,
+10/12 against 11/12 on `tsi-03-network-modules` and 14/14 against 14/14 on
+`tsi-04-ci-apply-role`, a net of 2 assertions. The first run's gaps of 1 on `tsi-01` and 3 on
+`tsi-03` did not repeat at that size, so read the skill's effect here as small. Only
+`tsi-03` separates the conditions without overlapping ranges. Two `tsi-04` graders failed the
+one run per condition that built the OIDC condition key from a variable; they now accept an
+interpolated key, and neither fails in the second run. All ten trigger probes routed correctly
+in all three passes after each description gained a clause naming the other terraform skill;
+the first run misrouted two probes, formatting HCL in a README and writing a `terraform test`
+file. `checkov` was not installed when the tasks ran, so `iam-checks-clean` was regraded in the
+finished workspaces after installing it, with the agents' output unchanged. No run could finish
 `terraform validate`, because the provider downloads in the harness sandbox and then fails to
 instantiate, so `validate-result-reported` measures whether the agent said so.
 
