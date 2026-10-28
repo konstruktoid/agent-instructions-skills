@@ -179,12 +179,13 @@ python3 evals/run_eval.py report --skill agents/python-security-verifier \
 ```
 
 `report`, `regrade` and `snapshot` take the suite as `--skill agents/<template>`. The grader review
-gate applies unchanged, since the suite's `assertions.json` and `run_eval.py` are the files it
-compares. `scripts/check_evals.py` holds these suites to the same structural rules, with a patch
-task's `request` and `fixer_summary` or a brief task's `request` or `question` and `sources` in
-place of a prompt, each declared comparison checked against the tasks, and no routing probes. It
-reports a suite that has never been run as unmeasured rather than failing it, since only a paid run
-can render the results file. It reports every template with no suite the same way.
+gate applies unchanged, since the suite's `assertions.json`, `tasks.json`, `fixtures/` and
+`patches/`, and `run_eval.py`, are the files it compares. `scripts/check_evals.py` holds these
+suites to the same structural rules, with a patch task's `request` and `fixer_summary` or a brief
+task's `request` or `question` and `sources` in place of a prompt, each declared comparison checked
+against the tasks, and no routing probes. It reports a suite that has never been run as unmeasured
+rather than failing it, since only a paid run can render the results file. It reports every template
+with no suite the same way.
 
 ## Instructions-document suites
 
@@ -235,9 +236,13 @@ opened. A command that only names the file counts as a read, so the count is an 
 whose runs never named it measured nothing about it.
 
 The first suite, `minimal-change`, is described in its own README, which also states its
-limits. Its 2026-10-20 stamp compared `instructions/minimal_change_instructions.md` with no
-instruction and with one sentence, and its result is summarized in the instructions table of the
-repository README.
+limits. Its 2026-10-20 and 2026-10-24 stamps compared `instructions/minimal_change_instructions.md`
+with no instruction and with one sentence, the second with the baseline kept clear of this
+repository's `AGENTS.md`, and gave the same result, which the instructions table of the repository
+README summarizes. Its two 2026-10-27 stamps measured two rewordings of the document for the
+`mc-05-save-settings` incident, `evals/minimal-change/incidents/mc-05-never-cut-disclosed.md`,
+and neither changed the result. Its two 2026-10-28 stamps reran that task alone on the unchanged
+document, and the incident record gives their result.
 
 An instructions suite can be neither stale-checked against a skill nor routed, so
 `scripts/check_evals.py` compares a stamp against the instructions file, `tasks.json` and
