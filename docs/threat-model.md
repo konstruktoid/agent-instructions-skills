@@ -599,7 +599,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:241`-`:243` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:173`, and `README.md:595` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:173`, and `README.md:597` was changed
 with it. The surrounding text at `skills/github/github-actions-security/SKILL.md:240`-`:244` states
 the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx

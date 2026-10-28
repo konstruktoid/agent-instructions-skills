@@ -100,7 +100,7 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:595` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:597` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:173`. The prose at
 `github-actions-security/SKILL.md:228`-`:232` was rewritten to state the reason where the
 command is, rather than as a rule the
@@ -598,7 +598,7 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:595` carry the
+   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:597` carry the
    digest from `lint.yml:173`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:719`. Attack path 1.3 is closed.
