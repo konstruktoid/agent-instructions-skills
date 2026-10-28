@@ -1,0 +1,23 @@
+<task-notification>
+<task-id>bkjh0i3ki</task-id>
+<tool-use-id>toolu_01Ai8ppd1pXojo2x18D6edbY</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/124aaef7-356d-4928-b333-accc84ad2a76/tasks/bkjh0i3ki.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for CodeRabbit and recheck threads and merge state" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+status of #46?
+
+---
+
+merge #46, and clean up
+
+---
+
+fix the two OIDC graders
+
+---
+
+commit it on a new branch and open the PR
