@@ -506,6 +506,9 @@ def check_freshness(
 
     `subject` replaces the skill as the thing measured, for an agent-template suite, whose
     run depends on the template and on the skill the template reads.
+
+    Task runs and trigger runs are each judged by their own newest stamp. A trigger-only stamp
+    graded no task, so letting it stand for the suite would hide every task result behind it.
     """
     stamps = rendered_stamps(suite)
     if subject is None:
@@ -514,7 +517,32 @@ def check_freshness(
         subject = ("the skill", [skill_dir])
     if not stamps:
         return
-    latest = stamps[-1]
+
+    raw = suite / "results" / "raw"
+    graded = [stamp for stamp in stamps if (raw / stamp / "task-outcomes.json").is_file()]
+    triggered = [
+        stamp for stamp in stamps if (raw / stamp / "triggers" / "trigger-outcomes.json").is_file()
+    ]
+    task_spec = ("the specification", [suite / "tasks.json", suite / "assertions.json"])
+    checks: dict[str, tuple[str, dict[str, list[Path]]]] = {}
+    if graded:
+        checks[graded[-1]] = ("task", dict([subject, task_spec]))
+    if triggered:
+        kind, sources = checks.get(triggered[-1], ("trigger", {}))
+        sources.update([subject, ("the trigger probes", [suite / "trigger-eval.json"])])
+        checks[triggered[-1]] = (kind if kind == "trigger" else "task and trigger", sources)
+    if not checks:
+        # A stamp rendered before the raw outcomes were kept records neither kind of run.
+        checks[stamps[-1]] = ("", dict([subject, task_spec]))
+    for stamp, (kind, sources) in checks.items():
+        check_stamp_freshness(suite, stamp, kind, sources, stale)
+
+
+def check_stamp_freshness(
+    suite: Path, latest: str, kind: str, sources: dict[str, list[Path]], stale: list[str]
+) -> None:
+    """Report one stamp that predates a change to any of `sources`, or graded a modified tree."""
+    described = " ".join(filter(None, [kind, "stamp", latest]))
     measured, dirty = stamp_revision(suite, latest)
 
     if dirty is None:
@@ -522,7 +550,7 @@ def check_freshness(
         # below still applies, but none of it can rule out uncommitted edits, so the stamp
         # carries no more provenance than the dirty case does.
         stale.append(
-            f"latest stamp {latest} records no readable working-tree state, so whether it "
+            f"latest {described} records no readable working-tree state, so whether it "
             "measured uncommitted edits on top of "
             f"{measured[:12] or 'an unrecorded revision'} is unknown; a freshness result "
             "below that reports no change is not evidence that the stamp is current"
@@ -533,16 +561,13 @@ def check_freshness(
         # still prove a change came after the run; it cannot prove the run included one, since
         # the skill it actually read is not the skill any revision holds.
         stale.append(
-            f"latest stamp {latest} was measured against a modified working tree at "
+            f"latest {described} was measured against a modified working tree at "
             f"{measured[:12] or 'an unrecorded revision'}, so the source it graded is in no "
             "commit; the measurement cannot be reproduced and a freshness result below that "
             "reports no change is not evidence that the stamp is current"
         )
 
-    for label, paths in (
-        subject,
-        ("the specification", [suite / "tasks.json", suite / "assertions.json"]),
-    ):
+    for label, paths in sources.items():
         changed_revision, changed = last_commit([path for path in paths if path.exists()])
         if not changed:
             continue
@@ -562,7 +587,7 @@ def check_freshness(
             evidence = f"{changed}, by date, since the stamp records no revision to compare"
         if outdated:
             stale.append(
-                f"latest stamp {latest} predates a change to {label} in {evidence}; "
+                f"latest {described} predates a change to {label} in {evidence}; "
                 "README.md states that the stamp does not carry forward across it"
             )
 

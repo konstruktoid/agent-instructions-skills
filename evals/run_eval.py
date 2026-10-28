@@ -1715,6 +1715,8 @@ def record_trigger_ancestry(root: Path, ancestry: list[str]) -> None:
     if not path.is_file():
         record_source_revision(root, ancestry)
         return
+    if not ancestry:
+        return
     revision = json.loads(path.read_text(encoding="utf-8"))
     recorded = revision.get("ancestor_instructions", [])
     revision["ancestor_instructions"] = sorted({*recorded, *ancestry})
@@ -2062,8 +2064,7 @@ def cmd_triggers(args: argparse.Namespace) -> int:
     skill_dir = EVALS_DIR / args.skill
     probes = load_json(skill_dir / "trigger-eval.json")["prompts"]
     stamp = args.stamp or today()
-    if ancestry:
-        record_trigger_ancestry(results_root(args.skill, stamp), ancestry)
+    record_trigger_ancestry(results_root(args.skill, stamp), ancestry)
     root = results_root(args.skill, stamp) / "triggers"
     plugin_dir = build_plugin(args.skill, root)
     runs = max(1, args.runs)

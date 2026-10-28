@@ -1,6 +1,6 @@
 ---
 name: terraform-secure-iac
-description: Authors and reviews Terraform configuration for the security properties that formatting and validation do not cover, meaning state and secret exposure, least-privilege execution identity, provider and module supply chain, sensitive variables and outputs, and policy-as-code enforcement, verified through the target repository's own fmt, validate, tflint, and configuration-scanning loop rather than from the edit alone. Use when creating or modifying Terraform configuration, backends, or provider blocks, and when reviewing state handling, secrets, execution credentials, module sources, or version pinning.
+description: Authors and reviews Terraform configuration for the security properties that formatting and validation do not cover, meaning state and secret exposure, least-privilege execution identity, provider and module supply chain, sensitive variables and outputs, and policy-as-code enforcement, verified through the target repository's own fmt, validate, tflint, and configuration-scanning loop rather than from the edit alone. Use when creating or modifying Terraform configuration, backends, or provider blocks, and when reviewing state handling, secrets, execution credentials, module sources, or version pinning. Not for writing or running `terraform test` files, Terratest, or plan assertions, which belong to terraform-testing.
 capabilities:
   tools:
     - Bash

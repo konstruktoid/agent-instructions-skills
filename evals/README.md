@@ -22,7 +22,10 @@ two tasks show no difference: the baseline kept the database password out of sta
 three `tsi-02-orders-database` runs, and the one failing run per condition on
 `tsi-04-ci-apply-role` built the OIDC condition key from a variable, which two graders do not
 match. Two trigger probes misrouted, formatting HCL in a README and writing a `terraform test`
-file, so the skill's description overlaps `terraform-testing`'s. No run could finish
+file, so the skill's description overlapped `terraform-testing`'s. After each description gained
+a clause naming the other skill, a trigger-only run on 2026-10-27, three passes per probe, routed
+all ten correctly. That stamp ran from `e2674b7` with the two description edits uncommitted, not
+from a fresh clone, so it needs repeating from the commit that carries them. No run could finish
 `terraform validate`, because the provider downloads in the harness sandbox and then fails to
 instantiate, so `validate-result-reported` measures whether the agent said so.
 
@@ -384,7 +387,9 @@ edit cannot fix any of them:
   smaller than its task list, which the results file has no way to say.
 - A stamp older than the skill directory, `tasks.json`, or `assertions.json` it measured.
   README.md states that such a stamp does not carry forward, and the check is what makes that
-  rule visible rather than remembered.
+  rule visible rather than remembered. Task runs are judged by the newest stamp that graded
+  tasks, and trigger runs by the newest stamp that routed probes, against the skill and
+  `trigger-eval.json`, so a later trigger-only stamp cannot hide stale task results.
 - A stamp that graded a modified working tree, described below. It measured source that is in
   no commit, so nothing can reproduce it and the comparison above cannot certify it.
 
