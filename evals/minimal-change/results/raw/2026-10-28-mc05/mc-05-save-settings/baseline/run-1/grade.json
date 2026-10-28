@@ -1,0 +1,65 @@
+{
+  "task": "mc-05-save-settings",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-28T10:45:35.666633+00:00",
+    "seconds": 7.7
+  },
+  "base_sha": "2363cdc297550f750c00ac1740f3d84b18752e1a",
+  "skills_used": [],
+  "num_turns": 3,
+  "cost_usd": 0.047022999999999995,
+  "output_tokens": 623,
+  "lines_added": 7,
+  "lines_deleted": 0,
+  "doc_read": false,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "hidden-behavior",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "failed-save-keeps-old-file",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": false,
+      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+    },
+    {
+      "id": "existing-atomic-write-reused",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+    }
+  ],
+  "passed": 3,
+  "total": 5
+}

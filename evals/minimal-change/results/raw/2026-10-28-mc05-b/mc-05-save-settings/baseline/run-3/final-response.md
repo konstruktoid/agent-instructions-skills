@@ -1,0 +1,1 @@
+I added `save_settings(path, settings)` to `app/settings.py`. It writes the dict as JSON with `indent=2` and `sort_keys=True`, then a trailing newline, using UTF-8 like `load_settings`. I didn't run it or any tests.
