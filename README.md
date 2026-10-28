@@ -57,7 +57,7 @@ separate, opt-in plugin from a separate repository, never in this one.
 instructions/     Domain-specific writing and coding standards (plain Markdown, no frontmatter)
 skills/           Claude Code skills, one directory per skill: skills/<category>/<name>/SKILL.md
 agent-templates/  Copy-and-adapt Claude Code subagent definitions, one flat file per agent
-evals/            Measurements of whether each skill changes agent output, and what it triggers on
+evals/            Measurements of what skills, instructions and agent templates change, and incidents
 scripts/          Checks that enforce this repository's own authoring rules
 .claude-plugin/   Marketplace manifest, so other projects can install the skills as plugins
 ```
@@ -84,7 +84,7 @@ Current instructions documents:
 | `overview_document_instructions.md` | Structure and content for a repository-level overview document. |
 | `github_governance_instructions.md` | The security and compliance baseline for GitHub repository and organization configuration, and the change and evidence rules that go with it. |
 | `agent_configuration_instructions.md` | Choosing between a project instructions file, a skill, a hook, and a subagent, writing each, and changing one without losing the behavior it was written for. |
-| `minimal_change_instructions.md` | The smallest complete change in any language: a reuse ladder applied after reading the callers, what is never cut, the scope and supply chain carve-outs, one small test for new logic, and a closing line stating what was skipped. Measured once, by `evals/minimal-change`: it wrote less source than no instruction and than a one-sentence instruction, and it added tests, but it used more output tokens than the sentence and showed no effect on reuse or error handling. |
+| `minimal_change_instructions.md` | The smallest complete change in any language: a reuse ladder applied after reading the callers, what is never cut, the scope and supply chain carve-outs, one small test for new logic, and a closing line stating what was skipped. Measured by `evals/minimal-change`, with the same assertion totals on 2026-10-20 and 2026-10-24: it wrote less source than no instruction and than a one-sentence instruction, and it added tests, but it used more output tokens than the sentence and showed no effect on reuse or error handling. |
 | `terraform_coding_instructions.md` | Passing `terraform fmt`, `terraform validate`, and `tflint` cleanly, plus the state, secret, version-pinning, and layout judgment those tools cannot enforce. |
 
 ### skills/
@@ -514,7 +514,9 @@ output, or that its `description` routes the right tasks to it. Two measurements
   tasks the arms did not differ, and one task failed in every run of every arm. The 2026-10-20
   stamp, whose baseline had this repository's `AGENTS.md` loaded as instructions, gave the same
   assertion totals. Earlier runs of the suite gave other test and token figures, so these are one
-  draw.
+  draw. Two stamps on 2026-10-27 measured rewordings of the document for the task that failed in
+  every run, and neither changed it; `evals/minimal-change/incidents/mc-05-never-cut-disclosed.md`
+  records both and the later reruns of that task.
 
 ```sh
 python3 evals/run_eval.py tasks    --skill <name> --model sonnet --parallel 5
