@@ -60,12 +60,9 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   about the safeguard, not whether it writes one, and its scope rules, such as changing only what
   the request needs, may outrank the never-cut list.
 
-- **The Claude Code version moved the result.** Supported by the timing, untested. The `doc` arm
-  failed `failed-save-keeps-old-file` in 12 of 12 runs on Claude Code 2.1.305, 2.1.310 and 2.1.311,
-  and passed it in 6 of 6 on 2.1.312, while the rules of the document at `a5d8770` are word for
-  word those at `c0616b1` and `56262a6`, whose six `doc` runs all failed it. No stamp ran one
-  revision on two versions, so the version, the draw, and anything else that changed between the
-  stamps cannot be separated.
+- **The Claude Code version moved the result.** Refuted 2026-10-29. At `a5d8770` the `doc` arm kept
+  the old file on a failed save in 1 of 3 runs on 2.1.305 and 2 of 3 on 2.1.311, so the versions
+  on which the earlier stamps failed it in every run pass it at this revision.
 
 ## Reproduction
 
@@ -164,3 +161,22 @@ that the cause is not established, and it no longer says the document leaves the
 The document is not credited with the change, because the rules are unchanged since the stamps that
 failed and Claude Code moved from 2.1.311 to 2.1.312. Telling the version from the draw takes one
 revision measured on two versions.
+
+Revised 2026-10-29. `a5d8770` was measured on Claude Code 2.1.305 and 2.1.311, in the
+2026-10-29-mc05-v305 and 2026-10-29-mc05-v311 stamps
+(`evals/minimal-change/results/2026-10-29-mc05-v305.md` and
+`evals/minimal-change/results/2026-10-29-mc05-v311.md`), each from a clean clone outside the home
+directory, with three runs per arm of `mc-05-save-settings` alone. `failed-save-keeps-old-file`
+passed in 1 of 3 and 2 of 3 `doc` runs and in 0 of 12 `baseline` and `plain` runs, and
+`existing-atomic-write-reused` failed in 18 of 18. The version is not the cause.
+
+The draw alone does not explain the history either. Across the four stamps at `a5d8770` the `doc`
+arm passed in 9 of 12 runs, and at that rate six runs all fail with a probability of about 0.0002,
+which is what happened at `c0616b1` and `56262a6`. Against `56262a6` the only change to the
+document at `a5d8770` is the "Measured effect" paragraph, which since `de26bb6` describes this task:
+it names `mc-05-save-settings`, calls it the one task whose change needs a safeguard against data
+loss, and says the agent left the safeguard out. Every stamp that failed in every `doc` run predates
+`de26bb6`, and every stamp that passed carries it. The paragraph is the leading explanation, which
+would make the result a property of the document describing its own measurement rather than of its
+rules. It is not established: the harness and the date changed too. Measuring `56262a6` on 2.1.312
+would separate the paragraph from the date.

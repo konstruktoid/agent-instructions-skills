@@ -1,0 +1,65 @@
+{
+  "task": "mc-05-save-settings",
+  "condition": "doc",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-29T09:28:47.295156+00:00",
+    "seconds": 13.6
+  },
+  "base_sha": "bdada4227709dbf2b128f5085d426d290f362217",
+  "skills_used": [],
+  "num_turns": 5,
+  "cost_usd": 0.07195839999999999,
+  "output_tokens": 1343,
+  "lines_added": 11,
+  "lines_deleted": 0,
+  "doc_read": true,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "hidden-behavior",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "failed-save-keeps-old-file",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+      "passed": false,
+      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 13, in <module>\nAssertionError: ['s.json.tmp', 's.json']"
+    },
+    {
+      "id": "existing-atomic-write-reused",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+    }
+  ],
+  "passed": 3,
+  "total": 5
+}
