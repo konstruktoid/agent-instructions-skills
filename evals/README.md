@@ -354,9 +354,10 @@ python3 evals/run_eval.py triggers --skill python-secure-coding --runs 3 --paral
 ```
 
 `--task <id>`, which `tasks` and `instructions-tasks` take and which may be repeated, runs only the
-named tasks, in every condition. The stamp then holds fewer tasks than `tasks.json`, and the
-freshness check judges task runs by the newest stamp that graded tasks, so give such a run its
-own `--stamp` and do not read it as a re-run of the suite.
+named tasks, in every condition. The stamp then holds fewer tasks than `tasks.json`, so the
+freshness check judges each task by the newest stamp that graded it, and a finding against an
+older stamp names the tasks it still stands for. Give such a run its own `--stamp` and do not
+read it as a re-run of the suite.
 
 Each run gets its own directory, `results/raw/<date>/<task>/<condition>/run-<n>/` for tasks and
 `results/raw/<date>/triggers/<probe>/run-<n>/` for probes, its own copy of the fixture, and its

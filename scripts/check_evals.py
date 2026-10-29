@@ -31,8 +31,9 @@ fix for each is a paid re-run rather than an edit:
   failed for the same reason as the rest: the structural rules above require a rendered
   results file, so a suite cannot be authored complete without paying for a run first.
 - Every task the suite defines has been graded in at least one stamp.
-- The skill, its `tasks.json`, and its `assertions.json` are no newer than the latest
-  rendered stamp. README.md states that editing any of them invalidates the stamp above it.
+- The skill, its `tasks.json`, and its `assertions.json` are no newer than the newest
+  stamp that graded each task, since a `--task` run grades only some. README.md states that
+  editing any of them invalidates the stamp above it.
   This compares revisions, not dates: a stamp records the commit it measured in
   `results/raw/<stamp>/source-revision.json`, and a change is newer when that commit does
   not contain it. A stamp with no usable revision falls back to comparing committer dates,
@@ -394,6 +395,24 @@ def recorded_runs(suite: Path) -> list[dict[str, Any]]:
     return runs
 
 
+def graded_tasks(outcomes: Path) -> set[str]:
+    """Return the tasks one stamp's `task-outcomes.json` graded to completion."""
+    try:
+        loaded = json.loads(outcomes.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return set()
+    if not isinstance(loaded, list):
+        return set()
+    return {
+        run["task"]
+        for run in loaded
+        if isinstance(run, dict)
+        and "task" in run
+        and not run.get("aborted")
+        and not run.get("truncated")
+    }
+
+
 def check_coverage(suite: Path, task_ids: list[str], stale: list[str]) -> None:
     """Report every task the suite defines that no stamp has ever graded to completion.
 
@@ -509,6 +528,9 @@ def check_freshness(
 
     Task runs and trigger runs are each judged by their own newest stamp. A trigger-only stamp
     graded no task, so letting it stand for the suite would hide every task result behind it.
+    The same holds inside task runs: a `--task` stamp grades only the tasks it names, so each
+    task is judged by the newest stamp that graded it, and an older stamp still standing for
+    some task is checked as well.
     """
     stamps = rendered_stamps(suite)
     if subject is None:
@@ -524,9 +546,15 @@ def check_freshness(
         stamp for stamp in stamps if (raw / stamp / "triggers" / "trigger-outcomes.json").is_file()
     ]
     task_spec = ("the specification", [suite / "tasks.json", suite / "assertions.json"])
+    newest: dict[str, str] = {}
+    for stamp in graded:
+        newest.update(dict.fromkeys(graded_tasks(raw / stamp / "task-outcomes.json"), stamp))
+    standing = {stamp: sorted(t for t, s in newest.items() if s == stamp) for stamp in graded}
+    task_stamps = [stamp for stamp in graded if standing[stamp]] or graded[-1:]
+
     checks: dict[str, tuple[str, dict[str, list[Path]]]] = {}
-    if graded:
-        checks[graded[-1]] = ("task", dict([subject, task_spec]))
+    for stamp in task_stamps:
+        checks[stamp] = ("task", dict([subject, task_spec]))
     if triggered:
         kind, sources = checks.get(triggered[-1], ("trigger", {}))
         sources.update([subject, ("the trigger probes", [suite / "trigger-eval.json"])])
@@ -535,14 +563,21 @@ def check_freshness(
         # A stamp rendered before the raw outcomes were kept records neither kind of run.
         checks[stamps[-1]] = ("", dict([subject, task_spec]))
     for stamp, (kind, sources) in checks.items():
-        check_stamp_freshness(suite, stamp, kind, sources, stale)
+        # Naming the tasks matters only where the stamp is not the newest for all of them.
+        scope = standing.get(stamp, [])
+        partial = len(task_stamps) > 1 and scope
+        named = f"for {', '.join(scope)}" if partial else ""
+        described = " ".join(filter(None, [kind, "stamp", stamp, named]))
+        check_stamp_freshness(suite, stamp, described, sources, stale)
 
 
 def check_stamp_freshness(
-    suite: Path, latest: str, kind: str, sources: dict[str, list[Path]], stale: list[str]
+    suite: Path, latest: str, described: str, sources: dict[str, list[Path]], stale: list[str]
 ) -> None:
-    """Report one stamp that predates a change to any of `sources`, or graded a modified tree."""
-    described = " ".join(filter(None, [kind, "stamp", latest]))
+    """Report one stamp that predates a change to any of `sources`, or graded a modified tree.
+
+    `described` names the stamp in each finding, as in "task stamp 2026-10-07".
+    """
     measured, dirty = stamp_revision(suite, latest)
 
     if dirty is None:
