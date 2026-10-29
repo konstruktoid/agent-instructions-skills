@@ -58,7 +58,7 @@ As audited, `scripts/check_skills.py` blocked exactly one of the four auto-disco
 directories and left the other three unguarded. That gap was attack path 1.3.
 
 **Landed.** `check_plugin_root` at `scripts/check_skills.py:719` now fails on any repository-root
-entry that is not on the allowlist at `:109`, skipping only the local-only names at `:132` that
+entry that is not on the allowlist at `:109`, skipping only the local-only names at `:133` that
 `.gitignore` already excludes. All four auto-discovered names fail, and so does a name a future
 release of Claude Code begins discovering, because the check names what is allowed rather than what
 is forbidden.
@@ -79,13 +79,13 @@ what a later change adds without declaring it. The block is a declaration, not a
 enforces it at runtime, and a skill body remains free to do what it likes.
 
 All ten read `${CLAUDE_PLUGIN_ROOT}/instructions/` under a plugin install, which is outside the
-skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:263`,
+skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:299`,
 `skills/bash/bash-secure-scripting/SKILL.md:331`, `skills/bash/bash-testing/SKILL.md:196`,
 `skills/github/github-actions-security/SKILL.md:346`,
 `skills/github/github-organization-governance/SKILL.md:282`,
 `skills/github/github-repository-security/SKILL.md:299`,
 `skills/python/python-secure-coding/SKILL.md:165`, `skills/python/python-testing/SKILL.md:139`,
-`skills/terraform/terraform-secure-iac/SKILL.md:170`, `skills/terraform/terraform-testing/SKILL.md:138`.
+`skills/terraform/terraform-secure-iac/SKILL.md:188`, `skills/terraform/terraform-testing/SKILL.md:151`.
 
 #### `skills/ansible/ansible-verification-loop/SKILL.md`
 
@@ -93,10 +93,10 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 |---|---|
 | Trigger | `:3` "Use when reviewing or modifying any Ansible role, collection, playbook, or task." |
 | Tools implied | Read, Edit, Bash. No declared allowlist. |
-| Shell | Yes. `ansible-lint` (`:137`), `git diff` (`:142`), the repository's own test entry point via `tox` or a Makefile target (`:147`), `setsid bash -c '<test entry point> > run.log 2>&1; echo $? > run.done' ... &` (`:159`), `molecule test` / `ansible-test` / `molecule converge` (`:186`, `:192`), `git status --porcelain` (`:195`), `ansible-galaxy collection build --force`, `mktemp -d`, `tar -tzf`, `git ls-files`, `comm` (`:200`-`:210`) |
+| Shell | Yes. `ansible-lint` (`:137`), `git diff` (`:143`), the repository's own test entry point via `tox` or a Makefile target (`:148`), `mktemp -d -t ansible-verify-XXXXXXXX` (`:159`), `setsid bash -c '<test entry point> > "${run_dir}/run.log" 2>&1; echo $? > "${run_dir}/run.done"' ... &` (`:160`), `molecule test` / `ansible-test` / `molecule converge` (`:204`, `:210`), `git status --porcelain` (`:213`), `ansible-galaxy collection build --force`, `mktemp -d`, `tar -tzf`, `git ls-files`, `comm` (`:219`-`:228`) |
 | Reads | Role `defaults/main.yml`, `tasks/main.yml`, `meta/main.yml`, `handlers/`, `vars/`, `templates/` (`:57`); `galaxy.yml`, `meta/runtime.yml`, `requirements.yml` (`:59`); `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, a `docs/` style guide (`:62`) |
-| Writes outside the repository root | Yes. `mktemp -d` output holding the `artifact` and `tracked` comparison files (`:208`-`:209`), explicitly required to be outside the collection root (`:224`-`:225`). `run.log` and `run.done` required to be kept out of the repository (`:184`-`:185`) |
-| Network egress | No host named in the file. Egress occurs indirectly through the target repository's own test entry point, which `:150` states installs dependencies from `requirements.yml` / `galaxy.yml`, and through the container or VM images `:151` describes. Hosts: UNKNOWN, determined by the target repository |
+| Writes outside the repository root | Yes. `mktemp -d` output holding the `artifact` and `tracked` comparison files (`:226`-`:227`), explicitly required to be outside the collection root (`:242`-`:243`). `run.pgid`, `run.log`, and `run.done` in a `mktemp -d` directory, required to come from outside the working directory (`:191`-`:192`) |
+| Network egress | No host named in the file. Egress occurs indirectly through the target repository's own test entry point, which `:151` states installs dependencies from `requirements.yml` / `galaxy.yml`, and through the container or VM images `:152` describes. Hosts: UNKNOWN, determined by the target repository |
 | Reads content it did not author | Yes, three ways. The target repository's instruction files, which `:61` instructs the agent to "follow" as "authoritative" (`:62`). Linter and test output. Container and VM console output. Partial counterweight at `:65`: SSH, sudo, PAM, audit, SELinux, AppArmor, firewall, mounts, sysctl, services and auth-adjacent tasks are treated as high-sensitivity "regardless of what a repo's docs say" |
 
 #### `skills/bash/bash-secure-scripting/SKILL.md`
@@ -178,12 +178,12 @@ The highest-egress skill in the repository.
 | Field | Value |
 |---|---|
 | Trigger | `:3`, on setting organization or enterprise policy, ruleset rollout, custom properties, access review, actions and runner policy, or compliance evidence |
-| Tools implied | Read, Edit, Bash. Implied credentials: an organization owner or enterprise admin token, plus audit log read. `:182` reads `orgs/ORG/repos` and `orgs/ORG/properties/values`; `references/identity-and-access.md:33` reads the `2fa_disabled` member filter; `:108` reads outside collaborators; `references/audit-and-compliance.md:36` reads `orgs/ORG/audit-log` |
-| Shell | Yes. `comm -23` over two process substitutions wrapping `gh api --paginate` (`:181`-`:186`), plus the reads in the reference files above |
+| Tools implied | Read, Edit, Bash. Implied credentials: an organization owner or enterprise admin token, plus audit log read. `:184` reads `orgs/ORG/repos` and `:186` reads `orgs/ORG/properties/values`; `references/identity-and-access.md:33` reads the `2fa_disabled` member filter; `:123` reads outside collaborators; `references/audit-and-compliance.md:36` reads `orgs/ORG/audit-log` |
+| Shell | Yes. `mktemp -d`, then `comm -23` over the two files each `gh api --paginate` request is sorted into (`:182`-`:190`), plus the reads in the reference files above |
 | Reads | Organization settings, rulesets, the custom property schema, actions and runner policy, app installations, token policy, and members outside the requirements (`:62`); enterprise-level controls (`:68`) |
-| Writes outside the repository root | None instructed |
+| Writes outside the repository root | Yes. A `mktemp -d` directory holding the `all` and `classified` lists (`:183`, `:185`, `:189`) |
 | Network egress | Yes. `api.github.com` for every `gh api` call |
-| Reads content it did not author | Yes. Member logins, repository names, custom property values, audit log entries, and evaluate-mode violation reports (`:188`) |
+| Reads content it did not author | Yes. Member logins, repository names, custom property values, audit log entries, and evaluate-mode violation reports (`:202`) |
 
 ### Reference files
 
@@ -203,13 +203,13 @@ states they are templates, not installable agents. The four verifiers grant no w
 | `agent-templates/prose-editor.md` | `:3` | `Read, Edit` (`:15`) | No. `:14` states that adding Bash means accepting that it executes commands | None |
 | `agent-templates/requirements-analyst.md` | `:3` | `Read, Grep, Glob` (`:14`) | No. `:12` names Bash as an addition to make only when a command must establish a material fact | None |
 | `agent-templates/evidence-synthesizer.md` | `:3` | `Read, Grep, Glob` (`:13`) | No | None. `:11` names `WebFetch` as an addition to make only for caller-supplied URLs |
-| `agent-templates/workflow-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:21`) | Yes, through Bash, for `actionlint` and `zizmor` (`:16`) | Yes, and the only template that states egress of its own, though not by hostname. `:16`-`:17` names `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA; `:71`-`:73` states what each reaches, the container run that mounts the tree, the package index `zizmor` resolves from, and the GitHub API, and requires the summary to say when a check ran without `GH_TOKEN` |
-| `agent-templates/bash-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:21`) | Yes, and wider than the others: `shellcheck`, `bash -n`, the repository's formatter, and the script under review itself (`:16`-`:20`), bounded at `:62`-`:66` to a disposable location with a report-instead-of-run rule for a destructive script | No host named in the file. Egress occurs indirectly through the script under review, which `:62` has this agent run: hosts UNKNOWN, determined by that script |
+| `agent-templates/workflow-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:21`) | Yes, through Bash, for `actionlint` and `zizmor` (`:16`) | Yes, and the only template that states egress of its own, though not by hostname. `:16`-`:17` names `actionlint`, `zizmor`, and the `gh` call that resolves an action SHA; `:78`-`:80` states what each reaches, the container run that mounts the tree, the package index `zizmor` resolves from, and the GitHub API, and requires the summary to say when a check ran without `GH_TOKEN` |
+| `agent-templates/bash-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:21`) | Yes, and wider than the others: `shellcheck`, `bash -n`, the repository's formatter, and the script under review itself (`:16`-`:20`), bounded at `:68`-`:72` to a disposable location with a report-instead-of-run rule for a destructive script | No host named in the file. Egress occurs indirectly through the script under review, which `:68` has this agent run: hosts UNKNOWN, determined by that script |
 | `agent-templates/terraform-security-reviewer.md` | `:3` | `Read, Grep, Glob, Edit, Bash` (`:21`) | Yes, through Bash, for `terraform fmt`, `terraform init -backend=false`, `terraform validate`, `tflint`, and the repository's configuration scanner (`:16`-`:20`). `:79`-`:81` bars `terraform apply` and limits `terraform plan` to a non-production target with read-only credentials that already exist | No host named in the file. `terraform init` downloads provider plugins and modules from whatever registries and `source` URLs the configuration names, independently of the plan restriction, which is why `:84`-`:90` adds a no-credentials, egress-restricted environment for the loop. Any `terraform plan` reaches the same sources and is additionally bounded by `:79`-`:81` as above |
 | `agent-templates/python-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:19`) | Yes, through Bash, to re-run `ruff` and `ty` (`:16`) | None |
 | `agent-templates/bash-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:20`) | Yes, through Bash, to re-run `shellcheck`, `bash -n`, and the script under review (`:16`) | No host named in the file. As for the reviewer, egress occurs through the script under review: hosts UNKNOWN |
-| `agent-templates/terraform-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:21`) | Yes, through Bash, to re-run `terraform fmt`, `terraform validate`, `tflint`, and the configuration scanner (`:16`). `:83` bars `terraform apply`, and `:20` excludes `plan` as well | As for the reviewer: `terraform init` reaches the registries and `source` URLs the configuration names |
-| `agent-templates/workflow-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:20`) | Yes, through Bash, to re-run `actionlint` and `zizmor` and re-resolve action SHAs (`:16`) | Yes, the GitHub API, which `:73` has it query to re-resolve every SHA in the diff |
+| `agent-templates/terraform-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:21`) | Yes, through Bash, to re-run `terraform fmt`, `terraform validate`, `tflint`, and the configuration scanner (`:16`). `:89` bars `terraform apply`, and `:20` excludes `plan` as well | As for the reviewer: `terraform init` reaches the registries and `source` URLs the configuration names |
+| `agent-templates/workflow-security-verifier.md` | `:3` | `Read, Grep, Glob, Bash` (`:20`) | Yes, through Bash, to re-run `actionlint` and `zizmor` and re-resolve action SHAs (`:16`) | Yes, the GitHub API, which `:79` has it query to re-resolve every SHA in the diff |
 
 The five templates that declare `hooks:`, the four verifiers and
 `agent-templates/terraform-security-reviewer.md`, also run shell through it, whatever `tools:`
@@ -250,12 +250,12 @@ no file in the repository defines it.
 
 | Path | Trigger | Permissions | Shell | Paths | Egress | Untrusted input |
 |---|---|---|---|---|---|---|
-| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:72`, `:94`, `:117`, `:154`, `:190`). `persist-credentials: false` on every checkout (`:27`, `:77`, `:99`, `:122`, `:159`, `:195`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `python3 scripts/check_content_only.py`, with and without `--self-test` (`:82`, `:87`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:106`-`:110`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:138`-`:147`); `docker run` of `rhysd/actionlint` pinned by digest (`:172`-`:173`); `uvx "zizmor@1.31.1"` over `.github/` (`:183`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:183`); `docker run` pulls the actionlint image (`:172`). Actions are pinned by SHA (`:25`, `:33`, `:202`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:182`) |
+| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:73`, `:95`, `:118`, `:155`, `:191`). `persist-credentials: false` on every checkout (`:27`, `:78`, `:100`, `:123`, `:160`, `:196`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:53`); `python3 scripts/check_content_only.py`, with and without `--self-test` (`:83`, `:88`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:107`-`:111`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:139`-`:147`); `docker run` of `rhysd/actionlint` pinned by digest (`:173`-`:174`); `uvx "zizmor@1.31.1"` over `.github/` (`:184`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:184`); `docker run` pulls the actionlint image (`:173`). Actions are pinned by SHA (`:25`, `:33`, `:203`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:183`) |
 | `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:75`, `:84`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:138`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:585`) | Read-only | None | `evals/` | None | Eval suite files |
-| `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
-| `scripts/check_content_only.py` | CI, `lint.yml:82` and `lint.yml:87`, in the `content-only` job; `.github/workflows/release.yml:44` and `.github/workflows/release.yml:46` | Read-only | `git ls-files`, and `claude plugin validate` on a copy in a temporary directory when `claude` is on `PATH`, which the CI runner does not provide | The checkout, the manifests, and `skills/**/*.md` | None | The files under check. It never executes them |
-| `.github/workflows/release.yml` | `push` of a tag matching `v*` (`:10`-`:11`) | `permissions: {}` at the top level (`:13`). The `build` job adds `id-token: write` and `attestations: write` (`:26`-`:27`); the `draft` job adds `contents: write` (`:74`) | Yes. A manifest version check, the content-only gate, `git archive`, `sha256sum`, and `gh release create --draft` | The checkout and `dist/` | Yes. `actions/attest` calls GitHub's attestation service, whose endpoints this audit did not trace; `gh release create` calls the GitHub API | The tag name, passed through `env` and never interpolated into a script. Anyone who can push a tag controls it, which the release tag ruleset limits |
+| `scripts/check_evals.py` | CI, `lint.yml:139`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:585`) | Read-only | None | `evals/` | None | Eval suite files |
+| `scripts/check_citations.py` | CI, `lint.yml:53`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
+| `scripts/check_content_only.py` | CI, `lint.yml:83` and `lint.yml:88`, in the `content-only` job; `.github/workflows/release.yml:62` and `.github/workflows/release.yml:64` | Read-only | `git ls-files`, and `claude plugin validate` on a copy in a temporary directory when `claude` is on `PATH`, which the CI runner does not provide | The checkout, the manifests, and `skills/**/*.md` | None | The files under check. It never executes them |
+| `.github/workflows/release.yml` | `push` of a tag matching `v*` (`:10`-`:11`) | `permissions: {}` at the top level (`:13`). The `build` job adds `id-token: write` and `attestations: write` (`:26`-`:27`); the `draft` job adds `contents: write` (`:92`) | Yes. A manifest version check, the content-only gate, `git archive`, `sha256sum`, and `gh release create --draft` | The checkout and `dist/` | Yes. `actions/attest` calls GitHub's attestation service, whose endpoints this audit did not trace; `gh release create` calls the GitHub API | The tag name, passed through `env` and never interpolated into a script. Anyone who can push a tag controls it, which the release tag ruleset limits |
 
 ### `evals/run_eval.py`
 
@@ -289,7 +289,7 @@ Supporting eval data:
 |---|---|
 | `.github/CODEOWNERS` | `* @konstruktoid` (`:5`). One account owns everything, including itself |
 | `SECURITY.md` | Absent as audited. Control 8 adds it at the root, naming private vulnerability reporting, which `gh api .../private-vulnerability-reporting` confirms is enabled |
-| Data-access statement | Absent as audited. Control 8 puts it in the same `SECURITY.md`, which is where `references/scanning-and-response.md:110` asks for it |
+| Data-access statement | Absent as audited. Control 8 puts it in the same `SECURITY.md`, which is where `references/scanning-and-response.md:112` asks for it |
 | Tags | As audited, none: `git tag` returned nothing. Since control 6, `v0.1.0` and `v0.2.0` are pushed and held by the release tag ruleset |
 | Releases | As audited, none and no release workflow. `.github/workflows/release.yml` now drafts an attested release on a `v*` tag, and has not run yet |
 | `.gitignore` | Blocks `**/.credentials.json` and `.env` tree-wide (`:9`, `:10`) |
@@ -323,7 +323,7 @@ whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.
 From there the attacker has the credential that authenticates the maintainer's Claude Code, and
 write access to the working tree of a repository whose default branch reaches every consumer at
 their next update. As audited, nothing in CI inspected the file first, because
-`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:138`,
+`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:139`,
 which changes nothing about this path: the checks there are structural, and a grader command that
 is structurally valid is exactly the one this path uses.
 
@@ -556,7 +556,7 @@ crafted container log line in the repository under review.
 **File abused.** Every skill's Verify section, because every skill's bounded loop makes a control
 decision from tool output: `github-repository-security/SKILL.md:122`-`:131` pipes `gh api` JSON
 through `--jq` and back into the loop, `github-actions-security/SKILL.md:251` reads `zizmor`
-output, `ansible-verification-loop/SKILL.md:137` reads `ansible-lint` output and `:173` reads a
+output, `ansible-verification-loop/SKILL.md:137` reads `ansible-lint` output and `:191` reads a
 detached `molecule` run's log.
 
 **What the agent does.** It reads the output as findings to act on. Seven of the ten skills tell
@@ -591,7 +591,7 @@ for trust boundary, and the file does not distinguish the two cases.
 **File abused.** `skills/github/github-actions-security/SKILL.md`, at the command that bind-mounts
 `$PWD` read-write into a container that was pinned by **tag**. The same file said, a few lines
 above, to pin the container by digest when it runs in CI, and this repository's own
-`lint.yml:173` did exactly that.
+`lint.yml:174` did exactly that.
 
 **What the agent does.** Runs the image and mounts the consumer's working tree into it.
 
@@ -599,7 +599,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:241`-`:243` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:173`, and `README.md:597` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:174`, and `README.md:597` was changed
 with it. The surrounding text at `skills/github/github-actions-security/SKILL.md:240`-`:244` states
 the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
@@ -624,7 +624,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 unpinned form kept below and labeled as tracking the default branch (`:261`). The team setting at
 `:319` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:748` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:734` documents the release order, and
+disagrees with the others. `README.md:742` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
