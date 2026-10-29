@@ -23,8 +23,16 @@ row is about. Where a document breaks that rule the continuation resolves to the
 is reported, which is the correction: the fix is to name the file. A path suffix matching more
 than one tracked file, such as a bare `SKILL.md`, resolves to none and fails for the same reason.
 
-What still goes unchecked is a citation pointing at the wrong non-blank line with no quote
-beside it, which carries nothing that says where it was meant to point.
+A citation without a quote still carries when it was written: `git blame` names the commit
+that last changed the citing line, and the cited file as it stood in that commit is what the
+number meant. The cited file is diffed from that commit to the working tree, and a citation
+whose line has moved since fails with the number the line has now. That is the drift an edit
+above a cited line leaves, and it needs history: in a shallow clone every line blames to the one
+commit there is, nothing has moved since it, and the check passes without having compared
+anything.
+
+What still goes unchecked is a citation not yet committed, which blames to no commit, and one
+whose cited line was itself rewritten since, where no line number says what it became.
 
 An edit that moves a cited line is mechanical to repair, so `--renumber` repairs it: it reads
 the working tree against `HEAD`, maps every cited target's old line numbers to its new ones, and
@@ -45,6 +53,7 @@ Exits 0 when every checked citation holds, 1 otherwise.
 from __future__ import annotations
 
 import argparse
+import functools
 import io
 import re
 import shutil
@@ -112,6 +121,9 @@ WINDOW_AFTER = 8
 
 # `git diff -U0` emits only headers and changed lines, so the headers alone carry the mapping.
 HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+# `git blame --porcelain` opens every line with its commit, its old number and its number now.
+BLAME_HEADER = re.compile(r"^([0-9a-f]{40,64}) \d+ (\d+)(?: \d+)?$")
 
 
 def collapse(text: str) -> str:
@@ -313,15 +325,15 @@ def check_quote(cited: str, number: int, target: Path, quote: str) -> str | None
     return f'{cited}:{number} does not carry the text quoted beside it: "{quote[:72]}"'
 
 
-def line_map(target: str) -> dict[int, int] | None:
-    """Return each line of a target at `HEAD` mapped to its line now, None when it is unchanged.
+def line_map(target: str, base: str = "HEAD") -> dict[int, int] | None:
+    """Return each line of a target at `base` mapped to its line now, None when it is unchanged.
 
     A line inside a hunk's replaced range is left out rather than guessed at: its content is not
     the content the citation was written against, so no number for it is defensible.
     """
     # Fixed argument list, no shell.
     result = subprocess.run(  # noqa: S603
-        [GIT, "diff", "-U0", "HEAD", "--", target],
+        [GIT, "diff", "-U0", base, "--", target],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -364,6 +376,62 @@ def moved_line(number: int, hunks: list[tuple[int, int, int]]) -> int | None:
         elif number >= old_start:
             return None
     return number + delta
+
+
+def blame_commits(doc: Path) -> dict[int, str]:
+    """Return the commit that last changed each line of a citing document, by line number.
+
+    A line not yet committed is left out, since it was written against the working tree and
+    no commit says what its numbers meant. An untracked document returns nothing.
+    """
+    # Fixed argument list, no shell.
+    result = subprocess.run(  # noqa: S603
+        [GIT, "blame", "--porcelain", "--", str(doc.relative_to(REPO_ROOT))],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return {}
+    commits: dict[int, str] = {}
+    for line in result.stdout.splitlines():
+        header = BLAME_HEADER.match(line)
+        if header is not None and header.group(1).strip("0"):
+            commits[int(header.group(2))] = header.group(1)
+    return commits
+
+
+@functools.cache
+def map_since(target: str, commit: str) -> dict[int, int] | None:
+    """Return a target's lines at `commit` mapped to its lines now, None when none moved.
+
+    A target the commit does not hold, added or renamed since, has no line a citation written
+    then could have meant, so it is treated as unmoved.
+    """
+    # Fixed argument list, no shell.
+    held = subprocess.run(  # noqa: S603
+        [GIT, "cat-file", "-e", f"{commit}:{target}"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        check=False,
+    )
+    if held.returncode != 0:
+        return None
+    return line_map(target, commit)
+
+
+def check_history(cited: str, number: int, target: str, commit: str) -> str | None:
+    """Return the failure a citation carries when its line moved since it was written."""
+    mapping = map_since(target, commit)
+    # A line a hunk rewrote is absent from the mapping, and nothing says which line it became.
+    now = number if mapping is None else mapping.get(number, number)
+    if now == number:
+        return None
+    return (
+        f"{cited}:{number} names a line that has moved to :{now} since {commit[:12]}, "
+        "the commit that last changed the citing line"
+    )
 
 
 def modified_documents(docs: list[Path]) -> list[str]:
@@ -524,11 +592,40 @@ def renumber(docs: list[Path], tracked: list[str]) -> int:
     return 0
 
 
+def check_held(
+    cited: str,
+    lines: tuple[int, int | None],
+    target: str,
+    quote: str | None,
+    commit: str | None,
+) -> tuple[str | None, Counter[str]]:
+    """Return the failure a resolved citation carries against its quote and its history.
+
+    The tally beside it counts which of the two the citation was held to.
+    """
+    number, end_line = lines
+    tally: Counter[str] = Counter()
+    if quote is not None:
+        tally["quoted"] += 1
+        failure = check_quote(cited, number, REPO_ROOT / target, quote)
+        if failure is not None:
+            return failure, tally
+    if commit is None:
+        return None, tally
+    failure = check_history(cited, number, target, commit)
+    if failure is None and end_line is not None:
+        failure = check_history(f"{cited}:{number}-", end_line, target, commit)
+    if failure is None:
+        tally["dated"] += 1
+    return failure, tally
+
+
 def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[str]]:
     """Return one document's failures and a tally of what was checked in it."""
     failures: list[str] = []
     tally: Counter[str] = Counter()
     text = doc.read_text(encoding="utf-8")
+    commits = blame_commits(doc)
 
     for match in CITATION.finditer(text):
         cited, number = match.group(1), int(match.group(2))
@@ -559,18 +656,24 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
             failure = check_range_end(cited, number, end_line, target)
         if failure is None:
             tally["checked"] += 1
-            quote = quote_after(text, match.end())
-            if quote is not None:
-                tally["quoted"] += 1
-                failure = check_quote(cited, number, target, quote)
+            failure, held = check_held(
+                cited,
+                (number, end_line),
+                matches[0],
+                quote_after(text, match.end()),
+                commits.get(line),
+            )
+            tally.update(held)
         if failure is not None:
             failures.append(f"{doc.relative_to(REPO_ROOT)}:{line}: {failure}")
 
-    failures += check_continuations(doc, text, tracked, tally)
+    failures += check_continuations(doc, text, tracked, tally, commits)
     return failures, tally
 
 
-def check_continuations(doc: Path, text: str, tracked: list[str], tally: Counter[str]) -> list[str]:
+def check_continuations(
+    doc: Path, text: str, tracked: list[str], tally: Counter[str], commits: dict[int, str]
+) -> list[str]:
     """Return the failures the bare continuations in one document carry.
 
     A continuation inherits the file the sentence last named, so a failure here is either a
@@ -584,14 +687,14 @@ def check_continuations(doc: Path, text: str, tracked: list[str], tally: Counter
             continue
         tally["continuations"] += 1
         target = REPO_ROOT / owner
+        line = text.count("\n", 0, match.start()) + 1
         failure = check_citation(owner, number, target)
         if failure is None:
-            quote = quote_after(text, match.end())
-            if quote is not None:
-                tally["quoted"] += 1
-                failure = check_quote(owner, number, target, quote)
+            failure, held = check_held(
+                owner, (number, None), owner, quote_after(text, match.end()), commits.get(line)
+            )
+            tally.update(held)
         if failure is not None:
-            line = text.count("\n", 0, match.start()) + 1
             failures.append(
                 f"{doc.relative_to(REPO_ROOT)}:{line}: continuation `:{number}` of {failure}"
             )
@@ -634,14 +737,18 @@ def main() -> int:
         f"{counts['checked']} citation(s) naming a path and {counts['continuations']} bare "
         f"continuation(s), across {len(docs)} document(s), resolve to one file and name a line "
         f"that exists and is not blank; {counts['quoted']} of them also carry the text quoted "
-        f"beside them; {counts['orphaned']} continuation(s) name no file before them, unchecked"
+        f"beside them; {counts['dated']} name a line unmoved since the commit that last changed "
+        f"the citing line; {counts['orphaned']} continuation(s) name no file before them, unchecked"
     )
     if failures:
         print(f"\n{len(failures)} citation(s) do not hold; {tally}", file=sys.stderr)
         return 1
 
     print(f"citations: {tally}.")
-    print("a citation with no quote beside it is held only to naming a non-blank line in range")
+    print(
+        "an uncommitted citation, or one whose cited line was rewritten since, is held only to "
+        "naming a non-blank line in range"
+    )
     return 0
 
 

@@ -79,7 +79,7 @@ commit.
 
 **Landed.** `check_plugin_agent_dir` became `check_plugin_root` at `scripts/check_skills.py:719`.
 It walks the repository root and fails on any entry that is not in `PLUGIN_ROOT_ALLOWED` (`:109`),
-skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:132`) that `.gitignore` already excludes.
+skipping the local-only names in `PLUGIN_ROOT_IGNORED` (`:133`) that `.gitignore` already excludes.
 Verified against a planted `hooks/` and `.mcp.json`: both were reported and the check exited
 non-zero. The failure message names the reason rather than the rule, so a contributor who hits it
 learns why the root is special. `docs` was added to the allowlist to admit this directory.
@@ -339,7 +339,7 @@ reviewer's list of what to look for in a file being merged, restated as what the
 distrust in a file it is reading.
 
 It is in all eight because every skill reads something it did not author, even where no rule file
-is involved: `github-organization-governance/SKILL.md:64` names the settings and API responses
+is involved: `github-organization-governance/SKILL.md:65` names the settings and API responses
 read back, and the two Python skills name command output. The stronger, domain-specific
 counterweight at `ansible-verification-loop/SKILL.md:65` is kept as it was, and the same pattern
 now also exists in `python-secure-coding/SKILL.md:48`, `bash-secure-scripting/SKILL.md:67`,
@@ -354,7 +354,7 @@ content.
 
 ### 8. `SECURITY.md` and a data-access statement
 
-Neither exists. `github-repository-security/SKILL.md:105` requires a `SECURITY.md` naming a private
+Neither exists. `github-repository-security/SKILL.md:107` requires a `SECURITY.md` naming a private
 channel and a response time, and `references/agent-content.md:78` requires that it cover
 "withdrawing a bad version and telling consumers". `references/agent-content.md:135` requires a
 data-access statement naming "paths and endpoints rather than categories".
@@ -370,7 +370,7 @@ release to yank and no version for consumers to avoid.
 *to*. It depends on control 6.
 
 **Landed.** `SECURITY.md` at the repository root, carrying both halves in one file, which is what
-`references/scanning-and-response.md:110` asks of a project that ships agent-facing content:
+`references/scanning-and-response.md:112` asks of a project that ships agent-facing content:
 
 - **The reporting channel** is GitHub private vulnerability reporting, which
   `gh api repos/konstruktoid/agent-instructions-skills/private-vulnerability-reporting` confirms
@@ -390,7 +390,7 @@ release to yank and no version for consumers to avoid.
 
 `SECURITY.md` was added to `PLUGIN_ROOT_ALLOWED` (`scripts/check_skills.py:109`), which is control
 1 working as intended: a new root entry is a decision rather than an accident. It was also added
-to `PROSE_GLOBS` (`:201`), so the house prose rules apply to it.
+to `PROSE_GLOBS` (`:202`), so the house prose rules apply to it.
 
 The ranking said this stops nothing, and that holds. It creates a channel and a plan where there
 were neither, and the data-access statement is what makes the review at
@@ -422,7 +422,7 @@ Concretely, on this repository's own files:
   `bash-secure-scripting/references/error-handling.md:144`-`:176`, which discusses `curl` at length
   without performing anything. Every one of those is a false positive, and a check with a high false
   positive rate on the existing tree gets suppressed within a month.
-- The same regex misses `github-repository-security/SKILL.md:141`, "check the current REST
+- The same regex misses `github-repository-security/SKILL.md:143`, "check the current REST
   documentation", which is an instruction to fetch a web page written entirely in English.
 - It misses `bash-secure-scripting/SKILL.md:264`, `pre-commit run --all-files`, which is arbitrary
   third-party code execution wearing the name of a linter.
@@ -455,7 +455,7 @@ present it to consumers as a guarantee, because it is not one.
 - **The block.** Every `SKILL.md` declares `capabilities` with `tools`, `shell`, `paths` and
   `egress`, each a sorted list, one entry per line. `check_capabilities` at
   `scripts/check_skills.py:569` fails the build when the block is missing, has an unknown key, has
-  a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:188`). Sorting is
+  a list that is not sorted, or declares a tool outside `DECLARABLE_TOOLS` (`:189`). Sorting is
   not tidiness: it is what makes an added capability one line of diff rather than a reordering.
   The tool allowlist deliberately excludes `WebFetch`, `WebSearch` and `Task`, so adding one is a
   build failure and a conversation rather than a line in a list.
