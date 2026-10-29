@@ -37,6 +37,22 @@ python3 evals/run_eval.py instructions-tasks --suite minimal-change --runs 3 --p
 python3 evals/run_eval.py report --skill minimal-change
 ```
 
+## Measured effect
+
+Against no instruction and the single sentence "Make the smallest complete change", an agent
+following the document wrote less source and added tests. It used more output tokens than the
+sentence, and it did not change how the agent reused existing helpers or covered a stated scope.
+Read the rules on reuse and error handling as guidance that has not been shown to alter behavior.
+
+In `mc-05-save-settings`, the one task whose change needs a safeguard against data loss, the
+`doc` arm left the safeguard out in 12 of 12 runs across the four stamps before `de26bb6`, and kept
+the old file on a failed save in 9 of 12 runs at `a5d8770`, on Claude Code 2.1.305, 2.1.311 and
+2.1.312, against 0 of 24 without the document. The version is not the cause. From `de26bb6` until
+this section moved here, the document itself described this task and its failure, and every
+stamp that passed carries that description, so the result may measure the description rather
+than the rules. `existing-atomic-write-reused` failed in all 72 runs, in every arm.
+`incidents/mc-05-never-cut-disclosed.md` holds the evidence for both.
+
 ## Limits
 
 - Six tasks in one language and one model tier cannot support a claim about every repository.
@@ -49,5 +65,7 @@ python3 evals/run_eval.py report --skill minimal-change
   Claude Code's builtin AGENTS.md plugin, so it was not an agent without instruction. The `doc`
   and `plain` arms were not exposed. The 2026-10-24 stamp ran without the exposure and gave the
   same result. See `incidents/baseline-reads-checkout.md`.
+- A finding written into the document reaches the `doc` arm, which then reads about its own
+  measurement, so the document states no measured result and this README holds them.
 - The `doc` arm gives the agent a pointer rather than the text, so a run that never opens the
   document measures the pointer. The report counts those runs.
