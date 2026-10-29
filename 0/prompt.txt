@@ -1,0 +1,9 @@
+clean up first and the read the state file regarding gaps
+
+---
+
+delete the caches and sandboxes as well
+
+---
+
+work through your recommended order, separate per branch and use signed commits with a minimal commit messages
