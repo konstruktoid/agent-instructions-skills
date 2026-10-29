@@ -681,6 +681,13 @@ documents abbreviate; eval fixtures are left out of that index, because a fixtur
 one tracked file, such as a bare `SKILL.md`, resolves to none and fails, since a citation nothing
 can resolve is where drift hides.
 
+A citation also carries when it was written. `git blame` names the commit that last changed the
+citing line, the cited file is diffed from that commit to the working tree, and a citation whose
+line has moved since fails with the number the line has now, quoted or not. In a shallow clone
+every line blames to the one commit there is and nothing has moved, so the `skills` job checks
+out with `fetch-depth: 0`. A citation not yet committed, or one whose cited line was itself
+rewritten since, is still held only to naming a non-blank line.
+
 A bare continuation such as `` `:21` `` is held to the same checks. It inherits the file named by
 the section heading, by the table row it sits in, or by the sentence before it, and inside a row
 the row's own subject wins, because naming another file in one cell does not change what the row

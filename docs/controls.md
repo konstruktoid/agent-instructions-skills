@@ -88,7 +88,7 @@ learns why the root is special. `docs` was added to the allowlist to admit this 
 
 As audited, `skills/github/github-actions-security/SKILL.md` ran `rhysd/actionlint:1.7.12` with
 `$PWD` bind-mounted read-write, a few lines below its own instruction to pin by digest, while
-`lint.yml:173` already carried the digest.
+`lint.yml:174` already carried the digest.
 
 **What it stops.** Attack path 3.5.
 
@@ -101,7 +101,7 @@ is not a hash.
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
 **Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:597` now
-carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:173`. The prose at
+carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:174`. The prose at
 `github-actions-security/SKILL.md:228`-`:232` was rewritten to state the reason where the
 command is, rather than as a rule the
 command beneath it broke.
@@ -121,19 +121,19 @@ fields; it does not care what the command does.
 **Where it fails open.** Immediately, against any grader command that is structurally valid. Do not
 count this as a control against 1.1. Count it as the place a check against 1.1 would go.
 
-**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:112`-`:147`, running
+**Landed.** A fifth job, `evals`, at `.github/workflows/lint.yml:113`-`:147`, running
 `python3 scripts/check_evals.py`, with `--strict-suite` for each suite the diff touches
-(`:138`-`:147`). Three choices in
+(`:139`-`:148`). Three choices in
 it:
 
 - **No uv setup.** The script imports only the standard library and shells out to `git` and
   `bash`, both of which the runner image provides, so the job is a checkout and a command.
-- **`fetch-depth: 0`** (`:128`). The staleness half of the check compares the commit a stamp
+- **`fetch-depth: 0`** (`:129`). The staleness half of the check compares the commit a stamp
   recorded against the commits that have since touched the skill, and the script degrades a
   failed git lookup to an empty string, which reads as "nothing changed". A shallow checkout
   would report every suite fresh without having compared anything, which is worse than not
   running it.
-- **Strict only for the suites the diff touches** (`:141`-`:147`). Staleness is a statement
+- **Strict only for the suites the diff touches** (`:142`-`:148`). Staleness is a statement
   about when a measurement was last taken, and a pull request that does not touch a suite
   cannot fix it, so an unconditional `--strict` would fail every pull request for a reason none
   of them caused. A change to an eval's own `tasks.json` or `assertions.json` is the case where
@@ -287,7 +287,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:734` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:741` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -462,7 +462,7 @@ present it to consumers as a guarantee, because it is not one.
 - **The detector.** `scripts/check_capabilities.py` compares each skill's `SKILL.md` and its
   `references/` against `origin/main` and reports hostnames, paths outside the repository, and
   command names that the change adds and the block does not declare. It reports and exits 0;
-  `--strict` exists for a reviewer, and `lint.yml:58` does not pass it.
+  `--strict` exists for a reviewer, and `lint.yml:59` does not pass it.
 
 **Two implementation findings worth keeping.** The first version scanned added diff lines and
 reported `capabilities`, `paths` and `what` as commands, because with `--unified=0` there is no
@@ -599,7 +599,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
    `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:597` carry the
-   digest from `lint.yml:173`.
+   digest from `lint.yml:174`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:719`. Attack path 1.3 is closed.
 3. **Control 5**, invert the eval harness permission default. **Landed**, as a tool allowlist rather
@@ -610,7 +610,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at
-   `.github/workflows/lint.yml:112`. It stops nothing by itself; it is the slot where a real
+   `.github/workflows/lint.yml:113`. It stops nothing by itself; it is the slot where a real
    grader check will live.
 6. **Control 6**, tag, protect the tags, and change the documented install so the pinned form is
    first. **Landed in the repository**: pinned install, declared versions with a CI check, and
@@ -623,7 +623,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
 9. **Control 9**, declared-capability frontmatter, at the low-ambition version described above.
    **Landed**: the block in all eight skills, its shape enforced at
    `scripts/check_skills.py:569`, and the report-only detector at
-   `scripts/check_capabilities.py`, wired into `lint.yml:58`.
+   `scripts/check_capabilities.py`, wired into `lint.yml:59`.
 10. **Control 10**, capability-diff release notes, generated from 9 between the tags from 6.
 11. **Control 11**, provenance, once there is something to attest. Never with a source-track claim
     the review structure does not support.

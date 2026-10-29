@@ -250,11 +250,11 @@ no file in the repository defines it.
 
 | Path | Trigger | Permissions | Shell | Paths | Egress | Untrusted input |
 |---|---|---|---|---|---|---|
-| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:72`, `:94`, `:117`, `:154`, `:190`). `persist-credentials: false` on every checkout (`:27`, `:77`, `:99`, `:122`, `:159`, `:195`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:52`); `python3 scripts/check_content_only.py`, with and without `--self-test` (`:82`, `:87`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:106`-`:110`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:138`-`:147`); `docker run` of `rhysd/actionlint` pinned by digest (`:172`-`:173`); `uvx "zizmor@1.31.1"` over `.github/` (`:183`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:183`); `docker run` pulls the actionlint image (`:172`). Actions are pinned by SHA (`:25`, `:33`, `:202`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:182`) |
+| `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:73`, `:95`, `:118`, `:155`, `:191`). `persist-credentials: false` on every checkout (`:27`, `:78`, `:100`, `:123`, `:160`, `:196`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:53`); `python3 scripts/check_content_only.py`, with and without `--self-test` (`:83`, `:88`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:107`-`:111`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:139`-`:147`); `docker run` of `rhysd/actionlint` pinned by digest (`:173`-`:174`); `uvx "zizmor@1.31.1"` over `.github/` (`:184`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:184`); `docker run` pulls the actionlint image (`:173`). Actions are pinned by SHA (`:25`, `:33`, `:203`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:183`) |
 | `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:75`, `:84`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:138`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:585`) | Read-only | None | `evals/` | None | Eval suite files |
-| `scripts/check_citations.py` | CI, `lint.yml:52`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
-| `scripts/check_content_only.py` | CI, `lint.yml:82` and `lint.yml:87`, in the `content-only` job; `.github/workflows/release.yml:62` and `.github/workflows/release.yml:64` | Read-only | `git ls-files`, and `claude plugin validate` on a copy in a temporary directory when `claude` is on `PATH`, which the CI runner does not provide | The checkout, the manifests, and `skills/**/*.md` | None | The files under check. It never executes them |
+| `scripts/check_evals.py` | CI, `lint.yml:139`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:585`) | Read-only | None | `evals/` | None | Eval suite files |
+| `scripts/check_citations.py` | CI, `lint.yml:53`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
+| `scripts/check_content_only.py` | CI, `lint.yml:83` and `lint.yml:88`, in the `content-only` job; `.github/workflows/release.yml:62` and `.github/workflows/release.yml:64` | Read-only | `git ls-files`, and `claude plugin validate` on a copy in a temporary directory when `claude` is on `PATH`, which the CI runner does not provide | The checkout, the manifests, and `skills/**/*.md` | None | The files under check. It never executes them |
 | `.github/workflows/release.yml` | `push` of a tag matching `v*` (`:10`-`:11`) | `permissions: {}` at the top level (`:13`). The `build` job adds `id-token: write` and `attestations: write` (`:26`-`:27`); the `draft` job adds `contents: write` (`:92`) | Yes. A manifest version check, the content-only gate, `git archive`, `sha256sum`, and `gh release create --draft` | The checkout and `dist/` | Yes. `actions/attest` calls GitHub's attestation service, whose endpoints this audit did not trace; `gh release create` calls the GitHub API | The tag name, passed through `env` and never interpolated into a script. Anyone who can push a tag controls it, which the release tag ruleset limits |
 
 ### `evals/run_eval.py`
@@ -323,7 +323,7 @@ whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.
 From there the attacker has the credential that authenticates the maintainer's Claude Code, and
 write access to the working tree of a repository whose default branch reaches every consumer at
 their next update. As audited, nothing in CI inspected the file first, because
-`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:138`,
+`scripts/check_evals.py` was not wired into `lint.yml`. Control 3 wires it in at `lint.yml:139`,
 which changes nothing about this path: the checks there are structural, and a grader command that
 is structurally valid is exactly the one this path uses.
 
@@ -591,7 +591,7 @@ for trust boundary, and the file does not distinguish the two cases.
 **File abused.** `skills/github/github-actions-security/SKILL.md`, at the command that bind-mounts
 `$PWD` read-write into a container that was pinned by **tag**. The same file said, a few lines
 above, to pin the container by digest when it runs in CI, and this repository's own
-`lint.yml:173` did exactly that.
+`lint.yml:174` did exactly that.
 
 **What the agent does.** Runs the image and mounts the consumer's working tree into it.
 
@@ -599,7 +599,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:241`-`:243` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:173`, and `README.md:597` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:174`, and `README.md:597` was changed
 with it. The surrounding text at `skills/github/github-actions-security/SKILL.md:240`-`:244` states
 the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
@@ -624,7 +624,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 unpinned form kept below and labeled as tracking the default branch (`:261`). The team setting at
 `:319` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:748` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:734` documents the release order, and
+disagrees with the others. `README.md:741` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 
