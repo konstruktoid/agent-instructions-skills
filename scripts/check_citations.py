@@ -269,6 +269,15 @@ def check_citation(cited: str, number: int, target: Path) -> str | None:
     return None
 
 
+def check_line(cited: str, number: int, target: str, commit: str | None) -> str | None:
+    """Return the failure the cited line itself carries, its move first when it has one."""
+    failure = check_citation(cited, number, REPO_ROOT / target)
+    if failure is None or commit is None:
+        return failure
+    # A shifted number usually lands on a blank line, and the move names the correction.
+    return check_history(cited, number, target, commit) or failure
+
+
 def check_range_end(cited: str, number: int, end: int, target: Path) -> str | None:
     """Return the failure a range's endpoint carries, None when the file reaches that far."""
     lines = target.read_text(encoding="utf-8").splitlines()
@@ -651,7 +660,7 @@ def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[st
             )
             continue
         target = REPO_ROOT / matches[0]
-        failure = check_citation(cited, number, target)
+        failure = check_line(cited, number, matches[0], commits.get(line))
         if failure is None and end_line is not None:
             failure = check_range_end(cited, number, end_line, target)
         if failure is None:
@@ -686,9 +695,8 @@ def check_continuations(
             tally["orphaned"] += 1
             continue
         tally["continuations"] += 1
-        target = REPO_ROOT / owner
         line = text.count("\n", 0, match.start()) + 1
-        failure = check_citation(owner, number, target)
+        failure = check_line(owner, number, owner, commits.get(line))
         if failure is None:
             failure, held = check_held(
                 owner, (number, None), owner, quote_after(text, match.end()), commits.get(line)
