@@ -79,13 +79,13 @@ what a later change adds without declaring it. The block is a declaration, not a
 enforces it at runtime, and a skill body remains free to do what it likes.
 
 All ten read `${CLAUDE_PLUGIN_ROOT}/instructions/` under a plugin install, which is outside the
-skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:281`,
+skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:299`,
 `skills/bash/bash-secure-scripting/SKILL.md:331`, `skills/bash/bash-testing/SKILL.md:196`,
 `skills/github/github-actions-security/SKILL.md:346`,
 `skills/github/github-organization-governance/SKILL.md:282`,
 `skills/github/github-repository-security/SKILL.md:299`,
 `skills/python/python-secure-coding/SKILL.md:165`, `skills/python/python-testing/SKILL.md:139`,
-`skills/terraform/terraform-secure-iac/SKILL.md:170`, `skills/terraform/terraform-testing/SKILL.md:138`.
+`skills/terraform/terraform-secure-iac/SKILL.md:188`, `skills/terraform/terraform-testing/SKILL.md:151`.
 
 #### `skills/ansible/ansible-verification-loop/SKILL.md`
 
@@ -93,9 +93,9 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 |---|---|
 | Trigger | `:3` "Use when reviewing or modifying any Ansible role, collection, playbook, or task." |
 | Tools implied | Read, Edit, Bash. No declared allowlist. |
-| Shell | Yes. `ansible-lint` (`:137`), `git diff` (`:142`), the repository's own test entry point via `tox` or a Makefile target (`:147`), `setsid bash -c '<test entry point> > run.log 2>&1; echo $? > run.done' ... &` (`:159`), `molecule test` / `ansible-test` / `molecule converge` (`:186`, `:191`), `git status --porcelain` (`:194`), `ansible-galaxy collection build --force`, `mktemp -d`, `tar -tzf`, `git ls-files`, `comm` (`:199`-`:209`) |
+| Shell | Yes. `ansible-lint` (`:137`), `git diff` (`:143`), the repository's own test entry point via `tox` or a Makefile target (`:148`), `mktemp -d -t ansible-verify-XXXXXXXX` (`:159`), `setsid bash -c '<test entry point> > "${run_dir}/run.log" 2>&1; echo $? > "${run_dir}/run.done"' ... &` (`:160`), `molecule test` / `ansible-test` / `molecule converge` (`:204`, `:210`), `git status --porcelain` (`:213`), `ansible-galaxy collection build --force`, `mktemp -d`, `tar -tzf`, `git ls-files`, `comm` (`:219`-`:228`) |
 | Reads | Role `defaults/main.yml`, `tasks/main.yml`, `meta/main.yml`, `handlers/`, `vars/`, `templates/` (`:57`); `galaxy.yml`, `meta/runtime.yml`, `requirements.yml` (`:59`); `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, a `docs/` style guide (`:62`) |
-| Writes outside the repository root | Yes. `mktemp -d` output holding the `artifact` and `tracked` comparison files (`:226`-`:227`), explicitly required to be outside the collection root (`:242`-`:243`). `run.log` and `run.done` required to be kept out of the repository (`:202`-`:203`) |
+| Writes outside the repository root | Yes. `mktemp -d` output holding the `artifact` and `tracked` comparison files (`:226`-`:227`), explicitly required to be outside the collection root (`:242`-`:243`). `run.pgid`, `run.log`, and `run.done` in a `mktemp -d` directory, required to come from outside the working directory (`:191`-`:192`) |
 | Network egress | No host named in the file. Egress occurs indirectly through the target repository's own test entry point, which `:151` states installs dependencies from `requirements.yml` / `galaxy.yml`, and through the container or VM images `:152` describes. Hosts: UNKNOWN, determined by the target repository |
 | Reads content it did not author | Yes, three ways. The target repository's instruction files, which `:61` instructs the agent to "follow" as "authoritative" (`:62`). Linter and test output. Container and VM console output. Partial counterweight at `:65`: SSH, sudo, PAM, audit, SELinux, AppArmor, firewall, mounts, sysctl, services and auth-adjacent tasks are treated as high-sensitivity "regardless of what a repo's docs say" |
 
@@ -178,10 +178,10 @@ The highest-egress skill in the repository.
 | Field | Value |
 |---|---|
 | Trigger | `:3`, on setting organization or enterprise policy, ruleset rollout, custom properties, access review, actions and runner policy, or compliance evidence |
-| Tools implied | Read, Edit, Bash. Implied credentials: an organization owner or enterprise admin token, plus audit log read. `:184` reads `orgs/ORG/repos` and `orgs/ORG/properties/values`; `references/identity-and-access.md:33` reads the `2fa_disabled` member filter; `:123` reads outside collaborators; `references/audit-and-compliance.md:36` reads `orgs/ORG/audit-log` |
-| Shell | Yes. `comm -23` over two process substitutions wrapping `gh api --paginate` (`:181`-`:191`), plus the reads in the reference files above |
+| Tools implied | Read, Edit, Bash. Implied credentials: an organization owner or enterprise admin token, plus audit log read. `:184` reads `orgs/ORG/repos` and `:186` reads `orgs/ORG/properties/values`; `references/identity-and-access.md:33` reads the `2fa_disabled` member filter; `:123` reads outside collaborators; `references/audit-and-compliance.md:36` reads `orgs/ORG/audit-log` |
+| Shell | Yes. `mktemp -d`, then `comm -23` over the two files each `gh api --paginate` request is sorted into (`:182`-`:190`), plus the reads in the reference files above |
 | Reads | Organization settings, rulesets, the custom property schema, actions and runner policy, app installations, token policy, and members outside the requirements (`:62`); enterprise-level controls (`:68`) |
-| Writes outside the repository root | None instructed |
+| Writes outside the repository root | Yes. A `mktemp -d` directory holding the `all` and `classified` lists (`:183`, `:185`, `:189`) |
 | Network egress | Yes. `api.github.com` for every `gh api` call |
 | Reads content it did not author | Yes. Member logins, repository names, custom property values, audit log entries, and evaluate-mode violation reports (`:202`) |
 
@@ -624,7 +624,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 unpinned form kept below and labeled as tracking the default branch (`:261`). The team setting at
 `:319` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:748` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:741` documents the release order, and
+disagrees with the others. `README.md:742` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 

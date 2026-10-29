@@ -335,7 +335,7 @@ def check_quote(cited: str, number: int, target: Path, quote: str) -> str | None
 
 
 def line_map(target: str, base: str = "HEAD") -> dict[int, int] | None:
-    """Return each line of a target at `base` mapped to its line now, None when it is unchanged.
+    """Return each line of a target at `base` mapped to its line now, None when git cannot diff it.
 
     A line inside a hunk's replaced range is left out rather than guessed at: its content is not
     the content the citation was written against, so no number for it is defensible.
@@ -348,7 +348,7 @@ def line_map(target: str, base: str = "HEAD") -> dict[int, int] | None:
         text=True,
         check=False,
     )
-    if result.returncode != 0 or not result.stdout.strip():
+    if result.returncode != 0:
         return None
 
     hunks: list[tuple[int, int, int]] = []
@@ -413,10 +413,10 @@ def blame_commits(doc: Path) -> dict[int, str]:
 
 @functools.cache
 def map_since(target: str, commit: str) -> dict[int, int] | None:
-    """Return a target's lines at `commit` mapped to its lines now, None when none moved.
+    """Return a target's lines at `commit` mapped to its lines now, None when history cannot say.
 
     A target the commit does not hold, added or renamed since, has no line a citation written
-    then could have meant, so it is treated as unmoved.
+    then could have meant, so no move can be checked.
     """
     # Fixed argument list, no shell.
     held = subprocess.run(  # noqa: S603
@@ -430,12 +430,17 @@ def map_since(target: str, commit: str) -> dict[int, int] | None:
     return line_map(target, commit)
 
 
-def check_history(cited: str, number: int, target: str, commit: str) -> str | None:
-    """Return the failure a citation carries when its line moved since it was written."""
+def line_since(target: str, number: int, commit: str) -> int | None:
+    """Return where a line named at `commit` sits now, None when history cannot say."""
     mapping = map_since(target, commit)
     # A line a hunk rewrote is absent from the mapping, and nothing says which line it became.
-    now = number if mapping is None else mapping.get(number, number)
-    if now == number:
+    return None if mapping is None else mapping.get(number)
+
+
+def check_history(cited: str, number: int, target: str, commit: str) -> str | None:
+    """Return the failure a citation carries when its line moved since it was written."""
+    now = line_since(target, number, commit)
+    if now is None or now == number:
         return None
     return (
         f"{cited}:{number} names a line that has moved to :{now} since {commit[:12]}, "
@@ -584,7 +589,11 @@ def renumber(docs: list[Path], tracked: list[str]) -> int:
 
     cited_paths = cited_targets(docs, tracked)
     maps = {path: line_map(path) for path in sorted(cited_paths)}
-    maps = {path: mapping for path, mapping in maps.items() if mapping is not None}
+    maps = {
+        path: mapping
+        for path, mapping in maps.items()
+        if mapping is not None and any(old != new for old, new in mapping.items())
+    }
     if not maps:
         print("renumber: no cited file has changed since HEAD, so no citation has moved")
         return 0
@@ -621,12 +630,16 @@ def check_held(
             return failure, tally
     if commit is None:
         return None, tally
-    failure = check_history(cited, number, target, commit)
-    if failure is None and end_line is not None:
-        failure = check_history(f"{cited}:{number}-", end_line, target, commit)
-    if failure is None:
+    ends = [(cited, number)]
+    if end_line is not None:
+        ends.append((f"{cited}:{number}-", end_line))
+    for label, line in ends:
+        failure = check_history(label, line, target, commit)
+        if failure is not None:
+            return failure, tally
+    if all(line_since(target, line, commit) is not None for _, line in ends):
         tally["dated"] += 1
-    return failure, tally
+    return None, tally
 
 
 def check_document(doc: Path, tracked: list[str]) -> tuple[list[str], Counter[str]]:
@@ -754,8 +767,8 @@ def main() -> int:
 
     print(f"citations: {tally}.")
     print(
-        "an uncommitted citation, or one whose cited line was rewritten since, is held only to "
-        "naming a non-blank line in range"
+        "an uncommitted citation, or one whose cited line was rewritten since, is held to a "
+        "non-blank line in range and to any quote beside it, but not checked for a move"
     )
     return 0
 

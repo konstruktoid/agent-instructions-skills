@@ -686,7 +686,8 @@ citing line, the cited file is diffed from that commit to the working tree, and 
 line has moved since fails with the number the line has now, quoted or not. In a shallow clone
 every line blames to the one commit there is and nothing has moved, so the `skills` job checks
 out with `fetch-depth: 0`. A citation not yet committed, or one whose cited line was itself
-rewritten since, is still held only to naming a non-blank line.
+rewritten since, is still held to a non-blank line and to any quote beside it, but nothing checks
+it for a move.
 
 A bare continuation such as `` `:21` `` is held to the same checks. It inherits the file named by
 the section heading, by the table row it sits in, or by the sentence before it, and inside a row
