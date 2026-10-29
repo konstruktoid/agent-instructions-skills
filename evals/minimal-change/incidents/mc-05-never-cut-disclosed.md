@@ -193,6 +193,5 @@ and changes no fixture, task, assertion, or harness file. `failed-save-keeps-old
 of 3 `doc` runs and in 6 of 6 `baseline` and `plain` runs, and `existing-atomic-write-reused`
 failed in 9 of 9. At the 9-of-12 rate `a5d8770` passed at, three runs all fail with a probability
 of about 0.016, and `a5d8770` passed on this version the day before and on two older versions the
-same day. The description was
-the cause: the document's rules do not keep the old file on a failed save, and naming the task in
-the document did.
+same day. The description was the cause: the document's rules do not keep the old file on a
+failed save, and naming the task in the document did.
