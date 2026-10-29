@@ -264,12 +264,12 @@ ship to consumers; it runs on the maintainer's machine.
 
 | Field | Value |
 |---|---|
-| Trigger | Manual. `evals/README.md:268` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
+| Trigger | Manual. `evals/README.md:269` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
 | Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:607`) and for git (`:1050`, `:1079`, `:1080`, `:1270`, `:1682`, `:1690`, `:2145`, `:2146`, `:2163`). And `subprocess.run(command, shell=True, ...)` at `:991`-`:993`, where `command` is a grader string read from a suite's `assertions.json` |
 | Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:122`, applied through `RunPermissions` at `:421` and `:481`-`:486`, with the unbounded surface behind `--all-tools` (`:1894`, `:2919`). `--setting-sources project` keeps the caller's own settings out of both arms (`:468`) |
 | Filesystem, outside the repository root | Yes, and it reaches a live credential. `:353` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:356` symlinks it into the run's private home. A private HOME tree is created per run (`:340`-`:352`). `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed" |
 | Environment | `env = dict(os.environ)` (`:407`), so the run starts from the caller's environment, less every variable whose name starts with `CLAUDE` other than the provider and credential variables in `INHERITED_CLAUDE_VARIABLES` (`:369`, `:415`); `$EVAL_TOOL_BIN` is prepended to `PATH` (`:410`) |
-| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:122`). Plus whatever a fixture's own tooling fetches (`evals/README.md:253`-`:269` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`, `terraform`, `checkov`) |
+| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:122`). Plus whatever a fixture's own tooling fetches (`evals/README.md:254`-`:269` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`, `terraform`, `checkov`) |
 | Reads content it did not author | Comprehensively. Task prompts from `tasks.json`, fixture trees, grader commands from `assertions.json`, and the model's own transcript, which is then parsed at `:787`-`:815`. Claude Code also loads any `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` above `evals/` into both conditions; a run refuses to start when one exists, unless `--allow-ancestor-instructions` is passed, in which case the paths are recorded in the stamp's `source-revision.json` and stated in its report |
 
 Supporting eval data:
@@ -313,7 +313,7 @@ this repository, since a new eval task requires both files.
 holds only for the trust assumption it names: "The command comes from a checked-in
 assertions.json in this repository". A pull request branch is not yet that.
 
-**What happens.** The maintainer runs the suite as `evals/README.md:268` documents. `run_grader`
+**What happens.** The maintainer runs the suite as `evals/README.md:269` documents. `run_grader`
 executes the string under `/bin/sh` with `cwd` set to the finished workspace and `env` from
 `run_environment(home)`, which is `dict(os.environ)` less the Claude Code variables outside
 `INHERITED_CLAUDE_VARIABLES`, plus the run's private HOME (`run_eval.py:407`, `:987`).
@@ -356,7 +356,7 @@ sandbox option in `controls.md` is the one that bounds reach, and it is still op
 **Entry point.** A pull request adding a task to `evals/<skill>/tasks.json` and its fixture tree.
 
 **File abused.** `evals/run_eval.py`, in the branch that added `--permission-mode
-bypassPermissions` whenever `--tools` was not passed. `evals/README.md:268` shows the documented
+bypassPermissions` whenever `--tools` was not passed. `evals/README.md:269` shows the documented
 invocation, which passes no `--tools`, so every task run took that branch.
 
 **What happens.** The agent is handed a contributor-written prompt and a contributor-written

@@ -242,7 +242,8 @@ repository's `AGENTS.md`, and gave the same result, which the instructions table
 README summarizes. Its two 2026-10-27 stamps measured two rewordings of the document for the
 `mc-05-save-settings` incident, `evals/minimal-change/incidents/mc-05-never-cut-disclosed.md`,
 and neither changed the result. Its two 2026-10-28 stamps reran that task alone on the unchanged
-document, and the incident record gives their result.
+document, and its two 2026-10-29 stamps reran it at the same revision on two older Claude Code
+versions; the incident record gives their result.
 
 An instructions suite can be neither stale-checked against a skill nor routed, so
 `scripts/check_evals.py` compares a stamp against the instructions file, `tasks.json` and

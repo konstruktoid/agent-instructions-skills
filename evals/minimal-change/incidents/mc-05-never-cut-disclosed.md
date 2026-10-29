@@ -31,8 +31,8 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 
 - **The closing line gives a never-cut item an exit.** Supported by the 2026-10-20 and 2026-10-24
   stamps, then contradicted as the cause by the 2026-10-27 stamp. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:133`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:70`). All three `doc` runs used the
+  line naming what was skipped (`instructions/minimal_change_instructions.md:122`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:59`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list. In the
   2026-10-27 stamp, with the closing line forbidden to report a missing never-cut item, at
@@ -42,7 +42,7 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
   runs each describe the truncation.
 - **The agent skipped the search for an existing helper.** Supported, and not specific to the
   document: no run in any arm opened `app/fsutil.py`, although the document requires that search
-  before choosing a rung (`:35`). Reusing `atomic_write` would have passed both assertions.
+  before choosing a rung (`:24`). Reusing `atomic_write` would have passed both assertions.
 - **The request's wording reads as a request for one line, and that outweighs any instruction.**
   Untested. All three arms wrote the same code, which fits it, but no arm varied the wording.
 - **"What Is Never Cut" reads as a rule about removing safeguards, not about writing new code.** Its
@@ -180,3 +180,8 @@ loss, and says the agent left the safeguard out. Every stamp that failed in ever
 would make the result a property of the document describing its own measurement rather than of its
 rules. It is not established: the harness and the date changed too. Measuring `56262a6` on 2.1.312
 would separate the paragraph from the date.
+
+The "Measured effect" paragraph was moved out of the document into
+`evals/minimal-change/README.md` on 2026-10-29, so a stamp of a later revision measures the rules
+without the description. If the `doc` arm then fails `failed-save-keeps-old-file` again, the
+description was the cause.
