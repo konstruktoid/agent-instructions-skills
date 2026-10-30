@@ -1,0 +1,7 @@
+<task-notification>
+<task-id>br9j3zmpb</task-id>
+<tool-use-id>toolu_01Ag51oF5grsZqfs9UKeyt34</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/dcd81d53-03b1-4140-a7dd-c508b61013d3/tasks/br9j3zmpb.output</output-file>
+<status>completed</status>
+<summary>Background command "Run both ablations and the 5-run full suite" completed (exit code 0)</summary>
+</task-notification>
