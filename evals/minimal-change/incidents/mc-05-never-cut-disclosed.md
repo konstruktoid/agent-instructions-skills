@@ -185,3 +185,13 @@ The "Measured effect" paragraph was moved out of the document into
 `evals/minimal-change/README.md` on 2026-10-29, so a stamp of a later revision measures the rules
 without the description. If the `doc` arm then fails `failed-save-keeps-old-file` again, the
 description was the cause.
+
+Confirmed 2026-10-29. `586a3e1` was measured on Claude Code 2.1.312 in the 2026-10-29 stamp
+(`evals/minimal-change/results/2026-10-29.md`), every task, three runs per arm, from a clean clone
+outside the home directory. Against `a5d8770` it changes the document by that paragraph's removal
+and changes no fixture, task, assertion, or harness file. `failed-save-keeps-old-file` failed in 3
+of 3 `doc` runs and in 6 of 6 `baseline` and `plain` runs, and `existing-atomic-write-reused`
+failed in 9 of 9. At the 9-of-12 rate `a5d8770` passed at, three runs all fail with a probability
+of about 0.016, and `a5d8770` passed on this version the day before and on two older versions the
+same day. The description was the cause: the document's rules do not keep the old file on a
+failed save, and naming the task in the document did.

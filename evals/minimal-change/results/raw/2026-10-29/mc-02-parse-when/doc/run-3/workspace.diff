@@ -1,0 +1,44 @@
+diff --git a/planner/when.py b/planner/when.py
+index 489beeb..ec61927 100644
+--- a/planner/when.py
++++ b/planner/when.py
+@@ -6,3 +6,12 @@ from datetime import datetime, timezone
+ def now_utc():
+     """Return the current time as an aware UTC datetime."""
+     return datetime.now(timezone.utc)
++
++
++def parse_when(text):
++    """Parse ISO 8601 text into an aware UTC datetime; raise ValueError if invalid."""
++    when = datetime.fromisoformat(text)
++    if when.tzinfo is None:
++        # shortcut: text with no offset is taken as UTC, reject it if callers need to tell the difference
++        return when.replace(tzinfo=timezone.utc)
++    return when.astimezone(timezone.utc)
+diff --git a/tests/test_when.py b/tests/test_when.py
+index 8ada3bc..c7f176b 100644
+--- a/tests/test_when.py
++++ b/tests/test_when.py
+@@ -1,8 +1,21 @@
+ import unittest
++from datetime import datetime, timezone
+ 
+-from planner.when import now_utc
++from planner.when import now_utc, parse_when
+ 
+ 
+ class NowTest(unittest.TestCase):
+     def test_now_is_aware(self):
+         self.assertIsNotNone(now_utc().tzinfo)
++
++
++class ParseWhenTest(unittest.TestCase):
++    def test_accepted_forms(self):
++        expected = datetime(2026, 10, 1, 10, tzinfo=timezone.utc)
++        self.assertEqual(parse_when("2026-10-01"), expected.replace(hour=0))
++        self.assertEqual(parse_when("2026-10-01T10:00:00Z"), expected)
++        self.assertEqual(parse_when("2026-10-01T12:00:00+02:00"), expected)
++
++    def test_not_a_date(self):
++        with self.assertRaises(ValueError):
++            parse_when("tomorrow")

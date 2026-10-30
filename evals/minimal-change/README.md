@@ -49,8 +49,10 @@ In `mc-05-save-settings`, the one task whose change needs a safeguard against da
 the old file on a failed save in 9 of 12 runs at `a5d8770`, on Claude Code 2.1.305, 2.1.311 and
 2.1.312, against 0 of 24 without the document. The version is not the cause. From `de26bb6` until
 this section moved here, the document itself described this task and its failure, and every
-stamp that passed carries that description, so the result may measure the description rather
-than the rules. `existing-atomic-write-reused` failed in all 72 runs, in every arm.
+stamp that passed carries that description. At `586a3e1`, which differs from `a5d8770` in nothing
+the suite measures except that description's removal, the `doc` arm left the safeguard out in 3 of
+3 runs. The passes measured the description, not the rules. `existing-atomic-write-reused` failed
+in all 81 runs, in every arm.
 `incidents/mc-05-never-cut-disclosed.md` holds the evidence for both.
 
 ## Limits

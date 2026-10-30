@@ -502,6 +502,17 @@ def stamp_revision(suite: Path, stamp: str) -> tuple[str, bool | None]:
     return revision, dirty
 
 
+def stamp_order(suite: Path, stamp: str) -> tuple[str, int, str]:
+    """Return a key ordering stamps by date, then by when the revision each measured was committed.
+
+    A suffix orders a stamp after the plain one of the same day by name alone, so a `--task`
+    stamp re-measuring an old revision would otherwise outrank a full run of the current one.
+    """
+    revision, _ = stamp_revision(suite, stamp)
+    committed = git_output(["show", "-s", "--format=%ct", revision]) if revision else ""
+    return stamp[:10], int(committed or 0), stamp
+
+
 def contains(revision: str, ancestor: str) -> bool:
     """Report whether `revision` already includes `ancestor`."""
     # A fixed argument list built from resolved revisions, with no shell involved.
@@ -530,7 +541,7 @@ def check_freshness(
     graded no task, so letting it stand for the suite would hide every task result behind it.
     The same holds inside task runs: a `--task` stamp grades only the tasks it names, so each
     task is judged by the newest stamp that graded it, and an older stamp still standing for
-    some task is checked as well.
+    some task is checked as well. Task stamps of one day are ordered by the revision each measured.
     """
     stamps = rendered_stamps(suite)
     if subject is None:
@@ -541,7 +552,10 @@ def check_freshness(
         return
 
     raw = suite / "results" / "raw"
-    graded = [stamp for stamp in stamps if (raw / stamp / "task-outcomes.json").is_file()]
+    graded = sorted(
+        (stamp for stamp in stamps if (raw / stamp / "task-outcomes.json").is_file()),
+        key=lambda stamp: stamp_order(suite, stamp),
+    )
     triggered = [
         stamp for stamp in stamps if (raw / stamp / "triggers" / "trigger-outcomes.json").is_file()
     ]
