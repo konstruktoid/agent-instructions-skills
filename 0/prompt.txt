@@ -1,0 +1,53 @@
+check the PR status checks
+
+---
+
+What's the next step?
+
+---
+
+Clean up then do 1 and 2
+
+---
+
+<task-notification>
+<task-id>b82mg8lou</task-id>
+<tool-use-id>toolu_01GMCopGfVHFxJdThRN5C4ZZ</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/dcd81d53-03b1-4140-a7dd-c508b61013d3/tasks/b82mg8lou.output</output-file>
+<status>failed</status>
+<summary>Background command "Run the full minimal-change suite on the reworked rule" failed with exit code 1</summary>
+</task-notification>
+
+---
+
+It's okay to signed  commit any changes, on a new branch if required, and clean up afterwards
+
+---
+
+<task-notification>
+<task-id>baik2nfvp</task-id>
+<tool-use-id>toolu_01DdFGFkqQynWbwic6S2vDAe</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/dcd81d53-03b1-4140-a7dd-c508b61013d3/tasks/baik2nfvp.output</output-file>
+<status>completed</status>
+<summary>Background command "Discard partial stamp and rerun the full suite" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+When all checks passed and the code looks good, push to a PR
+
+---
+
+Any ci status on #59?
+
+---
+
+Merge in order
+
+---
+
+Status?
+
+---
+
+Ensure up-to-date main and clean up, create a new branch and start working on the list items
