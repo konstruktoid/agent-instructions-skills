@@ -54,8 +54,8 @@ A smaller change never removes these. Each is part of doing the work, not an ext
 Nothing yet shows that this list on its own changes what an agent writes, so a reviewer checks each
 item against the diff rather than against the reply.
 
-Before writing the change, go through the list and name each item the change touches, then write
-the code that keeps it. Naming an item in the reply does not keep it.
+Before writing the change, check it against each item on the list, and for each item it touches,
+write the code that keeps it. Mentioning an item in the reply does not keep it.
 
 - Validation at a trust boundary: user input, requests and responses that cross a network, files
   from outside the repository, and the arguments of an interface that callers outside the repository
