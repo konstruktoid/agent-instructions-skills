@@ -61,10 +61,8 @@ write the code that keeps it. Mentioning an item in the reply does not keep it.
   from outside the repository, and the arguments of an interface that callers outside the repository
   use. Validation between functions that trust each other is extra, and the section "Beyond What the
   Tools Check" in `instructions/python_coding_instructions.md` states where that line falls.
-- Error handling that prevents data loss or silent failure. A write that replaces an existing file
-  leaves the old file intact when it fails, by writing a temporary file in the same directory and
-  renaming it over the original, or through the repository's own helper that does. A transaction
-  rolls back, and a command's failure is checked rather than ignored.
+- Error handling that prevents data loss or silent failure, such as a write that checks its result
+  or a transaction that rolls back.
 - Security controls and their rationale. The secure-coding skills and instructions own the detail:
   `skills/python/python-secure-coding/SKILL.md`, `skills/bash/bash-secure-scripting/SKILL.md`, and
   `skills/terraform/terraform-secure-iac/SKILL.md`.
