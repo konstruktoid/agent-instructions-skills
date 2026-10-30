@@ -212,3 +212,21 @@ example, not the list working in general, and the four changes were measured tog
 them moved the result is not isolated. Elsewhere one `doc` run of `mc-02-parse-when` failed
 `hidden-behavior`, which passed in 3 of 3 the day before, and `mc-04-set-quantity` added a test in
 1 of 3 `doc` runs against 3 of 3. Neither is separated from the draw at three runs per arm.
+
+Ablated 2026-10-30, on Claude Code 2.1.314, each from a clean clone. `466d6a3` first reworded the
+step to "check it against each item on the list", since "name each item" could be read as naming
+it in the reply. `71962b7` removes only the replace-file example, restoring "a write that checks
+its result", and in the 2026-10-30-no-example stamp
+(`evals/minimal-change/results/2026-10-30-no-example.md`) the `doc` arm kept the old file in 2 of 3
+runs and reused the helper in 0 of 3. `37eb741` keeps only the example and removes the other three
+changes, and in the 2026-10-30-example-only stamp
+(`evals/minimal-change/results/2026-10-30-example-only.md`) it passed both in 3 of 3. Every
+`baseline` and `plain` run of both failed both. The example is enough on its own and is the only
+change that produced the reuse; the other three, without it, moved the old-file result as well.
+
+`63b6eb6` restores the full document at `466d6a3`, measured with five runs per arm in the
+2026-10-30-runs5 stamp (`evals/minimal-change/results/2026-10-30-runs5.md`), every task. The `doc`
+arm kept the old file in 5 of 5 and reused the helper in 1 of 5, against 0 of 10 for either in
+the other arms, so across the three stamps that carry the example the reuse passed in 6 of 11 and
+is not reliable. `mc-02-parse-when` passed `hidden-behavior` in 5 of 5 `doc` runs, and
+`mc-04-set-quantity` added a test in 5 of 5, so neither earlier drop recurred.

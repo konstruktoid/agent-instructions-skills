@@ -1,0 +1,70 @@
+diff --git a/report/export.py b/report/export.py
+index b9e6d36..ff4bc24 100644
+--- a/report/export.py
++++ b/report/export.py
+@@ -1,9 +1,33 @@
+ """Writers for report data."""
+ 
++import csv
+ import json
++import os
++import tempfile
+ 
+ 
+ def export_json(rows, path):
+     """Write rows, a list of dicts, to path as indented JSON."""
+     with open(path, "w", encoding="utf-8") as handle:
+         json.dump(rows, handle, indent=2)
++
++
++def export_rows(rows, path):
++    """Write rows, a list of dicts sharing the same keys, to path as CSV.
++
++    The header and column order come from the keys of the first row. The
++    existing file at path stays intact if the write fails.
++    """
++    directory = os.path.dirname(os.path.abspath(path))
++    handle = tempfile.NamedTemporaryFile(
++        "w", encoding="utf-8", newline="", dir=directory, delete=False
++    )
++    try:
++        with handle:
++            writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
++            writer.writeheader()
++            writer.writerows(rows)
++        os.replace(handle.name, path)
++    except BaseException:
++        os.unlink(handle.name)
++        raise
+diff --git a/tests/test_export.py b/tests/test_export.py
+index f20dfd3..50f223b 100644
+--- a/tests/test_export.py
++++ b/tests/test_export.py
+@@ -1,9 +1,10 @@
++import csv
+ import json
+ import os
+ import tempfile
+ import unittest
+ 
+-from report.export import export_json
++from report.export import export_json, export_rows
+ 
+ 
+ class ExportJsonTest(unittest.TestCase):
+@@ -14,3 +15,15 @@ class ExportJsonTest(unittest.TestCase):
+             export_json(rows, path)
+             with open(path, encoding="utf-8") as handle:
+                 self.assertEqual(json.load(handle), rows)
++
++
++class ExportRowsTest(unittest.TestCase):
++    def test_header_order_and_quoting(self):
++        rows = [{"b": "x,y", "a": 'say "hi"'}, {"b": "1", "a": "2"}]
++        with tempfile.TemporaryDirectory() as directory:
++            path = os.path.join(directory, "out.csv")
++            export_rows(rows, path)
++            with open(path, encoding="utf-8", newline="") as handle:
++                self.assertEqual(list(csv.reader(handle))[0], ["b", "a"])
++                handle.seek(0)
++                self.assertEqual(list(csv.DictReader(handle)), rows)

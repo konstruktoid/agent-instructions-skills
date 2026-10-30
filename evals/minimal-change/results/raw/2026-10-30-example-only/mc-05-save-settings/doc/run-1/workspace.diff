@@ -1,0 +1,22 @@
+diff --git a/app/settings.py b/app/settings.py
+index 62846c9..fc86f9f 100644
+--- a/app/settings.py
++++ b/app/settings.py
+@@ -2,6 +2,8 @@
+ 
+ import json
+ 
++from app.fsutil import atomic_write
++
+ DEFAULTS = {"theme": "light", "page_size": 25}
+ 
+ 
+@@ -9,3 +11,8 @@ def load_settings(path):
+     """Return the settings stored at path, with defaults for anything missing."""
+     with open(path, encoding="utf-8") as handle:
+         return {**DEFAULTS, **json.load(handle)}
++
++
++def save_settings(path, settings):
++    """Write settings to path as indented, key-sorted JSON with a trailing newline."""
++    atomic_write(path, json.dumps(settings, indent=2, sort_keys=True) + "\n")

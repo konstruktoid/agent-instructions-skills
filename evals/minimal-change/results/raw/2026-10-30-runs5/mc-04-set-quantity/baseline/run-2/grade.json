@@ -1,0 +1,65 @@
+{
+  "task": "mc-04-set-quantity",
+  "condition": "baseline",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-30T19:51:34.662860+00:00",
+    "seconds": 12.7
+  },
+  "base_sha": "5cb72fac7c58193baf9e959176b2d10cac46a225",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.0563963,
+  "output_tokens": 971,
+  "lines_added": 14,
+  "lines_deleted": 0,
+  "doc_read": false,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "valid-request-applied",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "invalid-requests-rejected",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "test-added-for-validation-logic",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+      "passed": false,
+      "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+    }
+  ],
+  "passed": 4,
+  "total": 5
+}
