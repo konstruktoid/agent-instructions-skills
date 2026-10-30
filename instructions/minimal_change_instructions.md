@@ -51,6 +51,11 @@ it.
 ## What Is Never Cut
 
 A smaller change never removes these. Each is part of doing the work, not an extra on top of it.
+Nothing yet shows that this list on its own changes what an agent writes, so a reviewer checks each
+item against the diff rather than against the reply.
+
+Before writing the change, check it against each item on the list, and for each item it touches,
+write the code that keeps it. Mentioning an item in the reply does not keep it.
 
 - Validation at a trust boundary: user input, requests and responses that cross a network, files
   from outside the repository, and the arguments of an interface that callers outside the repository
@@ -124,8 +129,9 @@ length and placement follow the per-language instructions.
 End every reply that changes code with one or two lines stating what was skipped or not checked: a
 cheaper option that was considered and did not fully work, the test that was not added and why, the
 check that was not run, a requirement that looked larger than the need. A reply with nothing to
-report says that. The line exists so a reviewer finds the omissions without reconstructing them
-from the diff.
+report says that. An item from [What Is Never Cut](#what-is-never-cut) never belongs in this line:
+a change that leaves one out is incomplete, and the fix is to add it, not to report it. The line
+exists so a reviewer finds the omissions without reconstructing them from the diff.
 
 ## Quality Checklist
 
@@ -139,7 +145,8 @@ Before considering a change complete, verify that:
 - Every item a benchmark, standard, or explicit request required is present, and none was removed
   as unnecessary.
 - Validation at trust boundaries, error handling that prevents data loss, security controls, and
-  accessibility are intact.
+  accessibility are present in the diff, not only named in the reply, and a replaced file survives
+  a failed write.
 - No dependency was newly used or added that is unmaintained, vulnerable, or unpinned, and a flawed
   dependency the code already used was reported.
 - New non-trivial logic has one small test, or the reply says why it has none.
