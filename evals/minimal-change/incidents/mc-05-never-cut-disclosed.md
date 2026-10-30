@@ -31,8 +31,8 @@ The tool calls in each `run.jsonl` show what each run read: the `doc` runs opene
 
 - **The closing line gives a never-cut item an exit.** Supported by the 2026-10-20 and 2026-10-24
   stamps, then contradicted as the cause by the 2026-10-27 stamp. "Closing the Reply" asks for a
-  line naming what was skipped (`instructions/minimal_change_instructions.md:122`), and "What Is
-  Never Cut" lists error handling that prevents data loss (`:59`). All three `doc` runs used the
+  line naming what was skipped (`instructions/minimal_change_instructions.md:129`), and "What Is
+  Never Cut" lists error handling that prevents data loss (`:64`). All three `doc` runs used the
   first to report a cut the second forbids, and no run of the other arms, which lack the closing
   rule, reported it. Not isolated: no arm had the closing rule without the never-cut list. In the
   2026-10-27 stamp, with the closing line forbidden to report a missing never-cut item, at
@@ -195,3 +195,20 @@ failed in 9 of 9. At the 9-of-12 rate `a5d8770` passed at, three runs all fail w
 of about 0.016, and `a5d8770` passed on this version the day before and on two older versions the
 same day. The description was the cause: the document's rules do not keep the old file on a
 failed save, and naming the task in the document did.
+
+Reworked 2026-10-30. `39073d0` changes the document in four places: "What Is Never Cut" says the
+list is not shown to change what an agent writes and asks for each item the change touches to be
+named and then written; the data-loss bullet replaces "a write that checks its result", which does
+not keep the old file, with writing a temporary file in the same directory and renaming it over the
+original, or the repository's helper that does; "Closing the Reply" bars a never-cut item from the
+line of what was skipped; and the checklist asks for the items in the diff. Measured on Claude
+Code 2.1.314 in the 2026-10-30 stamp (`evals/minimal-change/results/2026-10-30.md`), every task,
+three runs per arm, from a clean clone. `failed-save-keeps-old-file` passed in 3 of 3 `doc` runs
+and 0 of 6 others, and `existing-atomic-write-reused` passed for the first time, in 2 of 3 `doc`
+runs and 0 of 6 others. The `doc` arm wrote 17 lines against 7 the day before.
+
+The bullet names the safeguard this task grades, so the pass shows an agent applying a named
+example, not the list working in general, and the four changes were measured together, so which of
+them moved the result is not isolated. Elsewhere one `doc` run of `mc-02-parse-when` failed
+`hidden-behavior`, which passed in 3 of 3 the day before, and `mc-04-set-quantity` added a test in
+1 of 3 `doc` runs against 3 of 3. Neither is separated from the draw at three runs per arm.

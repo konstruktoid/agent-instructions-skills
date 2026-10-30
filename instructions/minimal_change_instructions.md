@@ -51,13 +51,20 @@ it.
 ## What Is Never Cut
 
 A smaller change never removes these. Each is part of doing the work, not an extra on top of it.
+Nothing yet shows that this list on its own changes what an agent writes, so a reviewer checks each
+item against the diff rather than against the reply.
+
+Before writing the change, go through the list and name each item the change touches, then write
+the code that keeps it. Naming an item in the reply does not keep it.
 
 - Validation at a trust boundary: user input, requests and responses that cross a network, files
   from outside the repository, and the arguments of an interface that callers outside the repository
   use. Validation between functions that trust each other is extra, and the section "Beyond What the
   Tools Check" in `instructions/python_coding_instructions.md` states where that line falls.
-- Error handling that prevents data loss or silent failure, such as a write that checks its result
-  or a transaction that rolls back.
+- Error handling that prevents data loss or silent failure. A write that replaces an existing file
+  leaves the old file intact when it fails, by writing a temporary file in the same directory and
+  renaming it over the original, or through the repository's own helper that does. A transaction
+  rolls back, and a command's failure is checked rather than ignored.
 - Security controls and their rationale. The secure-coding skills and instructions own the detail:
   `skills/python/python-secure-coding/SKILL.md`, `skills/bash/bash-secure-scripting/SKILL.md`, and
   `skills/terraform/terraform-secure-iac/SKILL.md`.
@@ -122,8 +129,9 @@ length and placement follow the per-language instructions.
 End every reply that changes code with one or two lines stating what was skipped or not checked: a
 cheaper option that was considered and did not fully work, the test that was not added and why, the
 check that was not run, a requirement that looked larger than the need. A reply with nothing to
-report says that. The line exists so a reviewer finds the omissions without reconstructing them
-from the diff.
+report says that. An item from [What Is Never Cut](#what-is-never-cut) never belongs in this line:
+a change that leaves one out is incomplete, and the fix is to add it, not to report it. The line
+exists so a reviewer finds the omissions without reconstructing them from the diff.
 
 ## Quality Checklist
 
@@ -137,7 +145,8 @@ Before considering a change complete, verify that:
 - Every item a benchmark, standard, or explicit request required is present, and none was removed
   as unnecessary.
 - Validation at trust boundaries, error handling that prevents data loss, security controls, and
-  accessibility are intact.
+  accessibility are present in the diff, not only named in the reply, and a replaced file survives
+  a failed write.
 - No dependency was newly used or added that is unmaintained, vulnerable, or unpinned, and a flawed
   dependency the code already used was reported.
 - New non-trivial logic has one small test, or the reply says why it has none.

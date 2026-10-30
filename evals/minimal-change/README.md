@@ -52,7 +52,14 @@ this section moved here, the document itself described this task and its failure
 stamp that passed carries that description. At `586a3e1`, which differs from `a5d8770` in nothing
 the suite measures except that description's removal, the `doc` arm left the safeguard out in 3 of
 3 runs. The passes measured the description, not the rules. `existing-atomic-write-reused` failed
-in all 81 runs, in every arm.
+in all 81 of those runs, in every arm.
+
+At `39073d0` the data-loss rule names the safeguard, writing a temporary file and renaming it over
+the original or reusing the repository's helper that does, and a never-cut item may no longer be
+reported as skipped. The `doc` arm then kept the old file in 3 of 3 runs and reused the existing
+helper in 2 of 3, against 0 of 6 for either without the document. The rule names the safeguard
+this task grades, so the result shows an agent applying a named example, from one stamp of three
+runs per arm, and not the rest of the list working.
 `incidents/mc-05-never-cut-disclosed.md` holds the evidence for both.
 
 ## Limits
