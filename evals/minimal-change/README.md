@@ -60,6 +60,11 @@ reported as skipped. The `doc` arm then kept the old file in 3 of 3 runs and reu
 helper in 2 of 3, against 0 of 6 for either without the document. The rule names the safeguard
 this task grades, so the result shows an agent applying a named example, from one stamp of three
 runs per arm, and not the rest of the list working.
+
+Measured apart, the example alone kept the old file and reused the helper in 3 of 3 runs, and the
+other changes without it kept the old file in 2 of 3 and never reused the helper. With five runs
+per arm at `63b6eb6`, the `doc` arm kept the old file in 5 of 5 and reused the helper in 1 of 5,
+against 0 of 10 for either without the document, so the reuse is not reliable.
 `incidents/mc-05-never-cut-disclosed.md` holds the evidence for both.
 
 ## Limits

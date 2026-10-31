@@ -1,0 +1,37 @@
+diff --git a/report/export.py b/report/export.py
+index b9e6d36..8a45e84 100644
+--- a/report/export.py
++++ b/report/export.py
+@@ -1,9 +1,32 @@
+ """Writers for report data."""
+ 
++import csv
+ import json
++import os
++import tempfile
+ 
+ 
+ def export_json(rows, path):
+     """Write rows, a list of dicts, to path as indented JSON."""
+     with open(path, "w", encoding="utf-8") as handle:
+         json.dump(rows, handle, indent=2)
++
++
++def export_rows(rows, path):
++    """Write rows, a list of dicts sharing the same keys, to path as CSV.
++
++    The header and column order come from the keys of the first row. An
++    existing file at path is kept intact if the write fails.
++    """
++    handle = tempfile.NamedTemporaryFile(
++        "w", encoding="utf-8", newline="", dir=os.path.dirname(path) or ".", delete=False
++    )
++    try:
++        with handle:
++            writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
++            writer.writeheader()
++            writer.writerows(rows)
++        os.replace(handle.name, path)
++    except BaseException:
++        os.unlink(handle.name)
++        raise

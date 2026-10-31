@@ -1,0 +1,58 @@
+{
+  "task": "mc-03-export-rows",
+  "condition": "doc",
+  "run_index": 4,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-10-30T19:50:57.249188+00:00",
+    "seconds": 18.0
+  },
+  "base_sha": "12e5a80ac78bc96ce9ae358ad99a4cb9787f0c71",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.07176800000000001,
+  "output_tokens": 1403,
+  "lines_added": 27,
+  "lines_deleted": 0,
+  "doc_read": true,
+  "standards_read": 0,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "hidden-behavior",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-unrequested-option",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-dependency",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-suite-passes",
+      "kind": "workspace_command",
+      "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+      "passed": true,
+      "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

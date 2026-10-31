@@ -1,0 +1,33 @@
+diff --git a/app/settings.py b/app/settings.py
+index 62846c9..177608f 100644
+--- a/app/settings.py
++++ b/app/settings.py
+@@ -1,6 +1,8 @@
+ """Application settings."""
+ 
+ import json
++import os
++import tempfile
+ 
+ DEFAULTS = {"theme": "light", "page_size": 25}
+ 
+@@ -9,3 +11,19 @@ def load_settings(path):
+     """Return the settings stored at path, with defaults for anything missing."""
+     with open(path, encoding="utf-8") as handle:
+         return {**DEFAULTS, **json.load(handle)}
++
++
++def save_settings(path, settings):
++    """Write settings to path as JSON, leaving any existing file intact if the write fails."""
++    directory = os.path.dirname(os.path.abspath(path))
++    handle = tempfile.NamedTemporaryFile(
++        "w", encoding="utf-8", dir=directory, delete=False
++    )
++    try:
++        with handle:
++            json.dump(settings, handle, indent=2, sort_keys=True)
++            handle.write("\n")
++        os.replace(handle.name, path)
++    except BaseException:
++        os.unlink(handle.name)
++        raise
