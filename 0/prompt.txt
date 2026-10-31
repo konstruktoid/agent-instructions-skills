@@ -1,0 +1,17 @@
+Read the state file
+
+---
+
+start with #3 on a seperate branch
+
+---
+
+run checks and fix the issues, even if minor
+
+---
+
+run checks and fix the issues, even if minor
+
+---
+
+If done, commit with a signed commit and a minimal message and push to a PR
