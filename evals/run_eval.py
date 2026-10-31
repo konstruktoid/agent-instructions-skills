@@ -61,6 +61,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import textwrap
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -325,7 +326,8 @@ def isolated_environment(home: Path) -> dict[str, str]:
         # A run must not read the user's global git config, whose hooks and aliases would
         # otherwise apply inside the fixture repository.
         "GIT_CONFIG_GLOBAL": str(home / ".gitconfig"),
-        "TMPDIR": str(home / "tmp"),
+        # Outside `home`, because a socket path under the run directory exceeds the unix limit.
+        "TMPDIR": str((home / "tmp").resolve()),
         # Claude Code's own config directory is per-run state too: it writes sessions and
         # project records on every invocation. Without this, concurrent runs write the
         # user's real ~/.claude at the same time.
@@ -347,9 +349,14 @@ def prepare_run_home(run_dir: Path) -> Path:
         ".config",
         ".local/share",
         ".local/state",
-        "tmp",
     ):
         (home / relative).mkdir(parents=True, exist_ok=True)
+    # Terraform providers listen on a TMPDIR socket, and a socket path is capped at 108 bytes.
+    tmp = home / "tmp"
+    if tmp.is_symlink() and not tmp.exists():
+        tmp.unlink()
+    if not tmp.exists():
+        tmp.symlink_to(tempfile.mkdtemp(prefix="eval-tmp-"))
     source = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / CREDENTIALS_FILE
     link = home / ".claude" / CREDENTIALS_FILE
     if source.is_file() and not link.is_symlink():
