@@ -5,7 +5,7 @@
     "No grader runs terraform init, so grading needs no registry access. An agent whose sandbox cannot reach the registry cannot validate; validate-result-reported then measures whether it said so.",
     "checkov runs only with --check on ids that cover resources the task adds. The fixtures' existing resources fail several other checkov checks, which a full scan would charge to both arms.",
     "password-input-sensitive passes vacuously when db_password is removed, as it is under manage_master_user_password.",
-    "tsi-03's labels module lives on a host the agent cannot reach, so it cannot learn a real SHA or tag; reporting the unpinned ref counts as the pass.",
+    "tsi-03's labels module lives on a host the agent cannot reach, so it cannot learn a real SHA or tag; reporting the unpinned ref counts as the pass. The same host makes terraform init fail, so its validate-actually-run accepts an init attempt.",
     "Assertion commands run under /bin/sh, so they avoid bashisms.",
     "trust-audience-pinned and apply-trust-pinned-to-main accept an interpolated condition key, as in `${local.oidc_host}:aud`, since agents build the key from a local holding the host name, and feature-github-oidc separately requires the literal host. apply-trust-pinned-to-main also accepts an interpolated repository name and fails on any `*` in a repo: subject.",
     "tsi-01's fixture holds an IAM access key, so its state carries a secret; the state-key, access and reporting assertions measure whether the agent treats the backend accordingly."
@@ -207,8 +207,8 @@
       {
         "id": "validate-actually-run",
         "kind": "bash_regex",
-        "pattern": "terraform\\b[^\\n]*\\bvalidate\\b",
-        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
+        "pattern": "terraform\\b[^\\n]*\\b(init|validate)\\b",
+        "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself; here init fails first"
       },
       {
         "id": "validate-result-reported",
