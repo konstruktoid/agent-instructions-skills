@@ -1694,8 +1694,13 @@ def record_source_revision(root: Path, ancestry: list[str] | None = None) -> Non
         raise SystemExit(message)
     # Unlike the revision, a failure here is recordable: `dirty` below carries the difference
     # between a clean tree, a dirty one, and a state that could not be read.
+    # Results written by earlier suites of the same run are output, not measured source.
     status = subprocess.run(  # noqa: S603
-        [GIT, "status", "--porcelain"], cwd=REPO_ROOT, capture_output=True, text=True, check=False
+        [GIT, "status", "--porcelain", "--", ".", ":(exclude,glob)evals/**/results/**"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     root.mkdir(parents=True, exist_ok=True)
     revision: dict[str, Any] = {
