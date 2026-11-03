@@ -1,0 +1,57 @@
+diff --git a/variables.tf b/variables.tf
+index 236aa5f..577ed2b 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -7,3 +7,15 @@ variable "environment" {
+   type    = string
+   default = "staging"
+ }
++
++variable "vpc_cidr" {
++  type        = string
++  description = "IPv4 CIDR block of the VPC. The private subnets are carved out of this range."
++  default     = "10.0.0.0/16"
++}
++
++variable "private_subnet_cidrs" {
++  type        = list(string)
++  description = "IPv4 CIDR blocks of the private subnets, one per availability zone in the same order as the zones."
++  default     = ["10.0.1.0/24", "10.0.2.0/24"]
++}
+diff --git a/versions.tf b/versions.tf
+index bcdeda0..b20b14d 100644
+--- a/versions.tf
++++ b/versions.tf
+@@ -1,8 +1,10 @@
+ terraform {
++  required_version = ">= 1.10"
++
+   required_providers {
+     aws = {
+       source  = "hashicorp/aws"
+-      version = ">= 4.0"
++      version = "~> 6.28"
+     }
+   }
+ 
+diff --git a/vpc.tf b/vpc.tf
+new file mode 100644
+index 0000000..1d11565
+--- /dev/null
++++ b/vpc.tf
+@@ -0,0 +1,15 @@
++module "vpc" {
++  source  = "terraform-aws-modules/vpc/aws"
++  version = "6.7.3"
++
++  name = "network-${var.environment}"
++  cidr = var.vpc_cidr
++
++  azs             = ["${var.region}a", "${var.region}b"]
++  private_subnets = var.private_subnet_cidrs
++
++  # Private subnets only: no NAT or internet gateway is created.
++  enable_nat_gateway = false
++
++  # Tags reach every resource through provider default_tags (module.labels.tags).
++}

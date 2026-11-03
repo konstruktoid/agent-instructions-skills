@@ -1,0 +1,49 @@
+diff --git a/bin/mkbackup.sh b/bin/mkbackup.sh
+index 865a391..cd4eb6e 100755
+--- a/bin/mkbackup.sh
++++ b/bin/mkbackup.sh
+@@ -16,6 +16,10 @@ main() {
+         exclude="${2:-}"
+         shift 2
+         ;;
++      --exclude=*)
++        exclude="${1#--exclude=}"
++        shift
++        ;;
+       -h | --help)
+         usage
+         return 0
+diff --git a/test/test_mkbackup_exclude.sh b/test/test_mkbackup_exclude.sh
+new file mode 100644
+index 0000000..30f31ac
+--- /dev/null
++++ b/test/test_mkbackup_exclude.sh
+@@ -0,0 +1,28 @@
++#!/usr/bin/env bash
++# Both --exclude spellings must behave identically.
++
++set -uo pipefail
++
++TEST_NAME='mkbackup exclude'
++# shellcheck source=test/helpers.sh
++source "$(dirname "${BASH_SOURCE[0]}")/helpers.sh"
++
++workdir="$(mktemp -d)"
++trap 'rm -rf -- "${workdir}"' EXIT
++
++make_tree "${workdir}/src"
++
++for spelling in separate equals; do
++  out="${workdir}/${spelling}.tar.gz"
++  if [[ ${spelling} == separate ]]; then
++    "${REPO_ROOT}/bin/mkbackup.sh" --exclude skipme "${workdir}/src" "${out}"
++  else
++    "${REPO_ROOT}/bin/mkbackup.sh" --exclude=skipme "${workdir}/src" "${out}"
++  fi
++  assert_status 0 $?
++  contents="$(tar --list --file "${out}")"
++  assert_contains "${contents}" 'keepme/file.txt'
++  [[ ${contents} == *skipme* ]] && fail "--exclude (${spelling}) left skipme in the archive"
++done
++
++printf 'PASS %s\n' "${TEST_NAME}"

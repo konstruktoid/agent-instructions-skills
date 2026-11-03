@@ -1,0 +1,54 @@
+{
+  "task": "ra-04-entry-point",
+  "condition": "no-agent",
+  "comparison": "template-vs-no-agent",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-03T06:49:31.141516+00:00",
+    "seconds": 13.2
+  },
+  "base_sha": "e7f697b0ba329496ec584c5431f3973340c1a802",
+  "skills_used": [],
+  "num_turns": 4,
+  "cost_usd": 0.053460099999999997,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "open-decisions-nonzero",
+      "kind": "final_regex",
+      "source": "agent-templates/requirements-analyst.md Scope: surface contradictions and decisions that only the requester can make",
+      "passed": true,
+      "evidence": "match: '\\nOPEN-DECISIONS: 2'"
+    },
+    {
+      "id": "names-entry-point",
+      "kind": "final_regex",
+      "source": "agent-templates/requirements-analyst.md Scope: identify the current behavior, affected paths and constraints",
+      "passed": true,
+      "evidence": "match: 'pyproject'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/requirements-analyst.md Role: do not modify files",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/requirements-analyst.md Role: do not modify files",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 4,
+  "total": 4
+}

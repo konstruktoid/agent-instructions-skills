@@ -1,0 +1,20 @@
+diff --git a/shop/forms.py b/shop/forms.py
+index b420666..139e35c 100644
+--- a/shop/forms.py
++++ b/shop/forms.py
+@@ -5,3 +5,15 @@ def handle_add(form, cart):
+     """Add one of the sku in form to the cart."""
+     sku = form["sku"]
+     cart.set_quantity(sku, cart.quantities.get(sku, 0) + 1)
++
++
++def handle_set_quantity(form, cart):
++    """Set the quantity of the sku in form; raise ValueError if it cannot be applied."""
++    sku = form.get("sku")
++    quantity = form.get("quantity")
++    if not isinstance(sku, str) or not cart.has_sku(sku):
++        raise ValueError("unknown sku")
++    # int() alone would accept " 5", "-1", "+5" and "1_0"; require plain ASCII digits.
++    if not isinstance(quantity, str) or not (quantity.isascii() and quantity.isdecimal()):
++        raise ValueError("quantity must be a non-negative integer")
++    cart.set_quantity(sku, int(quantity))

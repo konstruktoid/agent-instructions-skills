@@ -1,0 +1,64 @@
+diff --git a/bin/mkuser-config.sh b/bin/mkuser-config.sh
+index 8ab73af..e771059 100755
+--- a/bin/mkuser-config.sh
++++ b/bin/mkuser-config.sh
+@@ -17,7 +17,7 @@ while (($# > 0)); do
+   case "$1" in
+     --name)
+       name="${2:-}"
+-      shift 2
++      shift "$(($# > 1 ? 2 : 1))"
+       ;;
+     --shell)
+       login_shell="${2:-}"
+@@ -34,6 +34,11 @@ while (($# > 0)); do
+   esac
+ done
+ 
++if [[ -z ${name} ]]; then
++  printf 'error: --name must not be empty\n' >&2
++  exit 64
++fi
++
+ mkdir -p -- "$(dirname -- "${out}")"
+ format_line "${name}" "${login_shell}" >> "${out}"
+ printf 'wrote %s for %s\n' "${out}" "${name}"
+diff --git a/bin/mkuser-config_test.sh b/bin/mkuser-config_test.sh
+new file mode 100644
+index 0000000..bf63236
+--- /dev/null
++++ b/bin/mkuser-config_test.sh
+@@ -0,0 +1,33 @@
++#!/usr/bin/env bash
++# Coverage for bin/mkuser-config.sh.
++
++set -uo pipefail
++
++ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++readonly ROOT
++script="${ROOT}/bin/mkuser-config.sh"
++
++tmp="$(mktemp -d)"
++trap 'rm -rf -- "${tmp}"' EXIT
++out="${tmp}/users.conf"
++
++fail() {
++  printf 'FAIL: %s\n' "$1" >&2
++  exit 1
++}
++
++# Empty name (explicit, missing value, and omitted) must be rejected.
++for args in '--name ""' '--name' ''; do
++  eval "set -- ${args}"
++  msg="$(bash "${script}" --out "${out}" "$@" 2>&1)"
++  status=$?
++  ((status != 0)) || fail "args '${args}' exited 0"
++  [[ ${msg} == *'--name must not be empty'* ]] || fail "args '${args}' gave no clear message: ${msg}"
++  [[ ! -s ${out} ]] || fail "args '${args}' wrote to the config"
++done
++
++# A valid name still works.
++bash "${script}" --name bob --out "${out}" >/dev/null || fail 'valid name rejected'
++[[ "$(cat "${out}")" == 'bob:/bin/bash' ]] || fail 'valid entry not written'
++
++printf 'ok bin/mkuser-config.sh\n'

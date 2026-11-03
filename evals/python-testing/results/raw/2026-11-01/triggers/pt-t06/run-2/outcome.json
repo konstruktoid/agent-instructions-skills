@@ -1,0 +1,16 @@
+{
+  "id": "pt-t06",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.1008416,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-02T07:16:02.131060+00:00",
+    "seconds": 14.3
+  },
+  "aborted": false,
+  "rate_limited": false
+}

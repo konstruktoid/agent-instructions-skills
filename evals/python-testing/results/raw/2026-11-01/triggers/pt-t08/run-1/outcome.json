@@ -1,0 +1,16 @@
+{
+  "id": "pt-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0653972,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-02T07:16:20.642239+00:00",
+    "seconds": 13.8
+  },
+  "aborted": false,
+  "rate_limited": false
+}

@@ -1,0 +1,79 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 05f2c82..913e7fe 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -6,10 +6,18 @@ on:
+ 
+ permissions: {}
+ 
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: true
++
+ jobs:
+   test:
+-    name: Test
+-    runs-on: ubuntu-latest
++    name: Test (${{ matrix.os }})
++    runs-on: ${{ matrix.os }}
++    strategy:
++      fail-fast: false
++      matrix:
++        os: [ubuntu-latest, windows-latest]
+     timeout-minutes: 10
+     permissions:
+       contents: read
+diff --git a/README.md b/README.md
+index 399a783..f91137e 100644
+--- a/README.md
++++ b/README.md
+@@ -6,4 +6,11 @@ Shares one composite action across the repository's workflows.
+ 
+ | Action | Purpose |
+ |--------|---------|
+-| `actions/setup-toolchain` | Installs the toolchain and restores the build cache. |
++| `actions/setup-toolchain` | Installs the toolchain, restores the build cache (keyed on OS, version, and the `uv.lock` hash), and lints with ruff. |
++
++## CI matrix
++
++| Job | Runner | Steps |
++|-----|--------|-------|
++| `test` | `ubuntu-latest` | `actions/setup-toolchain`, then `python -m pytest` |
++| `test` | `windows-latest` | `actions/setup-toolchain`, then `python -m pytest` |
+diff --git a/actions/setup-toolchain/action.yml b/actions/setup-toolchain/action.yml
+index 5d5a38d..b2adfdb 100644
+--- a/actions/setup-toolchain/action.yml
++++ b/actions/setup-toolchain/action.yml
+@@ -1,6 +1,6 @@
+ ---
+ name: Setup toolchain
+-description: Installs the language toolchain and restores the build cache.
++description: Installs the language toolchain, restores the build cache, and lints with ruff.
+ 
+ inputs:
+   version:
+@@ -10,12 +10,20 @@ inputs:
+ runs:
+   using: composite
+   steps:
+-    - uses: actions/setup-python@v5
++    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+       with:
+         python-version: ${{ inputs.version }}
+-    - uses: actions/cache@v4
++    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+       with:
+         path: ~/.cache/build
+-        key: build-${{ inputs.version }}
+-    - run: echo "Installed ${{ inputs.version }}"
++        # The OS is part of the key so Linux and Windows runners never share an entry.
++        key: build-${{ runner.os }}-${{ inputs.version }}-${{ hashFiles('uv.lock') }}
++    - run: echo "Installed ${INPUT_VERSION}"
+       shell: bash
++      env:
++        INPUT_VERSION: ${{ inputs.version }}
++    - name: Lint with ruff
++      shell: bash
++      run: |
++        python -m pip install "ruff==0.17.3"
++        python -m ruff check .

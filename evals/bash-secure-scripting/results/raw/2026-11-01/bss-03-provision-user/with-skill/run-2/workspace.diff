@@ -1,0 +1,228 @@
+diff --git a/README.md b/README.md
+index 570db44..c1f0d0f 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,30 @@
+ 
+ Account provisioning for the application hosts.
+ 
+-`sbin/provision-user.sh USERNAME` creates the local account and its database user. It runs
+-as root from `etc/cron.d/provision`. Database administrator credentials live in
+-`etc/db.conf`.
++```
++sbin/provision-user.sh [--shell SHELL] [--from-file FILE] [--] [USERNAME...]
++```
++
++For each account the script creates the local user and a MySQL user with the same name, using a
++random 24-character password. It runs as root from `etc/cron.d/provision`. Database administrator
++credentials live in `etc/db.conf`, which the script refuses to use unless it is owned by root (or the
++invoking user) and not group- or world-writable (use mode `0600`).
++
++## Options
++
++- `--from-file FILE` reads account names from `FILE`, one per line. Blank lines and lines starting
++  with `#` are ignored. Names given on the command line are provisioned as well.
++- `--shell SHELL` sets the login shell of the created accounts. It must be an absolute path listed in
++  `/etc/shells`. Without it, `useradd` uses the system default.
++
++Account names must match `^[a-z_][a-z0-9_-]{0,31}$`; anything else is rejected.
++
++## Output and exit status
++
++- One line per account on stdout: `provisioned NAME (shell: SHELL)`. Failures are reported on stderr
++  as `FAILED to provision: NAME`.
++- Each success is also appended, with a timestamp, to `/var/log/provision.log`. Passwords are no
++  longer written there or anywhere else.
++- A failing account does not stop the rest. The exit status is 1 if any account failed, 0 otherwise.
++  A failure after `useradd` (for example in MySQL) leaves the local account in place; fix it by hand
++  before retrying that name.
+diff --git a/sbin/provision-user.sh b/sbin/provision-user.sh
+index 3427aa2..0bfdae2 100755
+--- a/sbin/provision-user.sh
++++ b/sbin/provision-user.sh
+@@ -1,16 +1,177 @@
+ #!/bin/bash
+-# Create an application account and its database user.
++#
++# Create application accounts and their database users.
++#
++# Usage: provision-user.sh [--shell SHELL] [--from-file FILE] [--] [USERNAME...]
++#
++# Account names come from the command line, from FILE (one per line; blank
++# lines and lines starting with '#' are ignored), or both. Each account gets a
++# random password that is set locally and in MySQL; it is not printed or logged.
+ 
+-. etc/db.conf
++set -Eeuo pipefail
++shopt -s inherit_errexit
+ 
+-USERNAME=$1
++# Runs as root from cron: do not trust the caller's environment.
++PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
++export PATH
++export LC_ALL=C
++export TMPDIR=/var/tmp
++umask 077
+ 
+-useradd -m $USERNAME
++readonly PROGNAME="${0##*/}"
++SCRIPT_DIR="$(cd -- "${BASH_SOURCE[0]%/*}" && pwd -P)"
++readonly SCRIPT_DIR
++readonly DB_CONF="${SCRIPT_DIR}/../etc/db.conf"
++readonly LOG_FILE=/var/log/provision.log
++readonly USER_PATTERN='^[a-z_][a-z0-9_-]{0,31}$'
++readonly SHELL_PATTERN='^/[A-Za-z0-9._/+-]+$'
+ 
+-PASSWORD=$RANDOM$RANDOM$RANDOM
++# Script scope: the EXIT trap runs after main has returned.
++workdir=''
++DB_ADMIN_PASSWORD=''
+ 
+-echo "$USERNAME:$PASSWORD" | chpasswd
++err() {
++  printf '%s: %s\n' "${PROGNAME}" "$*" >&2
++}
+ 
+-mysql -u admin -p$DB_ADMIN_PASSWORD -e "CREATE USER '$USERNAME'@'%' IDENTIFIED BY '$PASSWORD';"
++cleanup() {
++  if [[ -n ${workdir} && -d ${workdir} ]]; then
++    rm -rf -- "${workdir}"
++  fi
++  return 0
++}
+ 
+-echo "provisioned $USERNAME with password $PASSWORD" >> /var/log/provision.log
++# Clean up, then die of the signal so callers see 128+n.
++on_signal() {
++  local sig="$1"
++  cleanup
++  trap - EXIT "${sig}"
++  kill -s "${sig}" -- "$$"
++}
++
++# Load the database admin password. The file is sourced, so it is code: it
++# must not be writable by anyone but its owner.
++load_db_conf() {
++  local owner mode
++  [[ -f ${DB_CONF} && ! -L ${DB_CONF} ]] || { err "missing config: ${DB_CONF}"; return 66; }
++  owner="$(stat -c '%u' -- "${DB_CONF}")"
++  mode="$(stat -c '%a' -- "${DB_CONF}")"
++  if [[ ${owner} != 0 && ${owner} != "${EUID}" ]] || ((8#${mode} & 8#022)); then
++    err "unsafe owner or mode on ${DB_CONF}"
++    return 77
++  fi
++  # shellcheck source=etc/db.conf
++  source "${DB_CONF}"
++  [[ -n ${DB_ADMIN_PASSWORD} ]] || { err "DB_ADMIN_PASSWORD not set"; return 78; }
++}
++
++# Write a mysql option file (mode 0600, in workdir) so the admin password
++# never appears on a command line.
++write_mysql_options() {
++  local pw="${DB_ADMIN_PASSWORD}"
++  pw="${pw//\\/\\\\}"
++  pw="${pw//\"/\\\"}"
++  printf '[client]\nuser=admin\npassword="%s"\n' "${pw}" > "${workdir}/my.cnf"
++}
++
++# Print a 24-character alphanumeric random password.
++generate_password() {
++  local secret
++  secret="$(tr -dc 'A-Za-z0-9' < <(head -c 512 /dev/urandom))"
++  secret="${secret:0:24}"
++  ((${#secret} == 24)) || { err 'could not generate a password'; return 70; }
++  printf '%s\n' "${secret}"
++}
++
++# Provision one account. Arguments: name, shell (may be empty).
++# Names and the shell are validated before they reach any command.
++provision_one() {
++  local name="$1" login_shell="$2" password
++  local -a useradd_args=(-m)
++
++  if [[ ! ${name} =~ ${USER_PATTERN} ]]; then
++    err "invalid account name: ${name}"
++    return 65
++  fi
++  if [[ -n ${login_shell} ]]; then
++    useradd_args+=(-s "${login_shell}")
++  fi
++
++  # Called from an `if`, so errexit is off in here: check each step.
++  password="$(generate_password)" || return
++  useradd "${useradd_args[@]}" -- "${name}" || return
++  printf '%s:%s\n' "${name}" "${password}" | chpasswd || return
++  # Name and password are validated/alphanumeric, so the SQL is safe.
++  printf "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';\n" "${name}" "${password}" \
++    | mysql --defaults-extra-file="${workdir}/my.cnf" || return
++
++  printf '%s provisioned %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${name}" >> "${LOG_FILE}" || return
++  printf 'provisioned %s (shell: %s)\n' "${name}" "${login_shell:-default}"
++}
++
++main() {
++  local login_shell='' from_file='' name line
++  local -a names=() requested=()
++
++  while (($# > 0)); do
++    case $1 in
++      --shell)
++        (($# >= 2)) || { err '--shell needs a value'; return 64; }
++        login_shell="$2"; shift 2 ;;
++      --from-file)
++        (($# >= 2)) || { err '--from-file needs a value'; return 64; }
++        from_file="$2"; shift 2 ;;
++      --) shift; requested+=("$@"); break ;;
++      -*) err "unknown option: $1"; return 64 ;;
++      *) requested+=("$1"); shift ;;
++    esac
++  done
++
++  if [[ -n ${login_shell} ]]; then
++    if [[ ! ${login_shell} =~ ${SHELL_PATTERN} ]] \
++      || ! grep -Fxq -- "${login_shell}" /etc/shells; then
++      err "shell not listed in /etc/shells: ${login_shell}"
++      return 65
++    fi
++  fi
++
++  names=("${requested[@]}")
++  if [[ -n ${from_file} ]]; then
++    [[ -f ${from_file} && -r ${from_file} ]] || { err "cannot read: ${from_file}"; return 66; }
++    while IFS= read -r line || [[ -n ${line} ]]; do
++      line="${line%$'\r'}"
++      [[ -z ${line} || ${line} == '#'* ]] && continue
++      names+=("${line}")
++    done < "${from_file}"
++  fi
++
++  if ((${#names[@]} == 0)); then
++    err "usage: ${PROGNAME} [--shell SHELL] [--from-file FILE] [--] [USERNAME...]"
++    return 64
++  fi
++
++  # Traps first, then the temp dir they clean up.
++  trap cleanup EXIT
++  trap 'on_signal INT' INT
++  trap 'on_signal TERM' TERM
++  workdir="$(mktemp -d)"
++
++  load_db_conf
++  write_mysql_options
++
++  local failed=0
++  for name in "${names[@]}"; do
++    # Keep going after a failure so one bad name does not block the rest.
++    if ! provision_one "${name}" "${login_shell}"; then
++      err "FAILED to provision: ${name}"
++      failed=$((failed + 1))
++    fi
++  done
++
++  if ((failed > 0)); then
++    err "${failed} of ${#names[@]} accounts failed"
++    return 1
++  fi
++}
++
++main "$@"

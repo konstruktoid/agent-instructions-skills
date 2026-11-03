@@ -1,0 +1,202 @@
+diff --git a/README.md b/README.md
+index 61a6c11..da3b559 100644
+--- a/README.md
++++ b/README.md
+@@ -9,8 +9,18 @@ Applies a hardened sshd configuration.
+ | `sshd_port` | `22` | Port sshd listens on. |
+ | `sshd_permit_root_login` | `"no"` | Value for `PermitRootLogin`. |
+ | `sshd_password_authentication` | `"no"` | Value for `PasswordAuthentication`. |
++| `sshd_max_auth_tries` | `4` | Value for `MaxAuthTries`. |
++| `sshd_login_grace_time` | `30` | Value for `LoginGraceTime` (seconds). |
+ | `sshd_config_path` | `/etc/ssh/sshd_config` | Path to the sshd configuration file. |
+ 
+ ## Supported platforms
+ 
+-Debian bookworm.
++- Debian bookworm
++- RedHat family (e.g. Rocky/Alma/RHEL 9)
++
++OS-specific values are loaded from `vars/<os_family>.yml`:
++
++| Variable | Debian | RedHat |
++|----------|--------|--------|
++| `sshd_package_name` | `openssh-server` | `openssh-server` |
++| `sshd_service_name` | `ssh` | `sshd` |
+diff --git a/defaults/main.yml b/defaults/main.yml
+index c668880..eb06efa 100644
+--- a/defaults/main.yml
++++ b/defaults/main.yml
+@@ -3,3 +3,5 @@ sshd_port: 22
+ sshd_permit_root_login: "no"
+ sshd_password_authentication: "no"
+ sshd_config_path: /etc/ssh/sshd_config
++sshd_max_auth_tries: 4
++sshd_login_grace_time: 30
+diff --git a/handlers/main.yml b/handlers/main.yml
+index cad74d8..af5edd8 100644
+--- a/handlers/main.yml
++++ b/handlers/main.yml
+@@ -1,5 +1,5 @@
+ ---
+ - name: Restart sshd
+   ansible.builtin.service:
+-    name: ssh
++    name: "{{ sshd_service_name }}"
+     state: restarted
+diff --git a/meta/main.yml b/meta/main.yml
+index e2191a1..9419516 100644
+--- a/meta/main.yml
++++ b/meta/main.yml
+@@ -9,6 +9,9 @@ galaxy_info:
+     - name: Debian
+       versions:
+         - bookworm
++    - name: EL
++      versions:
++        - "9"
+   galaxy_tags:
+     - security
+     - ssh
+diff --git a/molecule/default/molecule.yml b/molecule/default/molecule.yml
+new file mode 100644
+index 0000000..847b1f8
+--- /dev/null
++++ b/molecule/default/molecule.yml
+@@ -0,0 +1,20 @@
++---
++driver:
++  name: docker
++platforms:
++  - name: debian
++    image: geerlingguy/docker-debian12-ansible:latest
++    privileged: true
++    cgroupns_mode: host
++    volumes: ["/sys/fs/cgroup:/sys/fs/cgroup:rw"]
++    command: /lib/systemd/systemd
++  - name: rocky
++    image: geerlingguy/docker-rockylinux9-ansible:latest
++    privileged: true
++    cgroupns_mode: host
++    volumes: ["/sys/fs/cgroup:/sys/fs/cgroup:rw"]
++    command: /usr/lib/systemd/systemd
++provisioner:
++  name: ansible
++verifier:
++  name: ansible
+diff --git a/molecule/default/prepare.yml b/molecule/default/prepare.yml
+new file mode 100644
+index 0000000..3dddde4
+--- /dev/null
++++ b/molecule/default/prepare.yml
+@@ -0,0 +1,23 @@
++---
++- name: Prepare
++  hosts: all
++  tasks:
++    - name: Refresh the apt cache
++      ansible.builtin.apt:
++        update_cache: true
++      when: ansible_facts['os_family'] == 'Debian'
++
++    - name: Install openssh-server so host keys can be generated
++      ansible.builtin.package:
++        name: openssh-server
++        state: present
++
++    - name: Generate host keys (needed by sshd -T validation)
++      ansible.builtin.command: ssh-keygen -A
++      changed_when: false
++
++    - name: Create the privilege separation directory used by sshd -T
++      ansible.builtin.file:
++        path: /run/sshd
++        state: directory
++        mode: "0755"
+diff --git a/molecule/default/verify.yml b/molecule/default/verify.yml
+index 13d0aca..13a1abf 100644
+--- a/molecule/default/verify.yml
++++ b/molecule/default/verify.yml
+@@ -7,7 +7,26 @@
+         src: /etc/ssh/sshd_config
+       register: sshd_config
+ 
+-    - name: Confirm root login is disabled
++    - name: Confirm the configured options
+       ansible.builtin.assert:
+         that:
+           - "'PermitRootLogin no' in (sshd_config.content | b64decode)"
++          - "'PasswordAuthentication no' in (sshd_config.content | b64decode)"
++          - "(sshd_config.content | b64decode) is search('(?m)^MaxAuthTries 4$')"
++          - "(sshd_config.content | b64decode) is search('(?m)^LoginGraceTime 30$')"
++
++    - name: Gather service and package facts
++      ansible.builtin.service_facts:
++
++    - name: Gather package facts
++      ansible.builtin.package_facts:
++
++    - name: Confirm openssh-server is installed
++      ansible.builtin.assert:
++        that: "'openssh-server' in ansible_facts.packages"
++
++    - name: Confirm the OS-specific service exists
++      ansible.builtin.assert:
++        that:
++          - (ansible_facts['os_family'] == 'RedHat' and 'sshd.service' in ansible_facts.services)
++            or (ansible_facts['os_family'] == 'Debian' and 'ssh.service' in ansible_facts.services)
+diff --git a/tasks/main.yml b/tasks/main.yml
+index bcfcc45..ca6483a 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -1,7 +1,10 @@
+ ---
++- name: Load OS-family specific variables
++  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
++
+ - name: Install the openssh server package
+   ansible.builtin.package:
+-    name: openssh-server
++    name: "{{ sshd_package_name }}"
+     state: present
+ 
+ - name: Set the sshd port
+@@ -30,3 +33,21 @@
+     validate: /usr/sbin/sshd -T -f %s
+     mode: "0600"
+   notify: Restart sshd
++
++- name: Set maximum authentication attempts
++  ansible.builtin.lineinfile:
++    path: "{{ sshd_config_path }}"
++    regexp: "^#?MaxAuthTries"
++    line: "MaxAuthTries {{ sshd_max_auth_tries }}"
++    validate: /usr/sbin/sshd -T -f %s
++    mode: "0600"
++  notify: Restart sshd
++
++- name: Set login grace time
++  ansible.builtin.lineinfile:
++    path: "{{ sshd_config_path }}"
++    regexp: "^#?LoginGraceTime"
++    line: "LoginGraceTime {{ sshd_login_grace_time }}"
++    validate: /usr/sbin/sshd -T -f %s
++    mode: "0600"
++  notify: Restart sshd
+diff --git a/vars/Debian.yml b/vars/Debian.yml
+new file mode 100644
+index 0000000..e688f26
+--- /dev/null
++++ b/vars/Debian.yml
+@@ -0,0 +1,3 @@
++---
++sshd_package_name: openssh-server
++sshd_service_name: ssh
+diff --git a/vars/RedHat.yml b/vars/RedHat.yml
+new file mode 100644
+index 0000000..fc7dca1
+--- /dev/null
++++ b/vars/RedHat.yml
+@@ -0,0 +1,3 @@
++---
++sshd_package_name: openssh-server
++sshd_service_name: sshd

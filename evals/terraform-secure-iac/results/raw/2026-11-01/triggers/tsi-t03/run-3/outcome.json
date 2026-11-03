@@ -1,0 +1,18 @@
+{
+  "id": "tsi-t03",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-terraform-secure-iac:terraform-secure-iac"
+  ],
+  "cost_usd": 0.17765820000000004,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-03T06:44:57.246429+00:00",
+    "seconds": 36.7
+  },
+  "aborted": false,
+  "rate_limited": false
+}

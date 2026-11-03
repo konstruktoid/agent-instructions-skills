@@ -1,0 +1,18 @@
+{
+  "id": "bt-t01",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-bash-testing:bash-testing"
+  ],
+  "cost_usd": 0.15956599999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-01T16:06:21.394197+00:00",
+    "seconds": 44.9
+  },
+  "aborted": false,
+  "rate_limited": false
+}

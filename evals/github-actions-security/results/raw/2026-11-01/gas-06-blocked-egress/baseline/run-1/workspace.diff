@@ -1,0 +1,12 @@
+diff --git a/.github/workflows/dependency-review.yml b/.github/workflows/dependency-review.yml
+index 81d2caf..533da08 100644
+--- a/.github/workflows/dependency-review.yml
++++ b/.github/workflows/dependency-review.yml
+@@ -21,6 +21,7 @@ jobs:
+           allowed-endpoints: >
+             api.github.com:443
+             api.securityscorecards.dev:443
++            api.deps.dev:443
+             github.com:443
+             *.blob.core.windows.net:443
+ 

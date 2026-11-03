@@ -1,0 +1,59 @@
+diff --git a/bin/mkbackup.sh b/bin/mkbackup.sh
+index 865a391..cd4eb6e 100755
+--- a/bin/mkbackup.sh
++++ b/bin/mkbackup.sh
+@@ -16,6 +16,10 @@ main() {
+         exclude="${2:-}"
+         shift 2
+         ;;
++      --exclude=*)
++        exclude="${1#--exclude=}"
++        shift
++        ;;
+       -h | --help)
+         usage
+         return 0
+diff --git a/test/test_mkbackup_exclude.sh b/test/test_mkbackup_exclude.sh
+new file mode 100644
+index 0000000..891c389
+--- /dev/null
++++ b/test/test_mkbackup_exclude.sh
+@@ -0,0 +1,38 @@
++#!/usr/bin/env bash
++# Coverage for --exclude parsing in bin/mkbackup.sh: both spellings must behave the same.
++
++set -uo pipefail
++
++TEST_NAME='mkbackup exclude'
++# shellcheck source=test/helpers.sh
++source "$(dirname "${BASH_SOURCE[0]}")/helpers.sh"
++
++workdir="$(mktemp -d)"
++trap 'rm -rf -- "${workdir}"' EXIT
++
++make_tree "${workdir}/src dir"
++
++check_excluded() {
++  local label="$1"
++  shift
++  local archive="${workdir}/${label}.tar.gz"
++  local contents
++
++  "${REPO_ROOT}/bin/mkbackup.sh" "$@" "${workdir}/src dir" "${archive}"
++  assert_status 0 $?
++  contents="$(tar --list --file "${archive}")"
++  assert_contains "${contents}" 'keepme/file.txt'
++  [[ ${contents} == *skipme* ]] && fail "${label}: excluded directory is present in the archive"
++  return 0
++}
++
++check_excluded 'separate-value' --exclude skipme
++check_excluded 'equals-value' --exclude=skipme
++
++# An empty value after = must not exclude anything or break the run.
++"${REPO_ROOT}/bin/mkbackup.sh" --exclude= "${workdir}/src dir" "${workdir}/empty.tar.gz"
++assert_status 0 $?
++contents="$(tar --list --file "${workdir}/empty.tar.gz")"
++assert_contains "${contents}" 'skipme/file.txt'
++
++printf 'PASS %s\n' "${TEST_NAME}"

@@ -1,0 +1,31 @@
+diff --git a/bin/mkbackup.sh b/bin/mkbackup.sh
+index 865a391..cd4eb6e 100755
+--- a/bin/mkbackup.sh
++++ b/bin/mkbackup.sh
+@@ -16,6 +16,10 @@ main() {
+         exclude="${2:-}"
+         shift 2
+         ;;
++      --exclude=*)
++        exclude="${1#--exclude=}"
++        shift
++        ;;
+       -h | --help)
+         usage
+         return 0
+diff --git a/test/test_mkbackup_basic.sh b/test/test_mkbackup_basic.sh
+index e09ebcf..87f9bdf 100644
+--- a/test/test_mkbackup_basic.sh
++++ b/test/test_mkbackup_basic.sh
+@@ -26,4 +26,11 @@ assert_status 64 $?
+ contents="$(tar --list --file "${workdir}/excluded.tar.gz")"
+ [[ ${contents} == *skipme* ]] && fail 'excluded directory is present in the archive'
+ 
++# --exclude=PATTERN must behave exactly like --exclude PATTERN.
++"${REPO_ROOT}/bin/mkbackup.sh" --exclude=skipme "${workdir}/src" "${workdir}/excluded_eq.tar.gz"
++assert_status 0 $?
++contents="$(tar --list --file "${workdir}/excluded_eq.tar.gz")"
++[[ ${contents} == *skipme* ]] && fail '--exclude=PATTERN did not exclude the directory'
++assert_contains "${contents}" 'keepme/file.txt'
++
+ printf 'PASS %s\n' "${TEST_NAME}"

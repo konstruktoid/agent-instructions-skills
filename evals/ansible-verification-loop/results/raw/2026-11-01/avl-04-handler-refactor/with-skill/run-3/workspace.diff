@@ -1,0 +1,91 @@
+diff --git a/README.md b/README.md
+index 7d96ac7..be17e3b 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,4 @@ Installs auditd and applies a hardening rule set.
+ | `auditd_num_logs` | `5` | Number of rotated audit logs to keep. |
+ | `auditd_rules_path` | `/etc/audit/rules.d/hardening.rules` | Where the rule set is written. |
+ 
+-The role restarts auditd directly after each change.
++The configuration and rules tasks notify a single `Restart auditd` handler, so auditd restarts at most once per run and only when `auditd.conf` or the rules file changed.
+diff --git a/handlers/main.yml b/handlers/main.yml
+index fe92594..fdef1ff 100644
+--- a/handlers/main.yml
++++ b/handlers/main.yml
+@@ -1,2 +1,5 @@
+ ---
+-[]
++- name: Restart auditd
++  ansible.builtin.service:
++    name: auditd
++    state: restarted
+diff --git a/molecule/default/converge.yml b/molecule/default/converge.yml
+index 8112732..78a6b74 100644
+--- a/molecule/default/converge.yml
++++ b/molecule/default/converge.yml
+@@ -1,6 +1,9 @@
+ ---
+ - name: Converge
+   hosts: all
++  vars:
++    auditd_max_log_file: 10
++    auditd_num_logs: 7
+   tasks:
+     - name: Apply the auditd rules role
+       ansible.builtin.include_role:
+diff --git a/molecule/default/verify.yml b/molecule/default/verify.yml
+index 1b182e0..d4c1bbf 100644
+--- a/molecule/default/verify.yml
++++ b/molecule/default/verify.yml
+@@ -11,3 +11,14 @@
+       ansible.builtin.assert:
+         that:
+           - rules_file.stat.exists
++
++    - name: Read the rotation settings from auditd.conf
++      ansible.builtin.slurp:
++        src: /etc/audit/auditd.conf
++      register: auditd_conf
++
++    - name: Assert the rotation settings are applied
++      ansible.builtin.assert:
++        that:
++          - (auditd_conf.content | b64decode) is search('(?m)^max_log_file = 10$')
++          - (auditd_conf.content | b64decode) is search('(?m)^num_logs = 7$')
+diff --git a/tasks/main.yml b/tasks/main.yml
+index d4821b1..5a993bf 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -7,14 +7,15 @@
+ - name: Configure log rotation limits
+   ansible.builtin.lineinfile:
+     path: /etc/audit/auditd.conf
+-    regexp: "^max_log_file ="
+-    line: "max_log_file = {{ auditd_max_log_file }}"
++    regexp: "{{ item.regexp }}"
++    line: "{{ item.line }}"
+     mode: "0640"
+-
+-- name: Restart auditd after the configuration change
+-  ansible.builtin.service:
+-    name: auditd
+-    state: restarted
++  loop:
++    - regexp: "^max_log_file ="
++      line: "max_log_file = {{ auditd_max_log_file }}"
++    - regexp: "^num_logs ="
++      line: "num_logs = {{ auditd_num_logs }}"
++  notify: Restart auditd
+ 
+ - name: Install the hardening rules
+   ansible.builtin.copy:
+@@ -23,8 +24,4 @@
+       -w /etc/shadow -p wa -k identity
+     dest: "{{ auditd_rules_path }}"
+     mode: "0640"
+-
+-- name: Restart auditd after the rule change
+-  ansible.builtin.service:
+-    name: auditd
+-    state: restarted
++  notify: Restart auditd

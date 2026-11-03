@@ -1,0 +1,2432 @@
+[
+  {
+    "task": "bt-01-plain-suite",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:17.632725+00:00",
+      "seconds": 18.5
+    },
+    "base_sha": "a94081388e28eb7344fcea325df11492e7bbf767",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.061605799999999995,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nPASS mkbackup basic\nPASS mkbackup exclude\nall test files passed\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'run-tests.sh'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: write the test in the discovered style",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "source": "task prompt: both spellings behave the same",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 12
+  },
+  {
+    "task": "bt-01-plain-suite",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:17.633434+00:00",
+      "seconds": 14.4
+    },
+    "base_sha": "a94081388e28eb7344fcea325df11492e7bbf767",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.059613799999999995,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nPASS mkbackup basic\nall test files passed\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'run-tests.sh'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: write the test in the discovered style",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "source": "task prompt: both spellings behave the same",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 12
+  },
+  {
+    "task": "bt-01-plain-suite",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:17.636098+00:00",
+      "seconds": 20.1
+    },
+    "base_sha": "a94081388e28eb7344fcea325df11492e7bbf767",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0630578,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nPASS mkbackup basic\nPASS mkbackup exclude\nall test files passed\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'run-tests.sh'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: write the test in the discovered style",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "source": "task prompt: both spellings behave the same",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 12
+  },
+  {
+    "task": "bt-01-plain-suite",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:17.637287+00:00",
+      "seconds": 24.4
+    },
+    "base_sha": "a94081388e28eb7344fcea325df11492e7bbf767",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.09120210000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nPASS mkbackup basic\nPASS mkbackup exclude\nall test files passed\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'run-tests.sh'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: write the test in the discovered style",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "source": "task prompt: both spellings behave the same",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 12
+  },
+  {
+    "task": "bt-01-plain-suite",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:17.640427+00:00",
+      "seconds": 21.5
+    },
+    "base_sha": "a94081388e28eb7344fcea325df11492e7bbf767",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.0879717,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nPASS mkbackup basic\nPASS mkbackup exclude spellings\nall test files passed\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'run-tests.sh'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: write the test in the discovered style",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "source": "task prompt: both spellings behave the same",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 12
+  },
+  {
+    "task": "bt-01-plain-suite",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:32.492808+00:00",
+      "seconds": 17.0
+    },
+    "base_sha": "62c29837a019ea7e88fd3413b9a140e05315389a",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.0833545,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nPASS mkbackup basic\nPASS mkbackup exclude\nall test files passed\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names\ntar: Removing leading `/' from member names"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'run-tests.sh'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: a bug fix requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: write the test in the discovered style",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "covers-the-equals-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md: for a bug fix, write the test so it fails against the unfixed code",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-exit-status",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never weaken a test, skip it, or delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works-for-equals-form",
+        "kind": "workspace_command",
+        "source": "task prompt: --exclude=PATTERN must behave like --exclude PATTERN",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-keeps-space-form",
+        "kind": "workspace_command",
+        "source": "task prompt: both spellings behave the same",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 12,
+    "total": 12
+  },
+  {
+    "task": "bt-02-bats-suite",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:36.703465+00:00",
+      "seconds": 18.8
+    },
+    "base_sha": "1755b9ffd38b7942714234e9e61e0be6e8418ee0",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.06033970000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0\n1..7\nok 1 summarizes a mixed result file\nok 2 reports usage when no file is given\nok 3 reports a missing file on stderr\nok 4 --json prints the counters as JSON\nok 5 --json is accepted after the file\nok 6 --json without a file reports usage\nok 7 --json with a missing file exits 66"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'bats'"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: changed output format requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: new behavior requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "source": "task prompt: print the counters as machine-readable JSON",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: the existing text output must stay exactly as it is",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "bt-02-bats-suite",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:38.195380+00:00",
+      "seconds": 15.4
+    },
+    "base_sha": "73f5884fe628224c22d407c7f35f326aabf19249",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.061408300000000006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0\n1..7\nok 1 summarizes a mixed result file\nok 2 reports usage when no file is given\nok 3 reports a missing file on stderr\nok 4 --json prints the counters as JSON\nok 5 --json is accepted after the file too\nok 6 --json without a file reports usage\nok 7 --json with a missing file fails with 66"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'bats'"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: changed output format requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: new behavior requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "source": "task prompt: print the counters as machine-readable JSON",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: the existing text output must stay exactly as it is",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "bt-02-bats-suite",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:39.667426+00:00",
+      "seconds": 18.6
+    },
+    "base_sha": "26b8697d036dd26e6e8a1b6299119e002dbfb25d",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.06182030000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0\n1..7\nok 1 summarizes a mixed result file\nok 2 reports usage when no file is given\nok 3 reports a missing file on stderr\nok 4 --json prints the counters as JSON\nok 5 --json is accepted after the file too\nok 6 --json without a file reports usage\nok 7 --json with a missing file fails like text mode"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'bats'"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: changed output format requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: new behavior requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "source": "task prompt: print the counters as machine-readable JSON",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: the existing text output must stay exactly as it is",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "bt-02-bats-suite",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:42.588365+00:00",
+      "seconds": 21.5
+    },
+    "base_sha": "b24159e10c519c4267eb52cc5f52b269204c6590",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.0897387,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0\n1..8\nok 1 summarizes a mixed result file\nok 2 reports usage when no file is given\nok 3 reports a missing file on stderr\nok 4 --json prints the counters as JSON\nok 5 --json is accepted after the file\nok 6 --json works on a path containing a space\nok 7 --json without a file reports usage\nok 8 --json with a missing file keeps JSON off stdout"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'bats'"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: changed output format requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: new behavior requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "source": "task prompt: print the counters as machine-readable JSON",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: the existing text output must stay exactly as it is",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "bt-02-bats-suite",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:50.010289+00:00",
+      "seconds": 20.0
+    },
+    "base_sha": "3a433b53503554cc90ffc460d1e87b773a7141f2",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.08841389999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0\n1..8\nok 1 summarizes a mixed result file\nok 2 reports usage when no file is given\nok 3 reports a missing file on stderr\nok 4 --json prints the counters as JSON\nok 5 --json is accepted after the file too\nok 6 --json works with a path containing a space\nok 7 --json without a file reports usage and exits 64\nok 8 --json with a missing file exits 66 with no JSON on stdout"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'bats'"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: changed output format requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: new behavior requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "source": "task prompt: print the counters as machine-readable JSON",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: the existing text output must stay exactly as it is",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "bt-02-bats-suite",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:54.575494+00:00",
+      "seconds": 36.0
+    },
+    "base_sha": "baab924c2192e579ac0552a2901ef44dbbeca6ab",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.0880913,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes-if-bats-available",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0\n1..7\nok 1 summarizes a mixed result file\nok 2 reports usage when no file is given\nok 3 reports a missing file on stderr\nok 4 --json prints the same counters as JSON\nok 5 --json without a file reports usage on stderr\nok 6 --json with a missing file exits 66 and prints no JSON\nok 7 --json handles a path containing a space"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'bats'"
+      },
+      {
+        "id": "bats-file-touched",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: changed output format requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bats-idiom-used",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the existing naming and assertion conventions",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: no second test framework introduced alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-mode-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: new behavior requires a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "json-output-parses",
+        "kind": "workspace_command",
+        "source": "task prompt: print the counters as machine-readable JSON",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "text-output-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: the existing text output must stay exactly as it is",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "exit-codes-preserved",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert the status, not only the output",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "bt-03-inline-script",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:56.476961+00:00",
+      "seconds": 25.3
+    },
+    "base_sha": "9a056c7fd9ab1408f0fa24c4283a487783bc97c0",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.07321639999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: '_test.sh'"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "source": "task prompt: reject an empty name with a non-zero exit status",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path",
+        "passed": true,
+        "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "bt-03-inline-script",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:04:59.297019+00:00",
+      "seconds": 16.6
+    },
+    "base_sha": "ecfc4a83c53311567f3080046a839950c8514ac0",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.05929779999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: '_test.sh'"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "source": "task prompt: reject an empty name with a non-zero exit status",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path",
+        "passed": true,
+        "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "bt-03-inline-script",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:05.203790+00:00",
+      "seconds": 16.6
+    },
+    "base_sha": "093f0e59e731671cb45093a7e3d5ee9ba976c081",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0557806,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: '_test.sh'"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "source": "task prompt: reject an empty name with a non-zero exit status",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path",
+        "passed": true,
+        "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "bt-03-inline-script",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:11.252888+00:00",
+      "seconds": 20.6
+    },
+    "base_sha": "155c2702a83f0d2e3235648caeb4ed7598786a22",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.08176680000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: '_test.sh'"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "source": "task prompt: reject an empty name with a non-zero exit status",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path",
+        "passed": true,
+        "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "bt-03-inline-script",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:16.282676+00:00",
+      "seconds": 37.2
+    },
+    "base_sha": "ad12cd3e5153c5247683fab89e625d225924c432",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.09199099999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: '_test.sh'"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "source": "task prompt: reject an empty name with a non-zero exit status",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path",
+        "passed": true,
+        "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "bt-03-inline-script",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:22.112598+00:00",
+      "seconds": 19.9
+    },
+    "base_sha": "0799d437ba046b16891235c5ac441d714b0481b3",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.0889482,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's own entry point, and the full suite passes",
+        "passed": true,
+        "evidence": "exit 0\nok bin/mkuser-config.sh\nok lib/format.sh"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: '_test.sh'"
+      },
+      {
+        "id": "rejects-empty-name",
+        "kind": "workspace_command",
+        "source": "task prompt: reject an empty name with a non-zero exit status",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "valid-name-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: the full suite passes, not only the new test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-made-sourceable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: move the logic into functions and guard the entry point",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md table: input validation requires a test, including the rejection paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: match the discovered layout rather than imposing a new one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejection-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md: cover the rejection paths, not only the happy path",
+        "passed": true,
+        "evidence": "exit 0\ngrep: --include=*_test.sh: No such file or directory"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean on the test files too",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 11
+  },
+  {
+    "task": "bt-04-no-suite",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:22.138792+00:00",
+      "seconds": 15.6
+    },
+    "base_sha": "89192b2fd70b3c877677ad13ebf0774bff1891a5",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.055572899999999995,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "source": "task prompt: fail loudly when the artifact directory does not exist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: existing behavior must still pass",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never test a destructive script against real paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh'"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: including one failure path",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'no tests'"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "bt-04-no-suite",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:31.691440+00:00",
+      "seconds": 18.7
+    },
+    "base_sha": "730bf3031d78b5094d5368791ffbb272b4ebbbfd",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.058472800000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "source": "task prompt: fail loudly when the artifact directory does not exist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: existing behavior must still pass",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never test a destructive script against real paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh'"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh \"$t/nope\" 14; echo \"missing'"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'no test'"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "bt-04-no-suite",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:32.201607+00:00",
+      "seconds": 15.8
+    },
+    "base_sha": "836a76cde05d320fa42c1afdd3d67cccb2d9fdb3",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.05797310000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "source": "task prompt: fail loudly when the artifact directory does not exist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: existing behavior must still pass",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never test a destructive script against real paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh'"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh /nonexistent'"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'no test'"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "bt-04-no-suite",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:37.918728+00:00",
+      "seconds": 18.6
+    },
+    "base_sha": "dbdffbb9ba1b03d281823baa52d324d459cecb2e",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.0802569,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "source": "task prompt: fail loudly when the artifact directory does not exist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: existing behavior must still pass",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never test a destructive script against real paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh'"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: including one failure path",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  },
+  {
+    "task": "bt-04-no-suite",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:42.383631+00:00",
+      "seconds": 23.0
+    },
+    "base_sha": "1ec08a177cffb8f4de883e2622f68b5454e212fb",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.0787951,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "source": "task prompt: fail loudly when the artifact directory does not exist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: existing behavior must still pass",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never test a destructive script against real paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh'"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: including one failure path",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": true,
+        "evidence": "match: 'no automated tests'"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 10
+  },
+  {
+    "task": "bt-04-no-suite",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-01T16:05:48.174380+00:00",
+      "seconds": 32.8
+    },
+    "base_sha": "0e2ffa4e93f27d562c56772e0a81eec1fcf688a0",
+    "skills_used": [
+      "eval-bash-testing:bash-testing"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.0810149,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "missing-directory-fails",
+        "kind": "workspace_command",
+        "source": "task prompt: fail loudly when the artifact directory does not exist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "message-on-stderr",
+        "kind": "workspace_command",
+        "source": "SKILL.md: assert that diagnostics go to stderr and stdout carries only data",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "happy-path-still-works",
+        "kind": "workspace_command",
+        "source": "SKILL.md: existing behavior must still pass",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "recent-artifacts-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never test a destructive script against real paths",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "script-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: verify by running the script directly, including one failure path",
+        "passed": true,
+        "evidence": "match: 'prune-artifacts.sh'"
+      },
+      {
+        "id": "failure-path-exercised",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: including one failure path",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "coverage-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: if a test is not required, say so and why, rather than silently skipping it",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "strict-mode-improved",
+        "kind": "workspace_command",
+        "source": "bash_coding_instructions.md: a script fails loudly rather than silently",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "shellcheck-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: shellcheck clean",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-leftover-scratch-files",
+        "kind": "workspace_command",
+        "source": "SKILL.md: nothing written outside the test's own temporary directory",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 10
+  }
+]

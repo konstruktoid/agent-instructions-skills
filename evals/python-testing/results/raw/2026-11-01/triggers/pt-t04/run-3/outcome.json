@@ -1,0 +1,18 @@
+{
+  "id": "pt-t04",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-python-testing:python-testing"
+  ],
+  "cost_usd": 0.140196,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-02T07:15:36.597883+00:00",
+    "seconds": 25.7
+  },
+  "aborted": false,
+  "rate_limited": false
+}

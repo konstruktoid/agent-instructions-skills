@@ -1,0 +1,72 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 02a6377..cd330dd 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -5,8 +5,13 @@ on:
+   push:
+     branches:
+       - main
++    tags:
++      - "v*"
+   pull_request:
+ 
++permissions:
++  contents: read
++
+ jobs:
+   build:
+     runs-on: ubuntu-latest
+@@ -17,3 +22,27 @@ jobs:
+           node-version: 20
+       - run: npm ci
+       - run: npm test
++
++  release:
++    needs: build
++    if: startsWith(github.ref, 'refs/tags/v')
++    runs-on: ubuntu-latest
++    permissions:
++      contents: write # needed to create the GitHub release
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-node@v4
++        with:
++          node-version: 20
++          registry-url: https://registry.npmjs.org
++      - run: npm ci
++      - run: npm run build
++      - name: Publish to npm
++        run: npm publish
++        env:
++          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
++      - name: Create GitHub release
++        run: gh release create "$TAG" --title "$TAG" --generate-notes
++        env:
++          GH_TOKEN: ${{ github.token }}
++          TAG: ${{ github.ref_name }}
+diff --git a/README.md b/README.md
+index f9aacaf..85e59d8 100644
+--- a/README.md
++++ b/README.md
+@@ -4,5 +4,19 @@ A small Node package.
+ 
+ ## Releasing
+ 
+-Releases are cut by hand: bump the version in `package.json`, tag, and publish from a
+-workstation.
++Releases are automated by the `release` job in `.github/workflows/ci.yml`.
++
++1. Bump the version in `package.json` and merge the change to `main`.
++2. Tag the merge commit with a matching version and push the tag:
++
++   ```sh
++   git tag v1.5.0
++   git push origin v1.5.0
++   ```
++
++3. Pushing a `v*` tag runs the `build` job (install and tests). Only if it passes does
++   the `release` job run: it builds the package, publishes it to npm, and creates a
++   GitHub release for the tag with generated release notes.
++
++The workflow needs an `NPM_TOKEN` repository secret containing an npm automation token
++with publish rights. The GitHub release uses the built-in `GITHUB_TOKEN`.

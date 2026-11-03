@@ -1,0 +1,187 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..b1f3c54
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,7 @@
++.ansible/
++.cache/
++.env
++.venv/
++__pycache__/
++*.log
++*.tar.gz
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+new file mode 100644
+index 0000000..99f9524
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1,5 @@
++# Changelog
++
++## 1.2.0
++
++- Prefix role variables with `nftables_base_`, apply `nftables_base_allowed_tcp_ports`, add argument specs.
+diff --git a/README.md b/README.md
+index fa72497..e7c9e1b 100644
+--- a/README.md
++++ b/README.md
+@@ -17,3 +17,15 @@ make test
+ ```
+ 
+ `make test` runs `ansible-lint` and then the molecule scenario.
++
++## Variables
++
++Variables of `nftables_base` (also described in `meta/argument_specs.yml`):
++
++| Variable | Default | Description |
++|----------|---------|-------------|
++| `nftables_base_default_policy` | `drop` | Policy of the input chain: `drop` or `accept`. |
++| `nftables_base_allowed_tcp_ports` | `[22]` | TCP destination ports accepted on the input chain. An empty list adds no port rule. |
++| `nftables_base_ruleset_path` | `/etc/nftables.conf` | File the ruleset is written to and loaded from. |
++
++The ruleset also accepts established and related connections and loopback traffic.
+diff --git a/galaxy.yml b/galaxy.yml
+index 8725a14..9a70a73 100644
+--- a/galaxy.yml
++++ b/galaxy.yml
+@@ -8,5 +8,21 @@ authors:
+ description: Firewall roles for Debian and RedHat hosts.
+ license:
+   - MIT
++repository: https://github.com/platform/firewall
++tags:
++  - firewall
++  - linux
++  - security
+ build_ignore:
+   - .git
++  - .gitignore
++  - .ansible
++  - .ansible-lint
++  - .cache
++  - .env
++  - .venv
++  - __pycache__
++  - "*.log"
++  - "*.tar.gz"
++  - Makefile
++  - molecule
+diff --git a/meta/runtime.yml b/meta/runtime.yml
+index accfbd8..a764a08 100644
+--- a/meta/runtime.yml
++++ b/meta/runtime.yml
+@@ -1,2 +1,2 @@
+ ---
+-requires_ansible: ">=2.15"
++requires_ansible: ">=2.17.0"
+diff --git a/roles/nftables_base/defaults/main.yml b/roles/nftables_base/defaults/main.yml
+index 1cd269b..7d17297 100644
+--- a/roles/nftables_base/defaults/main.yml
++++ b/roles/nftables_base/defaults/main.yml
+@@ -1,5 +1,5 @@
+ ---
+-nftables_default_policy: drop
+-nftables_allowed_tcp_ports:
++nftables_base_default_policy: drop
++nftables_base_allowed_tcp_ports:
+   - 22
+-nftables_ruleset_path: /etc/nftables.conf
++nftables_base_ruleset_path: /etc/nftables.conf
+diff --git a/roles/nftables_base/handlers/main.yml b/roles/nftables_base/handlers/main.yml
+index ce59c69..884ae28 100644
+--- a/roles/nftables_base/handlers/main.yml
++++ b/roles/nftables_base/handlers/main.yml
+@@ -3,3 +3,7 @@
+   ansible.builtin.service:
+     name: nftables
+     state: reloaded
++
++- name: Load nftables ruleset
++  ansible.builtin.command: nft -f {{ nftables_base_ruleset_path }}
++  changed_when: true
+diff --git a/roles/nftables_base/meta/argument_specs.yml b/roles/nftables_base/meta/argument_specs.yml
+new file mode 100644
+index 0000000..72227f7
+--- /dev/null
++++ b/roles/nftables_base/meta/argument_specs.yml
+@@ -0,0 +1,27 @@
++---
++argument_specs:
++  main:
++    short_description: Applies a base nftables ruleset.
++    options:
++      nftables_base_default_policy:
++        type: str
++        default: drop
++        choices:
++          - drop
++          - accept
++        description: >-
++          Policy of the input chain. Traffic not matched by an accept rule
++          is handled according to this value.
++      nftables_base_allowed_tcp_ports:
++        type: list
++        elements: int
++        default:
++          - 22
++        description: >-
++          TCP destination ports accepted on the input chain. An empty list
++          adds no port rule.
++      nftables_base_ruleset_path:
++        type: path
++        default: /etc/nftables.conf
++        description: >-
++          File the ruleset is written to and loaded from.
+diff --git a/roles/nftables_base/meta/main.yml b/roles/nftables_base/meta/main.yml
+index 5221262..e0955de 100644
+--- a/roles/nftables_base/meta/main.yml
++++ b/roles/nftables_base/meta/main.yml
+@@ -4,7 +4,7 @@ galaxy_info:
+   author: platform
+   description: Applies a base nftables ruleset.
+   license: MIT
+-  min_ansible_version: "2.15"
++  min_ansible_version: "2.17"
+   platforms:
+     - name: Debian
+       versions:
+diff --git a/roles/nftables_base/tasks/main.yml b/roles/nftables_base/tasks/main.yml
+index f8ee310..57e3bf5 100644
+--- a/roles/nftables_base/tasks/main.yml
++++ b/roles/nftables_base/tasks/main.yml
+@@ -9,15 +9,25 @@
+     content: |
+       table inet filter {
+         chain input {
+-          type filter hook input priority 0; policy {{ nftables_default_policy }};
++          type filter hook input priority 0; policy {{ nftables_base_default_policy }};
++          ct state established,related accept
++          iifname "lo" accept
++      {% if nftables_base_allowed_tcp_ports | length > 0 %}
++          tcp dport { {{ nftables_base_allowed_tcp_ports | join(', ') }} } accept
++      {% endif %}
+         }
+       }
+-    dest: "{{ nftables_ruleset_path }}"
+-  notify: Reload nftables
+-
+-- name: Load the ruleset now
+-  ansible.builtin.command: nft -f {{ nftables_ruleset_path }}
++    dest: "{{ nftables_base_ruleset_path }}"
++    owner: root
++    group: root
++    mode: "0600"
++  notify:
++    - Load nftables ruleset
++    - Reload nftables
+ 
+ - name: Check the active ruleset
+-  ansible.builtin.shell: nft list ruleset | wc -l
+-  register: nftables_rule_lines
++  ansible.builtin.shell: set -o pipefail; nft list ruleset | wc -l
++  args:
++    executable: /bin/bash
++  register: nftables_base_rule_lines
++  changed_when: false

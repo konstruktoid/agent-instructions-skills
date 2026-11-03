@@ -1,0 +1,112 @@
+diff --git a/README.md b/README.md
+index 0d04e04..bd70e73 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,24 @@
+ 
+ Housekeeping scripts for the CI workers.
+ 
+-`bin/clean-workspaces.sh` removes stale build workspaces under `workspaces/`. The root and
+-the age threshold are hardcoded, so a worker with a different layout needs its own copy of
+-the script.
++`bin/clean-workspaces.sh` removes stale build workspaces: each directory directly under the
++workspace root whose newest file is older than the age threshold.
++
++```
++bin/clean-workspaces.sh [-n|--dry-run] [-r|--root DIR] [-d|--days N]
++```
++
++| Option | Default | Meaning |
++| --- | --- | --- |
++| `-r`, `--root DIR` | `workspaces` | Workspace root (relative paths resolve from the current directory) |
++| `-d`, `--days N` | `7` | Remove workspaces whose newest file is more than N days old |
++| `-n`, `--dry-run` | off | Print what would be removed (`would remove ...`) and delete nothing |
++
++Examples:
++
++```
++bin/clean-workspaces.sh --dry-run                    # preview with the defaults
++bin/clean-workspaces.sh --root /var/ci/ws --days 3   # custom layout and threshold
++```
++
++Symlinks under the root are skipped. Invalid arguments exit with status 2.
+diff --git a/bin/clean-workspaces.sh b/bin/clean-workspaces.sh
+index a6c30b3..3fa2f66 100755
+--- a/bin/clean-workspaces.sh
++++ b/bin/clean-workspaces.sh
+@@ -1,19 +1,64 @@
+ #!/bin/bash
+ # Remove stale CI workspaces.
++set -euo pipefail
+ 
+-WORKSPACE_ROOT=workspaces
+-DAYS=7
++DEFAULT_ROOT=workspaces
++DEFAULT_DAYS=7
+ 
+-cd $WORKSPACE_ROOT
++usage() {
++  cat <<USAGE
++Usage: ${0##*/} [-n|--dry-run] [-r|--root DIR] [-d|--days N]
+ 
+-for dir in $(ls); do
+-  if [ -d $dir ]; then
+-    LAST=`find $dir -type f -printf '%T@\n' | sort -n | tail -1`
+-    AGE=$(( ( $(date +%s) - ${LAST%.*} ) / 86400 ))
+-    if [ $AGE -gt $DAYS ]; then
+-      echo "removing $dir (age ${AGE}d)"
+-      rm -rf $dir/*
+-      rmdir $dir
++Remove workspace directories under DIR whose newest file is older than N days.
++
++  -r, --root DIR   workspace root (default: $DEFAULT_ROOT)
++  -d, --days N     age threshold in days (default: $DEFAULT_DAYS)
++  -n, --dry-run    list what would be removed, remove nothing
++  -h, --help       show this help
++USAGE
++}
++
++die() { echo "${0##*/}: $*" >&2; exit 2; }
++
++root=$DEFAULT_ROOT
++days=$DEFAULT_DAYS
++dry_run=0
++
++while [ $# -gt 0 ]; do
++  case $1 in
++    -n|--dry-run) dry_run=1 ;;
++    -r|--root) [ $# -ge 2 ] || die "$1 requires an argument"; root=$2; shift ;;
++    --root=*) root=${1#--root=} ;;
++    -d|--days) [ $# -ge 2 ] || die "$1 requires an argument"; days=$2; shift ;;
++    --days=*) days=${1#--days=} ;;
++    -h|--help) usage; exit 0 ;;
++    *) usage >&2; die "unknown argument: $1" ;;
++  esac
++  shift
++done
++
++[[ $days =~ ^[0-9]+$ ]] || die "--days must be a non-negative integer: $days"
++[ -n "$root" ] || die "--root must not be empty"
++[ -d "$root" ] || die "workspace root not found: $root"
++
++now=$(date +%s)
++
++for dir in "$root"/*/; do
++  dir=${dir%/}
++  # Skip the unmatched glob, and never follow symlinks out of the root.
++  [ -d "$dir" ] && [ ! -L "$dir" ] || continue
++
++  # Newest file mtime; fall back to the directory's own mtime if it has no files.
++  last=$(find -P "$dir" -type f -printf '%T@\n' | sort -n | tail -n 1)
++  [ -n "$last" ] || last=$(stat -c %Y -- "$dir")
++  age=$(( (now - ${last%.*}) / 86400 ))
++
++  if [ "$age" -gt "$days" ]; then
++    if [ "$dry_run" -eq 1 ]; then
++      echo "would remove $dir (age ${age}d)"
++    else
++      echo "removing $dir (age ${age}d)"
++      rm -rf -- "$dir"
+     fi
+   fi
+ done

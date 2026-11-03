@@ -1,0 +1,222 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..2785e8e
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,4 @@
++.terraform/
++*.tfstate
++*.tfstate.*
++crash.log
+diff --git a/README.md b/README.md
+index febd4f0..625d677 100644
+--- a/README.md
++++ b/README.md
+@@ -3,11 +3,45 @@
+ Terraform for the reports bucket and the key the nightly export job uploads with. The job reads
+ the key from `terraform output`.
+ 
+-## Usage
++## State
++
++State lives in a versioned, encrypted, private S3 bucket with native S3 locking
++(`use_lockfile`, Terraform >= 1.10), so anyone with access can run `plan` and `apply`; concurrent
++runs are blocked by the lock. The state contains the uploader's secret access key in plaintext, so
++only grant bucket access (`s3:ListBucket`, `s3:GetObject`, `s3:PutObject`, `s3:DeleteObject` on
++`reports/terraform.tfstate*`) to people who may read that key.
++
++### One-time bootstrap (one person)
++
++`bootstrap/` creates the state bucket. Its own state is local (it can't live in the bucket it
++creates). Keep `bootstrap/terraform.tfstate` safe, or ignore it: the bucket is rarely changed.
+ 
+ ```sh
++cd bootstrap
+ terraform init
+ terraform apply
++terraform output state_bucket
++```
++
++Put that bucket name in `backend.hcl` and commit it.
++
++### Migrating the existing local state
++
++From the laptop that holds the current `terraform.tfstate`:
++
++```sh
++terraform init -backend-config=backend.hcl -migrate-state
++terraform plan   # should show no changes
++```
++
++Answer `yes` to copy the state. Afterwards delete the local `terraform.tfstate*` files.
++
++## Usage (everyone else)
++
++```sh
++terraform init -backend-config=backend.hcl
++terraform plan
++terraform apply
+ ```
+ 
+-State is kept locally in `terraform.tfstate`, so only the person who last ran `apply` has it.
++If a run is killed and leaves a stale lock, remove it with `terraform force-unlock <ID>`.
+diff --git a/backend.hcl b/backend.hcl
+new file mode 100644
+index 0000000..7b42be2
+--- /dev/null
++++ b/backend.hcl
+@@ -0,0 +1,2 @@
++# Replace with the `state_bucket` output of bootstrap/.
++bucket = "reports-tfstate-REPLACE_WITH_ACCOUNT_ID-eu-north-1"
+diff --git a/backend.tf b/backend.tf
+new file mode 100644
+index 0000000..f67391c
+--- /dev/null
++++ b/backend.tf
+@@ -0,0 +1,10 @@
++# Partial configuration: the bucket name is supplied via backend.hcl
++# (terraform init -backend-config=backend.hcl). See README.
++terraform {
++  backend "s3" {
++    key          = "reports/terraform.tfstate"
++    region       = "eu-north-1"
++    encrypt      = true
++    use_lockfile = true
++  }
++}
+diff --git a/bootstrap/main.tf b/bootstrap/main.tf
+new file mode 100644
+index 0000000..1816991
+--- /dev/null
++++ b/bootstrap/main.tf
+@@ -0,0 +1,130 @@
++terraform {
++  required_version = ">= 1.10.0"
++
++  required_providers {
++    aws = {
++      source  = "hashicorp/aws"
++      version = "~> 6.0"
++    }
++  }
++}
++
++provider "aws" {
++  region = var.region
++}
++
++data "aws_caller_identity" "current" {}
++
++locals {
++  bucket_name = coalesce(var.state_bucket_name, "reports-tfstate-${data.aws_caller_identity.current.account_id}-${var.region}")
++}
++
++variable "region" {
++  type    = string
++  default = "eu-north-1"
++}
++
++variable "state_bucket_name" {
++  description = "Override the state bucket name (must be globally unique). Defaults to reports-tfstate-<account-id>-<region>."
++  type        = string
++  default     = null
++}
++
++# The state holds the IAM access key secret in plaintext, so the bucket is
++# private, encrypted, versioned and TLS-only.
++resource "aws_s3_bucket" "state" {
++  bucket = local.bucket_name
++
++  lifecycle {
++    prevent_destroy = true
++  }
++}
++
++resource "aws_s3_bucket_versioning" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  versioning_configuration {
++    status = "Enabled"
++  }
++}
++
++resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    apply_server_side_encryption_by_default {
++      sse_algorithm = "AES256"
++    }
++  }
++}
++
++resource "aws_s3_bucket_public_access_block" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  block_public_acls       = true
++  block_public_policy     = true
++  ignore_public_acls      = true
++  restrict_public_buckets = true
++}
++
++resource "aws_s3_bucket_ownership_controls" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    object_ownership = "BucketOwnerEnforced"
++  }
++}
++
++resource "aws_s3_bucket_lifecycle_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    id     = "expire-old-state-versions"
++    status = "Enabled"
++
++    filter {}
++
++    noncurrent_version_expiration {
++      noncurrent_days = 90
++    }
++
++    abort_incomplete_multipart_upload {
++      days_after_initiation = 7
++    }
++  }
++}
++
++data "aws_iam_policy_document" "tls_only" {
++  statement {
++    sid       = "DenyInsecureTransport"
++    effect    = "Deny"
++    actions   = ["s3:*"]
++    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
++
++    principals {
++      type        = "*"
++      identifiers = ["*"]
++    }
++
++    condition {
++      test     = "Bool"
++      variable = "aws:SecureTransport"
++      values   = ["false"]
++    }
++  }
++}
++
++resource "aws_s3_bucket_policy" "state" {
++  bucket = aws_s3_bucket.state.id
++  policy = data.aws_iam_policy_document.tls_only.json
++
++  depends_on = [aws_s3_bucket_public_access_block.state]
++}
++
++output "state_bucket" {
++  value = aws_s3_bucket.state.id
++}
++
++output "state_bucket_region" {
++  value = var.region
++}

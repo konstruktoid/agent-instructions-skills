@@ -1,0 +1,86 @@
+diff --git a/bin/report.sh b/bin/report.sh
+index caf882c..30b7c5f 100755
+--- a/bin/report.sh
++++ b/bin/report.sh
+@@ -4,10 +4,17 @@
+ set -euo pipefail
+ 
+ main() {
+-  local file="${1:-}"
++  local file="" json=0 arg
++  for arg in "$@"; do
++    if [[ ${arg} == '--json' ]]; then
++      json=1
++    elif [[ -z ${file} ]]; then
++      file="${arg}"
++    fi
++  done
+ 
+   if [[ -z ${file} ]]; then
+-    printf 'usage: %s FILE\n' "${0##*/}" >&2
++    printf 'usage: %s [--json] FILE\n' "${0##*/}" >&2
+     return 64
+   fi
+ 
+@@ -30,7 +37,11 @@ main() {
+     esac
+   done < "${file}"
+ 
+-  printf 'total=%d passed=%d failed=%d\n' "${total}" "${passed}" "${failed}"
++  if ((json)); then
++    printf '{"total":%d,"passed":%d,"failed":%d}\n' "${total}" "${passed}" "${failed}"
++  else
++    printf 'total=%d passed=%d failed=%d\n' "${total}" "${passed}" "${failed}"
++  fi
+ }
+ 
+ main "$@"
+diff --git a/test/report.bats b/test/report.bats
+index 9e835a5..52a520f 100755
+--- a/test/report.bats
++++ b/test/report.bats
+@@ -1,5 +1,6 @@
+ #!/usr/bin/env bats
+ 
++bats_require_minimum_version 1.5.0
+ load test_helper
+ 
+ @test "summarizes a mixed result file" {
+@@ -17,3 +18,37 @@ load test_helper
+   run "${REPO_ROOT}/bin/report.sh" "${REPO_ROOT}/data/absent.csv"
+   [ "$status" -eq 66 ]
+ }
++
++@test "--json prints the counters as JSON" {
++  run "${REPO_ROOT}/bin/report.sh" --json "${REPO_ROOT}/data/sample.csv"
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":2,"failed":1}' ]
++  echo "$output" | jq -e '.total == 3 and .passed == 2 and .failed == 1'
++}
++
++@test "--json is accepted after the file too" {
++  run "${REPO_ROOT}/bin/report.sh" "${REPO_ROOT}/data/sample.csv" --json
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":2,"failed":1}' ]
++}
++
++@test "--json works with a path containing a space" {
++  local dir
++  dir="$(mktemp -d)"
++  cp "${REPO_ROOT}/data/sample.csv" "${dir}/my results.csv"
++  run "${REPO_ROOT}/bin/report.sh" --json "${dir}/my results.csv"
++  rm -rf -- "${dir}"
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":2,"failed":1}' ]
++}
++
++@test "--json without a file reports usage and exits 64" {
++  run "${REPO_ROOT}/bin/report.sh" --json
++  [ "$status" -eq 64 ]
++}
++
++@test "--json with a missing file exits 66 with no JSON on stdout" {
++  run --separate-stderr "${REPO_ROOT}/bin/report.sh" --json "${REPO_ROOT}/data/absent.csv"
++  [ "$status" -eq 66 ]
++  [ -z "$output" ]
++}

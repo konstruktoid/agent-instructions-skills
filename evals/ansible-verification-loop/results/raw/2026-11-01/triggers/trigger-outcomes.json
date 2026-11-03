@@ -1,0 +1,622 @@
+[
+  {
+    "id": "avl-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1887666,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:37.158157+00:00",
+          "seconds": 27.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1736828,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:37.155569+00:00",
+          "seconds": 22.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1692166,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:37.158616+00:00",
+          "seconds": 20.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.531666
+  },
+  {
+    "id": "avl-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.15939620000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:37.156229+00:00",
+          "seconds": 18.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1587438,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:37.155870+00:00",
+          "seconds": 18.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1662856,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:55.151267+00:00",
+          "seconds": 20.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.4844256
+  },
+  {
+    "id": "avl-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1769274,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:55.685168+00:00",
+          "seconds": 24.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.17671920000000002,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:57.187434+00:00",
+          "seconds": 23.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.18909279999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:23:59.649417+00:00",
+          "seconds": 27.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.5427394
+  },
+  {
+    "id": "avl-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.186579,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:04.800340+00:00",
+          "seconds": 26.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1698674,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:15.682861+00:00",
+          "seconds": 15.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.1803468,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:20.152579+00:00",
+          "seconds": 21.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.5367932
+  },
+  {
+    "id": "avl-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.19354320000000003,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:20.491242+00:00",
+          "seconds": 30.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.20080880000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:26.747008+00:00",
+          "seconds": 33.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-ansible-verification-loop:ansible-verification-loop"
+        ],
+        "cost_usd": 0.185767,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:30.829921+00:00",
+          "seconds": 22.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.580119
+  },
+  {
+    "id": "avl-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.11018280000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:30.987757+00:00",
+          "seconds": 20.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.1102096,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:41.164499+00:00",
+          "seconds": 21.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.11011220000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:50.656965+00:00",
+          "seconds": 22.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.33050460000000004
+  },
+  {
+    "id": "avl-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0946968,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:51.412343+00:00",
+          "seconds": 12.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.09232660000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:24:53.347844+00:00",
+          "seconds": 11.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.093704,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:00.092068+00:00",
+          "seconds": 20.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2807274
+  },
+  {
+    "id": "avl-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.1039376,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:02.926575+00:00",
+          "seconds": 18.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.10880880000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:04.316850+00:00",
+          "seconds": 21.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.110679,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:04.603328+00:00",
+          "seconds": 16.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.32342540000000003
+  },
+  {
+    "id": "avl-t09",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0949334,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:12.941643+00:00",
+          "seconds": 12.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0957604,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:20.559156+00:00",
+          "seconds": 16.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.1002084,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:21.150301+00:00",
+          "seconds": 18.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2909022
+  },
+  {
+    "id": "avl-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "avl-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0769932,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:21.367819+00:00",
+          "seconds": 20.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0771932,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:24.974412+00:00",
+          "seconds": 21.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "avl-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.07335320000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-01T07:25:25.740783+00:00",
+          "seconds": 19.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2275396
+  }
+]

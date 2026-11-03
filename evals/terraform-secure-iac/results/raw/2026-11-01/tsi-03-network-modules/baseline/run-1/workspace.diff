@@ -1,0 +1,65 @@
+diff --git a/.terraform/modules/vpc b/.terraform/modules/vpc
+new file mode 160000
+index 0000000..b3abd6d
+--- /dev/null
++++ b/.terraform/modules/vpc
+@@ -0,0 +1 @@
++Subproject commit b3abd6df2ecf052451a361ed55b8f06f8742a795
+diff --git a/variables.tf b/variables.tf
+index 236aa5f..98800ad 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -3,6 +3,16 @@ variable "region" {
+   default = "eu-north-1"
+ }
+ 
++variable "vpc_cidr" {
++  type    = string
++  default = "10.0.0.0/16"
++}
++
++variable "private_subnet_cidrs" {
++  type    = list(string)
++  default = ["10.0.1.0/24", "10.0.2.0/24"]
++}
++
+ variable "environment" {
+   type    = string
+   default = "staging"
+diff --git a/versions.tf b/versions.tf
+index bcdeda0..a4a0f16 100644
+--- a/versions.tf
++++ b/versions.tf
+@@ -2,7 +2,7 @@ terraform {
+   required_providers {
+     aws = {
+       source  = "hashicorp/aws"
+-      version = ">= 4.0"
++      version = "~> 6.0"
+     }
+   }
+ 
+diff --git a/vpc.tf b/vpc.tf
+new file mode 100644
+index 0000000..b389cce
+--- /dev/null
++++ b/vpc.tf
+@@ -0,0 +1,18 @@
++module "vpc" {
++  source  = "terraform-aws-modules/vpc/aws"
++  version = "~> 6.0"
++
++  name = "network-${var.environment}"
++  cidr = var.vpc_cidr
++
++  azs             = ["eu-north-1a", "eu-north-1b"]
++  private_subnets = var.private_subnet_cidrs
++
++  # Private-only: no public subnets, no internet/NAT gateways.
++  enable_nat_gateway = false
++
++  enable_dns_hostnames = true
++  enable_dns_support   = true
++
++  tags = module.labels.tags
++}

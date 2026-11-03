@@ -1,0 +1,79 @@
+diff --git a/bin/report.sh b/bin/report.sh
+index caf882c..28d2a08 100755
+--- a/bin/report.sh
++++ b/bin/report.sh
+@@ -4,10 +4,16 @@
+ set -euo pipefail
+ 
+ main() {
+-  local file="${1:-}"
++  local json=0 file=""
++
++  if [[ ${1:-} == '--json' ]]; then
++    json=1
++    shift
++  fi
++  file="${1:-}"
+ 
+   if [[ -z ${file} ]]; then
+-    printf 'usage: %s FILE\n' "${0##*/}" >&2
++    printf 'usage: %s [--json] FILE\n' "${0##*/}" >&2
+     return 64
+   fi
+ 
+@@ -30,7 +36,11 @@ main() {
+     esac
+   done < "${file}"
+ 
+-  printf 'total=%d passed=%d failed=%d\n' "${total}" "${passed}" "${failed}"
++  if ((json)); then
++    printf '{"total":%d,"passed":%d,"failed":%d}\n' "${total}" "${passed}" "${failed}"
++  else
++    printf 'total=%d passed=%d failed=%d\n' "${total}" "${passed}" "${failed}"
++  fi
+ }
+ 
+ main "$@"
+diff --git a/test/report.bats b/test/report.bats
+index 9e835a5..d373044 100755
+--- a/test/report.bats
++++ b/test/report.bats
+@@ -1,5 +1,6 @@
+ #!/usr/bin/env bats
+ 
++bats_require_minimum_version 1.5.0
+ load test_helper
+ 
+ @test "summarizes a mixed result file" {
+@@ -17,3 +18,31 @@ load test_helper
+   run "${REPO_ROOT}/bin/report.sh" "${REPO_ROOT}/data/absent.csv"
+   [ "$status" -eq 66 ]
+ }
++
++@test "--json prints the same counters as JSON" {
++  run "${REPO_ROOT}/bin/report.sh" --json "${REPO_ROOT}/data/sample.csv"
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":2,"failed":1}' ]
++}
++
++@test "--json without a file reports usage on stderr" {
++  run --separate-stderr "${REPO_ROOT}/bin/report.sh" --json
++  [ "$status" -eq 64 ]
++  [ -z "$output" ]
++  [[ $stderr == *usage* ]]
++}
++
++@test "--json with a missing file exits 66 and prints no JSON" {
++  run --separate-stderr "${REPO_ROOT}/bin/report.sh" --json "${REPO_ROOT}/data/absent.csv"
++  [ "$status" -eq 66 ]
++  [ -z "$output" ]
++}
++
++@test "--json handles a path containing a space" {
++  local dir="${BATS_TEST_TMPDIR}/with space"
++  mkdir -p "$dir"
++  printf 'job,status,duration\na,pass,1\nb,fail,2\nc,fail,3\n' > "$dir/r.csv"
++  run "${REPO_ROOT}/bin/report.sh" --json "$dir/r.csv"
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":1,"failed":2}' ]
++}

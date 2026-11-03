@@ -1,0 +1,121 @@
+diff --git a/.github/dependabot.yml b/.github/dependabot.yml
+new file mode 100644
+index 0000000..aae6071
+--- /dev/null
++++ b/.github/dependabot.yml
+@@ -0,0 +1,15 @@
++version: 2
++updates:
++  - package-ecosystem: github-actions
++    directory: /
++    schedule:
++      interval: weekly
++    # Wait a week after a release is published before proposing it, so a
++    # malicious release has time to be found and yanked.
++    cooldown:
++      default-days: 7
++    # One pull request per week covering every action update.
++    groups:
++      github-actions:
++        patterns:
++          - "*"
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 9524188..dc6d88c 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -9,6 +9,10 @@ on:
+ 
+ permissions: {}
+ 
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: true
++
+ jobs:
+   lint:
+     name: Lint
+@@ -18,7 +22,7 @@ jobs:
+       contents: read
+     steps:
+       - name: Checkout repository
+-        uses: actions/checkout@v5
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+         with:
+           persist-credentials: false
+       - name: Lint
+@@ -32,10 +36,10 @@ jobs:
+       contents: read
+     steps:
+       - name: Checkout repository
+-        uses: actions/checkout@v5
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+         with:
+           persist-credentials: false
+       - name: Set up uv
+-        uses: astral-sh/setup-uv@v6
++        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+       - name: Test
+         run: make test
+diff --git a/.github/workflows/codeql.yml b/.github/workflows/codeql.yml
+index 69351f0..d3e3857 100644
+--- a/.github/workflows/codeql.yml
++++ b/.github/workflows/codeql.yml
+@@ -7,6 +7,10 @@ on:
+ 
+ permissions: {}
+ 
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: true
++
+ jobs:
+   analyze:
+     name: Analyze
+@@ -14,15 +18,15 @@ jobs:
+     timeout-minutes: 30
+     permissions:
+       contents: read
+-      security-events: write
++      security-events: write  # upload CodeQL SARIF results
+     steps:
+       - name: Checkout repository
+-        uses: actions/checkout@v5
++        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+         with:
+           persist-credentials: false
+       - name: Initialize CodeQL
+-        uses: github/codeql-action/init@v3
++        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+         with:
+           languages: python
+       - name: Analyze
+-        uses: github/codeql-action/analyze@v3
++        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+diff --git a/README.md b/README.md
+index c948b06..435af8d 100644
+--- a/README.md
++++ b/README.md
+@@ -2,4 +2,22 @@
+ 
+ Runs lint, tests, and a scheduled CodeQL analysis.
+ 
+-Actions are referenced by major version tag. There is no Dependabot configuration.
++## How action updates are handled
++
++Every action in `.github/workflows/` is pinned to a full 40-character commit SHA,
++with the release version in a trailing comment (for example
++`actions/checkout@<sha> # v7.0.1`). Tags are mutable, so a SHA is the only
++reference that cannot be moved after review.
++
++[Dependabot](.github/dependabot.yml) keeps those pins current:
++
++- It checks the `github-actions` ecosystem weekly.
++- All updates are grouped into a single pull request.
++- A 7-day cooldown means a release is only proposed once it has been public for a
++  week, which leaves time for a malicious release to be found and withdrawn.
++- Dependabot rewrites both the SHA and the version comment.
++
++When reviewing the weekly pull request, read the upstream diff between the old and
++new SHAs and the release notes for any major-version bump, rather than trusting the
++version number. Merge it promptly; a pinned action does not otherwise update itself.
++When adding a new action, pin it to a SHA resolved from its repository, not a tag.

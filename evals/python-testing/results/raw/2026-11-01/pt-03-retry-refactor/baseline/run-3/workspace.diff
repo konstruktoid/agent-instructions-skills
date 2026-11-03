@@ -1,0 +1,49 @@
+diff --git a/src/fetcher/client.py b/src/fetcher/client.py
+index 31af732..3e45efe 100644
+--- a/src/fetcher/client.py
++++ b/src/fetcher/client.py
+@@ -15,24 +15,21 @@ class Client:
+         self.transport = transport
+         self.attempts = 0
+ 
+-    def get(self, path: str) -> str:
+-        """Fetch a path, retrying on transport failure."""
++    def _with_retries(self, method: str, path: str) -> str:
++        """Call the transport, retrying on transport failure."""
+         last_error = None
+         for _ in range(MAX_ATTEMPTS):
+             self.attempts += 1
+             try:
+-                return self.transport("GET", path)
++                return self.transport(method, path)
+             except TransportError as error:
+                 last_error = error
+         raise last_error
+ 
++    def get(self, path: str) -> str:
++        """Fetch a path, retrying on transport failure."""
++        return self._with_retries("GET", path)
++
+     def head(self, path: str) -> str:
+         """Issue a HEAD for a path, retrying on transport failure."""
+-        last_error = None
+-        for _ in range(MAX_ATTEMPTS):
+-            self.attempts += 1
+-            try:
+-                return self.transport("HEAD", path)
+-            except TransportError as error:
+-                last_error = error
+-        raise last_error
++        return self._with_retries("HEAD", path)
+diff --git a/tests/test_client.py b/tests/test_client.py
+index 2a812b4..14674ec 100644
+--- a/tests/test_client.py
++++ b/tests/test_client.py
+@@ -1,6 +1,7 @@
+ """Tests for fetcher.client."""
+ 
+ import pytest
++
+ from fetcher import Client
+ from fetcher.client import TransportError
+ 

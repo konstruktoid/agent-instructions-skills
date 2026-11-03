@@ -1,0 +1,66 @@
+diff --git a/.github/workflows/triage.yml b/.github/workflows/triage.yml
+new file mode 100644
+index 0000000..b6ceae6
+--- /dev/null
++++ b/.github/workflows/triage.yml
+@@ -0,0 +1,43 @@
++---
++name: triage
++
++# pull_request_target runs in the context of the base repository, so the token
++# can write to pull requests opened from forks (plain `pull_request` gets a
++# read-only token there). This is safe only because the workflow never checks
++# out or executes code from the pull request.
++on:
++  pull_request_target:
++    types: [opened]
++
++permissions: {}
++
++jobs:
++  triage:
++    name: Welcome and label
++    runs-on: ubuntu-latest
++    timeout-minutes: 5
++    permissions:
++      pull-requests: write
++      issues: write
++    env:
++      GH_TOKEN: ${{ github.token }}
++      GH_REPO: ${{ github.repository }}
++      PR_NUMBER: ${{ github.event.pull_request.number }}
++      # Untrusted values are passed through env, never interpolated into the script.
++      PR_AUTHOR: ${{ github.event.pull_request.user.login }}
++      PR_TITLE: ${{ github.event.pull_request.title }}
++    steps:
++      - name: Ensure the needs-triage label exists
++        run: gh label create needs-triage --description "Awaiting triage" --color FBCA04 || true
++
++      - name: Apply the needs-triage label
++        run: gh pr edit "$PR_NUMBER" --add-label needs-triage
++
++      - name: Post the welcome comment
++        run: |
++          {
++            printf 'Welcome, @%s! Thanks for your contribution.\n\n' "$PR_AUTHOR"
++            printf 'Summary: **%s**\n\n' "$PR_TITLE"
++            printf 'A maintainer will triage this pull request soon.\n'
++          } > comment.md
++          gh pr comment "$PR_NUMBER" --body-file comment.md
+diff --git a/README.md b/README.md
+index 31b0fae..8557c10 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,12 @@ A repository that runs its tests on every pull request.
+ ## Contributing
+ 
+ Open a pull request. Contributions arrive from forks.
++
++## Triage workflow
++
++`.github/workflows/triage.yml` runs when a pull request is opened. It:
++
++- posts a comment welcoming the author by username and repeating the pull request title as a summary;
++- applies the `needs-triage` label (creating it if it does not exist).
++
++It uses the `pull_request_target` trigger so the token can write comments and labels on pull requests opened from forks, where `pull_request` tokens are read-only. For that reason the workflow must never check out or run code from the pull request; it only calls the `gh` CLI, and the title and username are passed via environment variables rather than interpolated into shell code.
