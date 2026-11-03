@@ -1,0 +1,61 @@
+{
+  "task": "pv-04-sound-fix",
+  "condition": "with-discipline",
+  "comparison": "discipline-ablation",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-03T06:52:43.695238+00:00",
+    "seconds": 18.9
+  },
+  "base_sha": "2b52780db0aac6c8a1c3b9025e2fcab905f9c98d",
+  "skills_used": [],
+  "num_turns": 6,
+  "cost_usd": 0.0563619,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "verdict-clear",
+      "kind": "final_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: report a verdict per item, confirmed clear or unresolved",
+      "passed": true,
+      "evidence": "match: '\\nVERDICT: CLEAR'"
+    },
+    {
+      "id": "reran-ruff",
+      "kind": "bash_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: re-run ruff independently, a result the fixer reported is not evidence",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "reran-ty",
+      "kind": "bash_regex",
+      "source": "agent-templates/python-security-verifier.md Scope: re-run ty independently",
+      "passed": true,
+      "evidence": "match: 'ty check'"
+    },
+    {
+      "id": "tracked-files-unchanged",
+      "kind": "workspace_command",
+      "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-new-source-files",
+      "kind": "workspace_command",
+      "source": "agent-templates/python-security-verifier.md frontmatter: no Edit, a verifier that can write can fix what it finds",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 5,
+  "total": 5
+}

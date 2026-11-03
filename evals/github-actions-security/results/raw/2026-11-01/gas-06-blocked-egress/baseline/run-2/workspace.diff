@@ -1,0 +1,12 @@
+diff --git a/.github/workflows/dependency-review.yml b/.github/workflows/dependency-review.yml
+index 81d2caf..a0197b6 100644
+--- a/.github/workflows/dependency-review.yml
++++ b/.github/workflows/dependency-review.yml
+@@ -19,6 +19,7 @@ jobs:
+         with:
+           egress-policy: block
+           allowed-endpoints: >
++            api.deps.dev:443
+             api.github.com:443
+             api.securityscorecards.dev:443
+             github.com:443

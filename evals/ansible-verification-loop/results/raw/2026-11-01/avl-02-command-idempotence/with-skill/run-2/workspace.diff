@@ -1,0 +1,46 @@
+diff --git a/README.md b/README.md
+index 26d5bf2..c2c7fa9 100644
+--- a/README.md
++++ b/README.md
+@@ -9,3 +9,4 @@ Requests and renews Let's Encrypt certificates.
+ | `certbot_domains` | `[]` | Domains to request certificates for. |
+ | `certbot_email` | `admin@example.com` | Registration contact address. |
+ | `certbot_renew_hour` | `3` | Hour the renewal timer fires. |
++| `certbot_staging` | `false` | When true, passes `--staging` so the request goes to the Let's Encrypt staging endpoint. Staging certificates are not publicly trusted. |
+diff --git a/defaults/main.yml b/defaults/main.yml
+index 2f00997..c4dca26 100644
+--- a/defaults/main.yml
++++ b/defaults/main.yml
+@@ -2,3 +2,4 @@
+ certbot_domains: []
+ certbot_email: admin@example.com
+ certbot_renew_hour: 3
++certbot_staging: false
+diff --git a/tasks/main.yml b/tasks/main.yml
+index aa2ea2c..1cd991e 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -4,12 +4,21 @@
+     name: certbot
+     state: present
+ 
+-- shell: certbot certificates | grep -c "VALID"
++- name: Count valid certificates
++  ansible.builtin.shell:
++    cmd: set -o pipefail && certbot certificates | grep -c "VALID"
++    executable: /bin/bash
+   register: certbot_valid_count
++  changed_when: false
++  failed_when: certbot_valid_count.rc > 1
+ 
+ - name: Request a certificate for each domain
+-  ansible.builtin.command: certbot certonly --standalone -d {{ item }} -m {{ certbot_email }} --agree-tos -n
++  ansible.builtin.command: >-
++    certbot certonly --standalone -d {{ item }} -m {{ certbot_email }}
++    --agree-tos -n{{ ' --staging' if certbot_staging | bool else '' }}
+   loop: "{{ certbot_domains }}"
++  when: certbot_valid_count.stdout | int == 0
++  changed_when: true
+   notify: Reload nginx
+ 
+ - name: Write the renewal timer

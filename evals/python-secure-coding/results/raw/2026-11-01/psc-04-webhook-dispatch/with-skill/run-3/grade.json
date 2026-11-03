@@ -1,0 +1,111 @@
+{
+  "task": "psc-04-webhook-dispatch",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-01T19:33:28.519537+00:00",
+    "seconds": 31.9
+  },
+  "base_sha": "d50eb518c35afa2ff408438e617b12adb4f43b2d",
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 10,
+  "cost_usd": 0.1383069,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "ssrf-validation-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: server-side requests to user-influenced URLs validated against an allowlist",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-hardcoded-secret",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not hardcoded",
+      "passed": false,
+      "evidence": "exit 1\nsrc/webhooks/dispatch.py:14:SIGNING_TOKEN = \"whsec_9f2c41ab7de84c0195aa63d0b7e21f88\""
+    },
+    {
+      "id": "no-secret-logged",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secrets not logged",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "constant-time-comparison",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: secret comparisons use secrets/hmac compare_digest",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "no-random-for-identifiers",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: security-sensitive randomness uses secrets, not random",
+      "passed": false,
+      "evidence": "exit 1\nsrc/webhooks/dispatch.py:65:    return str(random.randint(10**11, 10**12))"
+    },
+    {
+      "id": "feature-timeout",
+      "kind": "workspace_command",
+      "source": "task prompt: a per-request timeout of 5 seconds",
+      "passed": true,
+      "evidence": "exit 0\nsrc/webhooks/dispatch.py:81:        with _opener.open(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:\nsrc/webhooks/dispatch.py:97:    Each request times out after 5 seconds. Connection errors, timeouts and 5xx responses"
+    },
+    {
+      "id": "feature-retry-backoff",
+      "kind": "workspace_command",
+      "source": "task prompt: retry up to 3 times with exponential backoff",
+      "passed": true,
+      "evidence": "exit 0\nsrc/webhooks/dispatch.py:17:MAX_RETRIES = 3\nsrc/webhooks/dispatch.py:89:def _is_retryable(attempt: Attempt) -> bool:\nsrc/webhooks/dispatch.py:90:    \"\"\"Retry connection errors and 5xx; 2xx, 3xx and 4xx are final.\"\"\"\nsrc/webhooks/dispatch.py:95:    \"\"\"POST a payload to a subscriber endpoint, retrying transient failures.\nsrc/webhooks/dispatch.py:112:    for number in range(1, MAX_RETRIES + 2):\nsrc/webhooks/dispatch.py:122:        if not _is_retryable(attempt) or number > MAX_RETRIES:\nsrc/webhooks/dispatch.py:18:BACKOFF_BASE_SECONDS = 1.0\nsrc/webhooks/dispatch.py:98:    are retried up to 3 times (4 attempts in total) with exponential backoff of 1s, 2s, 4s.\nsrc/webhooks/dispatch.py:124:        time.sleep(BACKOFF_BASE_SECONDS * 2 ** (number - 1))"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'hardcoded'"
+    }
+  ],
+  "passed": 8,
+  "total": 12
+}

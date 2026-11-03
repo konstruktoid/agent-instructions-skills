@@ -1,0 +1,146 @@
+diff --git a/README.md b/README.md
+index cb55706..e78b109 100644
+--- a/README.md
++++ b/README.md
+@@ -10,6 +10,28 @@ from accounts.reset import request_reset
+ token = request_reset("user@example.com")
+ ```
+ 
+-Password storage and token comparison live in `accounts.crypto`, which the reset
+-flow calls rather than hashing or comparing anything itself. Issuing a token and
+-checking one are implemented; completing a reset is not.
++## Reset flow
++
++1. **Request.** `request_reset(email)` creates a random token (32 bytes from
++   `secrets`, URL-safe), records it with its issue time, and returns it. The caller
++   delivers it to the account owner (e.g. by email). The token is never logged.
++   Requesting again adds another token; earlier ones stay valid until used or expired.
++2. **Complete.** `complete_reset(email, token, new_password)` returns `True` and
++   stores the new password only if the token was issued for that account, has not
++   been used, and is less than 30 minutes old (`TOKEN_TTL_SECONDS`). Otherwise it
++   returns `False` and changes nothing; it does not raise.
++3. **Single use.** On success every outstanding token for the account is discarded,
++   so the same token (or any other) cannot be replayed. Expired tokens are purged
++   whenever the account's tokens are checked.
++
++```python
++from accounts.reset import complete_reset, request_reset
++
++token = request_reset("user@example.com")
++assert complete_reset("user@example.com", token, "new-password")
++assert not complete_reset("user@example.com", token, "again")  # already used
++```
++
++Password storage (salted PBKDF2-HMAC-SHA256) and constant-time token comparison
++live in `accounts.crypto`. State is in-memory (`USERS`, `RESET_TOKENS`); a real
++deployment needs persistent storage and rate limiting on `complete_reset`.
+diff --git a/src/accounts/crypto.py b/src/accounts/crypto.py
+index 3b8811b..433f59f 100644
+--- a/src/accounts/crypto.py
++++ b/src/accounts/crypto.py
+@@ -1,15 +1,20 @@
+ """Hashing and comparison helpers for the accounts package."""
+ 
+ import hashlib
++import hmac
+ 
+ # Mixed into every password hash so a stolen database cannot be checked against
+ # a precomputed table without it.
+ PEPPER = "accounts-v2"
+ 
++PBKDF2_ITERATIONS = 600_000
++
+ 
+ def hash_password(password: str, salt: str) -> str:
+     """Return the stored representation of a password."""
+-    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()
++    return hashlib.pbkdf2_hmac(
++        "sha256", (password + PEPPER).encode(), salt.encode(), PBKDF2_ITERATIONS
++    ).hex()
+ 
+ 
+ def tokens_match(left: str, right: str) -> bool:
+@@ -20,4 +25,4 @@ def tokens_match(left: str, right: str) -> bool:
+     """
+     left_digest = hashlib.sha256(left.encode()).hexdigest()
+     right_digest = hashlib.sha256(right.encode()).hexdigest()
+-    return left_digest == right_digest
++    return hmac.compare_digest(left_digest, right_digest)
+diff --git a/src/accounts/reset.py b/src/accounts/reset.py
+index 7bbfc25..2b2f1ed 100644
+--- a/src/accounts/reset.py
++++ b/src/accounts/reset.py
+@@ -2,16 +2,21 @@
+ 
+ import logging
+ import secrets
++import time
+ 
+ from accounts.crypto import hash_password, tokens_match
+ 
+ logger = logging.getLogger(__name__)
+ 
+ USERS: dict[str, dict] = {}
+-RESET_TOKENS: dict[str, str] = {}
++# Outstanding reset tokens per account, as (token, issued_at epoch seconds).
++RESET_TOKENS: dict[str, list[tuple[str, float]]] = {}
+ 
+-# Short enough to retype from a reset email without copy and paste.
+-TOKEN_BYTES = 6
++# A token stops working this long after it was issued.
++TOKEN_TTL_SECONDS = 30 * 60
++
++# 256 bits of entropy: tokens are delivered as links, so length is not a usability concern.
++TOKEN_BYTES = 32
+ 
+ 
+ def new_salt() -> str:
+@@ -33,19 +38,39 @@ def make_token() -> str:
+ def request_reset(email: str) -> str:
+     """Issue a reset token for an account and return it."""
+     token = make_token()
+-    RESET_TOKENS[email] = token
+-    logger.info("issued reset token %s... for %s", token[:4], email)
++    RESET_TOKENS.setdefault(email, []).append((token, time.time()))
++    logger.info("issued reset token for %s", email)
+     return token
+ 
+ 
++def _live_tokens(email: str, now: float) -> list[tuple[str, float]]:
++    """Drop expired tokens for an account and return those still valid."""
++    live = [(t, at) for t, at in RESET_TOKENS.get(email, []) if now - at < TOKEN_TTL_SECONDS]
++    if live:
++        RESET_TOKENS[email] = live
++    else:
++        RESET_TOKENS.pop(email, None)
++    return live
++
++
+ def check_token(email: str, token: str) -> bool:
+-    """Check a reset token against the issued one."""
+-    issued = RESET_TOKENS.get(email)
+-    if issued is None:
+-        return False
+-    return tokens_match(issued, token)
++    """Check a reset token against the unexpired tokens issued for the account."""
++    matched = False
++    for issued, _ in _live_tokens(email, time.time()):
++        # No early exit, so timing does not reveal which token matched.
++        matched |= tokens_match(issued, token)
++    return matched
+ 
+ 
+ def complete_reset(email: str, token: str, new_password: str) -> bool:
+-    """Complete a password reset."""
+-    raise NotImplementedError
++    """Complete a password reset.
++
++    Returns False, without changing anything, if the token is unknown, already
++    used, or older than TOKEN_TTL_SECONDS. On success the password is stored and
++    every outstanding token for the account is discarded, so the token is single use.
++    """
++    if not check_token(email, token):
++        return False
++    RESET_TOKENS.pop(email, None)
++    store_password(email, new_password)
++    return True

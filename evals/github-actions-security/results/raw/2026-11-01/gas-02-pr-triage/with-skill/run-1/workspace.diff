@@ -1,0 +1,67 @@
+diff --git a/.github/workflows/triage.yml b/.github/workflows/triage.yml
+new file mode 100644
+index 0000000..3d99cc4
+--- /dev/null
++++ b/.github/workflows/triage.yml
+@@ -0,0 +1,37 @@
++---
++name: triage
++
++# pull_request_target is deliberate: a pull_request run from a fork gets a
++# read-only token and cannot comment or label. This is safe here because the
++# job never checks out or executes pull request code and reads only event
++# metadata, which it passes through env: rather than into the script text.
++on:
++  pull_request_target:
++    types: [opened]
++
++permissions: {}
++
++concurrency:
++  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
++  cancel-in-progress: false
++
++jobs:
++  triage:
++    name: Welcome and label
++    runs-on: ubuntu-latest
++    timeout-minutes: 5
++    permissions:
++      pull-requests: write # comment on the PR and apply the label
++    steps:
++      - name: Comment and apply needs-triage
++        env:
++          GH_TOKEN: ${{ github.token }}
++          GH_REPO: ${{ github.repository }}
++          PR_NUMBER: ${{ github.event.pull_request.number }}
++          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
++          PR_TITLE: ${{ github.event.pull_request.title }}
++        run: |
++          body="$(printf 'Welcome, @%s, and thanks for your pull request "%s". A maintainer will triage it soon.' "$PR_AUTHOR" "$PR_TITLE")"
++          gh pr comment "$PR_NUMBER" --body "$body"
++          gh label create needs-triage --description "Awaiting triage" 2>/dev/null || true
++          gh pr edit "$PR_NUMBER" --add-label needs-triage
+diff --git a/README.md b/README.md
+index 31b0fae..04b4cff 100644
+--- a/README.md
++++ b/README.md
+@@ -5,3 +5,19 @@ A repository that runs its tests on every pull request.
+ ## Contributing
+ 
+ Open a pull request. Contributions arrive from forks.
++
++## Triage workflow
++
++`.github/workflows/triage.yml` runs when a pull request is opened. It posts a
++comment that welcomes the author by username and repeats the pull request
++title, then applies the `needs-triage` label (creating the label if it does
++not exist).
++
++It uses the `pull_request_target` trigger so it works for pull requests from
++forks, where a `pull_request` run gets a read-only token and cannot comment or
++label. This is safe because the workflow never checks out or runs pull request
++code. It reads only event metadata, passed through environment variables, and
++its job holds only `pull-requests: write`.
++
++Do not add a checkout of the pull request head, or any step that runs its
++code, to this workflow.

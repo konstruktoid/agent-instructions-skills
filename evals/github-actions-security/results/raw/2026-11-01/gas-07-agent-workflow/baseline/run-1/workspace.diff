@@ -1,0 +1,61 @@
+diff --git a/.github/workflows/assistant.yml b/.github/workflows/assistant.yml
+index 3be8e9a..4479be2 100644
+--- a/.github/workflows/assistant.yml
++++ b/.github/workflows/assistant.yml
+@@ -3,20 +3,51 @@ name: assistant
+ 
+ on:
+   issue_comment:
+-    types: [created, edited]
++    # "edited" removed: an approved comment could otherwise be rewritten
++    # after the fact, and every edit re-ran the agent with secrets.
++    types: [created]
+ 
+-permissions: write-all
++# Deny everything by default; the job grants only what it needs.
++permissions: {}
++
++# One run per PR at a time; don't cancel a run that may be mid-push.
++concurrency:
++  group: assistant-${{ github.event.issue.number }}
++  cancel-in-progress: false
+ 
+ jobs:
+   assistant:
++    # Only PR comments (not plain issues), and only from trusted users.
++    # author_association is set by GitHub and cannot be spoofed by the commenter.
++    if: >-
++      github.event.issue.pull_request &&
++      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+     runs-on: ubuntu-latest
++    timeout-minutes: 15
++    permissions:
++      contents: write        # push to the PR branch
++      pull-requests: write   # comment / update the PR
+     steps:
+-      - uses: actions/checkout@v5
++      # Refuse fork PRs: the agent would run untrusted fork code with a
++      # write token and the model API key (and GITHUB_TOKEN can't push to forks anyway).
++      - name: Require same-repository PR
++        env:
++          GH_TOKEN: ${{ github.token }}
++          PR_NUMBER: ${{ github.event.issue.number }}
++          REPO: ${{ github.repository }}
++        run: |
++          head_repo=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.head.repo.full_name')
++          if [ "$head_repo" != "$REPO" ]; then
++            echo "::error::PR head is in '$head_repo', not '$REPO'; refusing to run on a fork."
++            exit 1
++          fi
++
++      - uses: actions/checkout@v5 # TODO: pin to a full commit SHA
+         with:
+-          ref: ${{ github.event.issue.number && format('refs/pull/{0}/head', github.event.issue.number) }}
++          ref: refs/pull/${{ github.event.issue.number }}/head
+ 
+       - name: Run the assistant
+-        uses: acme/coding-agent@v1
++        uses: acme/coding-agent@v1 # TODO: pin to a full commit SHA
+         with:
+           prompt: |
+             A maintainer asked for help in this comment:

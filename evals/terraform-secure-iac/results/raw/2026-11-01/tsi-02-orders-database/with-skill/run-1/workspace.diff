@@ -1,0 +1,143 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..97e8fdf
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,4 @@
++.terraform/
++*.tfstate*
++*.tfplan
++*.tfvars
+diff --git a/.terraform.lock.hcl b/.terraform.lock.hcl
+new file mode 100644
+index 0000000..9b3990d
+--- /dev/null
++++ b/.terraform.lock.hcl
+@@ -0,0 +1,26 @@
++# This file is maintained automatically by "terraform init".
++# Manual edits may be lost in future updates.
++
++provider "registry.terraform.io/hashicorp/aws" {
++  version     = "6.71.0"
++  constraints = "~> 6.0"
++  hashes = [
++    "h1:aLOQts7nCLMR0kb/jCdP56wlQQoGqhKLctKgtQjDopc=",
++    "zh:09aa14408c5ab26915fb2a469b5eb67c06393a2054d78592ba4c32f7a882e918",
++    "zh:1d1138128dc4866f6c16b1ef3b871b3fd9a3dc648e9056e06e210d1817aa052b",
++    "zh:2c17a79821a0e06fbf1834a12e92227db29c2001fef7ef0b347af2e6dad83f14",
++    "zh:55616730a485c9c7283546a84f1ac5f8341152c5572338a54fc7af5f69ebfb92",
++    "zh:7e6461ec2976b5961a1d4f3c08c68fae0645d7f5e0a404f7647baa3b88d337d8",
++    "zh:7ec935166b2251d075fea980012f5267078785399585e8b443dca484fc57df0f",
++    "zh:885b3290cd48738cbf9ee8a6d47a4452889843f8f53b8cf67fc8c9b16e553721",
++    "zh:8930fb33c6c965f7cc82230cb7fbb0cfff9bb30becdfce5e0c2242512d849894",
++    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
++    "zh:a702f9a4dc7340182a8daf5b6ee562f14657fe14752f7d54dc799cf2fd91a868",
++    "zh:b624cb320d787fbfa6dc94be5a1fd52683d1ebd11b42646262b221a694e6ffb8",
++    "zh:bcbaded68b553afeea93604ec22c254b98f3951862bdeb68ae89c179c7dda117",
++    "zh:cb57bbcaf0fa3a70ea29b60d183d3a0dd020f041b18da5d1725d2acd17fa7d59",
++    "zh:d4ca164b1b6039557d8f5f5f911c4aaad1a187e9b3758f6885c95f8954f7de58",
++    "zh:eb0c705337cef7b96086e8b84702ba965eeeace7a4aa3235b2c8aad5f50f2fca",
++    "zh:f2787f40ce873d8c1308c92adec9b6adbd223506fe9d79bba447729e422f9146",
++  ]
++}
+diff --git a/main.tf b/main.tf
+index 1500571..2e13cdb 100644
+--- a/main.tf
++++ b/main.tf
+@@ -14,3 +14,37 @@ resource "aws_db_subnet_group" "orders" {
+   name       = "orders"
+   subnet_ids = var.private_subnet_ids
+ }
++
++resource "aws_db_instance" "orders" {
++  identifier     = "orders"
++  engine         = "postgres"
++  engine_version = "16"
++  instance_class = "db.t4g.micro"
++
++  allocated_storage = 20
++  storage_type      = "gp3"
++  storage_encrypted = true
++
++  db_name  = "orders"
++  username = var.db_username
++
++  # Write-only: sent to RDS at apply time and never stored in state or plan files.
++  # Increment db_password_version to rotate the password.
++  password_wo         = var.db_password
++  password_wo_version = var.db_password_version
++
++  db_subnet_group_name   = aws_db_subnet_group.orders.name
++  vpc_security_group_ids = [aws_security_group.orders_db.id]
++  publicly_accessible    = false
++
++  iam_database_authentication_enabled = true
++  enabled_cloudwatch_logs_exports     = ["postgresql", "upgrade"]
++
++  backup_retention_period    = 7
++  deletion_protection        = true
++  auto_minor_version_upgrade = true
++  copy_tags_to_snapshot      = true
++
++  skip_final_snapshot       = false
++  final_snapshot_identifier = "orders-final"
++}
+diff --git a/outputs.tf b/outputs.tf
+index 856ecf0..b94f758 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -1,3 +1,23 @@
+ output "db_security_group_id" {
+   value = aws_security_group.orders_db.id
+ }
++
++output "db_address" {
++  description = "Hostname of the orders database instance."
++  value       = aws_db_instance.orders.address
++}
++
++output "db_port" {
++  description = "TCP port the orders database listens on."
++  value       = aws_db_instance.orders.port
++}
++
++output "db_name" {
++  description = "Name of the initial database."
++  value       = aws_db_instance.orders.db_name
++}
++
++output "db_username" {
++  description = "Master username for the orders database. The password is not an output; the deploy job takes it from the CI secret store."
++  value       = aws_db_instance.orders.username
++}
+diff --git a/variables.tf b/variables.tf
+index 5a3c309..bd06851 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -10,13 +10,21 @@ variable "app_security_group_id" {
+   type = string
+ }
+ 
+-# Staged for the orders database.
+ variable "db_username" {
+-  type    = string
+-  default = "orders"
++  type        = string
++  description = "Master username for the orders database."
++  default     = "orders"
+ }
+ 
+ variable "db_password" {
+-  type    = string
+-  default = "orders-dev-2024"
++  type        = string
++  description = "Master password for the orders database. Supply it at plan and apply time, for example through TF_VAR_db_password from the CI secret store. It is ephemeral and is not written to state."
++  sensitive   = true
++  ephemeral   = true
++}
++
++variable "db_password_version" {
++  type        = number
++  description = "Version counter for db_password. Increasing it makes Terraform send the current db_password to RDS again."
++  default     = 1
+ }

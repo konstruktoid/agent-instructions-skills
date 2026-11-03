@@ -1,0 +1,95 @@
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 2c2293c..2660423 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -5,26 +5,42 @@ on:
+   push:
+     branches:
+       - main
++    tags:
++      - 'v*'
+   workflow_dispatch:
+ 
+-permissions: write-all
++permissions: {}
++
++concurrency:
++  group: ${{ github.workflow }}-${{ github.ref }}
++  cancel-in-progress: false
+ 
+ jobs:
+   deploy:
+-    runs-on: self-hosted
++    name: Deploy
++    runs-on: ubuntu-latest # was self-hosted; a public repository must not use self-hosted runners
++    timeout-minutes: 15
++    permissions:
++      contents: read
++      id-token: write # OIDC token for AWS role assumption
+     steps:
+-      - uses: actions/checkout@main
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
++        with:
++          persist-credentials: false
+       - name: Configure AWS
+-        uses: aws-actions/configure-aws-credentials@v4
++        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+         with:
+-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
++          role-to-assume: arn:aws:iam::123456789012:role/deploy-widget
+           aws-region: eu-north-1
+       - name: Build and push
++        env:
++          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+         run: |
+-          echo "Deploying ${{ github.event.head_commit.message }}"
++          echo "Deploying ${COMMIT_MESSAGE}"
+           ./scripts/deploy.sh
+       - name: Notify
++        # Unpinned: some-org/slack-notify has no resolvable release or tag to pin
++        # to a SHA. Pin it once the source is confirmed.
+         uses: some-org/slack-notify@v1
+         with:
+           webhook: ${{ secrets.SLACK_WEBHOOK }}
+diff --git a/README.md b/README.md
+index 8347b4a..b371200 100644
+--- a/README.md
++++ b/README.md
+@@ -1,5 +1,35 @@
+ # deploy-demo
+ 
+-Deploys the service to AWS on every push to `main`.
++Deploys the service to AWS on every push to `main` and on every pushed
++version tag matching `v*`. It can also be started manually
++(`workflow_dispatch`).
+ 
+ This repository is public.
++
++## AWS authentication
++
++The workflow authenticates with OIDC. It assumes
++`arn:aws:iam::123456789012:role/deploy-widget` in `eu-north-1`, and no
++long-lived AWS access keys are stored. The `AWS_ACCESS_KEY_ID` and
++`AWS_SECRET_ACCESS_KEY` repository secrets are no longer used and can be
++deleted.
++
++The role's trust policy must trust the GitHub OIDC provider
++(`token.actions.githubusercontent.com`, audience `sts.amazonaws.com`) and
++match the `sub` claim exactly, with no wildcard:
++
++- `repo:<owner>/<repo>:ref:refs/heads/main` for pushes to `main`
++- `repo:<owner>/<repo>:ref:refs/tags/v*` for version tags (use `StringLike`
++  for this one only)
++
++Manual runs from other branches get a different `sub` and are denied unless
++you add it.
++
++## Secrets
++
++- `SLACK_WEBHOOK`: used by the Slack notification step.
++
++## Runner
++
++The job runs on a GitHub-hosted runner (`ubuntu-latest`). Self-hosted runners
++must not be used in a public repository.

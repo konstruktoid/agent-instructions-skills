@@ -1,0 +1,20 @@
+diff --git a/bin/prune-artifacts.sh b/bin/prune-artifacts.sh
+index 38abfff..f116c59 100755
+--- a/bin/prune-artifacts.sh
++++ b/bin/prune-artifacts.sh
+@@ -9,10 +9,13 @@ main() {
+   local dir="${1:-artifacts}"
+   local days="${2:-${DEFAULT_DAYS}}"
+ 
+-  if [[ -d ${dir} ]]; then
+-    find "${dir}" -type f -name '*.tar.gz' -mtime "+${days}" -delete
++  if [[ ! -d ${dir} ]]; then
++    printf 'error: artifact directory not found: %s\n' "${dir}" >&2
++    return 1
+   fi
+ 
++  find "${dir}" -type f -name '*.tar.gz' -mtime "+${days}" -delete || return 1
++
+   printf 'pruned %s (older than %s days)\n' "${dir}" "${days}"
+ }
+ 

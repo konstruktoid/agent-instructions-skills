@@ -106,7 +106,7 @@
       "kind": "workspace_command",
       "source": "task prompt: cumulative balance after each entry, empty list when the account has none",
       "passed": false,
-      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/home/tsj/Code/Git/agent-instructions-skills/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/with-skill/run-3/workspace/src/ledger/__init__.py)"
+      "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import sys; sys.path.insert(0,'src'); from ledger import Entry, running_balance as r; e=[Entry('cash',100),Entry('receivable',5),Entry('cash',-30)]; assert r(e,'cash')==[100,70], r(e,'cash'); assert r(e,'equity')==[]\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nImportError: cannot import name 'running_balance' from 'ledger' (/repo/evals/python-testing/results/raw/2026-09-13/pt-05-unusual-layout/with-skill/run-3/workspace/src/ledger/__init__.py)"
     },
     {
       "id": "added-checks-fail-when-the-feature-breaks",

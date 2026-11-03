@@ -1,0 +1,327 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..7cfc630
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,8 @@
++.terraform/
++*.tfstate
++*.tfstate.*
++*.tfplan
++crash.log
++crash.*.log
++*.tfvars
++*.auto.tfvars
+diff --git a/.terraform.lock.hcl b/.terraform.lock.hcl
+new file mode 100644
+index 0000000..9b3990d
+--- /dev/null
++++ b/.terraform.lock.hcl
+@@ -0,0 +1,26 @@
++# This file is maintained automatically by "terraform init".
++# Manual edits may be lost in future updates.
++
++provider "registry.terraform.io/hashicorp/aws" {
++  version     = "6.71.0"
++  constraints = "~> 6.0"
++  hashes = [
++    "h1:aLOQts7nCLMR0kb/jCdP56wlQQoGqhKLctKgtQjDopc=",
++    "zh:09aa14408c5ab26915fb2a469b5eb67c06393a2054d78592ba4c32f7a882e918",
++    "zh:1d1138128dc4866f6c16b1ef3b871b3fd9a3dc648e9056e06e210d1817aa052b",
++    "zh:2c17a79821a0e06fbf1834a12e92227db29c2001fef7ef0b347af2e6dad83f14",
++    "zh:55616730a485c9c7283546a84f1ac5f8341152c5572338a54fc7af5f69ebfb92",
++    "zh:7e6461ec2976b5961a1d4f3c08c68fae0645d7f5e0a404f7647baa3b88d337d8",
++    "zh:7ec935166b2251d075fea980012f5267078785399585e8b443dca484fc57df0f",
++    "zh:885b3290cd48738cbf9ee8a6d47a4452889843f8f53b8cf67fc8c9b16e553721",
++    "zh:8930fb33c6c965f7cc82230cb7fbb0cfff9bb30becdfce5e0c2242512d849894",
++    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
++    "zh:a702f9a4dc7340182a8daf5b6ee562f14657fe14752f7d54dc799cf2fd91a868",
++    "zh:b624cb320d787fbfa6dc94be5a1fd52683d1ebd11b42646262b221a694e6ffb8",
++    "zh:bcbaded68b553afeea93604ec22c254b98f3951862bdeb68ae89c179c7dda117",
++    "zh:cb57bbcaf0fa3a70ea29b60d183d3a0dd020f041b18da5d1725d2acd17fa7d59",
++    "zh:d4ca164b1b6039557d8f5f5f911c4aaad1a187e9b3758f6885c95f8954f7de58",
++    "zh:eb0c705337cef7b96086e8b84702ba965eeeace7a4aa3235b2c8aad5f50f2fca",
++    "zh:f2787f40ce873d8c1308c92adec9b6adbd223506fe9d79bba447729e422f9146",
++  ]
++}
+diff --git a/README.md b/README.md
+index febd4f0..2ee45e1 100644
+--- a/README.md
++++ b/README.md
+@@ -3,11 +3,60 @@
+ Terraform for the reports bucket and the key the nightly export job uploads with. The job reads
+ the key from `terraform output`.
+ 
+-## Usage
++## State
++
++State is stored in an S3 bucket created by `bootstrap/`, with versioning, KMS encryption at rest,
++public access blocked, TLS-only access, and S3 native locking (`use_lockfile`, Terraform >= 1.10),
++so two people cannot apply at once.
++
++State contains the uploader's IAM secret access key in cleartext (`sensitive` only hides it from
++CLI output). Grant access to the state bucket only to the people and CI identity that run
++Terraform for this configuration. Never commit `*.tfstate` or plan files.
++
++## First-time setup (one person, once)
++
++The bucket cannot store its own creation state, so `bootstrap/` keeps a local state file. It is
++git-ignored; keep it somewhere safe or re-import the bucket if it is lost
++(`terraform import aws_s3_bucket.state <bucket>`).
++
++1. Pick a globally unique bucket name and set the same value as `bucket` in `backend.tf`
++   (and `region`, if you change it).
++2. Create the bucket:
++
++   ```sh
++   cd bootstrap
++   terraform init
++   terraform apply -var 'state_bucket_name=<bucket>'
++   ```
++
++3. Migrate the existing local state into the bucket from the repository root. Copy
++   `terraform.tfstate` aside as a backup first, then:
++
++   ```sh
++   terraform init -migrate-state
++   ```
++
++   Answer `yes` to copy the state. Confirm with `terraform plan` that it shows no changes, then
++   delete the local `terraform.tfstate` and backup files.
++
++## Everyday workflow
++
++Credentials come from the default AWS credential chain (for example `AWS_PROFILE` or SSO); nothing
++secret goes in `backend.tf`. The identity needs `s3:ListBucket` on the bucket,
++`s3:GetObject`/`s3:PutObject`/`s3:DeleteObject` on `reports/terraform.tfstate` and
++`reports/terraform.tfstate.tflock`, and use of the bucket's KMS key.
+ 
+ ```sh
+ terraform init
+-terraform apply
++terraform plan -out=plan.tfplan
++terraform apply plan.tfplan
++rm plan.tfplan   # plan files can contain secrets
+ ```
+ 
+-State is kept locally in `terraform.tfstate`, so only the person who last ran `apply` has it.
++If a run is interrupted and leaves a stale lock, `terraform force-unlock <lock-id>` after
++confirming nobody else is running.
++
++## Recovering state
++
++Versioning keeps previous state objects for 90 days. To roll back, restore an earlier version of
++`reports/terraform.tfstate` in the bucket.
+diff --git a/backend.tf b/backend.tf
+new file mode 100644
+index 0000000..ef2ce45
+--- /dev/null
++++ b/backend.tf
+@@ -0,0 +1,11 @@
++terraform {
++  backend "s3" {
++    # Non-secret metadata only. Credentials come from the default AWS credential chain.
++    # The bucket is created by bootstrap/; keep this name equal to its state_bucket_name.
++    bucket       = "reports-tfstate-example"
++    key          = "reports/terraform.tfstate"
++    region       = "eu-north-1"
++    encrypt      = true
++    use_lockfile = true # S3 native locking, Terraform >= 1.10
++  }
++}
+diff --git a/bootstrap/.terraform.lock.hcl b/bootstrap/.terraform.lock.hcl
+new file mode 100644
+index 0000000..9b3990d
+--- /dev/null
++++ b/bootstrap/.terraform.lock.hcl
+@@ -0,0 +1,26 @@
++# This file is maintained automatically by "terraform init".
++# Manual edits may be lost in future updates.
++
++provider "registry.terraform.io/hashicorp/aws" {
++  version     = "6.71.0"
++  constraints = "~> 6.0"
++  hashes = [
++    "h1:aLOQts7nCLMR0kb/jCdP56wlQQoGqhKLctKgtQjDopc=",
++    "zh:09aa14408c5ab26915fb2a469b5eb67c06393a2054d78592ba4c32f7a882e918",
++    "zh:1d1138128dc4866f6c16b1ef3b871b3fd9a3dc648e9056e06e210d1817aa052b",
++    "zh:2c17a79821a0e06fbf1834a12e92227db29c2001fef7ef0b347af2e6dad83f14",
++    "zh:55616730a485c9c7283546a84f1ac5f8341152c5572338a54fc7af5f69ebfb92",
++    "zh:7e6461ec2976b5961a1d4f3c08c68fae0645d7f5e0a404f7647baa3b88d337d8",
++    "zh:7ec935166b2251d075fea980012f5267078785399585e8b443dca484fc57df0f",
++    "zh:885b3290cd48738cbf9ee8a6d47a4452889843f8f53b8cf67fc8c9b16e553721",
++    "zh:8930fb33c6c965f7cc82230cb7fbb0cfff9bb30becdfce5e0c2242512d849894",
++    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
++    "zh:a702f9a4dc7340182a8daf5b6ee562f14657fe14752f7d54dc799cf2fd91a868",
++    "zh:b624cb320d787fbfa6dc94be5a1fd52683d1ebd11b42646262b221a694e6ffb8",
++    "zh:bcbaded68b553afeea93604ec22c254b98f3951862bdeb68ae89c179c7dda117",
++    "zh:cb57bbcaf0fa3a70ea29b60d183d3a0dd020f041b18da5d1725d2acd17fa7d59",
++    "zh:d4ca164b1b6039557d8f5f5f911c4aaad1a187e9b3758f6885c95f8954f7de58",
++    "zh:eb0c705337cef7b96086e8b84702ba965eeeace7a4aa3235b2c8aad5f50f2fca",
++    "zh:f2787f40ce873d8c1308c92adec9b6adbd223506fe9d79bba447729e422f9146",
++  ]
++}
+diff --git a/bootstrap/main.tf b/bootstrap/main.tf
+new file mode 100644
+index 0000000..d1ec1c3
+--- /dev/null
++++ b/bootstrap/main.tf
+@@ -0,0 +1,96 @@
++resource "aws_s3_bucket" "state" {
++  bucket = var.state_bucket_name
++
++  # State is the only record of managed infrastructure; block accidental deletion.
++  lifecycle {
++    prevent_destroy = true
++  }
++}
++
++resource "aws_s3_bucket_versioning" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  versioning_configuration {
++    status = "Enabled"
++  }
++}
++
++resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    apply_server_side_encryption_by_default {
++      sse_algorithm = "aws:kms"
++    }
++    bucket_key_enabled = true
++  }
++}
++
++resource "aws_s3_bucket_public_access_block" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  block_public_acls       = true
++  block_public_policy     = true
++  ignore_public_acls      = true
++  restrict_public_buckets = true
++}
++
++resource "aws_s3_bucket_ownership_controls" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    object_ownership = "BucketOwnerEnforced"
++  }
++}
++
++resource "aws_s3_bucket_lifecycle_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  # Versioning must exist before noncurrent-version rules are accepted.
++  depends_on = [aws_s3_bucket_versioning.state]
++
++  rule {
++    id     = "expire-noncurrent-state-versions"
++    status = "Enabled"
++
++    filter {}
++
++    noncurrent_version_expiration {
++      noncurrent_days = var.noncurrent_version_retention_days
++    }
++
++    abort_incomplete_multipart_upload {
++      days_after_initiation = 7
++    }
++  }
++}
++
++data "aws_iam_policy_document" "state" {
++  statement {
++    sid     = "DenyInsecureTransport"
++    effect  = "Deny"
++    actions = ["s3:*"]
++    resources = [
++      aws_s3_bucket.state.arn,
++      "${aws_s3_bucket.state.arn}/*",
++    ]
++
++    principals {
++      type        = "*"
++      identifiers = ["*"]
++    }
++
++    condition {
++      test     = "Bool"
++      variable = "aws:SecureTransport"
++      values   = ["false"]
++    }
++  }
++}
++
++resource "aws_s3_bucket_policy" "state" {
++  bucket = aws_s3_bucket.state.id
++  policy = data.aws_iam_policy_document.state.json
++
++  depends_on = [aws_s3_bucket_public_access_block.state]
++}
+diff --git a/bootstrap/outputs.tf b/bootstrap/outputs.tf
+new file mode 100644
+index 0000000..504ccca
+--- /dev/null
++++ b/bootstrap/outputs.tf
+@@ -0,0 +1,4 @@
++output "state_bucket_name" {
++  description = "Name of the state bucket, for the bucket argument in the parent configuration's backend block."
++  value       = aws_s3_bucket.state.id
++}
+diff --git a/bootstrap/providers.tf b/bootstrap/providers.tf
+new file mode 100644
+index 0000000..dc58d9a
+--- /dev/null
++++ b/bootstrap/providers.tf
+@@ -0,0 +1,3 @@
++provider "aws" {
++  region = var.region
++}
+diff --git a/bootstrap/variables.tf b/bootstrap/variables.tf
+new file mode 100644
+index 0000000..892603a
+--- /dev/null
++++ b/bootstrap/variables.tf
+@@ -0,0 +1,21 @@
++variable "region" {
++  type        = string
++  description = "AWS region the state bucket is created in. Must match the region in the backend block of the parent configuration."
++  default     = "eu-north-1"
++}
++
++variable "state_bucket_name" {
++  type        = string
++  description = "Name of the S3 bucket that holds Terraform state. S3 bucket names are global, so choose a unique one. Must match the bucket in the backend block of the parent configuration."
++
++  validation {
++    condition     = can(regex("^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", var.state_bucket_name))
++    error_message = "The bucket name must be 3 to 63 characters of lowercase letters, digits, dots, and hyphens."
++  }
++}
++
++variable "noncurrent_version_retention_days" {
++  type        = number
++  description = "Days a superseded state version is kept before it is deleted. Older versions are the rollback history for a corrupt or truncated state."
++  default     = 90
++}
+diff --git a/bootstrap/versions.tf b/bootstrap/versions.tf
+new file mode 100644
+index 0000000..691becc
+--- /dev/null
++++ b/bootstrap/versions.tf
+@@ -0,0 +1,10 @@
++terraform {
++  required_version = ">= 1.10.0"
++
++  required_providers {
++    aws = {
++      source  = "hashicorp/aws"
++      version = "~> 6.0"
++    }
++  }
++}

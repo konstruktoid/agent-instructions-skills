@@ -1,0 +1,278 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..4ec8f6e
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,5 @@
++.terraform/
++*.tfstate
++*.tfstate.*
++crash.log
++*.tfvars
+diff --git a/README.md b/README.md
+index febd4f0..49f640a 100644
+--- a/README.md
++++ b/README.md
+@@ -3,11 +3,45 @@
+ Terraform for the reports bucket and the key the nightly export job uploads with. The job reads
+ the key from `terraform output`.
+ 
+-## Usage
++State is stored in S3 (versioned, KMS-encrypted, public access blocked, TLS-only, native
++lockfile locking via `use_lockfile`, so no DynamoDB table). Requires Terraform >= 1.10.
++**The state contains the uploader's secret access key**, so limit who can read the bucket and
++the KMS key `alias/reports-tfstate` to people who may see that key.
++
++## One-time bootstrap (one person, once)
++
++The state bucket is created by `bootstrap/`, which keeps its own state locally (it can't
++store state in a bucket that doesn't exist yet). It only holds the bucket and KMS key, no secrets.
++
++```sh
++cd bootstrap
++terraform init
++terraform apply
++```
++
++Then set the bucket name in `backend.tf` (default `reports-tfstate-<account id>`; see
++`terraform output bucket`) and commit. Keep `bootstrap/terraform.tfstate` somewhere safe
++(it is gitignored); the bucket has `prevent_destroy`.
++
++## Migrating the existing local state (once)
++
++From the laptop that has the current `terraform.tfstate`:
++
++```sh
++terraform init -migrate-state   # answer "yes" to copy local state to S3
++terraform plan                  # should show no changes
++```
++
++After verifying, delete the local `terraform.tfstate*` files.
++
++## Daily workflow (everyone)
++
++Needs AWS credentials with access to the state bucket and KMS key.
+ 
+ ```sh
+ terraform init
++terraform plan
+ terraform apply
+ ```
+ 
+-State is kept locally in `terraform.tfstate`, so only the person who last ran `apply` has it.
++Locking prevents concurrent applies. If a run crashes, use `terraform force-unlock <id>`.
+diff --git a/backend.tf b/backend.tf
+new file mode 100644
+index 0000000..fd24681
+--- /dev/null
++++ b/backend.tf
+@@ -0,0 +1,12 @@
++# Bucket is created by ./bootstrap. Backend blocks cannot use variables, so replace
++# <ACCOUNT_ID> with the AWS account id (or pass -backend-config at init).
++terraform {
++  backend "s3" {
++    bucket       = "reports-tfstate-<ACCOUNT_ID>"
++    key          = "reports/terraform.tfstate"
++    region       = "eu-north-1"
++    encrypt      = true
++    kms_key_id   = "alias/reports-tfstate"
++    use_lockfile = true
++  }
++}
+diff --git a/bootstrap/.terraform.lock.hcl b/bootstrap/.terraform.lock.hcl
+new file mode 100644
+index 0000000..9b3990d
+--- /dev/null
++++ b/bootstrap/.terraform.lock.hcl
+@@ -0,0 +1,26 @@
++# This file is maintained automatically by "terraform init".
++# Manual edits may be lost in future updates.
++
++provider "registry.terraform.io/hashicorp/aws" {
++  version     = "6.71.0"
++  constraints = "~> 6.0"
++  hashes = [
++    "h1:aLOQts7nCLMR0kb/jCdP56wlQQoGqhKLctKgtQjDopc=",
++    "zh:09aa14408c5ab26915fb2a469b5eb67c06393a2054d78592ba4c32f7a882e918",
++    "zh:1d1138128dc4866f6c16b1ef3b871b3fd9a3dc648e9056e06e210d1817aa052b",
++    "zh:2c17a79821a0e06fbf1834a12e92227db29c2001fef7ef0b347af2e6dad83f14",
++    "zh:55616730a485c9c7283546a84f1ac5f8341152c5572338a54fc7af5f69ebfb92",
++    "zh:7e6461ec2976b5961a1d4f3c08c68fae0645d7f5e0a404f7647baa3b88d337d8",
++    "zh:7ec935166b2251d075fea980012f5267078785399585e8b443dca484fc57df0f",
++    "zh:885b3290cd48738cbf9ee8a6d47a4452889843f8f53b8cf67fc8c9b16e553721",
++    "zh:8930fb33c6c965f7cc82230cb7fbb0cfff9bb30becdfce5e0c2242512d849894",
++    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
++    "zh:a702f9a4dc7340182a8daf5b6ee562f14657fe14752f7d54dc799cf2fd91a868",
++    "zh:b624cb320d787fbfa6dc94be5a1fd52683d1ebd11b42646262b221a694e6ffb8",
++    "zh:bcbaded68b553afeea93604ec22c254b98f3951862bdeb68ae89c179c7dda117",
++    "zh:cb57bbcaf0fa3a70ea29b60d183d3a0dd020f041b18da5d1725d2acd17fa7d59",
++    "zh:d4ca164b1b6039557d8f5f5f911c4aaad1a187e9b3758f6885c95f8954f7de58",
++    "zh:eb0c705337cef7b96086e8b84702ba965eeeace7a4aa3235b2c8aad5f50f2fca",
++    "zh:f2787f40ce873d8c1308c92adec9b6adbd223506fe9d79bba447729e422f9146",
++  ]
++}
+diff --git a/bootstrap/main.tf b/bootstrap/main.tf
+new file mode 100644
+index 0000000..1b4e9a5
+--- /dev/null
++++ b/bootstrap/main.tf
+@@ -0,0 +1,110 @@
++provider "aws" {
++  region = var.region
++}
++
++data "aws_caller_identity" "current" {}
++
++locals {
++  bucket_name = coalesce(var.bucket_name, "reports-tfstate-${data.aws_caller_identity.current.account_id}")
++}
++
++# The state holds the uploader IAM secret key in plaintext, so treat it as a secret store.
++resource "aws_kms_key" "state" {
++  description         = "Encrypts Terraform state for reports"
++  enable_key_rotation = true
++}
++
++resource "aws_kms_alias" "state" {
++  name          = "alias/reports-tfstate"
++  target_key_id = aws_kms_key.state.key_id
++}
++
++resource "aws_s3_bucket" "state" {
++  bucket = local.bucket_name
++
++  lifecycle {
++    prevent_destroy = true
++  }
++}
++
++resource "aws_s3_bucket_versioning" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  versioning_configuration {
++    status = "Enabled"
++  }
++}
++
++resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    apply_server_side_encryption_by_default {
++      sse_algorithm     = "aws:kms"
++      kms_master_key_id = aws_kms_key.state.arn
++    }
++    bucket_key_enabled = true
++  }
++}
++
++resource "aws_s3_bucket_public_access_block" "state" {
++  bucket                  = aws_s3_bucket.state.id
++  block_public_acls       = true
++  block_public_policy     = true
++  ignore_public_acls      = true
++  restrict_public_buckets = true
++}
++
++resource "aws_s3_bucket_ownership_controls" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    object_ownership = "BucketOwnerEnforced"
++  }
++}
++
++resource "aws_s3_bucket_lifecycle_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    id     = "expire-noncurrent-versions"
++    status = "Enabled"
++
++    filter {}
++
++    noncurrent_version_expiration {
++      noncurrent_days = 90
++    }
++
++    abort_incomplete_multipart_upload {
++      days_after_initiation = 7
++    }
++  }
++}
++
++data "aws_iam_policy_document" "state" {
++  statement {
++    sid       = "DenyInsecureTransport"
++    effect    = "Deny"
++    actions   = ["s3:*"]
++    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
++
++    principals {
++      type        = "*"
++      identifiers = ["*"]
++    }
++
++    condition {
++      test     = "Bool"
++      variable = "aws:SecureTransport"
++      values   = ["false"]
++    }
++  }
++}
++
++resource "aws_s3_bucket_policy" "state" {
++  bucket = aws_s3_bucket.state.id
++  policy = data.aws_iam_policy_document.state.json
++
++  depends_on = [aws_s3_bucket_public_access_block.state]
++}
+diff --git a/bootstrap/outputs.tf b/bootstrap/outputs.tf
+new file mode 100644
+index 0000000..1386cb1
+--- /dev/null
++++ b/bootstrap/outputs.tf
+@@ -0,0 +1,11 @@
++output "bucket" {
++  value = aws_s3_bucket.state.id
++}
++
++output "region" {
++  value = var.region
++}
++
++output "kms_key_arn" {
++  value = aws_kms_key.state.arn
++}
+diff --git a/bootstrap/variables.tf b/bootstrap/variables.tf
+new file mode 100644
+index 0000000..898c93a
+--- /dev/null
++++ b/bootstrap/variables.tf
+@@ -0,0 +1,10 @@
++variable "region" {
++  type    = string
++  default = "eu-north-1"
++}
++
++variable "bucket_name" {
++  type        = string
++  default     = null
++  description = "State bucket name. Defaults to reports-tfstate-<account id> (bucket names are global)."
++}
+diff --git a/bootstrap/versions.tf b/bootstrap/versions.tf
+new file mode 100644
+index 0000000..691becc
+--- /dev/null
++++ b/bootstrap/versions.tf
+@@ -0,0 +1,10 @@
++terraform {
++  required_version = ">= 1.10.0"
++
++  required_providers {
++    aws = {
++      source  = "hashicorp/aws"
++      version = "~> 6.0"
++    }
++  }
++}

@@ -1,0 +1,55 @@
+diff --git a/bin/mkbackup.sh b/bin/mkbackup.sh
+index 865a391..cd4eb6e 100755
+--- a/bin/mkbackup.sh
++++ b/bin/mkbackup.sh
+@@ -16,6 +16,10 @@ main() {
+         exclude="${2:-}"
+         shift 2
+         ;;
++      --exclude=*)
++        exclude="${1#--exclude=}"
++        shift
++        ;;
+       -h | --help)
+         usage
+         return 0
+diff --git a/test/test_mkbackup_exclude.sh b/test/test_mkbackup_exclude.sh
+new file mode 100644
+index 0000000..b52a435
+--- /dev/null
++++ b/test/test_mkbackup_exclude.sh
+@@ -0,0 +1,34 @@
++#!/usr/bin/env bash
++# --exclude PATTERN and --exclude=PATTERN must behave the same.
++
++set -uo pipefail
++
++TEST_NAME='mkbackup exclude'
++# shellcheck source=test/helpers.sh
++source "$(dirname "${BASH_SOURCE[0]}")/helpers.sh"
++
++workdir="$(mktemp -d)"
++trap 'rm -rf -- "${workdir}"' EXIT
++
++make_tree "${workdir}/my src"
++
++for spelling in separate equals; do
++  archive="${workdir}/${spelling}.tar.gz"
++  if [[ ${spelling} == separate ]]; then
++    "${REPO_ROOT}/bin/mkbackup.sh" --exclude skipme "${workdir}/my src" "${archive}"
++  else
++    "${REPO_ROOT}/bin/mkbackup.sh" --exclude=skipme "${workdir}/my src" "${archive}"
++  fi
++  assert_status 0 $?
++  contents="$(tar --list --file "${archive}")"
++  assert_contains "${contents}" 'keepme/file.txt'
++  [[ ${contents} == *skipme* ]] && fail "${spelling}: excluded directory is in the archive"
++done
++
++# An empty value must not turn into an exclude of everything or be dropped silently.
++"${REPO_ROOT}/bin/mkbackup.sh" --exclude= "${workdir}/my src" "${workdir}/empty.tar.gz"
++assert_status 0 $?
++contents="$(tar --list --file "${workdir}/empty.tar.gz")"
++assert_contains "${contents}" 'skipme/file.txt'
++
++printf 'PASS %s\n' "${TEST_NAME}"

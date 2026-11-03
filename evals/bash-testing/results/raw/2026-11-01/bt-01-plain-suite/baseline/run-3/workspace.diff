@@ -1,0 +1,63 @@
+diff --git a/bin/mkbackup.sh b/bin/mkbackup.sh
+index 865a391..91bb845 100755
+--- a/bin/mkbackup.sh
++++ b/bin/mkbackup.sh
+@@ -13,7 +13,11 @@ main() {
+   while (($# > 0)); do
+     case "$1" in
+       --exclude)
+-        exclude="${2:-}"
++        if (($# < 2)); then
++          usage
++          return 64
++        fi
++        exclude="$2"
+         shift 2
+         ;;
+       -h | --help)
+@@ -24,6 +28,10 @@ main() {
+         shift
+         break
+         ;;
++      --exclude=*)
++        exclude="${1#--exclude=}"
++        shift
++        ;;
+       --*)
+         # Unknown long option, skipped so older callers keep working.
+         shift
+diff --git a/test/test_mkbackup_exclude.sh b/test/test_mkbackup_exclude.sh
+new file mode 100644
+index 0000000..4135bc2
+--- /dev/null
++++ b/test/test_mkbackup_exclude.sh
+@@ -0,0 +1,29 @@
++#!/usr/bin/env bash
++# Regression: --exclude=PATTERN and --exclude PATTERN must behave the same.
++
++set -uo pipefail
++
++TEST_NAME='mkbackup exclude'
++# shellcheck source=test/helpers.sh
++source "$(dirname "${BASH_SOURCE[0]}")/helpers.sh"
++
++workdir="$(mktemp -d)"
++trap 'rm -rf -- "${workdir}"' EXIT
++
++make_tree "${workdir}/src"
++
++"${REPO_ROOT}/bin/mkbackup.sh" --exclude skipme "${workdir}/src" "${workdir}/space.tar.gz"
++assert_status 0 $?
++"${REPO_ROOT}/bin/mkbackup.sh" --exclude=skipme "${workdir}/src" "${workdir}/equals.tar.gz"
++assert_status 0 $?
++
++for name in space equals; do
++  contents="$(tar --list --file "${workdir}/${name}.tar.gz")"
++  assert_contains "${contents}" 'keepme/file.txt'
++  [[ ${contents} == *skipme* ]] && fail "--exclude (${name} form) left skipme in the archive"
++done
++
++"${REPO_ROOT}/bin/mkbackup.sh" --exclude > /dev/null 2>&1
++assert_status 64 $?
++
++printf 'PASS %s\n' "${TEST_NAME}"

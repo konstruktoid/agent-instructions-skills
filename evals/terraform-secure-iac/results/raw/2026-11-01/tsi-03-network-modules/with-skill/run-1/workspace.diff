@@ -1,0 +1,62 @@
+diff --git a/variables.tf b/variables.tf
+index 236aa5f..9299990 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -7,3 +7,21 @@ variable "environment" {
+   type    = string
+   default = "staging"
+ }
++
++variable "vpc_cidr" {
++  type        = string
++  description = "IPv4 CIDR block of the VPC."
++  default     = "10.0.0.0/16"
++}
++
++variable "availability_zones" {
++  type        = list(string)
++  description = "Availability zones that receive one private subnet each, in the same order as private_subnet_cidrs."
++  default     = ["eu-north-1a", "eu-north-1b"]
++}
++
++variable "private_subnet_cidrs" {
++  type        = list(string)
++  description = "IPv4 CIDR blocks of the private subnets, one per entry in availability_zones."
++  default     = ["10.0.1.0/24", "10.0.2.0/24"]
++}
+diff --git a/versions.tf b/versions.tf
+index bcdeda0..a57677a 100644
+--- a/versions.tf
++++ b/versions.tf
+@@ -1,8 +1,10 @@
+ terraform {
++  required_version = ">= 1.10"
++
+   required_providers {
+     aws = {
+       source  = "hashicorp/aws"
+-      version = ">= 4.0"
++      version = "~> 6.0"
+     }
+   }
+ 
+diff --git a/vpc.tf b/vpc.tf
+new file mode 100644
+index 0000000..491a072
+--- /dev/null
++++ b/vpc.tf
+@@ -0,0 +1,14 @@
++module "vpc" {
++  source  = "terraform-aws-modules/vpc/aws"
++  version = "6.7.3"
++
++  name = "network-${var.environment}"
++  cidr = var.vpc_cidr
++
++  azs             = var.availability_zones
++  private_subnets = var.private_subnet_cidrs
++
++  enable_nat_gateway = false
++
++  tags = module.labels.tags
++}

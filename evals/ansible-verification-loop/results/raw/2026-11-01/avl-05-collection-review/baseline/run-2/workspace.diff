@@ -1,0 +1,104 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+new file mode 100644
+index 0000000..6c97320
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1,5 @@
++# Changelog
++
++## 1.2.0
++
++- Current release of the `nftables_base` role.
+diff --git a/galaxy.yml b/galaxy.yml
+index 8725a14..8a3de70 100644
+--- a/galaxy.yml
++++ b/galaxy.yml
+@@ -8,5 +8,13 @@ authors:
+ description: Firewall roles for Debian and RedHat hosts.
+ license:
+   - MIT
++repository: https://github.com/platform/firewall
++documentation: https://github.com/platform/firewall/blob/main/README.md
++homepage: https://github.com/platform/firewall
++issues: https://github.com/platform/firewall/issues
++tags:
++  - networking
++  - security
++  - linux
+ build_ignore:
+   - .git
+diff --git a/meta/runtime.yml b/meta/runtime.yml
+index accfbd8..a764a08 100644
+--- a/meta/runtime.yml
++++ b/meta/runtime.yml
+@@ -1,2 +1,2 @@
+ ---
+-requires_ansible: ">=2.15"
++requires_ansible: ">=2.17.0"
+diff --git a/roles/nftables_base/defaults/main.yml b/roles/nftables_base/defaults/main.yml
+index 1cd269b..7d17297 100644
+--- a/roles/nftables_base/defaults/main.yml
++++ b/roles/nftables_base/defaults/main.yml
+@@ -1,5 +1,5 @@
+ ---
+-nftables_default_policy: drop
+-nftables_allowed_tcp_ports:
++nftables_base_default_policy: drop
++nftables_base_allowed_tcp_ports:
+   - 22
+-nftables_ruleset_path: /etc/nftables.conf
++nftables_base_ruleset_path: /etc/nftables.conf
+diff --git a/roles/nftables_base/meta/main.yml b/roles/nftables_base/meta/main.yml
+index 5221262..c6c63ed 100644
+--- a/roles/nftables_base/meta/main.yml
++++ b/roles/nftables_base/meta/main.yml
+@@ -4,8 +4,11 @@ galaxy_info:
+   author: platform
+   description: Applies a base nftables ruleset.
+   license: MIT
+-  min_ansible_version: "2.15"
++  min_ansible_version: "2.17"
+   platforms:
++    - name: EL
++      versions:
++        - all
+     - name: Debian
+       versions:
+         - bookworm
+diff --git a/roles/nftables_base/tasks/main.yml b/roles/nftables_base/tasks/main.yml
+index f8ee310..e88c6ce 100644
+--- a/roles/nftables_base/tasks/main.yml
++++ b/roles/nftables_base/tasks/main.yml
+@@ -9,15 +9,27 @@
+     content: |
+       table inet filter {
+         chain input {
+-          type filter hook input priority 0; policy {{ nftables_default_policy }};
++          type filter hook input priority 0; policy {{ nftables_base_default_policy }};
++          ct state established,related accept
++          iif lo accept
++      {% for port in nftables_base_allowed_tcp_ports %}
++          tcp dport {{ port }} accept
++      {% endfor %}
+         }
+       }
+-    dest: "{{ nftables_ruleset_path }}"
++    dest: "{{ nftables_base_ruleset_path }}"
++    owner: root
++    group: root
++    mode: "0644"
+   notify: Reload nftables
+ 
+ - name: Load the ruleset now
+-  ansible.builtin.command: nft -f {{ nftables_ruleset_path }}
++  ansible.builtin.command: nft -f {{ nftables_base_ruleset_path }}
++  changed_when: false
+ 
+ - name: Check the active ruleset
+-  ansible.builtin.shell: nft list ruleset | wc -l
+-  register: nftables_rule_lines
++  ansible.builtin.shell: set -o pipefail && nft list ruleset | wc -l
++  args:
++    executable: /bin/bash
++  register: nftables_base_rule_lines
++  changed_when: false

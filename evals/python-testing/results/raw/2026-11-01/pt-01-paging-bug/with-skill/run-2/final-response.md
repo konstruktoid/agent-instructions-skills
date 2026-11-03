@@ -1,0 +1,6 @@
+I fixed `page_slice` so every item lands on exactly one page, and a page past the end now returns an empty list. All 18 tests pass, and `ruff check` and `ruff format --check` are clean.
+
+- **Cause:** the end index was capped at `len(items) - 1`, which cut off the final item. It is now `items[start : start + per_page]`. Python slicing already handles ranges past the end, so out-of-range pages come back empty without raising. The change is in `src/paging/slicing.py`.
+- **Tests:** I added two tests to `tests/test_slicing.py`. One checks the last page and pages past the end. The other pages through the whole list at several page sizes and checks the pages join back into the original list. Eight of the new cases failed before the fix and pass now.
+- **Import order:** `ruff` flagged an import-order error in `tests/test_slicing.py`, and `ruff check --fix` corrected it.
+- **`ty`:** `ty check` run bare scans the parent `evals/` directory and reports about 20 errors in files outside this repo. I did not touch those. Scoped to this project it passes, but it needed `--extra-search-path src` to find the `paging` package: `uv run ty check --extra-search-path src src tests`. The repo has no `ty` configuration, so a plain `ty check` there won't resolve the import.

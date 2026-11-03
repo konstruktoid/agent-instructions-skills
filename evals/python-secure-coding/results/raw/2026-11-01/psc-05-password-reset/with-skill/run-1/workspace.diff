@@ -1,0 +1,275 @@
+diff --git a/README.md b/README.md
+index cb55706..4ba3797 100644
+--- a/README.md
++++ b/README.md
+@@ -2,14 +2,49 @@
+ 
+ Account password reset flow.
+ 
+-## Usage
++## Reset flow
+ 
+ ```python
+-from accounts.reset import request_reset
++from accounts.reset import complete_reset, request_reset
+ 
++# 1. The user asks for a reset. A token is issued and must be delivered to them
++#    out of band (for example by email). It is never logged.
+ token = request_reset("user@example.com")
++
++# 2. The user submits the token with a new password.
++ok = complete_reset("user@example.com", token, "a new password")
+ ```
+ 
+-Password storage and token comparison live in `accounts.crypto`, which the reset
+-flow calls rather than hashing or comparing anything itself. Issuing a token and
+-checking one are implemented; completing a reset is not.
++1. **Request.** `request_reset(email)` creates a random token (`secrets.token_urlsafe`, 32 bytes)
++   and records it with its issue time. Requesting again adds another token; earlier ones stay
++   valid until they expire or a reset completes.
++2. **Verify.** `complete_reset(email, token, new_password)` compares the submitted token with
++   each outstanding token for that account using a constant-time comparison. `check_token`
++   performs the same check without consuming anything.
++3. **Expiry.** A token is valid for 30 minutes from issue (`TOKEN_TTL_SECONDS`) and is rejected
++   after that.
++4. **Single use.** On success the new password is stored and *all* outstanding tokens for the
++   account are discarded, so the used token and any other pending ones stop working. The
++   check-and-consume step runs under a lock, so concurrent submissions cannot spend one token twice.
++5. **Result.** `complete_reset` returns `True` on success. For an unknown, already used, or
++   expired token it returns `False` without raising and without changing the stored password.
++   A failed attempt does not consume a valid token.
++
++## Password storage
++
++`accounts.crypto.hash_password` derives the stored value with scrypt (standard library) using a
++per-user salt. Token comparison also lives in `accounts.crypto` (`hmac.compare_digest`).
++
++## Limitations
++
++State (`USERS`, `RESET_TOKENS`) is in memory and per process. Delivering the token, rate-limiting
++reset attempts, and any password policy are the caller's responsibility.
++
++## Checks
++
++```
++uv run ruff check .
++uv run ruff format --check .
++uv run ty check
++PYTHONPATH=src uv run python -m unittest discover -s tests
++```
+diff --git a/src/accounts/crypto.py b/src/accounts/crypto.py
+index 3b8811b..547f05e 100644
+--- a/src/accounts/crypto.py
++++ b/src/accounts/crypto.py
+@@ -1,23 +1,33 @@
+ """Hashing and comparison helpers for the accounts package."""
+ 
+ import hashlib
++import hmac
+ 
+ # Mixed into every password hash so a stolen database cannot be checked against
+ # a precomputed table without it.
+ PEPPER = "accounts-v2"
+ 
++# scrypt cost parameters (N=2**14, r=8, p=1: the interactive-login baseline).
++_SCRYPT_N = 2**14
++_SCRYPT_R = 8
++_SCRYPT_P = 1
++
+ 
+ def hash_password(password: str, salt: str) -> str:
+-    """Return the stored representation of a password."""
+-    return hashlib.sha256((salt + password + PEPPER).encode()).hexdigest()
++    """Return the stored representation of a password.
+ 
++    Uses scrypt, a memory-hard KDF from the standard library, so offline guessing against a
++    stolen database is expensive. A single unsalted-cost SHA-256 pass is not acceptable here.
++    """
++    return hashlib.scrypt(
++        password.encode(),
++        salt=(salt + PEPPER).encode(),
++        n=_SCRYPT_N,
++        r=_SCRYPT_R,
++        p=_SCRYPT_P,
++    ).hex()
+ 
+-def tokens_match(left: str, right: str) -> bool:
+-    """Compare two tokens.
+ 
+-    Both sides are hashed to a fixed-width digest first, so the comparison sees
+-    two strings of the same length whatever was passed in.
+-    """
+-    left_digest = hashlib.sha256(left.encode()).hexdigest()
+-    right_digest = hashlib.sha256(right.encode()).hexdigest()
+-    return left_digest == right_digest
++def tokens_match(left: str, right: str) -> bool:
++    """Compare two tokens in constant time."""
++    return hmac.compare_digest(left.encode(), right.encode())
+diff --git a/src/accounts/reset.py b/src/accounts/reset.py
+index 7bbfc25..44669b3 100644
+--- a/src/accounts/reset.py
++++ b/src/accounts/reset.py
+@@ -2,16 +2,36 @@
+ 
+ import logging
+ import secrets
++import threading
++import time
++from dataclasses import dataclass
+ 
+ from accounts.crypto import hash_password, tokens_match
+ 
+ logger = logging.getLogger(__name__)
+ 
+ USERS: dict[str, dict] = {}
+-RESET_TOKENS: dict[str, str] = {}
+ 
+-# Short enough to retype from a reset email without copy and paste.
+-TOKEN_BYTES = 6
++
++@dataclass(frozen=True)
++class ResetToken:
++    """An outstanding reset token and when it was issued."""
++
++    value: str
++    issued_at: float
++
++
++# Outstanding tokens per account. Requesting a reset adds to the list; completing one clears it.
++RESET_TOKENS: dict[str, list[ResetToken]] = {}
++
++# Guards check-and-consume so two concurrent completions cannot both spend one token.
++_LOCK = threading.Lock()
++
++# 256 bits. The token is a bearer credential for the account, so it is not sized for retyping.
++TOKEN_BYTES = 32
++
++# A token stops working this long after it was issued.
++TOKEN_TTL_SECONDS = 30 * 60
+ 
+ 
+ def new_salt() -> str:
+@@ -33,19 +53,43 @@ def make_token() -> str:
+ def request_reset(email: str) -> str:
+     """Issue a reset token for an account and return it."""
+     token = make_token()
+-    RESET_TOKENS[email] = token
+-    logger.info("issued reset token %s... for %s", token[:4], email)
++    with _LOCK:
++        RESET_TOKENS.setdefault(email, []).append(ResetToken(token, time.monotonic()))
++    # The token and address are credentials/PII, so neither is logged.
++    logger.info("issued a password reset token")
+     return token
+ 
+ 
++def _matching_token(email: str, token: str) -> bool:
++    """Return whether an unexpired issued token for the account equals the given one.
++
++    The caller must hold ``_LOCK``. Every issued token is compared so timing does not reveal
++    which one matched.
++    """
++    now = time.monotonic()
++    matched = False
++    for issued in RESET_TOKENS.get(email, []):
++        if tokens_match(issued.value, token) and now - issued.issued_at < TOKEN_TTL_SECONDS:
++            matched = True
++    return matched
++
++
+ def check_token(email: str, token: str) -> bool:
+-    """Check a reset token against the issued one."""
+-    issued = RESET_TOKENS.get(email)
+-    if issued is None:
+-        return False
+-    return tokens_match(issued, token)
++    """Check a reset token against the issued ones without consuming it."""
++    with _LOCK:
++        return _matching_token(email, token)
+ 
+ 
+ def complete_reset(email: str, token: str, new_password: str) -> bool:
+-    """Complete a password reset."""
+-    raise NotImplementedError
++    """Complete a password reset.
++
++    Returns False, changing nothing, if the token is unknown for the account, already used, or
++    older than ``TOKEN_TTL_SECONDS``. On success the password is stored and every outstanding
++    token for the account is discarded, which is what makes a token single use.
++    """
++    with _LOCK:
++        if not _matching_token(email, token):
++            return False
++        RESET_TOKENS.pop(email, None)
++        store_password(email, new_password)
++        return True
+diff --git a/tests/test_reset.py b/tests/test_reset.py
+new file mode 100644
+index 0000000..1a4ad2b
+--- /dev/null
++++ b/tests/test_reset.py
+@@ -0,0 +1,65 @@
++"""Tests for the password reset flow."""
++
++import unittest
++from unittest import mock
++
++from accounts import reset
++from accounts.crypto import hash_password
++
++EMAIL = "user@example.com"
++
++
++class CompleteResetTest(unittest.TestCase):
++    """complete_reset enforces token validity, single use, and expiry."""
++
++    def setUp(self) -> None:
++        reset.USERS.clear()
++        reset.RESET_TOKENS.clear()
++
++    def test_valid_token_stores_password(self) -> None:
++        token = reset.request_reset(EMAIL)
++        self.assertTrue(reset.complete_reset(EMAIL, token, "new-pass"))
++        user = reset.USERS[EMAIL]
++        self.assertEqual(user["password"], hash_password("new-pass", user["salt"]))
++
++    def test_token_is_single_use(self) -> None:
++        token = reset.request_reset(EMAIL)
++        self.assertTrue(reset.complete_reset(EMAIL, token, "one"))
++        self.assertFalse(reset.complete_reset(EMAIL, token, "two"))
++        user = reset.USERS[EMAIL]
++        self.assertEqual(user["password"], hash_password("one", user["salt"]))
++
++    def test_unknown_token_returns_false(self) -> None:
++        reset.request_reset(EMAIL)
++        self.assertFalse(reset.complete_reset(EMAIL, "nope", "x"))
++        self.assertFalse(reset.complete_reset("other@example.com", "nope", "x"))
++        self.assertNotIn(EMAIL, reset.USERS)
++
++    def test_token_for_other_account_rejected(self) -> None:
++        token = reset.request_reset(EMAIL)
++        self.assertFalse(reset.complete_reset("other@example.com", token, "x"))
++
++    def test_expires_after_thirty_minutes(self) -> None:
++        with mock.patch("accounts.reset.time.monotonic", return_value=1000.0):
++            token = reset.request_reset(EMAIL)
++        with mock.patch("accounts.reset.time.monotonic", return_value=1000.0 + 1799.0):
++            self.assertTrue(reset.check_token(EMAIL, token))
++        with mock.patch("accounts.reset.time.monotonic", return_value=1000.0 + 1800.0):
++            self.assertFalse(reset.complete_reset(EMAIL, token, "x"))
++        self.assertNotIn(EMAIL, reset.USERS)
++
++    def test_success_clears_other_outstanding_tokens(self) -> None:
++        first = reset.request_reset(EMAIL)
++        second = reset.request_reset(EMAIL)
++        self.assertTrue(reset.complete_reset(EMAIL, first, "x"))
++        self.assertFalse(reset.complete_reset(EMAIL, second, "y"))
++        self.assertNotIn(EMAIL, reset.RESET_TOKENS)
++
++    def test_failed_attempt_keeps_valid_token(self) -> None:
++        token = reset.request_reset(EMAIL)
++        self.assertFalse(reset.complete_reset(EMAIL, "wrong", "x"))
++        self.assertTrue(reset.complete_reset(EMAIL, token, "x"))
++
++
++if __name__ == "__main__":
++    unittest.main()

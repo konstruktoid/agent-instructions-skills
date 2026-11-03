@@ -1,0 +1,225 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..506f365
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,5 @@
++.terraform/
++*.tfstate
++*.tfstate.*
++*.tfplan
++crash.log
+diff --git a/README.md b/README.md
+index febd4f0..d6fbfd4 100644
+--- a/README.md
++++ b/README.md
+@@ -3,11 +3,49 @@
+ Terraform for the reports bucket and the key the nightly export job uploads with. The job reads
+ the key from `terraform output`.
+ 
+-## Usage
++State is stored in S3 (`reports-terraform-state`, key `reports/terraform.tfstate`) with
++versioning, KMS encryption and S3-native locking, so anyone with access can run plan and apply.
++
++## One-time setup: create the state bucket
++
++Done once by one person, with AWS credentials allowed to create S3 buckets:
++
++```sh
++cd bootstrap
++terraform init
++terraform apply
++```
++
++`bootstrap/` keeps its own state locally (it can't store state in a bucket that doesn't exist yet).
++It is git-ignored and rarely changes; if you lose it, the bucket can be re-imported with
++`terraform import aws_s3_bucket.state reports-terraform-state` (and the other bootstrap resources).
++
++Bucket names are global. If `reports-terraform-state` is taken, change `state_bucket_name` in
++`bootstrap/variables.tf` and `bucket` in `backend.tf`.
++
++## Migrating the existing local state (once)
++
++The person who holds the current `terraform.tfstate` runs, from the repo root:
++
++```sh
++terraform init -migrate-state
++```
++
++Answer `yes` to copy the local state to S3. Then `terraform plan` should show no changes.
++Afterwards, delete the local `terraform.tfstate*` files, and nobody else should apply
++until the migration is done.
++
++## Day-to-day workflow
+ 
+ ```sh
+ terraform init
++terraform plan
+ terraform apply
+ ```
+ 
+-State is kept locally in `terraform.tfstate`, so only the person who last ran `apply` has it.
++- Every engineer needs AWS credentials with `s3:ListBucket` on the state bucket,
++  `s3:GetObject`/`s3:PutObject`/`s3:DeleteObject` on `reports/terraform.tfstate*`
++  (the lock is a `.tflock` object next to it), and use of the bucket's KMS key.
++- Locking is automatic; if a run is interrupted, `terraform force-unlock <ID>`.
++- **The state contains the uploader's IAM secret access key in plaintext.** Restrict access to
++  the state bucket to the people who should be able to read that key.
+diff --git a/backend.tf b/backend.tf
+new file mode 100644
+index 0000000..886c304
+--- /dev/null
++++ b/backend.tf
+@@ -0,0 +1,11 @@
++# The bucket is created by ./bootstrap. Backend blocks cannot use variables, so the
++# name must match bootstrap's `state_bucket_name`.
++terraform {
++  backend "s3" {
++    bucket       = "reports-terraform-state"
++    key          = "reports/terraform.tfstate"
++    region       = "eu-north-1"
++    encrypt      = true
++    use_lockfile = true # native S3 locking (Terraform >= 1.10), no DynamoDB table needed
++  }
++}
+diff --git a/bootstrap/main.tf b/bootstrap/main.tf
+new file mode 100644
+index 0000000..3a9c840
+--- /dev/null
++++ b/bootstrap/main.tf
+@@ -0,0 +1,94 @@
++provider "aws" {
++  region = var.region
++}
++
++resource "aws_s3_bucket" "state" {
++  bucket = var.state_bucket_name
++
++  # The state of everything else lives here; make accidental deletion hard.
++  lifecycle {
++    prevent_destroy = true
++  }
++}
++
++# Versioning lets you recover from a bad or corrupted state write.
++resource "aws_s3_bucket_versioning" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  versioning_configuration {
++    status = "Enabled"
++  }
++}
++
++resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    apply_server_side_encryption_by_default {
++      sse_algorithm = "aws:kms"
++    }
++    bucket_key_enabled = true
++  }
++}
++
++resource "aws_s3_bucket_public_access_block" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  block_public_acls       = true
++  block_public_policy     = true
++  ignore_public_acls      = true
++  restrict_public_buckets = true
++}
++
++resource "aws_s3_bucket_ownership_controls" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    object_ownership = "BucketOwnerEnforced"
++  }
++}
++
++data "aws_iam_policy_document" "state" {
++  statement {
++    sid       = "DenyInsecureTransport"
++    effect    = "Deny"
++    actions   = ["s3:*"]
++    resources = [aws_s3_bucket.state.arn, "${aws_s3_bucket.state.arn}/*"]
++
++    principals {
++      type        = "*"
++      identifiers = ["*"]
++    }
++
++    condition {
++      test     = "Bool"
++      variable = "aws:SecureTransport"
++      values   = ["false"]
++    }
++  }
++}
++
++resource "aws_s3_bucket_policy" "state" {
++  bucket = aws_s3_bucket.state.id
++  policy = data.aws_iam_policy_document.state.json
++
++  depends_on = [aws_s3_bucket_public_access_block.state]
++}
++
++# Keep old state versions from piling up forever, but retain plenty for recovery.
++resource "aws_s3_bucket_lifecycle_configuration" "state" {
++  bucket = aws_s3_bucket.state.id
++
++  rule {
++    id     = "expire-noncurrent-state"
++    status = "Enabled"
++
++    filter {}
++
++    noncurrent_version_expiration {
++      noncurrent_days = 90
++    }
++  }
++
++  depends_on = [aws_s3_bucket_versioning.state]
++}
+diff --git a/bootstrap/outputs.tf b/bootstrap/outputs.tf
+new file mode 100644
+index 0000000..c7ed2a9
+--- /dev/null
++++ b/bootstrap/outputs.tf
+@@ -0,0 +1,3 @@
++output "state_bucket" {
++  value = aws_s3_bucket.state.id
++}
+diff --git a/bootstrap/variables.tf b/bootstrap/variables.tf
+new file mode 100644
+index 0000000..b2bd5e3
+--- /dev/null
++++ b/bootstrap/variables.tf
+@@ -0,0 +1,10 @@
++variable "region" {
++  type    = string
++  default = "eu-north-1"
++}
++
++# S3 bucket names are global. If this one is taken, change it here AND in ../backend.tf.
++variable "state_bucket_name" {
++  type    = string
++  default = "reports-terraform-state"
++}
+diff --git a/bootstrap/versions.tf b/bootstrap/versions.tf
+new file mode 100644
+index 0000000..691becc
+--- /dev/null
++++ b/bootstrap/versions.tf
+@@ -0,0 +1,10 @@
++terraform {
++  required_version = ">= 1.10.0"
++
++  required_providers {
++    aws = {
++      source  = "hashicorp/aws"
++      version = "~> 6.0"
++    }
++  }
++}

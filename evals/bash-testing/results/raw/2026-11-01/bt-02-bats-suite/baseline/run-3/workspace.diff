@@ -1,0 +1,79 @@
+diff --git a/README.md b/README.md
+index 43b2b8a..bce2309 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,7 @@
+ # buildreport
+ 
+ `bin/report.sh FILE` summarizes a CSV of build results as one line of counters.
++Pass `--json` (`bin/report.sh --json FILE`) to get the same counters as a JSON object.
+ 
+ Tests use bats-core. Files live in `test/` as `*.bats` and load `test/test_helper.bash`.
+ Run them with `make test`, which calls `bats test/`.
+diff --git a/bin/report.sh b/bin/report.sh
+index caf882c..d3f94d7 100755
+--- a/bin/report.sh
++++ b/bin/report.sh
+@@ -4,10 +4,17 @@
+ set -euo pipefail
+ 
+ main() {
+-  local file="${1:-}"
++  local file="" json=0 arg
++
++  for arg in "$@"; do
++    case "${arg}" in
++      --json) json=1 ;;
++      *) [[ -z ${file} ]] && file="${arg}" ;;
++    esac
++  done
+ 
+   if [[ -z ${file} ]]; then
+-    printf 'usage: %s FILE\n' "${0##*/}" >&2
++    printf 'usage: %s [--json] FILE\n' "${0##*/}" >&2
+     return 64
+   fi
+ 
+@@ -30,7 +37,11 @@ main() {
+     esac
+   done < "${file}"
+ 
+-  printf 'total=%d passed=%d failed=%d\n' "${total}" "${passed}" "${failed}"
++  if ((json)); then
++    printf '{"total":%d,"passed":%d,"failed":%d}\n' "${total}" "${passed}" "${failed}"
++  else
++    printf 'total=%d passed=%d failed=%d\n' "${total}" "${passed}" "${failed}"
++  fi
+ }
+ 
+ main "$@"
+diff --git a/test/report.bats b/test/report.bats
+index 9e835a5..367cc91 100755
+--- a/test/report.bats
++++ b/test/report.bats
+@@ -17,3 +17,25 @@ load test_helper
+   run "${REPO_ROOT}/bin/report.sh" "${REPO_ROOT}/data/absent.csv"
+   [ "$status" -eq 66 ]
+ }
++
++@test "--json prints the counters as JSON" {
++  run "${REPO_ROOT}/bin/report.sh" --json "${REPO_ROOT}/data/sample.csv"
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":2,"failed":1}' ]
++}
++
++@test "--json is accepted after the file too" {
++  run "${REPO_ROOT}/bin/report.sh" "${REPO_ROOT}/data/sample.csv" --json
++  [ "$status" -eq 0 ]
++  [ "$output" = '{"total":3,"passed":2,"failed":1}' ]
++}
++
++@test "--json without a file reports usage" {
++  run "${REPO_ROOT}/bin/report.sh" --json
++  [ "$status" -eq 64 ]
++}
++
++@test "--json with a missing file fails like text mode" {
++  run "${REPO_ROOT}/bin/report.sh" --json "${REPO_ROOT}/data/absent.csv"
++  [ "$status" -eq 66 ]
++}

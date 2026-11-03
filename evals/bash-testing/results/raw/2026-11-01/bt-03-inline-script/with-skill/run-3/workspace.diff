@@ -1,0 +1,58 @@
+diff --git a/bin/mkuser-config.sh b/bin/mkuser-config.sh
+index 8ab73af..768f16a 100755
+--- a/bin/mkuser-config.sh
++++ b/bin/mkuser-config.sh
+@@ -34,6 +34,11 @@ while (($# > 0)); do
+   esac
+ done
+ 
++if [[ -z ${name} ]]; then
++  printf 'mkuser-config: --name must not be empty\n' >&2
++  exit 64
++fi
++
+ mkdir -p -- "$(dirname -- "${out}")"
+ format_line "${name}" "${login_shell}" >> "${out}"
+ printf 'wrote %s for %s\n' "${out}" "${name}"
+diff --git a/bin/mkuser-config_test.sh b/bin/mkuser-config_test.sh
+new file mode 100755
+index 0000000..2a5eb79
+--- /dev/null
++++ b/bin/mkuser-config_test.sh
+@@ -0,0 +1,36 @@
++#!/usr/bin/env bash
++# Coverage for bin/mkuser-config.sh.
++
++set -uo pipefail
++
++ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++readonly ROOT
++SCRIPT="${ROOT}/bin/mkuser-config.sh"
++readonly SCRIPT
++
++tmp="$(mktemp -d)"
++trap 'rm -rf -- "${tmp}"' EXIT
++
++fail() {
++  printf 'FAIL: %s\n' "$1" >&2
++  exit 1
++}
++
++# Empty --name is rejected: non-zero status, message on stderr, nothing written.
++out="${tmp}/dir with space/users.conf"
++stderr="$("${SCRIPT}" --name '' --out "${out}" 2>&1 >/dev/null)"
++status=$?
++((status != 0)) || fail 'empty --name exited 0'
++[[ ${stderr} == *'--name must not be empty'* ]] || fail "unclear message: ${stderr}"
++[[ ! -s ${out} ]] || fail 'empty --name wrote an entry'
++
++# Omitting --name entirely is rejected the same way.
++"${SCRIPT}" --out "${out}" >/dev/null 2>&1 && fail 'missing --name exited 0'
++[[ ! -s ${out} ]] || fail 'missing --name wrote an entry'
++
++# A valid name still appends exactly one entry.
++"${SCRIPT}" --name alice --shell /bin/sh --out "${out}" >/dev/null ||
++  fail 'valid name failed'
++[[ "$(cat -- "${out}")" == 'alice:/bin/sh' ]] || fail 'unexpected entry'
++
++printf 'ok bin/mkuser-config.sh\n'

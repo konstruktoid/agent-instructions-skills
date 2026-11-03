@@ -1,0 +1,16 @@
+{
+  "id": "psc-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.1008604,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-02T07:11:24.108167+00:00",
+    "seconds": 13.1
+  },
+  "aborted": false,
+  "rate_limited": false
+}

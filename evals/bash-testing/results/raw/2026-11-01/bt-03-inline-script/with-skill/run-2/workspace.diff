@@ -1,0 +1,61 @@
+diff --git a/bin/mkuser-config.sh b/bin/mkuser-config.sh
+index 8ab73af..fca9824 100755
+--- a/bin/mkuser-config.sh
++++ b/bin/mkuser-config.sh
+@@ -34,6 +34,11 @@ while (($# > 0)); do
+   esac
+ done
+ 
++if [[ -z ${name} ]]; then
++  printf 'error: --name is required and must not be empty\n' >&2
++  exit 64
++fi
++
+ mkdir -p -- "$(dirname -- "${out}")"
+ format_line "${name}" "${login_shell}" >> "${out}"
+ printf 'wrote %s for %s\n' "${out}" "${name}"
+diff --git a/bin/mkuser-config_test.sh b/bin/mkuser-config_test.sh
+new file mode 100755
+index 0000000..ca1c4e6
+--- /dev/null
++++ b/bin/mkuser-config_test.sh
+@@ -0,0 +1,39 @@
++#!/usr/bin/env bash
++# Coverage for bin/mkuser-config.sh.
++
++set -uo pipefail
++
++ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
++readonly ROOT
++SCRIPT="${ROOT}/bin/mkuser-config.sh"
++readonly SCRIPT
++
++tmp="$(mktemp -d)"
++trap 'rm -rf -- "${tmp}"' EXIT
++
++fail() {
++  printf 'FAIL: %s\n' "$1" >&2
++  exit 1
++}
++
++# Rejects an empty name and an omitted name, writing nothing.
++check_rejected() {
++  local label="$1"
++  shift
++  local out="${tmp}/dir with space/${label}.conf" stderr status
++  stderr="$("${SCRIPT}" "$@" --out "${out}" 2>&1 >/dev/null)"
++  status=$?
++  ((status != 0)) || fail "${label}: exited 0"
++  [[ ${stderr} == *'--name'* ]] || fail "${label}: no clear message: ${stderr}"
++  [[ ! -s ${out} ]] || fail "${label}: entry written"
++}
++
++check_rejected empty --name ''
++check_rejected omitted
++
++# A valid name still works.
++out="${tmp}/ok.conf"
++"${SCRIPT}" --name alice --out "${out}" >/dev/null || fail 'valid name rejected'
++[[ $(<"${out}") == 'alice:/bin/bash' ]] || fail 'unexpected entry for valid name'
++
++printf 'ok bin/mkuser-config.sh\n'

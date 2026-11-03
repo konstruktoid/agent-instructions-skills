@@ -1,0 +1,97 @@
+{
+  "task": "psc-02-session-restore",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-01T19:31:46.155883+00:00",
+    "seconds": 37.3
+  },
+  "base_sha": "51247f42fd966b888fd14837e18b3c628de48d2f",
+  "skills_used": [
+    "eval-python-secure-coding:python-secure-coding"
+  ],
+  "num_turns": 12,
+  "cost_usd": 0.1439425,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "ruff-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff check .` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "format-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ruff format --check .` clean",
+      "passed": true,
+      "evidence": "exit 0\n2 files already formatted"
+    },
+    {
+      "id": "ty-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: `uv run ty check` clean",
+      "passed": true,
+      "evidence": "exit 0\nAll checks passed!"
+    },
+    {
+      "id": "checks-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md tooling baseline: run the checks yourself, do not merely describe them",
+      "passed": true,
+      "evidence": "match: 'ruff check'"
+    },
+    {
+      "id": "no-pickle-on-input",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches pickle",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-eval",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: no untrusted data reaches eval/exec",
+      "passed": false,
+      "evidence": "exit 1\nsrc/sessionsvc/store.py:56:    return eval(text)"
+    },
+    {
+      "id": "feature-ttl-enforced",
+      "kind": "workspace_command",
+      "source": "task prompt: reject a session older than SESSION_TTL",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:11:SESSION_TTL = 3600  # seconds a session stays valid after issued_at\nsrc/sessionsvc/store.py:15:    \"\"\"The session is malformed or older than SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:19:    \"\"\"Return True only for an envelope with a valid issued_at within SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:27:    return 0 <= now - issued_at <= SESSION_TTL\nsrc/sessionsvc/store.py:39:    anything malformed, or issued more than SESSION_TTL seconds ago, is rejected."
+    },
+    {
+      "id": "feature-issued-at",
+      "kind": "workspace_command",
+      "source": "task prompt: record an issued_at timestamp",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:11:SESSION_TTL = 3600  # seconds a session stays valid after issued_at\nsrc/sessionsvc/store.py:19:    \"\"\"Return True only for an envelope with a valid issued_at within SESSION_TTL.\"\"\"\nsrc/sessionsvc/store.py:22:    issued_at = envelope.get(\"issued_at\")\nsrc/sessionsvc/store.py:23:    if isinstance(issued_at, bool) or not isinstance(issued_at, int | float):\nsrc/sessionsvc/store.py:25:    if not math.isfinite(issued_at):\nsrc/sessionsvc/store.py:27:    return 0 <= now - issued_at <= SESSION_TTL\nsrc/sessionsvc/store.py:31:    \"\"\"Serialize a session with the issued_at time it was saved.\"\"\"\nsrc/sessionsvc/store.py:32:    return json.dumps({\"issued_at\": time.time(), \"session\": session}).encode()"
+    },
+    {
+      "id": "feature-purge-expired",
+      "kind": "workspace_command",
+      "source": "task prompt: add a purge_expired() function",
+      "passed": true,
+      "evidence": "exit 0\nsrc/sessionsvc/store.py:70:def purge_expired() -> int:"
+    },
+    {
+      "id": "security-reasoning-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md step 5: state the security reasoning for any non-obvious call",
+      "passed": true,
+      "evidence": "match: 'Pickle'"
+    }
+  ],
+  "passed": 9,
+  "total": 10
+}

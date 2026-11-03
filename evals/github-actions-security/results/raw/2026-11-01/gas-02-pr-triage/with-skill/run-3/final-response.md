@@ -1,0 +1,7 @@
+I added `.github/workflows/triage.yml` and a "Triage workflow" section in the README. It hasn't run on GitHub yet. I didn't push or trigger it, so the comment and label behaviour is untested.
+
+- **What it does:** when a pull request is opened, it applies `needs-triage`, creating the label if it's missing. It then posts a comment: "Welcome @author, and thank you for your contribution! You opened "title". A maintainer will triage it soon."
+- **Fork support:** it uses `pull_request_target`, because a plain `pull_request` run from a fork gets a read-only token and couldn't comment or label. It never checks out or runs the pull request's code. The author and title come from event metadata and reach the shell only through environment variables. It uses the preinstalled `gh` CLI, so there are no third-party actions to pin.
+- **Permissions and limits:** the token is `pull-requests: write` on the one job, with `permissions: {}` at workflow level, a 5-minute timeout, and per-PR concurrency.
+- **Checks:** `actionlint` is clean. `zizmor` (pedantic) flags `pull_request_target` as dangerous, so I added `zizmor.yml` with that one rule ignored for `triage.yml`, with the reason in a comment. You didn't ask for that file, so drop it if you'd rather not carry it. The one remaining finding is a low-severity missing-concurrency note on the existing `ci.yml`, which I left alone.
+- **Still to confirm:** the first pull request opened from a fork will show whether the comment and label land.

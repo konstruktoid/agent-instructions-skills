@@ -1,0 +1,53 @@
+diff --git a/README.md b/README.md
+index 1e0dbe8..7e8c3cd 100644
+--- a/README.md
++++ b/README.md
+@@ -11,3 +11,4 @@ Configures the host as a time synchronisation client.
+ | `ntp_client_conf_path` | `/etc/chrony/chrony.conf` | Path of the rendered configuration file. |
+ | `ntp_client_conf_owner` | `root` | Owner and group of the rendered configuration file. |
+ | `ntp_client_service_enabled` | `true` | Whether the service is started and enabled at boot. |
++| `ntp_client_min_sources` | `2` | Minimum number of sources required before the clock is adjusted (rendered as `minsources`). |
+diff --git a/defaults/main.yml b/defaults/main.yml
+index 64b54e4..7f6f998 100644
+--- a/defaults/main.yml
++++ b/defaults/main.yml
+@@ -13,3 +13,6 @@ ntp_client_conf_owner: "root"
+ 
+ # Whether the service is started and enabled at boot.
+ ntp_client_service_enabled: true
++
++# Minimum number of sources required before the clock is adjusted.
++ntp_client_min_sources: 2
+diff --git a/tasks/main.yml b/tasks/main.yml
+index ccd18b4..c84b420 100644
+--- a/tasks/main.yml
++++ b/tasks/main.yml
+@@ -1,6 +1,6 @@
+ ---
+-- name: render the time synchronisation configuration
+-  template:
++- name: Render the time synchronisation configuration
++  ansible.builtin.template:
+     src: chrony.conf.j2
+     dest: "{{ ntp_client_conf_path }}"
+     owner: "{{ ntp_client_conf_owner }}"
+@@ -8,8 +8,8 @@
+     mode: "0644"
+   notify: Restart the time synchronisation service
+ 
+-- name: manage the time synchronisation service
+-  service:
++- name: Manage the time synchronisation service
++  ansible.builtin.service:
+     name: chrony
+     state: started
+     enabled: "{{ ntp_client_service_enabled }}"
+diff --git a/templates/chrony.conf.j2 b/templates/chrony.conf.j2
+index 8519cb1..e252b92 100644
+--- a/templates/chrony.conf.j2
++++ b/templates/chrony.conf.j2
+@@ -7,3 +7,4 @@ pool {{ pool }} iburst
+ {% endfor %}
+ driftfile /var/lib/chrony/chrony.drift
+ makestep 1.0 3
++minsources {{ ntp_client_min_sources }}

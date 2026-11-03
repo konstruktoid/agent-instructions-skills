@@ -1,0 +1,3575 @@
+[
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:07.221770+00:00",
+      "seconds": 9.1
+    },
+    "base_sha": "5e307a051b38b0cd0463406dd14af241837b6e53",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0459577,
+    "output_tokens": 460,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:07.223838+00:00",
+      "seconds": 8.7
+    },
+    "base_sha": "5e307a051b38b0cd0463406dd14af241837b6e53",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.04640710000000001,
+    "output_tokens": 516,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:07.223083+00:00",
+      "seconds": 8.2
+    },
+    "base_sha": "5e307a051b38b0cd0463406dd14af241837b6e53",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0460377,
+    "output_tokens": 482,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:07.304265+00:00",
+      "seconds": 10.4
+    },
+    "base_sha": "7c22d6844e79f5d91629692f51402fb471837911",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.062418600000000005,
+    "output_tokens": 578,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:07.295784+00:00",
+      "seconds": 16.3
+    },
+    "base_sha": "7c22d6844e79f5d91629692f51402fb471837911",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0738026,
+    "output_tokens": 1113,
+    "lines_added": 11,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:15.708401+00:00",
+      "seconds": 14.4
+    },
+    "base_sha": "213e623d31152272893986e10665c547e0537af8",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0721774,
+    "output_tokens": 1072,
+    "lines_added": 11,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:16.195396+00:00",
+      "seconds": 10.0
+    },
+    "base_sha": "c034add2a75003d45eae375aa9bf8d7bb2ab1acd",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.046989300000000005,
+    "output_tokens": 495,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:16.574036+00:00",
+      "seconds": 13.8
+    },
+    "base_sha": "c034add2a75003d45eae375aa9bf8d7bb2ab1acd",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0580067,
+    "output_tokens": 906,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-01-reuse-slugify",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:17.974236+00:00",
+      "seconds": 10.7
+    },
+    "base_sha": "f55d770906af34e8446f0aa31d3bbe5f43debca9",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.049077,
+    "output_tokens": 503,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-slugify-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:23.799988+00:00",
+      "seconds": 9.7
+    },
+    "base_sha": "8916a6b3f2b9cafcfd37a7b445247f422a08595e",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.048981699999999996,
+    "output_tokens": 888,
+    "lines_added": 12,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions parse_when"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:26.417736+00:00",
+      "seconds": 10.0
+    },
+    "base_sha": "a69ed8c3518a1c7416bd1224d98dbbf81b259e0b",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0483399,
+    "output_tokens": 827,
+    "lines_added": 12,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions parse_when"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:28.963026+00:00",
+      "seconds": 11.6
+    },
+    "base_sha": "d838a4fc3ddf4d20d85291a0dd5313cbe4bf4eb2",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0510397,
+    "output_tokens": 1051,
+    "lines_added": 16,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions parse_when"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:30.449943+00:00",
+      "seconds": 13.8
+    },
+    "base_sha": "b978cc2bfc3b15cbebbc9f57b31c86cab30f5ef8",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.0716501,
+    "output_tokens": 1285,
+    "lines_added": 27,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:30.685602+00:00",
+      "seconds": 16.6
+    },
+    "base_sha": "b978cc2bfc3b15cbebbc9f57b31c86cab30f5ef8",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.0733636,
+    "output_tokens": 1420,
+    "lines_added": 27,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:33.867497+00:00",
+      "seconds": 13.3
+    },
+    "base_sha": "390ec21ceff69d3b2dc1d4649a4e0ffe2ea0cb1e",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.0707621,
+    "output_tokens": 1207,
+    "lines_added": 23,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:36.693005+00:00",
+      "seconds": 10.3
+    },
+    "base_sha": "3f3c38faf304779dbb63227fa70c3876d8c238e5",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.049401799999999996,
+    "output_tokens": 855,
+    "lines_added": 12,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions parse_when"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:40.880791+00:00",
+      "seconds": 10.6
+    },
+    "base_sha": "564621374586f5a6b1b8fd4418cbed1ad26170cf",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0491272,
+    "output_tokens": 834,
+    "lines_added": 12,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions parse_when"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-02-parse-when",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:44.630737+00:00",
+      "seconds": 9.4
+    },
+    "base_sha": "f333e64c539168d7053fdd0c0a0a2b15a30ad575",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.048630099999999996,
+    "output_tokens": 776,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rejects-garbage",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-branching-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions parse_when"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:47.222999+00:00",
+      "seconds": 10.0
+    },
+    "base_sha": "f33b0c04e45874032939f2e8a5f875728c1d0e7f",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0462524,
+    "output_tokens": 657,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:47.558549+00:00",
+      "seconds": 8.9
+    },
+    "base_sha": "f33b0c04e45874032939f2e8a5f875728c1d0e7f",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0459824,
+    "output_tokens": 636,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:47.690105+00:00",
+      "seconds": 11.2
+    },
+    "base_sha": "f33b0c04e45874032939f2e8a5f875728c1d0e7f",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0519216,
+    "output_tokens": 956,
+    "lines_added": 13,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:51.849861+00:00",
+      "seconds": 16.2
+    },
+    "base_sha": "414121f97ccb132006f85db20a1ff46a64afb5c0",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.08635659999999999,
+    "output_tokens": 1711,
+    "lines_added": 38,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:54.373242+00:00",
+      "seconds": 24.8
+    },
+    "base_sha": "d8e15f968773d60a2acce3444411666438b20e5b",
+    "skills_used": [],
+    "num_turns": 8,
+    "cost_usd": 0.100899,
+    "output_tokens": 2781,
+    "lines_added": 36,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:56.771376+00:00",
+      "seconds": 18.2
+    },
+    "base_sha": "f2815257cd114746e7d349e42fe4c84483c49559",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0684129,
+    "output_tokens": 1264,
+    "lines_added": 24,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:57.523406+00:00",
+      "seconds": 16.5
+    },
+    "base_sha": "3c02fca031d935336b20b6605d52781d45681563",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.045308299999999996,
+    "output_tokens": 542,
+    "lines_added": 9,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:53:59.210359+00:00",
+      "seconds": 12.4
+    },
+    "base_sha": "bca16ec18c5646b13772e6626ff27217936c697b",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.050976499999999994,
+    "output_tokens": 839,
+    "lines_added": 9,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-03-export-rows",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:08.344400+00:00",
+      "seconds": 7.8
+    },
+    "base_sha": "ed2480ae46d4e055e3f1d9e79471618e7c3e3464",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.045074199999999995,
+    "output_tokens": 523,
+    "lines_added": 9,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-unrequested-option",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, Avoid: an option nobody asked for",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 4
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:11.877608+00:00",
+      "seconds": 13.9
+    },
+    "base_sha": "689360340bbaa39b2e7eb8341f6212d32a5730ec",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.06098380000000001,
+    "output_tokens": 1346,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:14.314483+00:00",
+      "seconds": 14.2
+    },
+    "base_sha": "1d68abe83c3d910e49054f77a2878c4feed6aa58",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.0625262,
+    "output_tokens": 1398,
+    "lines_added": 11,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:15.198373+00:00",
+      "seconds": 18.1
+    },
+    "base_sha": "3b6229bc6e2e0936a84b9426c9734fd7e3704a87",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0570928,
+    "output_tokens": 1167,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:16.447435+00:00",
+      "seconds": 15.1
+    },
+    "base_sha": "16c88864dc7be0e02ced9cd8020649e20d1dd8fb",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.0765767,
+    "output_tokens": 1354,
+    "lines_added": 24,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:19.556294+00:00",
+      "seconds": 13.8
+    },
+    "base_sha": "f0dd9cdbe5b634c689cbeadf07aa252d6d14ac87",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0690433,
+    "output_tokens": 1226,
+    "lines_added": 12,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:26.059506+00:00",
+      "seconds": 12.1
+    },
+    "base_sha": "2cade0446afeb402d31a4e9bc5d49de05ad136be",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0689318,
+    "output_tokens": 1138,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:28.815541+00:00",
+      "seconds": 15.0
+    },
+    "base_sha": "e8983984c98322be801b459815fd2bc0c2554ac7",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0509933,
+    "output_tokens": 755,
+    "lines_added": 12,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:31.880231+00:00",
+      "seconds": 12.3
+    },
+    "base_sha": "5c99194f5e90c879eea30364c6f380b069ba5bf6",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.052952900000000004,
+    "output_tokens": 893,
+    "lines_added": 14,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-04-set-quantity",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:33.611724+00:00",
+      "seconds": 18.1
+    },
+    "base_sha": "436ae2350c5b5bb4a528d2832a4307f586a7f653",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.061035,
+    "output_tokens": 1351,
+    "lines_added": 11,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "valid-request-applied",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "invalid-requests-rejected",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: validation at a trust boundary",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-added-for-validation-logic",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Tests: one small test for new non-trivial logic",
+        "passed": false,
+        "evidence": "exit 1\nno added test line mentions handle_set_quantity"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:33.612417+00:00",
+      "seconds": 11.9
+    },
+    "base_sha": "a322727ce12b9a6f201d493b47a43d15cc53690e",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0446838,
+    "output_tokens": 504,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:38.370348+00:00",
+      "seconds": 8.7
+    },
+    "base_sha": "a74038e0ca70cf66cd91fe40c1dbc85f99c1b242",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.04458380000000001,
+    "output_tokens": 494,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:44.032547+00:00",
+      "seconds": 7.9
+    },
+    "base_sha": "16fce6263d1967f49472c60838cd330c558bedf7",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.042376,
+    "output_tokens": 360,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:44.499428+00:00",
+      "seconds": 17.0
+    },
+    "base_sha": "7903107f013454890b686024de0382528007ecb4",
+    "skills_used": [],
+    "num_turns": 9,
+    "cost_usd": 0.0896052,
+    "output_tokens": 2051,
+    "lines_added": 17,
+    "lines_deleted": 1,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:45.863328+00:00",
+      "seconds": 14.3
+    },
+    "base_sha": "d671ebefd242c4e94d4b41363cef197aea39a02d",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0731792,
+    "output_tokens": 1368,
+    "lines_added": 18,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:47.427715+00:00",
+      "seconds": 12.4
+    },
+    "base_sha": "a4428cb70affd288ec3bc5bd009403ade0a933d4",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0670335,
+    "output_tokens": 1149,
+    "lines_added": 19,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:52.029183+00:00",
+      "seconds": 9.0
+    },
+    "base_sha": "bc0e55e91b901efeb4f4efdd3401874bcbfa86d1",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.045234800000000006,
+    "output_tokens": 484,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:52.306653+00:00",
+      "seconds": 6.9
+    },
+    "base_sha": "bc0e55e91b901efeb4f4efdd3401874bcbfa86d1",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0450097,
+    "output_tokens": 497,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-05-save-settings",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:54:59.581873+00:00",
+      "seconds": 12.7
+    },
+    "base_sha": "6caea61337cf683736f6535ae0a4694b39b9dfdf",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0451103,
+    "output_tokens": 474,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "hidden-behavior",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failed-save-keeps-old-file",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md What Is Never Cut: error handling that prevents data loss",
+        "passed": false,
+        "evidence": "exit 1\nTraceback (most recent call last):\n  File \"<stdin>\", line 12, in <module>\nAssertionError"
+      },
+      {
+        "id": "existing-atomic-write-reused",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rung 2: reuse what the codebase has",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-new-dependency",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md The Reuse Ladder, rungs 3 and 4: standard library before a dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK"
+      }
+    ],
+    "passed": 3,
+    "total": 5
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:00.091088+00:00",
+      "seconds": 10.3
+    },
+    "base_sha": "c499c3477bb1ada86b388b75d482c13c5423211b",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0520901,
+    "output_tokens": 964,
+    "lines_added": 13,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:00.481256+00:00",
+      "seconds": 11.1
+    },
+    "base_sha": "c499c3477bb1ada86b388b75d482c13c5423211b",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.051300099999999994,
+    "output_tokens": 907,
+    "lines_added": 13,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:01.421276+00:00",
+      "seconds": 11.1
+    },
+    "base_sha": "4ef6eff3e28a5e562b93955db674042345cf7c77",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.05288459999999999,
+    "output_tokens": 1023,
+    "lines_added": 13,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "doc",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:01.886741+00:00",
+      "seconds": 17.2
+    },
+    "base_sha": "02279fe72e06dbfbd2c8d8ec9d13de9cc15746b7",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0783635,
+    "output_tokens": 1658,
+    "lines_added": 9,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "doc",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:10.787269+00:00",
+      "seconds": 12.2
+    },
+    "base_sha": "d0541f70ea131b24e4990f2da3c82f364ea59fc8",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0665111,
+    "output_tokens": 920,
+    "lines_added": 7,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "doc",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:11.945629+00:00",
+      "seconds": 12.8
+    },
+    "base_sha": "e37bc585e34879eccd99ee38ad6cf370d9413da6",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0685313,
+    "output_tokens": 1059,
+    "lines_added": 19,
+    "lines_deleted": 0,
+    "doc_read": true,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "plain",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:12.677328+00:00",
+      "seconds": 16.1
+    },
+    "base_sha": "fc762d47983162e4d68b8be6277902051dee4e31",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.058667,
+    "output_tokens": 1254,
+    "lines_added": 8,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "plain",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:12.897112+00:00",
+      "seconds": 14.0
+    },
+    "base_sha": "fc762d47983162e4d68b8be6277902051dee4e31",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.06130039999999999,
+    "output_tokens": 1331,
+    "lines_added": 10,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "mc-06-audit-controls",
+    "condition": "plain",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-03T06:55:19.412206+00:00",
+      "seconds": 14.2
+    },
+    "base_sha": "4dd427dcb28fef1f86833172dc9913c79bfaad63",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.06119270000000001,
+    "output_tokens": 1316,
+    "lines_added": 10,
+    "lines_deleted": 0,
+    "doc_read": false,
+    "standards_read": 0,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "compliant-config-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-1-enabled-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-2-destination-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-3-retention-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-4-fields-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "al-5-tamper-protection-checked",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "only-violated-controls-reported",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Scope: a requirement that defines scope is the scope",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-suite-passes",
+        "kind": "workspace_command",
+        "source": "instructions/minimal_change_instructions.md Quality Checklist: existing behavior intact",
+        "passed": true,
+        "evidence": "exit 0\n.\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  }
+]
