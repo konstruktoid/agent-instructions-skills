@@ -25,11 +25,11 @@ python3 evals/run_eval.py report   --skill terraform-secure-iac
 - `checkov` must be on the PATH or in `EVAL_TOOL_BIN`. `tsi-04`'s `iam-checks-clean` runs it with
   `--check` limited to the IAM ids. The fixtures' existing buckets, queue, and table fail several
   other checkov checks that no task asks about, and a full scan would charge them to both arms.
-- No grader runs `terraform init`, so grading needs no registry access. In the harness sandbox
-  `init` downloads the provider but `validate` fails to instantiate it, so no run can validate
-  cleanly; `validate-result-reported` measures whether the agent said so rather than claiming a
-  clean run. On 2026-10-26 every with-skill `tsi-01` run retried `validate` across both roots
-  until it was truncated.
+- No grader runs `terraform init`, so grading needs no registry access. Since 2026-11-01 the
+  harness sandbox sets a short `TMPDIR`, so the provider can start and `validate` can pass; before
+  that it failed to instantiate the provider and `validate-result-reported` measured whether the
+  agent said so. A fixture whose module host is unreachable still cannot validate. On 2026-10-26
+  every with-skill `tsi-01` run retried `validate` across both roots until it was truncated.
 - `tsi-01`'s fixture holds an IAM access key, so its state carries a secret.
   `state-key-customer-managed` and `secret-in-state-reported` are the assertions that separate the
   arms there; the baseline already adds a bucket policy, so `state-bucket-access-restricted` is a
