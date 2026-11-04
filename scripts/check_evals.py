@@ -344,6 +344,14 @@ def rendered_stamps(suite: Path) -> list[str]:
     return sorted(path.stem for path in results.glob("*.md") if STAMP_NAME.match(path.stem))
 
 
+def has_trigger_outcomes(suite: Path) -> bool:
+    """Return whether a rendered stamp of the suite holds the outcomes of a trigger run."""
+    return any(
+        (suite / "results" / "raw" / stamp / "triggers" / "trigger-outcomes.json").is_file()
+        for stamp in rendered_stamps(suite)
+    )
+
+
 # The date-comparison fallback in check_freshness is strictly weaker than the revision
 # comparison beside it: it cannot see a change made later on the day of the run. Requiring the
 # field keeps the weaker signal from spreading to stamps written from here on. The cutoff is
@@ -902,7 +910,7 @@ def check_trigger_only_suite(suite: Path, skills: dict[str, Path]) -> tuple[list
         errors,
     )
     check_results(suite, errors, require_rendered=False)
-    if rendered_stamps(suite):
+    if has_trigger_outcomes(suite):
         check_freshness(suite, skills.get(suite.name), stale)
     return errors, stale
 
@@ -1195,7 +1203,7 @@ def main() -> int:
         + [
             f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured its routing"
             for suite in suites
-            if is_trigger_only(suite) and not rendered_stamps(suite)
+            if is_trigger_only(suite) and not has_trigger_outcomes(suite)
         ]
         + [
             f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this document"

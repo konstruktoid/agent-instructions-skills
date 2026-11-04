@@ -196,7 +196,7 @@ A suite holding `trigger-eval.json` and neither `tasks.json` nor `assertions.jso
 skill routes and nothing it does once it fires. `scripts/check_evals.py` holds it to the probe,
 README, and freshness rules, and reports it as unmeasured twice: once for having no task suite, and
 once more until a trigger run has been rendered, since only a paid run can render the results file.
-Only `run_eval.py triggers` applies to such a suite; `tasks` needs a `tasks.json`.
+`triggers` writes its raw outcomes, `report` renders them, and `tasks` needs a `tasks.json`.
 
 ## Instructions-document suites
 
