@@ -52,6 +52,11 @@ with the suite stating a `brief_intro` and a `final_line_request`; `tasks.json` 
 with no rendered results file yet is reported as unmeasured rather than failed. A template
 with no suite is reported the same way.
 
+A suite with a `trigger-eval.json` and neither `tasks.json` nor `assertions.json` measures only
+how a skill routes. It is held to the trigger, README, and freshness rules above, is reported as
+unmeasured for having no task suite, and as unmeasured for never having run when it has no
+rendered results file, since a suite cannot be authored complete without paying for a run first.
+
 A suite whose `tasks.json` names an `instructions` file measures an instructions document
 rather than a skill. It is held to the same rules with three differences: no skill has to match
 the directory, no `trigger-eval.json` exists or is required because a document has no
@@ -870,11 +875,45 @@ def check_instructions_suite(suite: Path, document: str) -> tuple[list[str], lis
     return errors, stale
 
 
+def is_trigger_only(suite: Path) -> bool:
+    """Return whether the suite holds trigger probes and no task specification at all."""
+    return (suite / "trigger-eval.json").is_file() and not any(
+        (suite / name).exists() for name in AGENT_SPEC_FILES
+    )
+
+
+def check_trigger_only_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[str]]:
+    """Check a suite that measures routing alone, returning its errors and staleness findings."""
+    errors: list[str] = []
+    stale: list[str] = []
+    if suite.name not in skills:
+        errors.append("no skills/<category>/<name>/SKILL.md matches this suite directory")
+    doc = load_json(suite / "trigger-eval.json", errors)
+    if doc is None:
+        return errors, stale
+    check_spec_headers(suite, {"trigger-eval.json": doc}, errors)
+    check_triggers(
+        scalar_fields(
+            object_entries(doc.get("prompts", []), "trigger-eval.json 'prompts'", errors),
+            PROBE_FIELDS,
+            "trigger-eval.json 'prompts'",
+            errors,
+        ),
+        errors,
+    )
+    check_results(suite, errors, require_rendered=False)
+    if rendered_stamps(suite):
+        check_freshness(suite, skills.get(suite.name), stale)
+    return errors, stale
+
+
 def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[str]]:
     """Check one suite, returning its structural errors and its staleness findings."""
     document = instructions_document(suite)
     if document is not None:
         return check_instructions_suite(suite, document)
+    if is_trigger_only(suite):
+        return check_trigger_only_suite(suite, skills)
 
     errors: list[str] = []
     stale: list[str] = []
@@ -1146,6 +1185,17 @@ def main() -> int:
             f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this template"
             for suite in agent_suites
             if not rendered_stamps(suite)
+        ]
+        + [
+            f"{suite.relative_to(REPO_ROOT)}: trigger probes only, so nothing measures what this "
+            "skill does once it fires"
+            for suite in suites
+            if is_trigger_only(suite)
+        ]
+        + [
+            f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured its routing"
+            for suite in suites
+            if is_trigger_only(suite) and not rendered_stamps(suite)
         ]
         + [
             f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this document"
