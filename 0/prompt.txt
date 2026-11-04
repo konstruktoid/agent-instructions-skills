@@ -1,0 +1,15 @@
+run the trigger eval from a local clone
+
+---
+
+<task-notification>
+<task-id>bwywdwd2y</task-id>
+<tool-use-id>toolu_012dZ4Mx8sjgrpnc2P2S3q3B</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/bwywdwd2y.output</output-file>
+<status>completed</status>
+<summary>Background command "Run the paid trigger eval from the clone" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+commit this with a signed commit with a minimal commit message
