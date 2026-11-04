@@ -70,7 +70,7 @@ It reports on the checkout it lives in and can be run from anywhere:
 
     python3 scripts/check_evals.py           # structural errors fail, the rest is reported
     python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
-    python3 scripts/check_evals.py --strict-suite NAME  # the same, for the findings on NAME only
+    python3 scripts/check_evals.py --strict-suite NAME  # the same for NAME, bar never-run findings
 
 Exits 0 when everything passes, 1 otherwise. It needs only the standard library.
 """
@@ -1252,10 +1252,13 @@ def main() -> int:
         f"{len(stale_total)} staleness finding(s)"
     )
     # A suite's findings are prefixed with its path, so a scoped run matches on that prefix.
+    # A never-run finding is left out because only a paid run clears it, and that run needs the
+    # suite merged first, so failing the pull request that adds the suite would deadlock it.
     scoped = [
         finding
         for finding in unmeasured + stale_total
-        if any(
+        if ": never run, so nothing has measured" not in finding
+        and any(
             finding.startswith((f"{EVALS_DIR}/{name}:", f"{EVALS_DIR}/{AGENTS_DIR}/{name}:"))
             for name in args.strict_suite
         )
