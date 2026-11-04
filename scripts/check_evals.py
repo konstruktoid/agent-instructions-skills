@@ -56,6 +56,8 @@ A suite with a `trigger-eval.json` and neither `tasks.json` nor `assertions.json
 how a skill routes. It is held to the trigger, README, and freshness rules above, is reported as
 unmeasured for having no task suite, and as unmeasured for never having run when it has no
 rendered results file, since a suite cannot be authored complete without paying for a run first.
+A skill task suite with no rendered results file is reported the same way, as unmeasured for
+never having run, and its coverage and freshness are checked from its first stamp on.
 
 A suite whose `tasks.json` names an `instructions` file measures an instructions document
 rather than a skill. It is held to the same rules with three differences: no skill has to match
@@ -68,7 +70,7 @@ It reports on the checkout it lives in and can be run from anywhere:
 
     python3 scripts/check_evals.py           # structural errors fail, the rest is reported
     python3 scripts/check_evals.py --strict  # unmeasured skills and staleness fail as well
-    python3 scripts/check_evals.py --strict-suite NAME  # the same, for the findings on NAME only
+    python3 scripts/check_evals.py --strict-suite NAME  # the same for NAME, bar never-run findings
 
 Exits 0 when everything passes, 1 otherwise. It needs only the standard library.
 """
@@ -242,6 +244,26 @@ def check_tasks(suite: Path, tasks: list[dict[str, Any]], errors: list[str]) -> 
             for path in sorted(path for path in fixtures.iterdir() if path.is_dir())
             if f"fixtures/{path.name}" not in referenced
         )
+    check_github_state(suite, {str(task.get("id")) for task in tasks}, errors)
+
+
+def check_github_state(suite: Path, task_ids: set[str], errors: list[str]) -> None:
+    """Check that each GitHub state file the stub serves belongs to a task and has resources."""
+    state_dir = suite / "github-state"
+    if not state_dir.is_dir():
+        return
+    for path in sorted(state_dir.iterdir()):
+        name = f"github-state/{path.name}"
+        if path.suffix != ".json" or path.stem not in task_ids:
+            errors.append(f"{name}: names no task, so the stub never serves it")
+            continue
+        try:
+            state = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{name}: {exc}")
+            continue
+        if not isinstance(state, dict) or not isinstance(state.get("resources"), dict):
+            errors.append(f"{name}: no 'resources' object for the stub to serve")
 
 
 def check_assertion(task_id: str, assertion: dict[str, Any], errors: list[str]) -> None:
@@ -958,9 +980,10 @@ def check_suite(suite: Path, skills: dict[str, Path]) -> tuple[list[str], list[s
         ),
         errors,
     )
-    check_results(suite, errors)
-    check_coverage(suite, task_ids, stale)
-    check_freshness(suite, skills.get(suite.name), stale)
+    check_results(suite, errors, require_rendered=False)
+    if rendered_stamps(suite):
+        check_coverage(suite, task_ids, stale)
+        check_freshness(suite, skills.get(suite.name), stale)
     return errors, stale
 
 
@@ -1206,6 +1229,13 @@ def main() -> int:
             if is_trigger_only(suite) and not has_trigger_outcomes(suite)
         ]
         + [
+            f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this skill"
+            for suite in suites
+            if not is_trigger_only(suite)
+            and instructions_document(suite) is None
+            and not rendered_stamps(suite)
+        ]
+        + [
             f"{suite.relative_to(REPO_ROOT)}: never run, so nothing has measured this document"
             for suite in suites
             if instructions_document(suite) is not None and not rendered_stamps(suite)
@@ -1222,10 +1252,13 @@ def main() -> int:
         f"{len(stale_total)} staleness finding(s)"
     )
     # A suite's findings are prefixed with its path, so a scoped run matches on that prefix.
+    # A never-run finding is left out because only a paid run clears it, and that run needs the
+    # suite merged first, so failing the pull request that adds the suite would deadlock it.
     scoped = [
         finding
         for finding in unmeasured + stale_total
-        if any(
+        if ": never run, so nothing has measured" not in finding
+        and any(
             finding.startswith((f"{EVALS_DIR}/{name}:", f"{EVALS_DIR}/{AGENTS_DIR}/{name}:"))
             for name in args.strict_suite
         )

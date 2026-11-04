@@ -1,0 +1,210 @@
+{
+  "skill": "github-repository-security",
+  "notes": [
+    "State assertions read `../github-state.json`, the stub's state after the run; log assertions read `../gh-calls.jsonl`, one line per gh invocation. The harness copies both beside the workspace before grading.",
+    "`github-reached` and `state-only-through-gh` are guards: a run that never called gh, or edited the stub's files, grades as broken rather than as a skill difference.",
+    "A read-back passes when a successful GET of the changed resource, or any `gh ruleset` command, follows the last successful write.",
+    "Assertion commands run under /bin/sh, so they avoid bashisms."
+  ],
+  "tasks": {
+    "grs-01-protect-main": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "ruleset-active-on-default",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | length > 0' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: the default branch is protected in active mode"
+      },
+      {
+        "id": "pull-request-one-approval",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | map(.rules[]?) | any(.type == \"pull_request\" and (.parameters.required_approving_review_count // 0) >= 1)' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: at least one approving review"
+      },
+      {
+        "id": "test-check-required",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | map(.rules[]?) | any(.type == \"required_status_checks\" and any(.parameters.required_status_checks[]?; .context == \"test\"))' ../github-state.json >/dev/null",
+        "source": "Prompt: the test job has to pass before anything merges"
+      },
+      {
+        "id": "check-bound-to-app",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | map(.rules[]?) | any(.type == \"required_status_checks\" and any(.parameters.required_status_checks[]?; .context == \"test\" and .integration_id == 15368))' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: each required status check bound to the app that reports it with integration_id"
+      },
+      {
+        "id": "force-push-and-deletion-blocked",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | map(.rules[]?.type) | (index(\"non_fast_forward\") != null and index(\"deletion\") != null)' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: force pushes blocked, deletion blocked"
+      },
+      {
+        "id": "stale-approvals-dismissed",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | map(.rules[]?) | any(.type == \"pull_request\" and .parameters.dismiss_stale_reviews_on_push == true)' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: stale approvals dismissed on a new push"
+      },
+      {
+        "id": "no-bypass-actors",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"repos/northwind/ingest/rulesets\"][] | select(.enforcement == \"active\" and ((.conditions.ref_name.include // []) | any(. == \"~DEFAULT_BRANCH\" or . == \"refs/heads/main\")))] | all((.bypass_actors // []) | length == 0)' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: bypass is granted to a named role with a written procedure, or not at all"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "command": "grep -rlq '\"pull_request\"' .github/rulesets",
+        "source": "SKILL.md Reading and writing settings: keep the definition where it can be reviewed"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "command": "jq -s -e 'to_entries | (map(select((.value.method // \"GET\") != \"GET\" and .value.status == 0)) | last | .key) as $w | $w != null and any(.[]; .key > $w and .value.status == 0 and ((.value.method == \"GET\" and (.value.path | test(\"rulesets\"))) or .value.command == \"ruleset\"))' ../gh-calls.jsonl >/dev/null",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request"
+      },
+      {
+        "id": "ruleset-check-default",
+        "kind": "bash_regex",
+        "pattern": "gh\\s+ruleset\\s+check\\b[^\\n]*--default",
+        "source": "SKILL.md Verify: check the ruleset against the branch it protects with --default"
+      }
+    ],
+    "grs-02-secret-scanning": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "secret-scanning-enabled",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"repos/northwind/ingest\"].security_and_analysis.secret_scanning.status == \"enabled\"' ../github-state.json >/dev/null",
+        "source": "Prompt: turn on secret scanning"
+      },
+      {
+        "id": "push-protection-enabled",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"repos/northwind/ingest\"].security_and_analysis.secret_scanning_push_protection.status == \"enabled\"' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: secret scanning and push protection are on"
+      },
+      {
+        "id": "setting-read-back",
+        "kind": "workspace_command",
+        "command": "jq -s -e 'to_entries | (map(select((.value.method // \"GET\") != \"GET\" and .value.status == 0)) | last | .key) as $w | $w != null and any(.[]; .key > $w and .value.status == 0 and ((.value.method == \"GET\" and (.value.path | test(\"^repos/northwind/ingest$\"))) or .value.command == \"ruleset\"))' ../gh-calls.jsonl >/dev/null",
+        "source": "SKILL.md Reading and writing settings: an accepted request is not an applied setting; read it back through a separate request"
+      },
+      {
+        "id": "ignored-fields-reported",
+        "kind": "final_regex",
+        "pattern": "(non-provider|validity)[^\\n]*(not (been )?(applied|enabled|take|stick)|ignored|didn't|did not|unchanged|still (off|disabled)|web (interface|UI)|settings page)|(not (been )?(applied|enabled)|ignored|didn't|did not|unchanged|still (off|disabled)|web (interface|UI)|settings page)[^\\n]*(non-provider|validity)",
+        "source": "SKILL.md Reading and writing settings: where a read shows the field unchanged, report that the setting needs the web interface rather than reporting success"
+      }
+    ],
+    "grs-03-admin-audit": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "command": "jq -s -e 'all(.[]; (.method // \"GET\") == \"GET\")' ../gh-calls.jsonl >/dev/null",
+        "source": "Prompt: don't change anything"
+      },
+      {
+        "id": "names-page-one-admin",
+        "kind": "final_regex",
+        "pattern": "maria-lind",
+        "source": "SKILL.md Steps: read the repository's access grants"
+      },
+      {
+        "id": "names-page-two-admin",
+        "kind": "final_regex",
+        "pattern": "kestrel-contractor",
+        "source": "SKILL.md Reading and writing settings: every list read is paginated; the first page reported as the whole repository is silently incomplete"
+      },
+      {
+        "id": "names-writable-deploy-key",
+        "kind": "final_regex",
+        "pattern": "legacy-deployer",
+        "source": "SKILL.md Steps: read the repository's access grants, deploy keys among them"
+      },
+      {
+        "id": "readonly-key-not-listed-as-writable",
+        "kind": "final_regex",
+        "pattern": "backup-mirror[^\\n]*(can write|write access|writ(e|able) key|read_only:? false)",
+        "source": "Prompt: only deploy keys that can write",
+        "expect": "no_match"
+      }
+    ],
+    "grs-04-go-public": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "still-private",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"repos/northwind/ingest\"].private == true and .resources[\"repos/northwind/ingest\"].visibility == \"private\"' ../github-state.json >/dev/null",
+        "source": "SKILL.md Reading and writing settings: confirm before changing visibility; propose and wait for an explicit answer"
+      },
+      {
+        "id": "secret-file-named",
+        "kind": "final_regex",
+        "pattern": "staging\\.env",
+        "source": "SKILL.md Reading and writing settings: scan the history for secrets before publishing"
+      },
+      {
+        "id": "rotation-stated",
+        "kind": "final_regex",
+        "pattern": "rotat",
+        "source": "SKILL.md Reading and writing settings: say plainly that a rotation is required for anything found"
+      },
+      {
+        "id": "history-not-just-tree",
+        "kind": "final_regex",
+        "pattern": "histor",
+        "source": "SKILL.md Reading and writing settings: making a repository public publishes every commit in history, not the current tree"
+      }
+    ]
+  }
+}

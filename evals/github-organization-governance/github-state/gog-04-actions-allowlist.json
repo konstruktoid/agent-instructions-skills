@@ -1,0 +1,415 @@
+{
+  "default_repo": "northwind/org-config",
+  "user": "eval-admin",
+  "per_page": 30,
+  "ignored_fields": {},
+  "resources": {
+    "user": {
+      "login": "eval-admin"
+    },
+    "orgs/northwind": {
+      "login": "northwind",
+      "default_repository_permission": "read",
+      "members_can_create_repositories": true,
+      "members_can_create_public_repositories": false,
+      "two_factor_requirement_enabled": true,
+      "members_can_fork_private_repositories": false,
+      "web_commit_signoff_required": false,
+      "plan": {
+        "name": "enterprise"
+      }
+    },
+    "orgs/northwind/memberships/eval-admin": {
+      "role": "admin",
+      "state": "active"
+    },
+    "orgs/northwind/repos": [
+      {
+        "name": "ingest",
+        "full_name": "northwind/ingest",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "billing-api",
+        "full_name": "northwind/billing-api",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": [
+          "production",
+          "payments"
+        ]
+      },
+      {
+        "name": "ledger",
+        "full_name": "northwind/ledger",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": [
+          "production",
+          "finance"
+        ]
+      },
+      {
+        "name": "web",
+        "full_name": "northwind/web",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "docs",
+        "full_name": "northwind/docs",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "infra",
+        "full_name": "northwind/infra",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "search",
+        "full_name": "northwind/search",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "mobile",
+        "full_name": "northwind/mobile",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "notify",
+        "full_name": "northwind/notify",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "auth-service",
+        "full_name": "northwind/auth-service",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "reports",
+        "full_name": "northwind/reports",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      },
+      {
+        "name": "sandbox",
+        "full_name": "northwind/sandbox",
+        "archived": false,
+        "private": true,
+        "visibility": "private",
+        "topics": []
+      }
+    ],
+    "orgs/northwind/rulesets": [],
+    "orgs/northwind/properties/schema": [
+      {
+        "property_name": "tier",
+        "value_type": "single_select",
+        "required": false,
+        "allowed_values": [
+          "production",
+          "staging",
+          "internal"
+        ]
+      }
+    ],
+    "orgs/northwind/properties/values": [
+      {
+        "repository_name": "ingest",
+        "repository_full_name": "northwind/ingest",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "production"
+          }
+        ]
+      },
+      {
+        "repository_name": "billing-api",
+        "repository_full_name": "northwind/billing-api",
+        "properties": []
+      },
+      {
+        "repository_name": "ledger",
+        "repository_full_name": "northwind/ledger",
+        "properties": []
+      },
+      {
+        "repository_name": "web",
+        "repository_full_name": "northwind/web",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "production"
+          }
+        ]
+      },
+      {
+        "repository_name": "docs",
+        "repository_full_name": "northwind/docs",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "internal"
+          }
+        ]
+      },
+      {
+        "repository_name": "infra",
+        "repository_full_name": "northwind/infra",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "production"
+          }
+        ]
+      },
+      {
+        "repository_name": "search",
+        "repository_full_name": "northwind/search",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "staging"
+          }
+        ]
+      },
+      {
+        "repository_name": "mobile",
+        "repository_full_name": "northwind/mobile",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "staging"
+          }
+        ]
+      },
+      {
+        "repository_name": "notify",
+        "repository_full_name": "northwind/notify",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "staging"
+          }
+        ]
+      },
+      {
+        "repository_name": "auth-service",
+        "repository_full_name": "northwind/auth-service",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "production"
+          }
+        ]
+      },
+      {
+        "repository_name": "reports",
+        "repository_full_name": "northwind/reports",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "staging"
+          }
+        ]
+      },
+      {
+        "repository_name": "sandbox",
+        "repository_full_name": "northwind/sandbox",
+        "properties": [
+          {
+            "property_name": "tier",
+            "value": "internal"
+          }
+        ]
+      }
+    ],
+    "orgs/northwind/actions/permissions": {
+      "enabled_repositories": "all",
+      "allowed_actions": "all",
+      "sha_pinning_required": false
+    },
+    "orgs/northwind/actions/permissions/selected-actions": {
+      "github_owned_allowed": false,
+      "verified_allowed": false,
+      "patterns_allowed": []
+    },
+    "orgs/northwind/actions/permissions/workflow": {
+      "default_workflow_permissions": "write",
+      "can_approve_pull_request_reviews": true
+    },
+    "orgs/northwind/installations": {
+      "list_key": "installations",
+      "items": [
+        {
+          "id": 501,
+          "app_slug": "northwind-release",
+          "app_id": 9001,
+          "repository_selection": "selected"
+        }
+      ]
+    },
+    "orgs/northwind/actions/runner-groups": {
+      "list_key": "runner_groups",
+      "items": [
+        {
+          "id": 1,
+          "name": "Default",
+          "visibility": "all"
+        }
+      ]
+    },
+    "orgs/northwind/members": [
+      {
+        "login": "member-01"
+      },
+      {
+        "login": "member-02"
+      },
+      {
+        "login": "member-03"
+      },
+      {
+        "login": "member-04"
+      },
+      {
+        "login": "member-05"
+      },
+      {
+        "login": "member-06"
+      },
+      {
+        "login": "member-07"
+      },
+      {
+        "login": "member-08"
+      },
+      {
+        "login": "member-09"
+      },
+      {
+        "login": "member-10"
+      },
+      {
+        "login": "member-11"
+      },
+      {
+        "login": "member-12"
+      },
+      {
+        "login": "member-13"
+      },
+      {
+        "login": "member-14"
+      },
+      {
+        "login": "member-15"
+      },
+      {
+        "login": "member-16"
+      },
+      {
+        "login": "member-17"
+      },
+      {
+        "login": "member-18"
+      },
+      {
+        "login": "member-19"
+      },
+      {
+        "login": "member-20"
+      },
+      {
+        "login": "member-21"
+      },
+      {
+        "login": "member-22"
+      },
+      {
+        "login": "member-23"
+      },
+      {
+        "login": "member-24"
+      },
+      {
+        "login": "member-25"
+      },
+      {
+        "login": "member-26"
+      },
+      {
+        "login": "member-27"
+      },
+      {
+        "login": "member-28"
+      },
+      {
+        "login": "member-29"
+      },
+      {
+        "login": "member-30"
+      },
+      {
+        "login": "member-31"
+      },
+      {
+        "login": "member-32"
+      },
+      {
+        "login": "member-33"
+      },
+      {
+        "login": "member-34"
+      },
+      {
+        "login": "member-35"
+      },
+      {
+        "login": "member-36"
+      },
+      {
+        "login": "member-37"
+      },
+      {
+        "login": "member-38"
+      },
+      {
+        "login": "member-39"
+      },
+      {
+        "login": "member-40"
+      }
+    ],
+    "orgs/northwind/members?filter=2fa_disabled": [],
+    "orgs/northwind/outside_collaborators": []
+  }
+}

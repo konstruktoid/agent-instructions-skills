@@ -402,6 +402,15 @@ INHERITED_CLAUDE_VARIABLES = frozenset(
 )
 
 
+FORGE_TOKEN_VARIABLES = (
+    "GH_CONFIG_DIR",
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+    "GH_ENTERPRISE_TOKEN",
+    "GITHUB_ENTERPRISE_TOKEN",
+)
+
+
 def run_environment(home: Path | None = None) -> dict[str, str]:
     """Return the environment for a run, with any harness tool directory on PATH.
 
@@ -409,9 +418,15 @@ def run_environment(home: Path | None = None) -> dict[str, str]:
     `actionlint` outside the user's own PATH and still have runs find them. Passing
     `home` confines the run's tool state to that directory and drops the caller's Claude
     Code variables outside INHERITED_CLAUDE_VARIABLES; omitting it leaves the ambient
-    environment alone, which is what the harness's own git calls want.
+    environment alone, which is what the harness's own git calls want. A run with `home` also
+    loses every GitHub token and gh config variable, so neither an agent nor a grader reaches
+    real GitHub.
     """
     env = dict(os.environ)
+    if home is not None:
+        # A token inherited from the caller's shell would let an agent act on real GitHub.
+        for name in FORGE_TOKEN_VARIABLES:
+            env.pop(name, None)
     tool_bin = env.get("EVAL_TOOL_BIN")
     if tool_bin:
         env["PATH"] = f"{tool_bin}{os.pathsep}{env['PATH']}"
@@ -422,7 +437,42 @@ def run_environment(home: Path | None = None) -> dict[str, str]:
             if not name.startswith("CLAUDE") or name in INHERITED_CLAUDE_VARIABLES
         }
         env.update(isolated_environment(home))
+        stub = home / GH_STUB_HOME
+        if (stub / "bin").is_dir():
+            env["GH_STUB_DIR"] = str(stub)
+            env["PATH"] = f"{stub / 'bin'}{os.pathsep}{env['PATH']}"
     return env
+
+
+# A suite that serves GitHub state keeps one file per task here, beside its fixtures.
+GITHUB_STATE_DIR = "github-state"
+GH_STUB_HOME = "gh-stub"
+GH_STUB = Path(__file__).resolve().parent / "gh_stub.py"
+
+
+def install_gh_stub(home: Path, state: Path) -> None:
+    """Put the stub `gh` on this run's PATH, serving a private copy of the task's GitHub state."""
+    stub = home / GH_STUB_HOME
+    (stub / "bin").mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(state, stub / "state.json")
+    (stub / "log.jsonl").write_text("", encoding="utf-8")
+    wrapper = stub / "bin" / "gh"
+    wrapper.write_text(f'#!/bin/sh\nexec python3 "{GH_STUB}" "$@"\n', encoding="utf-8")
+    wrapper.chmod(0o755)
+
+
+def github_state(suite: Path, task_id: str) -> Path | None:
+    """Return the task's GitHub state file, or None for a task that runs without the stub."""
+    state = suite / GITHUB_STATE_DIR / f"{task_id}.json"
+    return state if state.is_file() else None
+
+
+def keep_gh_stub_record(home: Path, run_dir: Path) -> None:
+    """Copy the stub's call log and final state beside the run, where graders read them."""
+    stub = home / GH_STUB_HOME
+    for source, name in (("log.jsonl", "gh-calls.jsonl"), ("state.json", "github-state.json")):
+        if (stub / source).is_file():
+            shutil.copyfile(stub / source, run_dir / name)
 
 
 class RunPermissions(NamedTuple):
@@ -1112,6 +1162,8 @@ def run_one_task(job: Job) -> dict[str, Any]:
     home = prepare_run_home(run_dir)
     workspace = run_dir / "workspace"
     base_sha = prepare_workspace(job["fixture"], workspace, home)
+    if job.get("github_state"):
+        install_gh_stub(home, job["github_state"])
 
     command = claude_command(
         prompt=TASK_PREAMBLE + task["prompt"],
@@ -1128,6 +1180,7 @@ def run_one_task(job: Job) -> dict[str, Any]:
     # Written before grading, because an assertion encoding the skill's "clean, or
     # reported" rule reads ../final-response.md from inside the workspace.
     (run_dir / "final-response.md").write_text(scrub(facts["final_text"]) + "\n", encoding="utf-8")
+    keep_gh_stub_record(home, run_dir)
     graded = [
         grade_assertion(assertion, workspace, facts, base_sha, home)
         for assertion in job["assertions"]
@@ -1895,6 +1948,7 @@ def cmd_tasks(args: argparse.Namespace) -> int:
             "model": args.model,
             "plugin_dir": plugin_dir,
             "fixture": skill_dir / task["fixture"],
+            "github_state": github_state(skill_dir, task["id"]),
             "assertions": assertions[task["id"]],
             "run_dir": (
                 root / task["id"] / condition
