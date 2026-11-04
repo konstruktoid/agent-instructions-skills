@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M6MA4R5453VH4Z9QEPP6MPC1",
+  "session_id": "641b2a36-7ada-454b-a6e6-213ac435c19b",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-04T22:16:17.814756108Z",
+  "branch": "github-governance-eval-suites",
+  "checkpoints_count": 3,
+  "save_step_count": 1,
+  "files_touched": [
+    "scripts/check_evals.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "79f05a873c96",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 30,
+    "cache_creation_tokens": 34544,
+    "cache_read_tokens": 697222,
+    "output_tokens": 5999,
+    "api_call_count": 13
+  },
+  "redaction": {
+    "replacements": 3,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 3,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  },
+  "session_metrics": {
+    "turn_count": 3
+  }
+}

@@ -1,0 +1,13 @@
+read the state fil
+
+---
+
+check CI and review threads
+
+---
+
+do option 1
+
+---
+
+signed commit with a minimal commit messag
