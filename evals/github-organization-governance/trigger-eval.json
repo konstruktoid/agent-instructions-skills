@@ -1,0 +1,60 @@
+{
+  "skill": "github-organization-governance",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "gog-t01",
+      "expect": "trigger",
+      "prompt": "Require two-factor authentication for every member of our GitHub organization."
+    },
+    {
+      "id": "gog-t02",
+      "expect": "trigger",
+      "prompt": "Roll out a ruleset to every repository in our org that is tagged as production."
+    },
+    {
+      "id": "gog-t03",
+      "expect": "trigger",
+      "prompt": "Restrict which GitHub Actions the repositories in our organization may use."
+    },
+    {
+      "id": "gog-t04",
+      "expect": "trigger",
+      "prompt": "Review which GitHub Apps are installed in our org and what they can access."
+    },
+    {
+      "id": "gog-t05",
+      "expect": "trigger",
+      "prompt": "Collect evidence from our GitHub organization's audit log for the SOC 2 auditor."
+    },
+    {
+      "id": "gog-t06",
+      "expect": "no-trigger",
+      "prompt": "Turn on secret scanning for this one repository."
+    },
+    {
+      "id": "gog-t07",
+      "expect": "no-trigger",
+      "prompt": "Tighten the permissions block in our deploy workflow."
+    },
+    {
+      "id": "gog-t08",
+      "expect": "no-trigger",
+      "prompt": "Set up an Azure DevOps project with branch policies."
+    },
+    {
+      "id": "gog-t09",
+      "expect": "no-trigger",
+      "prompt": "Write a CODEOWNERS file for this repository."
+    },
+    {
+      "id": "gog-t10",
+      "expect": "no-trigger",
+      "prompt": "Explain the difference between a GitHub organization and an enterprise account."
+    }
+  ]
+}

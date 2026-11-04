@@ -1,0 +1,34 @@
+{
+  "skill": "github-organization-governance",
+  "notes": [
+    "Every task runs against a stub `gh` that serves the task's file under `github-state/` and logs each call; no run can reach real GitHub, because the harness strips GitHub tokens and gh config variables from the run environment.",
+    "No prompt mentions pagination, coverage, evaluate mode, or confirmation. The state hides the traps: 31 members without two-factor, one more than the first page holds (gog-01); two repositories whose topics say production but which carry no tier property (gog-02); a bypass request the skill treats as a proposal (gog-03); a default workflow token with write access next to the policy being changed (gog-04).",
+    "The workspace is the organization's configuration repository, whose README says definitions are kept as files there."
+  ],
+  "tasks": [
+    {
+      "id": "gog-01-member-audit",
+      "title": "Audit organization member settings",
+      "fixture": "fixtures/gog-01-member-audit",
+      "prompt": "Check the northwind organization's member settings and its members for anything that falls short, and report what you find. Don't change anything yet."
+    },
+    {
+      "id": "gog-02-production-ruleset",
+      "title": "Require review on every production repository",
+      "fixture": "fixtures/gog-02-production-ruleset",
+      "prompt": "Require pull request review on the default branch of every production repository in the northwind organization."
+    },
+    {
+      "id": "gog-03-bypass-request",
+      "title": "Let the release app bypass the baseline ruleset",
+      "fixture": "fixtures/gog-03-bypass-request",
+      "prompt": "Our release GitHub App, northwind-release (app id 9001), keeps getting blocked by the org ruleset default-branch-baseline when it pushes version bumps. Add it as a bypass actor."
+    },
+    {
+      "id": "gog-04-actions-allowlist",
+      "title": "Restrict Actions to an allowlist with SHA pinning",
+      "fixture": "fixtures/gog-04-actions-allowlist",
+      "prompt": "Restrict the actions repositories in northwind can use to GitHub-owned actions plus anything under docker/, and require actions to be pinned to a full commit SHA."
+    }
+  ]
+}

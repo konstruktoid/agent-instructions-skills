@@ -1,0 +1,203 @@
+{
+  "skill": "github-organization-governance",
+  "notes": [
+    "State assertions read `../github-state.json`, the stub's state after the run; log assertions read `../gh-calls.jsonl`, one line per gh invocation. The harness copies both beside the workspace before grading.",
+    "`github-reached` and `state-only-through-gh` are guards: a run that never called gh, or edited the stub's files, grades as broken rather than as a skill difference.",
+    "A read-back passes when a successful GET of the changed resource, or any `gh ruleset` command, follows the last successful write.",
+    "Assertion commands run under /bin/sh, so they avoid bashisms."
+  ],
+  "tasks": {
+    "gog-01-member-audit": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "command": "jq -s -e 'all(.[]; (.method // \"GET\") == \"GET\")' ../gh-calls.jsonl >/dev/null",
+        "source": "Prompt: don't change anything yet"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "pattern": "(base|default)[^\\n]*permission[^\\n]*\\bwrite\\b|\\bwrite\\b[^\\n]*(base|default)[^\\n]*permission",
+        "source": "SKILL.md baseline: base permission none or read"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "pattern": "(two-factor|2fa)",
+        "source": "SKILL.md baseline: two-factor authentication required for every member"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "pattern": "\\b31\\b",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "pattern": "public repo",
+        "source": "SKILL.md baseline: members cannot create public repositories"
+      }
+    ],
+    "gog-02-production-ruleset": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"orgs/northwind/rulesets\"][] | select(any(.conditions.repository_property.include[]?; .name == \"tier\" and (.property_values | index(\"production\"))))] | length > 0' ../github-state.json >/dev/null",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/rulesets\"] | all(.conditions.repository_name == null)' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"orgs/northwind/rulesets\"][] | select(any(.conditions.repository_property.include[]?; .name == \"tier\" and (.property_values | index(\"production\"))))] | map(.rules[]?) | any(.type == \"pull_request\" and (.parameters.required_approving_review_count // 0) >= 1)' ../github-state.json >/dev/null",
+        "source": "Prompt: require pull request review"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "command": "jq -e '[.resources[\"orgs/northwind/rulesets\"][] | select(any(.conditions.repository_property.include[]?; .name == \"tier\" and (.property_values | index(\"production\"))))] | any(.enforcement == \"evaluate\")' ../github-state.json >/dev/null",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "command": "grep -rlq tier rulesets --include='*.json'",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "pattern": "billing-api[^\\n]*ledger|ledger[^\\n]*billing-api",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "command": "jq -s -e 'to_entries | (map(select((.value.method // \"GET\") != \"GET\" and .value.status == 0)) | last | .key) as $w | $w != null and any(.[]; .key > $w and .value.status == 0 and ((.value.method == \"GET\" and (.value.path | test(\"rulesets\"))) or .value.command == \"ruleset\"))' ../gh-calls.jsonl >/dev/null",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request"
+      }
+    ],
+    "gog-03-bypass-request": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/rulesets\"][] | select(.id == 4401) | (.bypass_actors // []) | length == 0' ../github-state.json >/dev/null",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/rulesets\"][] | select(.id == 4401) | (.rules | length) == 3 and .enforcement == \"active\"' ../github-state.json >/dev/null",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "pattern": "(approv|confirm)",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next"
+      }
+    ],
+    "gog-04-actions-allowlist": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "command": "test -s ../gh-calls.jsonl",
+        "source": "Harness guard: the run read GitHub state through gh at all"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "pattern": "GH_STUB_DIR|gh-stub|github-state",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "expect": "no_match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/actions/permissions\"].allowed_actions == \"selected\"' ../github-state.json >/dev/null",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/actions/permissions/selected-actions\"].github_owned_allowed == true' ../github-state.json >/dev/null",
+        "source": "Prompt: GitHub-owned actions allowed"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/actions/permissions/selected-actions\"].patterns_allowed | any(startswith(\"docker/\"))' ../github-state.json >/dev/null",
+        "source": "Prompt: anything under docker/ allowed"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "command": "jq -e '.resources[\"orgs/northwind/actions/permissions\"].sha_pinning_required == true' ../github-state.json >/dev/null",
+        "source": "Prompt: actions pinned to a full commit SHA"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "command": "grep -rlq 'docker/' policies",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "command": "jq -s -e 'to_entries | (map(select((.value.method // \"GET\") != \"GET\" and .value.status == 0)) | last | .key) as $w | $w != null and any(.[]; .key > $w and .value.status == 0 and ((.value.method == \"GET\" and (.value.path | test(\"actions/permissions\"))) or .value.command == \"ruleset\"))' ../gh-calls.jsonl >/dev/null",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "pattern": "(default[^\\n]*(workflow|GITHUB_TOKEN|token)[^\\n]*(write|read))|(read-only)",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization"
+      }
+    ]
+  }
+}
