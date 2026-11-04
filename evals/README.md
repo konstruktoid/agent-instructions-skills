@@ -32,9 +32,11 @@ finished workspaces after installing it, with the agents' output unchanged. No r
 `terraform validate`, because the provider downloads in the harness sandbox and then fails to
 instantiate, so `validate-result-reported` measures whether the agent said so.
 
-Two skills have no suite at all, `github-repository-security` and `github-organization-governance`,
-so nothing measures them. `terraform-testing` has trigger probes and no task suite, so only its routing
-can be measured. Of the twelve agent templates,
+Two skills have no suite at all, `github-repository-security` and
+`github-organization-governance`, so nothing measures them. `terraform-testing` has trigger probes
+and no task suite, so only its routing can be measured. Its first trigger run, stamp `2026-11-04` at
+`4d9fe5a` with three passes per probe, routed all ten probes correctly, and the README-formatting
+probe `tt-t08` fired in one of three passes. Of the twelve agent templates,
 `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a suite, and
 the last two were first run on 2026-10-26 at `52d4ed8`, where neither separated from its no-agent
 arm. The verifier's 2026-10-08 stamp re-ran the same
