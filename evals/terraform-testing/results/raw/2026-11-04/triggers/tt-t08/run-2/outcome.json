@@ -1,0 +1,16 @@
+{
+  "id": "tt-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.049961799999999994,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-04T09:22:18.563636+00:00",
+    "seconds": 15.6
+  },
+  "aborted": false,
+  "rate_limited": false
+}

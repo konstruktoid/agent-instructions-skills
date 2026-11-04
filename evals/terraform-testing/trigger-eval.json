@@ -1,0 +1,60 @@
+{
+  "skill": "terraform-testing",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "One out-of-scope probe belongs to terraform-secure-iac, the skill this description names as the owner of state, secrets, credentials, and module and provider sources. Another is a request that needs no test.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "tt-t01",
+      "expect": "trigger",
+      "prompt": "I added a validation block to the subnet_count variable. Add a test so a zero value can't slip back in."
+    },
+    {
+      "id": "tt-t02",
+      "expect": "trigger",
+      "prompt": "The VPC module's output for private subnet IDs returned the public ones last week. Fix it and lock the fix in with a test."
+    },
+    {
+      "id": "tt-t03",
+      "expect": "trigger",
+      "prompt": "This Terraform repo has some tests under test/ that I don't recognise. Where should a test for my new module input go?"
+    },
+    {
+      "id": "tt-t04",
+      "expect": "trigger",
+      "prompt": "I changed the security group module so it creates the egress rule only when allow_egress is true. Cover that with tests."
+    },
+    {
+      "id": "tt-t05",
+      "expect": "trigger",
+      "prompt": "Our module has Terratest in Go. Add a case for the new retention_days output without switching frameworks."
+    },
+    {
+      "id": "tt-t06",
+      "expect": "no-trigger",
+      "prompt": "Our Terraform root keeps state in a local file that is committed. Move it to a remote backend with locking and encryption."
+    },
+    {
+      "id": "tt-t07",
+      "expect": "no-trigger",
+      "prompt": "The Terraform module pins its provider to >= 4.0 and sources a sibling module from a Git URL with no ref. Tighten both."
+    },
+    {
+      "id": "tt-t08",
+      "expect": "no-trigger",
+      "prompt": "Run terraform fmt over the repository and fix the indentation in the README's HCL examples."
+    },
+    {
+      "id": "tt-t09",
+      "expect": "no-trigger",
+      "prompt": "Add a pytest case that checks our config loader rejects a negative timeout."
+    },
+    {
+      "id": "tt-t10",
+      "expect": "no-trigger",
+      "prompt": "Explain what terraform test does differently from terraform validate. No code changes needed."
+    }
+  ]
+}

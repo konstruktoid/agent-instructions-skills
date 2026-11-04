@@ -484,7 +484,7 @@ output, or that its `description` routes the right tasks to it. Two measurements
   attributable to the skill. Seven of the ten skills have a suite.
   `github-repository-security` and `github-organization-governance` have none, because a task
   for either acts on a live GitHub organization rather than on a fixture directory, and
-  `terraform-testing` has none yet;
+  `terraform-testing` has trigger probes only, with no task suite yet;
   `scripts/check_evals.py` reports each of them as unmeasured.
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
@@ -538,7 +538,7 @@ from standing as a general claim about the skill. `github-repository-security` a
 `github-organization-governance` have neither eval yet: both act on live GitHub settings, so
 a task eval needs a fixture that stands in for an organization, and until that exists there is
 no measurement of what either skill changes. `terraform-testing`
-has neither eval yet either; a suite for it is a follow-up.
+has trigger probes and no task eval yet; a task suite for it is a follow-up.
 
 `scripts/check_evals.py` holds the seven suites to the structure described here, and separates
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and

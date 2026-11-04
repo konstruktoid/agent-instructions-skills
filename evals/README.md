@@ -32,8 +32,11 @@ finished workspaces after installing it, with the agents' output unchanged. No r
 `terraform validate`, because the provider downloads in the harness sandbox and then fails to
 instantiate, so `validate-result-reported` measures whether the agent said so.
 
-Three skills have no suite at all, `github-repository-security`, `github-organization-governance`,
-and `terraform-testing`, so nothing measures them. Of the twelve agent templates,
+Two skills have no suite at all, `github-repository-security` and
+`github-organization-governance`, so nothing measures them. `terraform-testing` has trigger probes
+and no task suite, so only its routing can be measured. Its first trigger run, stamp `2026-11-04` at
+`4d9fe5a` with three passes per probe, routed all ten probes correctly, and the README-formatting
+probe `tt-t08` fired in one of three passes. Of the twelve agent templates,
 `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a suite, and
 the last two were first run on 2026-10-26 at `52d4ed8`, where neither separated from its no-agent
 arm. The verifier's 2026-10-08 stamp re-ran the same
@@ -49,9 +52,9 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 Open work, as of 2026-10-27:
 
-- A suite for each of the three skills without one. The two bash skills,
-  `bash-secure-scripting` and `bash-testing`, and `terraform-secure-iac` already have suites, so
-  they are not on this list.
+- A suite for each of the two skills without one, and a task suite for `terraform-testing`. The two
+  bash skills, `bash-secure-scripting` and `bash-testing`, and `terraform-secure-iac` already have
+  suites, so they are not on this list.
 - Two `terraform-secure-iac` graders, `trust-audience-pinned` and `apply-trust-pinned-to-main`,
   miss a condition key built from a variable. Fixing them invalidates the 2026-10-26 stamp.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
@@ -186,6 +189,14 @@ task's `request` or `question` and `sources` in place of a prompt, each declared
 against the tasks, and no routing probes. It reports a suite that has never been run as unmeasured
 rather than failing it, since only a paid run can render the results file. It reports every template
 with no suite the same way.
+
+## Trigger-only suites
+
+A suite holding `trigger-eval.json` and neither `tasks.json` nor `assertions.json` measures how a
+skill routes and nothing it does once it fires. `scripts/check_evals.py` holds it to the probe,
+README, and freshness rules, and reports it as unmeasured twice: once for having no task suite, and
+once more until a trigger run has been rendered, since only a paid run can render the results file.
+`triggers` writes its raw outcomes, `report` renders them, and `tasks` needs a `tasks.json`.
 
 ## Instructions-document suites
 
