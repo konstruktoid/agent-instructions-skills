@@ -1,0 +1,44 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M6M8ND396P9XV3RQGGRM43D3",
+  "strategy": "manual-commit",
+  "branch": "github-governance-eval-suites",
+  "checkpoints_count": 7,
+  "files_touched": [
+    "README.md",
+    "docs/controls.md",
+    "docs/threat-model.md",
+    "evals/run_eval.py",
+    "scripts/check_evals.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 6,
+    "cache_creation_tokens": 2617,
+    "cache_read_tokens": 227018,
+    "output_tokens": 1719,
+    "api_call_count": 3
+  },
+  "redaction": {
+    "replacements": 24,
+    "layers": {
+      "betterleaks": 2,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 22,
+      "credentialed_uri": 2,
+      "entropy": 0,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  }
+}
