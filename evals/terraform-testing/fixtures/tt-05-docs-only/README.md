@@ -2,5 +2,11 @@
 
 A smal module that records a retention polcy for one service.
 
-Run the checks with `make test`, which initialises the module, checks formating, and runs the
-native tests under `tests/`.
+## Tests
+
+- `tests/unit/` holds one file per input or output, named for it, and every `run` block uses
+  `command = plan`. `make test` formats and runs these.
+- `tests/integration/` holds tests that `apply`. CI runs them with `make integration` in a sandbox
+  account, and nobody adds to them without the platform team.
+
+Checks run with `make test`, which also checks formating.

@@ -30,8 +30,26 @@
       {
         "id": "existing-convention-followed",
         "kind": "workspace_command",
-        "command": "for f in $(git ls-files --others --exclude-standard -- tests); do case \"$f\" in tests/*.tftest.hcl) ;; *) exit 1 ;; esac; done",
+        "command": "for f in $(git ls-files --others --exclude-standard -- tests); do case \"$f\" in tests/unit/*.tftest.hcl) ;; *) exit 1 ;; esac; done",
         "source": "SKILL.md Steps: place the test where the repository's convention puts it"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "command": "test -f tests/unit/retention_days.tftest.hcl",
+        "source": "SKILL.md Steps: a name that matches the surrounding files"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'command *= *apply' tests/unit",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\" -- tests/integration && [ -z \"$(git ls-files --others --exclude-standard -- tests/integration)\" ]",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target"
       },
       {
         "id": "no-second-framework",
@@ -42,7 +60,7 @@
       {
         "id": "failure-path-covered",
         "kind": "workspace_command",
-        "command": "grep -rq expect_failures tests/",
+        "command": "grep -rq expect_failures tests/unit",
         "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path"
       },
       {
@@ -60,13 +78,13 @@
       {
         "id": "test-fails-without-the-validation",
         "kind": "workspace_command",
-        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && git -C .. show \"$EVAL_BASE_SHA:variables.tf\" > variables.tf && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; ! terraform test > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && git -C .. show \"$EVAL_BASE_SHA:variables.tf\" > variables.tf && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; ! terraform test -test-directory=tests/unit > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
         "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails"
       },
       {
         "id": "existing-test-not-gutted",
         "kind": "workspace_command",
-        "command": "grep -q policy_name_follows_service tests/defaults.tftest.hcl && grep -q billing-retention tests/defaults.tftest.hcl",
+        "command": "grep -q policy_name_follows_service tests/unit/name.tftest.hcl && grep -q billing-retention tests/unit/name.tftest.hcl",
         "source": "SKILL.md: never delete an assertion to get a green run"
       },
       {
@@ -250,6 +268,12 @@
         "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead"
       },
       {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; awk '/^output \"full_name\"/{f=1} f && /^[[:space:]]*value[[:space:]]*=/{print \"  value = \\\"wrong\\\"\"; f=0; next} {print}' outputs.tf > o.tmp && mv o.tmp outputs.tf && terraform fmt outputs.tf > /dev/null && ! make check > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point"
+      },
+      {
         "id": "full-name-correct",
         "kind": "workspace_command",
         "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; terraform apply -auto-approve -input=false -var team=core -var name=api > /dev/null 2>&1 && [ \"$(terraform output -raw full_name)\" = core-api ] ); rc=$?; rm -rf eval-check; exit $rc",
@@ -290,7 +314,7 @@
       {
         "id": "no-test-decision-stated",
         "kind": "final_regex",
-        "pattern": "(no (new |additional )?tests?|test(s)? (is|are|was|were) not (needed|required)|not needed|nothing to test|no behaviou?r)",
+        "pattern": "(no (new |additional )?tests?|(didn'?t|did not|do not|don'?t) (need|add|require)\\w* (a |any |new )?tests?|tests? (is|are|was|were) not (needed|required)|not needed|nothing to test)",
         "source": "SKILL.md When NOT to use this: say a test is not needed, and why"
       },
       {
