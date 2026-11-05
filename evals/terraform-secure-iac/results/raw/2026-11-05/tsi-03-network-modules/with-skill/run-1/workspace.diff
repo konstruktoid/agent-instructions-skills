@@ -1,0 +1,98 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..55638f9
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,7 @@
++.terraform/
++*.tfstate
++*.tfstate.*
++*.tfplan
++crash*.log
++*.tfvars
++*.auto.tfvars
+diff --git a/main.tf b/main.tf
+index cdfda61..a4062bb 100644
+--- a/main.tf
++++ b/main.tf
+@@ -4,3 +4,18 @@ module "labels" {
+   service     = "network"
+   environment = var.environment
+ }
++
++module "vpc" {
++  source  = "terraform-aws-modules/vpc/aws"
++  version = "6.7.3"
++
++  name = "network-${var.environment}"
++  cidr = var.vpc_cidr
++
++  azs             = var.availability_zones
++  private_subnets = var.private_subnet_cidrs
++
++  enable_nat_gateway = false
++
++  tags = module.labels.tags
++}
+diff --git a/outputs.tf b/outputs.tf
+new file mode 100644
+index 0000000..abbf217
+--- /dev/null
++++ b/outputs.tf
+@@ -0,0 +1,9 @@
++output "vpc_id" {
++  description = "ID of the VPC."
++  value       = module.vpc.vpc_id
++}
++
++output "private_subnet_ids" {
++  description = "IDs of the private subnets, in the order of availability_zones."
++  value       = module.vpc.private_subnets
++}
+diff --git a/variables.tf b/variables.tf
+index 236aa5f..d01f54a 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -7,3 +7,26 @@ variable "environment" {
+   type    = string
+   default = "staging"
+ }
++
++variable "vpc_cidr" {
++  type        = string
++  description = "IPv4 CIDR block of the VPC. Private subnet CIDRs must fall inside it."
++  default     = "10.0.0.0/16"
++}
++
++variable "availability_zones" {
++  type        = list(string)
++  description = "Availability zones that receive one private subnet each, matched by position to private_subnet_cidrs."
++  default     = ["eu-north-1a", "eu-north-1b"]
++}
++
++variable "private_subnet_cidrs" {
++  type        = list(string)
++  description = "IPv4 CIDR blocks of the private subnets, matched by position to availability_zones."
++  default     = ["10.0.1.0/24", "10.0.2.0/24"]
++
++  validation {
++    condition     = length(var.private_subnet_cidrs) == length(var.availability_zones)
++    error_message = "private_subnet_cidrs must have the same number of entries as availability_zones."
++  }
++}
+diff --git a/versions.tf b/versions.tf
+index bcdeda0..a57677a 100644
+--- a/versions.tf
++++ b/versions.tf
+@@ -1,8 +1,10 @@
+ terraform {
++  required_version = ">= 1.10"
++
+   required_providers {
+     aws = {
+       source  = "hashicorp/aws"
+-      version = ">= 4.0"
++      version = "~> 6.0"
+     }
+   }
+ 

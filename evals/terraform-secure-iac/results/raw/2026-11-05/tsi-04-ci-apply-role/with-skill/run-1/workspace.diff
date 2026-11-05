@@ -1,0 +1,326 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..c74078f
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,4 @@
++.terraform/
++*.tfstate
++*.tfstate.*
++*.tfplan
+diff --git a/.terraform.lock.hcl b/.terraform.lock.hcl
+new file mode 100644
+index 0000000..9dd42a7
+--- /dev/null
++++ b/.terraform.lock.hcl
+@@ -0,0 +1,26 @@
++# This file is maintained automatically by "terraform init".
++# Manual edits may be lost in future updates.
++
++provider "registry.terraform.io/hashicorp/aws" {
++  version     = "6.72.0"
++  constraints = "~> 6.0"
++  hashes = [
++    "h1:v8OGTOUuY1sbRr4VDjYW7ypqV5NBB1cosUY5LrcwqTs=",
++    "zh:2ffb6b2caaf320b61b406cff192d6e4303b64e32990b69384a056fe5af3d015b",
++    "zh:33cd70e1b3d0f80bfdf07480139142f81a3daec26ab0fd160d00793e819b807e",
++    "zh:37166439117b6ab889b02513e9cdc09b9ea4dd0b6e0733e83da47fc938acad35",
++    "zh:676fc5b60e270af38f94da63bb0caa80c3fb24c8c68c77ceb4df8c09f5fd78f0",
++    "zh:7218399da8607fd00b948e817941d3e543a09347272ff9103d9cf3797ad697e0",
++    "zh:7fba55258fa19b283b465b2158141f8cffa23d4aa670cd9edfab9e4deaebc5d2",
++    "zh:81da89c4557a9fb2943f10e229b4e289852df94255b7186dc7e1dcbd36641a9f",
++    "zh:82b8dd415eb13a81e7e28fc29756e4639c77683534b0ffae6bf25c10b693a374",
++    "zh:98fd4bbce8d01e99e983b09a824d0d76dacb9131c3d0d6246bc58f4a31ba1e51",
++    "zh:9b12af85486a96aedd8d7984b0ff811a4b42e3d88dad1a3fb4c0b580d04fa425",
++    "zh:9f4805d74c8a217d5226c0a0432aac48bf78e1f1211ebd8e637ef03c371dfe39",
++    "zh:dea44ec068f2cf22d4c7de93c5639b494d37ae96afd030d930bfb52d5a56993b",
++    "zh:e36e6b40ecb21c5c11c901a278b3ff8cb16ef553b155d7d22a774d051051803b",
++    "zh:ed50513dd885ae66c3be4b170931e44775886339027431135cd41aa885307280",
++    "zh:eefefe233dcb8934d4cdda1cb67e7e89b177a2717ee73822f4915cb3681cdc83",
++    "zh:f67a7f2d76347698874caab82da856cfd6b99c418b0401768be06c5cc10a488d",
++  ]
++}
+diff --git a/ci_iam.tf b/ci_iam.tf
+new file mode 100644
+index 0000000..b6f5443
+--- /dev/null
++++ b/ci_iam.tf
+@@ -0,0 +1,229 @@
++# AWS side of the CI handover: GitHub OIDC trust plus two roles for the
++# platform/ingest workflow. No static keys exist; each run exchanges its GitHub
++# token for a one-hour session.
++#
++# - plan role:  assumed by pull_request runs, read-only on the managed resources.
++# - apply role: assumed only by runs on the protected branch, can change them.
++#
++# An AWS account allows one OIDC provider per issuer URL. If the account already
++# has token.actions.githubusercontent.com, import it instead of creating it.
++
++locals {
++  github_oidc_host = "token.actions.githubusercontent.com"
++  state_object_arn = "arn:aws:s3:::${var.state_bucket}/${var.state_key}"
++  lock_object_arn  = "arn:aws:s3:::${var.state_bucket}/${var.state_key}.tflock"
++}
++
++resource "aws_iam_openid_connect_provider" "github" {
++  url            = "https://${local.github_oidc_host}"
++  client_id_list = ["sts.amazonaws.com"]
++}
++
++data "aws_iam_policy_document" "plan_trust" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.github_oidc_host}:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++
++    # Exact match, no wildcards. Fork pull requests do not receive OIDC tokens
++    # for this repository's subject.
++    condition {
++      test     = "StringEquals"
++      variable = "${local.github_oidc_host}:sub"
++      values   = ["repo:${var.github_repository}:pull_request"]
++    }
++  }
++}
++
++data "aws_iam_policy_document" "apply_trust" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.github_oidc_host}:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++
++    condition {
++      test     = "StringEquals"
++      variable = "${local.github_oidc_host}:sub"
++      values   = ["repo:${var.github_repository}:ref:refs/heads/${var.apply_branch}"]
++    }
++  }
++}
++
++# Read access shared by both roles: what refresh and plan need on the managed
++# resources, plus the state backend.
++data "aws_iam_policy_document" "read" {
++  statement {
++    sid = "ReadBucket"
++    actions = [
++      "s3:ListBucket",
++      "s3:GetBucketLocation",
++      "s3:GetBucketTagging",
++      "s3:GetBucketPolicy",
++      "s3:GetBucketAcl",
++      "s3:GetBucketCORS",
++      "s3:GetBucketWebsite",
++      "s3:GetBucketVersioning",
++      "s3:GetBucketLogging",
++      "s3:GetBucketRequestPayment",
++      "s3:GetBucketObjectLockConfiguration",
++      "s3:GetBucketOwnershipControls",
++      "s3:GetBucketPublicAccessBlock",
++      "s3:GetAccelerateConfiguration",
++      "s3:GetEncryptionConfiguration",
++      "s3:GetLifecycleConfiguration",
++      "s3:GetReplicationConfiguration",
++    ]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++
++  statement {
++    sid = "ReadQueue"
++    actions = [
++      "sqs:GetQueueAttributes",
++      "sqs:GetQueueUrl",
++      "sqs:ListQueueTags",
++    ]
++    resources = [aws_sqs_queue.events.arn]
++  }
++
++  statement {
++    sid = "ReadTable"
++    actions = [
++      "dynamodb:DescribeTable",
++      "dynamodb:DescribeContinuousBackups",
++      "dynamodb:DescribeTimeToLive",
++      "dynamodb:ListTagsOfResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++
++  statement {
++    sid       = "ReadStateList"
++    actions   = ["s3:ListBucket"]
++    resources = ["arn:aws:s3:::${var.state_bucket}"]
++
++    condition {
++      test     = "StringLike"
++      variable = "s3:prefix"
++      values   = [var.state_key, "${var.state_key}.*"]
++    }
++  }
++
++  statement {
++    sid       = "ReadState"
++    actions   = ["s3:GetObject"]
++    resources = [local.state_object_arn]
++  }
++
++  # use_lockfile = true: locking writes and removes a lock object next to the
++  # state. This is the only write the plan role holds.
++  statement {
++    sid       = "StateLock"
++    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
++    resources = [local.lock_object_arn]
++  }
++}
++
++data "aws_iam_policy_document" "apply_write" {
++  statement {
++    sid = "ManageBucket"
++    actions = [
++      "s3:CreateBucket",
++      "s3:DeleteBucket",
++      "s3:PutBucketTagging",
++      "s3:PutBucketPolicy",
++      "s3:DeleteBucketPolicy",
++      "s3:PutBucketAcl",
++      "s3:PutBucketCORS",
++      "s3:PutBucketVersioning",
++      "s3:PutBucketLogging",
++      "s3:PutBucketOwnershipControls",
++      "s3:PutBucketPublicAccessBlock",
++      "s3:PutEncryptionConfiguration",
++      "s3:PutLifecycleConfiguration",
++    ]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++
++  statement {
++    sid = "ManageQueue"
++    actions = [
++      "sqs:CreateQueue",
++      "sqs:DeleteQueue",
++      "sqs:SetQueueAttributes",
++      "sqs:TagQueue",
++      "sqs:UntagQueue",
++    ]
++    resources = [aws_sqs_queue.events.arn]
++  }
++
++  statement {
++    sid = "ManageTable"
++    actions = [
++      "dynamodb:CreateTable",
++      "dynamodb:DeleteTable",
++      "dynamodb:UpdateTable",
++      "dynamodb:UpdateContinuousBackups",
++      "dynamodb:UpdateTimeToLive",
++      "dynamodb:TagResource",
++      "dynamodb:UntagResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++
++  statement {
++    sid       = "WriteState"
++    actions   = ["s3:PutObject", "s3:DeleteObject"]
++    resources = [local.state_object_arn]
++  }
++}
++
++resource "aws_iam_role" "ci_plan" {
++  name                 = "ingest-ci-plan"
++  description          = "Assumed by pull_request runs of ${var.github_repository} to run terraform plan with read-only access."
++  assume_role_policy   = data.aws_iam_policy_document.plan_trust.json
++  max_session_duration = 3600
++}
++
++resource "aws_iam_role_policy" "ci_plan" {
++  name   = "plan-read-only"
++  role   = aws_iam_role.ci_plan.id
++  policy = data.aws_iam_policy_document.read.json
++}
++
++resource "aws_iam_role" "ci_apply" {
++  name                 = "ingest-ci-apply"
++  description          = "Assumed by ${var.apply_branch} runs of ${var.github_repository} to run terraform apply on this configuration."
++  assume_role_policy   = data.aws_iam_policy_document.apply_trust.json
++  max_session_duration = 3600
++}
++
++resource "aws_iam_role_policy" "ci_apply_read" {
++  name   = "apply-read"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.read.json
++}
++
++resource "aws_iam_role_policy" "ci_apply_write" {
++  name   = "apply-write"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.apply_write.json
++}
+diff --git a/outputs.tf b/outputs.tf
+new file mode 100644
+index 0000000..9012d51
+--- /dev/null
++++ b/outputs.tf
+@@ -0,0 +1,9 @@
++output "ci_plan_role_arn" {
++  description = "ARN of the read-only role the pull-request workflow assumes through role-to-assume."
++  value       = aws_iam_role.ci_plan.arn
++}
++
++output "ci_apply_role_arn" {
++  description = "ARN of the role the workflow assumes on the protected branch to run apply."
++  value       = aws_iam_role.ci_apply.arn
++}
+diff --git a/variables.tf b/variables.tf
+new file mode 100644
+index 0000000..1f8e9e1
+--- /dev/null
++++ b/variables.tf
+@@ -0,0 +1,28 @@
++variable "github_repository" {
++  type        = string
++  description = "GitHub repository, in owner/name form, whose workflow may assume the CI roles. Only workflow runs from this repository are trusted."
++  default     = "platform/ingest"
++
++  validation {
++    condition     = can(regex("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", var.github_repository))
++    error_message = "github_repository must be in owner/name form with no wildcards."
++  }
++}
++
++variable "apply_branch" {
++  type        = string
++  description = "Branch whose workflow runs may assume the apply role. Runs from any other ref are refused."
++  default     = "main"
++}
++
++variable "state_bucket" {
++  type        = string
++  description = "Name of the S3 bucket holding this configuration's remote state. Must match the backend block in versions.tf."
++  default     = "ingest-terraform-state"
++}
++
++variable "state_key" {
++  type        = string
++  description = "Object key of this configuration's state file in the state bucket. Must match the backend block in versions.tf."
++  default     = "ingest/terraform.tfstate"
++}

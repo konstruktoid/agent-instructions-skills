@@ -1,0 +1,187 @@
+diff --git a/ci_oidc.tf b/ci_oidc.tf
+new file mode 100644
+index 0000000..92fc791
+--- /dev/null
++++ b/ci_oidc.tf
+@@ -0,0 +1,181 @@
++# GitHub Actions -> AWS handover for the platform/ingest workflow.
++# Two roles: a read-only one for `plan` on pull requests, and one for `apply`
++# that only the main branch can assume.
++
++locals {
++  github_repo = "platform/ingest"
++  state_arn   = "arn:aws:s3:::ingest-terraform-state"
++}
++
++# AWS allows one provider per issuer URL per account. If this account already
++# has token.actions.githubusercontent.com, import it instead of creating it:
++#   terraform import aws_iam_openid_connect_provider.github \
++#     arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com
++resource "aws_iam_openid_connect_provider" "github" {
++  url            = "https://token.actions.githubusercontent.com"
++  client_id_list = ["sts.amazonaws.com"]
++}
++
++data "aws_iam_policy_document" "trust_apply" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++    # Exact match: only workflow runs on main in this repository.
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:sub"
++      values   = ["repo:${local.github_repo}:ref:refs/heads/main"]
++    }
++  }
++}
++
++data "aws_iam_policy_document" "trust_plan" {
++  statement {
++    actions = ["sts:AssumeRoleWithWebIdentity"]
++    principals {
++      type        = "Federated"
++      identifiers = [aws_iam_openid_connect_provider.github.arn]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:aud"
++      values   = ["sts.amazonaws.com"]
++    }
++    condition {
++      test     = "StringEquals"
++      variable = "token.actions.githubusercontent.com:sub"
++      values   = ["repo:${local.github_repo}:pull_request"]
++    }
++  }
++}
++
++# --- Permissions -----------------------------------------------------------
++
++data "aws_iam_policy_document" "state_rw" {
++  statement {
++    sid       = "StateList"
++    actions   = ["s3:ListBucket"]
++    resources = [local.state_arn]
++  }
++  statement {
++    sid       = "StateObject"
++    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
++    resources = ["${local.state_arn}/ingest/terraform.tfstate", "${local.state_arn}/ingest/terraform.tfstate.tflock"]
++  }
++}
++
++# Plan only needs the lock file to be writable; state itself stays read-only.
++data "aws_iam_policy_document" "state_plan" {
++  statement {
++    sid       = "StateList"
++    actions   = ["s3:ListBucket"]
++    resources = [local.state_arn]
++  }
++  statement {
++    sid       = "StateRead"
++    actions   = ["s3:GetObject"]
++    resources = ["${local.state_arn}/ingest/terraform.tfstate"]
++  }
++  statement {
++    sid       = "StateLock"
++    actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
++    resources = ["${local.state_arn}/ingest/terraform.tfstate.tflock"]
++  }
++}
++
++data "aws_iam_policy_document" "manage_ingest" {
++  statement {
++    sid       = "Bucket"
++    actions   = ["s3:*"]
++    resources = [aws_s3_bucket.landing.arn, "${aws_s3_bucket.landing.arn}/*"]
++  }
++  statement {
++    sid       = "Queue"
++    actions   = ["sqs:*"]
++    resources = [aws_sqs_queue.events.arn]
++  }
++  statement {
++    sid       = "Table"
++    actions   = ["dynamodb:*"]
++    resources = [aws_dynamodb_table.checkpoints.arn, "${aws_dynamodb_table.checkpoints.arn}/*"]
++  }
++}
++
++data "aws_iam_policy_document" "read_ingest" {
++  statement {
++    sid = "BucketRead"
++    actions = [
++      "s3:GetBucket*", "s3:GetLifecycleConfiguration", "s3:GetAccelerateConfiguration",
++      "s3:GetEncryptionConfiguration", "s3:GetReplicationConfiguration",
++      "s3:GetAccessPoint", "s3:ListBucket",
++    ]
++    resources = [aws_s3_bucket.landing.arn]
++  }
++  statement {
++    sid       = "QueueRead"
++    actions   = ["sqs:GetQueueAttributes", "sqs:GetQueueUrl", "sqs:ListQueueTags"]
++    resources = [aws_sqs_queue.events.arn]
++  }
++  statement {
++    sid = "TableRead"
++    actions = [
++      "dynamodb:DescribeTable", "dynamodb:DescribeContinuousBackups", "dynamodb:DescribeTimeToLive",
++      "dynamodb:ListTagsOfResource",
++    ]
++    resources = [aws_dynamodb_table.checkpoints.arn]
++  }
++}
++
++# --- Roles -----------------------------------------------------------------
++
++resource "aws_iam_role" "ci_apply" {
++  name                 = "ingest-ci-apply"
++  assume_role_policy   = data.aws_iam_policy_document.trust_apply.json
++  max_session_duration = 3600
++}
++
++resource "aws_iam_role_policy" "ci_apply_state" {
++  name   = "terraform-state"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.state_rw.json
++}
++
++resource "aws_iam_role_policy" "ci_apply_resources" {
++  name   = "ingest-resources"
++  role   = aws_iam_role.ci_apply.id
++  policy = data.aws_iam_policy_document.manage_ingest.json
++}
++
++resource "aws_iam_role" "ci_plan" {
++  name                 = "ingest-ci-plan"
++  assume_role_policy   = data.aws_iam_policy_document.trust_plan.json
++  max_session_duration = 3600
++}
++
++resource "aws_iam_role_policy" "ci_plan_state" {
++  name   = "terraform-state"
++  role   = aws_iam_role.ci_plan.id
++  policy = data.aws_iam_policy_document.state_plan.json
++}
++
++resource "aws_iam_role_policy" "ci_plan_resources" {
++  name   = "ingest-resources-read"
++  role   = aws_iam_role.ci_plan.id
++  policy = data.aws_iam_policy_document.read_ingest.json
++}
++
++output "ci_apply_role_arn" {
++  value = aws_iam_role.ci_apply.arn
++}
++
++output "ci_plan_role_arn" {
++  value = aws_iam_role.ci_plan.arn
++}
