@@ -1,0 +1,21 @@
+read the state file
+
+---
+
+go with the terraform-testing
+
+---
+
+install go
+
+---
+
+go is installed
+
+---
+
+redo tests
+
+---
+
+create the branch and sign-commit, then run  tasks and triggers for terraform-testing

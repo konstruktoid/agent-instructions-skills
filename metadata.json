@@ -1,0 +1,77 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M6NKGFANVK2528T2V82TR4DK",
+  "strategy": "manual-commit",
+  "branch": "terraform-testing-task-suite",
+  "checkpoints_count": 6,
+  "files_touched": [
+    "README.md",
+    "evals/README.md",
+    "evals/terraform-testing/README.md",
+    "evals/terraform-testing/assertions.json",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/Makefile",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/README.md",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/main.tf",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/outputs.tf",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/tests/defaults.tftest.hcl",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/variables.tf",
+    "evals/terraform-testing/fixtures/tt-01-native-suite/versions.tf",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/README.md",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/go.mod",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/main.tf",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/outputs.tf",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/test/service_name_test.go",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/variables.tf",
+    "evals/terraform-testing/fixtures/tt-02-terratest-suite/versions.tf",
+    "evals/terraform-testing/fixtures/tt-03-conditional-resource/README.md",
+    "evals/terraform-testing/fixtures/tt-03-conditional-resource/main.tf",
+    "evals/terraform-testing/fixtures/tt-03-conditional-resource/outputs.tf",
+    "evals/terraform-testing/fixtures/tt-03-conditional-resource/variables.tf",
+    "evals/terraform-testing/fixtures/tt-03-conditional-resource/versions.tf",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/.terraform-version",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/Makefile",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/README.md",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/main.tf",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/outputs.tf",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/variables.tf",
+    "evals/terraform-testing/fixtures/tt-04-pinned-old-terraform/versions.tf",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/Makefile",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/README.md",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/main.tf",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/outputs.tf",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/tests/defaults.tftest.hcl",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/variables.tf",
+    "evals/terraform-testing/fixtures/tt-05-docs-only/versions.tf",
+    "evals/terraform-testing/tasks.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": "/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 74,
+    "cache_creation_tokens": 154452,
+    "cache_read_tokens": 2625285,
+    "output_tokens": 33923,
+    "api_call_count": 31
+  },
+  "redaction": {
+    "replacements": 0,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 0,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  }
+}
