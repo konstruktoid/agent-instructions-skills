@@ -1,0 +1,13 @@
+open a pr
+
+---
+
+go with option 2
+
+---
+
+check the ci
+
+---
+
+check the coderabbit review comments if any, fix the issues, then a signed commit and push to pr of there's any changes. then wait 1h, and repeat. merge when the loop doesn't return any changes to be made
