@@ -34,8 +34,8 @@ passes in the 2026-11-01 runs.
 
 `github-repository-security` and `github-organization-governance` have suites that run against
 `evals/gh_stub.py`, a stand-in `gh` serving each task's `github-state/` file, and neither has run
-yet. `terraform-testing` has trigger probes
-and no task suite, so only its routing can be measured. Its first trigger run, stamp `2026-11-04` at
+yet. `terraform-testing` has a task suite that has not run, so only its routing has been measured.
+Its first trigger run, stamp `2026-11-04` at
 `4d9fe5a` with three passes per probe, routed all ten probes correctly, and the README-formatting
 probe `tt-t08` fired in one of three passes. Of the twelve agent templates,
 `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a suite, and
@@ -53,7 +53,7 @@ Its `discipline-ablation` comparison is implemented for that and has not been ru
 
 Open work, as of 2026-10-27:
 
-- A suite for each of the two skills without one, and a task suite for `terraform-testing`. The two
+- A suite for each of the two skills without one. The two
   bash skills, `bash-secure-scripting` and `bash-testing`, and `terraform-secure-iac` already have
   suites, so they are not on this list.
 - Two `terraform-secure-iac` graders, `trust-audience-pinned` and `apply-trust-pinned-to-main`,
