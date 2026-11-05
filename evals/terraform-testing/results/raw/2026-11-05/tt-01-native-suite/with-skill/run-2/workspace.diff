@@ -1,0 +1,83 @@
+diff --git a/tests/unit/retention_days.tftest.hcl b/tests/unit/retention_days.tftest.hcl
+new file mode 100644
+index 0000000..6d01fcb
+--- /dev/null
++++ b/tests/unit/retention_days.tftest.hcl
+@@ -0,0 +1,59 @@
++variables {
++  name = "billing"
++}
++
++run "retention_days_lower_bound_accepted" {
++  command = plan
++
++  variables {
++    retention_days = 1
++  }
++
++  assert {
++    condition     = terraform_data.policy.input.retention_days == 1
++    error_message = "retention_days = 1 must be accepted."
++  }
++}
++
++run "retention_days_upper_bound_accepted" {
++  command = plan
++
++  variables {
++    retention_days = 365
++  }
++
++  assert {
++    condition     = terraform_data.policy.input.retention_days == 365
++    error_message = "retention_days = 365 must be accepted."
++  }
++}
++
++run "retention_days_zero_rejected" {
++  command = plan
++
++  variables {
++    retention_days = 0
++  }
++
++  expect_failures = [var.retention_days]
++}
++
++run "retention_days_above_max_rejected" {
++  command = plan
++
++  variables {
++    retention_days = 366
++  }
++
++  expect_failures = [var.retention_days]
++}
++
++run "retention_days_negative_rejected" {
++  command = plan
++
++  variables {
++    retention_days = -5
++  }
++
++  expect_failures = [var.retention_days]
++}
+diff --git a/variables.tf b/variables.tf
+index 5e0244a..8d96c81 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -4,7 +4,12 @@ variable "name" {
+ }
+ 
+ variable "retention_days" {
+-  description = "How many days records are kept."
++  description = "How many days records are kept. Must be between 1 and 365."
+   type        = number
+   default     = 30
++
++  validation {
++    condition     = var.retention_days >= 1 && var.retention_days <= 365
++    error_message = "retention_days must be between 1 and 365."
++  }
+ }

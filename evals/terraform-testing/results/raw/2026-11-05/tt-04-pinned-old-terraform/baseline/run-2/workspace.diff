@@ -1,0 +1,98 @@
+diff --git a/.terraform/check.tfstate b/.terraform/check.tfstate
+new file mode 100644
+index 0000000..5be7fbe
+--- /dev/null
++++ b/.terraform/check.tfstate
+@@ -0,0 +1,63 @@
++{
++  "version": 4,
++  "terraform_version": "1.17.1",
++  "serial": 1,
++  "lineage": "e2236720-444a-50cf-d5bd-9821df2fd6e1",
++  "outputs": {
++    "full_name": {
++      "value": "alpha-web",
++      "type": "string"
++    },
++    "team": {
++      "value": "alpha",
++      "type": "string"
++    }
++  },
++  "resources": [
++    {
++      "mode": "managed",
++      "type": "terraform_data",
++      "name": "owned",
++      "provider": "provider[\"terraform.io/builtin/terraform\"]",
++      "instances": [
++        {
++          "schema_version": 0,
++          "attributes": {
++            "id": "bf3cf1cf-7e87-1c11-313e-a53feb9b43ca",
++            "input": {
++              "value": {
++                "name": "web",
++                "team": "alpha"
++              },
++              "type": [
++                "object",
++                {
++                  "name": "string",
++                  "team": "string"
++                }
++              ]
++            },
++            "output": {
++              "value": {
++                "name": "web",
++                "team": "alpha"
++              },
++              "type": [
++                "object",
++                {
++                  "name": "string",
++                  "team": "string"
++                }
++              ]
++            },
++            "store": null,
++            "triggers_replace": null
++          },
++          "sensitive_attributes": [],
++          "identity_schema_version": 0
++        }
++      ]
++    }
++  ],
++  "check_results": null
++}
+diff --git a/Makefile b/Makefile
+index 0ca016a..658b701 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,11 @@
++STATE := .terraform/check.tfstate
++
+ .PHONY: check
+ check:
+ 	terraform init -backend=false -input=false
+ 	terraform fmt -check -recursive
+ 	terraform validate
++	# Behavioural check (`terraform test` needs >= 1.6; CI pins 1.5.7, module supports 1.3+).
++	terraform apply -auto-approve -input=false -state=$(STATE) -var team=alpha -var name=web >/dev/null
++	@got=$$(terraform output -state=$(STATE) -raw full_name); \
++	[ "$$got" = "alpha-web" ] || { echo "full_name check failed: got '$$got'"; exit 1; }
+diff --git a/outputs.tf b/outputs.tf
+index c452a56..d6b0976 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -2,3 +2,8 @@ output "team" {
+   description = "Team that owns the resource."
+   value       = var.team
+ }
++
++output "full_name" {
++  description = "Team and name joined with a hyphen."
++  value       = "${var.team}-${var.name}"
++}

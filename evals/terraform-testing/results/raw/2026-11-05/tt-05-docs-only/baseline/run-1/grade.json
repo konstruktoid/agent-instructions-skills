@@ -1,0 +1,81 @@
+{
+  "task": "tt-05-docs-only",
+  "condition": "baseline",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:09:37.194829+00:00",
+    "seconds": 11.9
+  },
+  "base_sha": "e4a685de69d816c0cda5e44499dc92ba2336f333",
+  "skills_used": [],
+  "num_turns": 6,
+  "cost_usd": 0.0525864,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "suite-still-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the repository's suite still passes",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-test-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-test-decision-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+      "passed": false,
+      "evidence": "no match"
+    },
+    {
+      "id": "behavior-unchanged",
+      "kind": "workspace_command",
+      "source": "task prompt: no behavior should change",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "descriptions-rewritten",
+      "kind": "workspace_command",
+      "source": "task prompt: the variable descriptions are clearer",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "typos-fixed",
+      "kind": "workspace_command",
+      "source": "task prompt: the README typos are fixed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-state-plan-or-cache-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: no state or plan file is left in the tree",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 7,
+  "total": 8
+}

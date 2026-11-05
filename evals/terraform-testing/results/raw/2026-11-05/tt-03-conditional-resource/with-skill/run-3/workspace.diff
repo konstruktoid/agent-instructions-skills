@@ -1,0 +1,82 @@
+diff --git a/main.tf b/main.tf
+index 2899c45..99afde5 100644
+--- a/main.tf
++++ b/main.tf
+@@ -1,3 +1,9 @@
+ resource "terraform_data" "service" {
+   input = var.name
+ }
++
++resource "terraform_data" "audit" {
++  count = var.enable_audit ? 1 : 0
++
++  input = var.name
++}
+diff --git a/outputs.tf b/outputs.tf
+index 2930f48..6475018 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -2,3 +2,8 @@ output "service_id" {
+   description = "Identifier of the service record."
+   value       = terraform_data.service.id
+ }
++
++output "audit_enabled" {
++  description = "Whether the audit record was created."
++  value       = length(terraform_data.audit) > 0
++}
+diff --git a/tests/audit.tftest.hcl b/tests/audit.tftest.hcl
+new file mode 100644
+index 0000000..da7ca20
+--- /dev/null
++++ b/tests/audit.tftest.hcl
+@@ -0,0 +1,35 @@
++variables {
++  name = "example"
++}
++
++run "audit_disabled_by_default" {
++  command = plan
++
++  assert {
++    condition     = length(terraform_data.audit) == 0
++    error_message = "The audit record must not be created by default."
++  }
++
++  assert {
++    condition     = output.audit_enabled == false
++    error_message = "audit_enabled must be false when enable_audit is unset."
++  }
++}
++
++run "audit_enabled" {
++  command = plan
++
++  variables {
++    enable_audit = true
++  }
++
++  assert {
++    condition     = length(terraform_data.audit) == 1
++    error_message = "The audit record must be created when enable_audit is true."
++  }
++
++  assert {
++    condition     = output.audit_enabled == true
++    error_message = "audit_enabled must be true when enable_audit is true."
++  }
++}
+diff --git a/variables.tf b/variables.tf
+index e642132..985b1b2 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -2,3 +2,9 @@ variable "name" {
+   description = "Name of the service."
+   type        = string
+ }
++
++variable "enable_audit" {
++  description = "Whether to create the optional audit record."
++  type        = bool
++  default     = false
++}

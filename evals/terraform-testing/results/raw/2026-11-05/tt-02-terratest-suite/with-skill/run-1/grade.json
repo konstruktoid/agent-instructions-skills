@@ -1,0 +1,125 @@
+{
+  "task": "tt-02-terratest-suite",
+  "condition": "with-skill",
+  "run_index": 1,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:06:46.497738+00:00",
+    "seconds": 81.5
+  },
+  "base_sha": "1c7bafb776c50024757b73dd17da23570e3859b2",
+  "skills_used": [
+    "eval-terraform-testing:terraform-testing"
+  ],
+  "num_turns": 12,
+  "cost_usd": 0.1351863,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+      "passed": true,
+      "evidence": "match: 'go test'"
+    },
+    {
+      "id": "test-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: an output bug fix needs a test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-convention-followed",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "named-for-the-output",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: a name that matches the surrounding files",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-second-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "unit-tests-plan-only",
+      "kind": "workspace_command",
+      "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "integration-tests-untouched",
+      "kind": "workspace_command",
+      "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "asserts-the-endpoint-output",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: assert the new output's value",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "asserts-host-port-form",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "existing-test-not-gutted",
+      "kind": "workspace_command",
+      "source": "SKILL.md: never delete an assertion to get a green run",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fix-works",
+      "kind": "workspace_command",
+      "source": "task prompt: endpoint renders as host:port",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "gofmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-state-plan-or-cache-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: no state or plan file is left in the tree",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 14,
+  "total": 14
+}

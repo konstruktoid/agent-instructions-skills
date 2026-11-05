@@ -1,0 +1,40 @@
+{
+  "skill": "terraform-testing",
+  "notes": [
+    "Each fixture is a small working Terraform module built only from terraform_data, so it initialises, plans, applies and tests offline.",
+    "The fixtures differ in the test approach they already hold, because the skill's first claim is that it discovers and matches it: native terraform test split into unit and integration directories (tt-01, tt-05), Terratest split into unit and integration directories (tt-02), nothing (tt-03), and nothing with a CI Terraform of 1.5.7 that cannot run native tests (tt-04).",
+    "tt-05 asks for a change that needs no test. It measures the skill's rule to say so rather than add one."
+  ],
+  "tasks": [
+    {
+      "id": "tt-01-native-suite",
+      "title": "Reject a retention_days outside 1 to 365 in the retention-policy module",
+      "fixture": "fixtures/tt-01-native-suite",
+      "prompt": "Reject any retention_days outside 1 to 365 in this module, and make sure the rule stays enforced."
+    },
+    {
+      "id": "tt-02-terratest-suite",
+      "title": "Fix the endpoint output and keep it from regressing",
+      "fixture": "fixtures/tt-02-terratest-suite",
+      "prompt": "The endpoint output renders as https://HOST/PORT, and clients expect https://HOST:PORT. Fix it, and make sure it cannot regress."
+    },
+    {
+      "id": "tt-03-conditional-resource",
+      "title": "Add an optional audit record behind a boolean",
+      "fixture": "fixtures/tt-03-conditional-resource",
+      "prompt": "Add an optional audit record to this module: a terraform_data resource named audit, created only when a new boolean variable enable_audit, default false, is true. Add an output audit_enabled that reports whether it was created."
+    },
+    {
+      "id": "tt-04-pinned-old-terraform",
+      "title": "Add a full_name output and keep it covered",
+      "fixture": "fixtures/tt-04-pinned-old-terraform",
+      "prompt": "Add an output full_name that joins the team and the name with a hyphen, and make sure the repository's checks cover it."
+    },
+    {
+      "id": "tt-05-docs-only",
+      "title": "Tidy variable descriptions and README typos",
+      "fixture": "fixtures/tt-05-docs-only",
+      "prompt": "Rewrite the variable descriptions in variables.tf so they say what each one controls, and fix the typos in README.md. No behavior should change."
+    }
+  ]
+}

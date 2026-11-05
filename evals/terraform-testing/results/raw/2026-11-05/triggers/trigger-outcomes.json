@@ -1,0 +1,624 @@
+[
+  {
+    "id": "tt-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0671852,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:13.525478+00:00",
+          "seconds": 13.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0672056,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:13.526737+00:00",
+          "seconds": 13.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0667819,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:13.526065+00:00",
+          "seconds": 12.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2011727
+  },
+  {
+    "id": "tt-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.06576660000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:26.412542+00:00",
+          "seconds": 12.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0629365,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:26.712255+00:00",
+          "seconds": 12.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0661456,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:26.721276+00:00",
+          "seconds": 12.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1948487
+  },
+  {
+    "id": "tt-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0718529,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:39.125388+00:00",
+          "seconds": 18.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0757805,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:39.224305+00:00",
+          "seconds": 20.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.07201459999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:39.297934+00:00",
+          "seconds": 18.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.21964799999999998
+  },
+  {
+    "id": "tt-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.06437109999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:57.454344+00:00",
+          "seconds": 13.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.06753200000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:57.510234+00:00",
+          "seconds": 14.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.06709939999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:10:59.319635+00:00",
+          "seconds": 13.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.19900249999999997
+  },
+  {
+    "id": "tt-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.06348680000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:11.087743+00:00",
+          "seconds": 13.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0670047,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:11.767909+00:00",
+          "seconds": 13.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0659102,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:13.145603+00:00",
+          "seconds": 12.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1964017
+  },
+  {
+    "id": "tt-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.06278940000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:24.707619+00:00",
+          "seconds": 17.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.07057970000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:25.109490+00:00",
+          "seconds": 20.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.06169419999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:25.707803+00:00",
+          "seconds": 16.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1950633
+  },
+  {
+    "id": "tt-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0484914,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:42.357645+00:00",
+          "seconds": 11.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.046150300000000005,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:42.385271+00:00",
+          "seconds": 12.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.05045959999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:45.773395+00:00",
+          "seconds": 14.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1451013
+  },
+  {
+    "id": "tt-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 1,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.050270800000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:53.969964+00:00",
+          "seconds": 10.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t08",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-terraform-testing:terraform-testing"
+        ],
+        "cost_usd": 0.0675632,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:11:55.170874+00:00",
+          "seconds": 14.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.05582369999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:00.173208+00:00",
+          "seconds": 12.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1736577
+  },
+  {
+    "id": "tt-t09",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.05250280000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:04.766329+00:00",
+          "seconds": 12.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0529859,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:09.809601+00:00",
+          "seconds": 12.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.051097000000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:12.899916+00:00",
+          "seconds": 11.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.15658570000000002
+  },
+  {
+    "id": "tt-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tt-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0275626,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:17.246377+00:00",
+          "seconds": 7.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0267026,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:22.334219+00:00",
+          "seconds": 7.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tt-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0274526,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T12:12:24.739626+00:00",
+          "seconds": 8.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.08171780000000001
+  }
+]

@@ -1,0 +1,52 @@
+diff --git a/Makefile b/Makefile
+index 0ca016a..a59753a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -3,3 +3,4 @@ check:
+ 	terraform init -backend=false -input=false
+ 	terraform fmt -check -recursive
+ 	terraform validate
++	tests/full_name.sh
+diff --git a/outputs.tf b/outputs.tf
+index c452a56..d6b0976 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -2,3 +2,8 @@ output "team" {
+   description = "Team that owns the resource."
+   value       = var.team
+ }
++
++output "full_name" {
++  description = "Team and name joined with a hyphen."
++  value       = "${var.team}-${var.name}"
++}
+diff --git a/tests/full_name.sh b/tests/full_name.sh
+new file mode 100755
+index 0000000..9c406b1
+--- /dev/null
++++ b/tests/full_name.sh
+@@ -0,0 +1,24 @@
++#!/usr/bin/env bash
++# Plan-only check for the full_name output. Works on Terraform 1.3+, where
++# native `terraform test` is not available. Creates nothing and leaves no plan file.
++set -euo pipefail
++
++root="$(cd "$(dirname "$0")/.." && pwd)"
++tmp="$(mktemp -d)"
++trap 'rm -rf "$tmp"' EXIT
++
++assert_full_name() {
++  local team="$1" name="$2" want="$3" got
++  terraform -chdir="$root" plan -input=false -refresh=false \
++    -var "team=$team" -var "name=$name" -out="$tmp/plan.bin" >/dev/null
++  got="$(terraform -chdir="$root" show -json "$tmp/plan.bin" |
++    jq -r '.output_changes.full_name.after')"
++  if [ "$got" != "$want" ]; then
++    echo "FAIL: team=$team name=$name: full_name=$got, want $want" >&2
++    exit 1
++  fi
++  echo "ok: $team + $name -> $got"
++}
++
++assert_full_name platform web platform-web
++assert_full_name data etl-job data-etl-job

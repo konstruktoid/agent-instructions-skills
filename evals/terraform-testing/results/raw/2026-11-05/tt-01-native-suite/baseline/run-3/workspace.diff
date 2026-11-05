@@ -1,0 +1,61 @@
+diff --git a/tests/unit/retention_days.tftest.hcl b/tests/unit/retention_days.tftest.hcl
+new file mode 100644
+index 0000000..9276b55
+--- /dev/null
++++ b/tests/unit/retention_days.tftest.hcl
+@@ -0,0 +1,41 @@
++variables {
++  name = "billing"
++}
++
++run "rejects_zero" {
++  command = plan
++  variables {
++    retention_days = 0
++  }
++  expect_failures = [var.retention_days]
++}
++
++run "rejects_negative" {
++  command = plan
++  variables {
++    retention_days = -5
++  }
++  expect_failures = [var.retention_days]
++}
++
++run "rejects_above_max" {
++  command = plan
++  variables {
++    retention_days = 366
++  }
++  expect_failures = [var.retention_days]
++}
++
++run "accepts_lower_bound" {
++  command = plan
++  variables {
++    retention_days = 1
++  }
++}
++
++run "accepts_upper_bound" {
++  command = plan
++  variables {
++    retention_days = 365
++  }
++}
+diff --git a/variables.tf b/variables.tf
+index 5e0244a..4573831 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -7,4 +7,9 @@ variable "retention_days" {
+   description = "How many days records are kept."
+   type        = number
+   default     = 30
++
++  validation {
++    condition     = var.retention_days >= 1 && var.retention_days <= 365
++    error_message = "retention_days must be between 1 and 365 inclusive."
++  }
+ }

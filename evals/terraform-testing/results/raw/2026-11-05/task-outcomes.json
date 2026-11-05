@@ -1,0 +1,3212 @@
+[
+  {
+    "task": "tt-01-native-suite",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:04:21.651612+00:00",
+      "seconds": 38.9
+    },
+    "base_sha": "3021befdf4c2ca4f36e75c97afe85481222012e7",
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.0740091,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform test'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "source": "task prompt: values inside 1 to 365 still plan",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  {
+    "task": "tt-01-native-suite",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:04:21.649219+00:00",
+      "seconds": 47.1
+    },
+    "base_sha": "3021befdf4c2ca4f36e75c97afe85481222012e7",
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.0726596,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform test'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "source": "task prompt: values inside 1 to 365 still plan",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  {
+    "task": "tt-01-native-suite",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:04:21.653244+00:00",
+      "seconds": 27.6
+    },
+    "base_sha": "3021befdf4c2ca4f36e75c97afe85481222012e7",
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.0719805,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform test'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "source": "task prompt: values inside 1 to 365 still plan",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  {
+    "task": "tt-01-native-suite",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:04:50.367149+00:00",
+      "seconds": 35.8
+    },
+    "base_sha": "6bacfc5f65eff3778506929e793deeec79ac4121",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 10,
+    "cost_usd": 0.1097199,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'make test'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "source": "task prompt: values inside 1 to 365 still plan",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  {
+    "task": "tt-01-native-suite",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:05:01.554511+00:00",
+      "seconds": 26.8
+    },
+    "base_sha": "fd2aec14d96db04812df8eb534892300b2bdf328",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1000016,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'make test'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "source": "task prompt: values inside 1 to 365 still plan",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  {
+    "task": "tt-01-native-suite",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:05:09.870118+00:00",
+      "seconds": 39.5
+    },
+    "base_sha": "d68e49ecf2bd6e9add539f87d0b438aac65869e3",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.10177939999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'make test'"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "source": "task prompt: values inside 1 to 365 still plan",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  {
+    "task": "tt-02-terratest-suite",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:05:27.300202+00:00",
+      "seconds": 83.9
+    },
+    "base_sha": "12181dd28bc2e7c25ac75514babf8caf11e517c7",
+    "skills_used": [],
+    "num_turns": 13,
+    "cost_usd": 0.0936044,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+        "passed": true,
+        "evidence": "match: 'go test'"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: an output bug fix needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the new output's value",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "source": "task prompt: endpoint renders as host:port",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tt-02-terratest-suite",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:05:29.402906+00:00",
+      "seconds": 76.5
+    },
+    "base_sha": "ed6bca035f9ee2e99fe8a7db37757018375a98ac",
+    "skills_used": [],
+    "num_turns": 12,
+    "cost_usd": 0.08199739999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+        "passed": true,
+        "evidence": "match: 'go test'"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: an output bug fix needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the new output's value",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "source": "task prompt: endpoint renders as host:port",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "tt-02-terratest-suite",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:05:50.374120+00:00",
+      "seconds": 67.2
+    },
+    "base_sha": "0373ba03cba6cd494f1c09cf24d1c137edce814b",
+    "skills_used": [],
+    "num_turns": 11,
+    "cost_usd": 0.076005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+        "passed": true,
+        "evidence": "match: 'go test'"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: an output bug fix needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the new output's value",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "source": "task prompt: endpoint renders as host:port",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 13,
+    "total": 14
+  },
+  {
+    "task": "tt-02-terratest-suite",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:06:46.497738+00:00",
+      "seconds": 81.5
+    },
+    "base_sha": "1c7bafb776c50024757b73dd17da23570e3859b2",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 12,
+    "cost_usd": 0.1351863,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+        "passed": true,
+        "evidence": "match: 'go test'"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: an output bug fix needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the new output's value",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "source": "task prompt: endpoint renders as host:port",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tt-02-terratest-suite",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:06:51.495028+00:00",
+      "seconds": 102.8
+    },
+    "base_sha": "757f72f4adf4394f64b3075a61afaa49d6ef159a",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 13,
+    "cost_usd": 0.1331231,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+        "passed": true,
+        "evidence": "match: 'go test'"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: an output bug fix needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the new output's value",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "source": "task prompt: endpoint renders as host:port",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tt-02-terratest-suite",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:06:57.899047+00:00",
+      "seconds": 82.0
+    },
+    "base_sha": "456cf2ba9b401762dea45eb9ec051bcbcbe8c07c",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 11,
+    "cost_usd": 0.13206459999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test",
+        "passed": true,
+        "evidence": "match: 'go test'"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: an output bug fix needs a test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: a name that matches the surrounding files",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the new output's value",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "source": "SKILL.md: never delete an assertion to get a green run",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "source": "task prompt: endpoint renders as host:port",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 14,
+    "total": 14
+  },
+  {
+    "task": "tt-03-conditional-resource",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:08.795727+00:00",
+      "seconds": 10.9
+    },
+    "base_sha": "c615d6e8b90907346bfd87d28d51f14025502912",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.049897,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: cover each branch of the conditional",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "source": "task prompt: enable_audit defaults to false",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "source": "task prompt: audit_enabled reports whether the record was created",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 11
+  },
+  {
+    "task": "tt-03-conditional-resource",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:20.505003+00:00",
+      "seconds": 9.8
+    },
+    "base_sha": "04f56b69d040760b64c06a9d08b3d1c914002b53",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0494715,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: cover each branch of the conditional",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "source": "task prompt: enable_audit defaults to false",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "source": "task prompt: audit_enabled reports whether the record was created",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 11
+  },
+  {
+    "task": "tt-03-conditional-resource",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:20.644956+00:00",
+      "seconds": 12.0
+    },
+    "base_sha": "04f56b69d040760b64c06a9d08b3d1c914002b53",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.047355400000000006,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: cover each branch of the conditional",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "source": "task prompt: enable_audit defaults to false",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "source": "task prompt: audit_enabled reports whether the record was created",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 11
+  },
+  {
+    "task": "tt-03-conditional-resource",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:30.888376+00:00",
+      "seconds": 19.4
+    },
+    "base_sha": "26743d1a828f10efa4aacfbe1cb057f3b17e4f6e",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.09937089999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform test'"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: cover each branch of the conditional",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "source": "task prompt: enable_audit defaults to false",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "source": "task prompt: audit_enabled reports whether the record was created",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tt-03-conditional-resource",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:33.237903+00:00",
+      "seconds": 16.6
+    },
+    "base_sha": "258e9eb20ca7e81e577409f0b10b286e66fba306",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.09142230000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform test'"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: cover each branch of the conditional",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "source": "task prompt: enable_audit defaults to false",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "source": "task prompt: audit_enabled reports whether the record was created",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tt-03-conditional-resource",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:34.638163+00:00",
+      "seconds": 15.9
+    },
+    "base_sha": "0ec05bcdf020205a276a0e509e6aee007a80a5f6",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.09354749999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform test'"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: cover each branch of the conditional",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "source": "task prompt: enable_audit defaults to false",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "source": "task prompt: audit_enabled reports whether the record was created",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 11,
+    "total": 11
+  },
+  {
+    "task": "tt-04-pinned-old-terraform",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:50.503436+00:00",
+      "seconds": 25.4
+    },
+    "base_sha": "2c97744250d86f3adf30bcd770fe21b92ede0925",
+    "skills_used": [],
+    "num_turns": 10,
+    "cost_usd": 0.0828975,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform validate'"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: full_name joins team and name with a hyphen",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: say why the framework was chosen",
+        "passed": true,
+        "evidence": "match: '1.5'"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "tt-04-pinned-old-terraform",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:50.897328+00:00",
+      "seconds": 30.5
+    },
+    "base_sha": "2c97744250d86f3adf30bcd770fe21b92ede0925",
+    "skills_used": [],
+    "num_turns": 11,
+    "cost_usd": 0.092836,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform validate'"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: full_name joins team and name with a hyphen",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: say why the framework was chosen",
+        "passed": true,
+        "evidence": "match: '1.5'"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "tt-04-pinned-old-terraform",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:08:51.096107+00:00",
+      "seconds": 18.5
+    },
+    "base_sha": "77cc02995356499475611e6dbc24fdb8246a2b25",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0821314,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform validate'"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: full_name joins team and name with a hyphen",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: say why the framework was chosen",
+        "passed": true,
+        "evidence": "match: '1.5'"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 9,
+    "total": 10
+  },
+  {
+    "task": "tt-04-pinned-old-terraform",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:10.603878+00:00",
+      "seconds": 25.3
+    },
+    "base_sha": "4c31c87e64db5140d0dac1dc840e37d9ea5c2bb1",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 9,
+    "cost_usd": 0.1088775,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'make check'"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: full_name joins team and name with a hyphen",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: say why the framework was chosen",
+        "passed": true,
+        "evidence": "match: '1.5'"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "tt-04-pinned-old-terraform",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:16.970084+00:00",
+      "seconds": 26.3
+    },
+    "base_sha": "d58cdfce93a2d36092b120b8defe70eec8c2f4fa",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.10990660000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform validate'"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: full_name joins team and name with a hyphen",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: say why the framework was chosen",
+        "passed": true,
+        "evidence": "match: '1.5'"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "tt-04-pinned-old-terraform",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:22.499558+00:00",
+      "seconds": 24.7
+    },
+    "base_sha": "74ad8fb386259c1489b7ec4bda79bc6e146b969e",
+    "skills_used": [
+      "eval-terraform-testing:terraform-testing"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1049379,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "source": "SKILL.md Verify: run the suite, do not describe it",
+        "passed": true,
+        "evidence": "match: 'terraform plan'"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "source": "task prompt: full_name joins team and name with a hyphen",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "source": "SKILL.md Steps: say why the framework was chosen",
+        "passed": true,
+        "evidence": "match: '1.5'"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 10,
+    "total": 10
+  },
+  {
+    "task": "tt-05-docs-only",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:37.194829+00:00",
+      "seconds": 11.9
+    },
+    "base_sha": "e4a685de69d816c0cda5e44499dc92ba2336f333",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0525864,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the repository's suite still passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: no behavior should change",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "source": "task prompt: the variable descriptions are clearer",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: the README typos are fixed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 8
+  },
+  {
+    "task": "tt-05-docs-only",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:44.508036+00:00",
+      "seconds": 10.8
+    },
+    "base_sha": "21da7b9e9792355ee746695f61e494c0529e3053",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.05510290000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the repository's suite still passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: no behavior should change",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "source": "task prompt: the variable descriptions are clearer",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: the README typos are fixed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 8
+  },
+  {
+    "task": "tt-05-docs-only",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:48.392137+00:00",
+      "seconds": 10.0
+    },
+    "base_sha": "5dea3be988adb9559a2d4792320845383470a266",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0529544,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the repository's suite still passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: no behavior should change",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "source": "task prompt: the variable descriptions are clearer",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: the README typos are fixed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 8
+  },
+  {
+    "task": "tt-05-docs-only",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:49.471953+00:00",
+      "seconds": 10.2
+    },
+    "base_sha": "e26c2cc4845aa08a4714d6d05332ac9b7e5e9e68",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.049679,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the repository's suite still passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+        "passed": true,
+        "evidence": "match: \"didn't add a test\""
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: no behavior should change",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "source": "task prompt: the variable descriptions are clearer",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: the README typos are fixed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  },
+  {
+    "task": "tt-05-docs-only",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:55.597813+00:00",
+      "seconds": 12.4
+    },
+    "base_sha": "de420056e7b601494890c29dc395b923718343f5",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.054641300000000004,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the repository's suite still passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+        "passed": false,
+        "evidence": "no match"
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: no behavior should change",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "source": "task prompt: the variable descriptions are clearer",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: the README typos are fixed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 8
+  },
+  {
+    "task": "tt-05-docs-only",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T12:09:58.810717+00:00",
+      "seconds": 14.2
+    },
+    "base_sha": "a53885779fa2aea85b3b178f1f04c8156a7c094d",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0576432,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: the repository's suite still passes",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why",
+        "passed": true,
+        "evidence": "match: 'no tests'"
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "source": "task prompt: no behavior should change",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "source": "task prompt: the variable descriptions are clearer",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "source": "task prompt: the README typos are fixed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 8
+  }
+]

@@ -1,0 +1,35 @@
+diff --git a/README.md b/README.md
+index 6fd86e7..77a6c91 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ # retention-policy
+ 
+-A smal module that records a retention polcy for one service.
++A small module that records a retention policy for one service.
+ 
+ ## Tests
+ 
+@@ -9,4 +9,4 @@ A smal module that records a retention polcy for one service.
+ - `tests/integration/` holds tests that `apply`. CI runs them with `make integration` in a sandbox
+   account, and nobody adds to them without the platform team.
+ 
+-Checks run with `make test`, which also checks formating.
++Checks run with `make test`, which also checks formatting.
+diff --git a/variables.tf b/variables.tf
+index e514fcb..3523a5e 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -1,10 +1,10 @@
+ variable "name" {
+-  description = "the name"
++  description = "Name of the service the retention policy applies to."
+   type        = string
+ }
+ 
+ variable "retention_days" {
+-  description = "days"
++  description = "Number of days the service's data is retained before it expires. Defaults to 30."
+   type        = number
+   default     = 30
+ }

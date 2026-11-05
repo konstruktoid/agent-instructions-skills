@@ -1,0 +1,370 @@
+{
+  "skill": "terraform-testing",
+  "notes": [
+    "The first claim of the skill is that it discovers the repository's test approach and matches it, so the fixtures differ in what they already hold: a native terraform test suite (tt-01), a Terratest suite (tt-02), nothing (tt-03), nothing plus a Terraform version too old for native tests (tt-04), and a native suite with a change that needs no test (tt-05).",
+    "Every fixture creates only terraform_data, which belongs to the built-in provider, so init, plan, apply and test run without registry access or credentials.",
+    "tt-02 is a Terratest suite and no grader runs go test, since it would download Terratest for every graded run. Its assertions read the test files and the module, and gofmt-clean exits 0 when gofmt is absent, so it never fails for a reason the run had no control over.",
+    "test-fails-without-the-validation restores variables.tf from the base commit and expects terraform test to fail, which assumes the validation block lives where the variable is declared.",
+    "Assertion commands run under /bin/sh. Those that run terraform do so in a scratch copy named eval-check, so grading leaves no .terraform directory behind in the workspace."
+  ],
+  "tasks": {
+    "tt-01-native-suite": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; make test > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform test|make test",
+        "source": "SKILL.md Verify: run the suite, do not describe it"
+      },
+      {
+        "id": "test-added-or-updated",
+        "kind": "workspace_command",
+        "command": "{ git diff --name-only \"$EVAL_BASE_SHA\" -- tests; git ls-files --others --exclude-standard -- tests; } | grep -q .",
+        "source": "SKILL.md Steps: a validation block needs a test"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "command": "for f in $(git ls-files --others --exclude-standard -- tests); do case \"$f\" in tests/unit/*.tftest.hcl) ;; *) exit 1 ;; esac; done",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it"
+      },
+      {
+        "id": "named-for-the-variable",
+        "kind": "workspace_command",
+        "command": "test -f tests/unit/retention_days.tftest.hcl",
+        "source": "SKILL.md Steps: a name that matches the surrounding files"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'command *= *apply' tests/unit",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\" -- tests/integration && [ -z \"$(git ls-files --others --exclude-standard -- tests/integration)\" ]",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "command": "! find . \\( -name '*_test.go' -o -name go.mod -o -name conftest.py -o -name '*.rego' \\) -not -path './eval-check/*' | grep -q .",
+        "source": "SKILL.md checklist: the test matches the existing framework; no second framework was introduced"
+      },
+      {
+        "id": "failure-path-covered",
+        "kind": "workspace_command",
+        "command": "grep -rq expect_failures tests/unit",
+        "source": "SKILL.md Steps: a validation block rejecting a bad input; cover the failure path"
+      },
+      {
+        "id": "bad-values-rejected",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; for v in 0 -5 366; do terraform plan -var name=x -var retention_days=$v > /dev/null 2>&1 && exit 1; done; exit 0 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "task prompt: retention_days outside 1 to 365 is rejected"
+      },
+      {
+        "id": "good-values-accepted",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; for v in 1 30 365; do terraform plan -var name=x -var retention_days=$v > /dev/null 2>&1 || exit 1; done; exit 0 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "task prompt: values inside 1 to 365 still plan"
+      },
+      {
+        "id": "test-fails-without-the-validation",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && git -C .. show \"$EVAL_BASE_SHA:variables.tf\" > variables.tf && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; ! terraform test -test-directory=tests/unit > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: run the new test with the change under test reverted and confirm it fails"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "command": "grep -q policy_name_follows_service tests/unit/name.tftest.hcl && grep -q billing-retention tests/unit/name.tftest.hcl",
+        "source": "SKILL.md: never delete an assertion to get a green run"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -check -recursive",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "command": "! find . -path ./.git -prune -o -path ./eval-check -prune -o \\( -name 'terraform.tfstate*' -o -name '*.tfplan' -o -name tfplan -o -name .terraform \\) -print | grep -q .",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree"
+      }
+    ],
+    "tt-02-terratest-suite": [
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "go test",
+        "source": "SKILL.md Verify: run the repository's test entry point, here go test"
+      },
+      {
+        "id": "test-added",
+        "kind": "workspace_command",
+        "command": "{ git diff --name-only \"$EVAL_BASE_SHA\" -- test; git ls-files --others --exclude-standard -- test; } | grep -q '_test[.]go$'",
+        "source": "SKILL.md Steps: an output bug fix needs a test"
+      },
+      {
+        "id": "existing-convention-followed",
+        "kind": "workspace_command",
+        "command": "for f in $(git ls-files --others --exclude-standard -- test | grep -v 'go[.]sum$'); do case \"$f\" in test/unit/*_test.go) ;; *) exit 1 ;; esac; done",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "command": "test -f test/unit/endpoint_test.go",
+        "source": "SKILL.md Steps: a name that matches the surrounding files"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "command": "! find . -name '*.tftest.hcl' -not -path './eval-check/*' | grep -q .",
+        "source": "SKILL.md Steps: do not add a second framework alongside an existing one"
+      },
+      {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'InitAndApply|terraform[.]Apply|terraform[.]Destroy' test/unit",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\" -- test/integration && [ -z \"$(git ls-files --others --exclude-standard -- test/integration)\" ]",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target"
+      },
+      {
+        "id": "asserts-the-endpoint-output",
+        "kind": "workspace_command",
+        "command": "grep -rq endpoint test/unit",
+        "source": "SKILL.md Steps: assert the new output's value"
+      },
+      {
+        "id": "asserts-host-port-form",
+        "kind": "workspace_command",
+        "command": "grep -rqE '[a-z]:[0-9]{2,5}' test/unit",
+        "source": "SKILL.md Steps: the test pins the value the bug got wrong"
+      },
+      {
+        "id": "existing-test-not-gutted",
+        "kind": "workspace_command",
+        "command": "grep -q service_name test/unit/service_name_test.go && grep -q 'svc-api' test/unit/service_name_test.go",
+        "source": "SKILL.md: never delete an assertion to get a green run"
+      },
+      {
+        "id": "fix-works",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; terraform apply -auto-approve -input=false -var name=api -var host=api.example.internal > /dev/null 2>&1 && [ \"$(terraform output -raw endpoint)\" = https://api.example.internal:8443 ] ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "task prompt: endpoint renders as host:port"
+      },
+      {
+        "id": "gofmt-clean",
+        "kind": "workspace_command",
+        "command": "command -v gofmt > /dev/null 2>&1 || exit 0; test -z \"$(gofmt -l test)\"",
+        "source": "SKILL.md: Go test files are held to the repository's Go tooling"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -check -recursive",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "command": "! find . -path ./.git -prune -o -path ./eval-check -prune -o \\( -name 'terraform.tfstate*' -o -name '*.tfplan' -o -name tfplan -o -name .terraform \\) -print | grep -q .",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree"
+      }
+    ],
+    "tt-03-conditional-resource": [
+      {
+        "id": "suite-passes",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; terraform test > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes"
+      },
+      {
+        "id": "suite-actually-run",
+        "kind": "bash_regex",
+        "pattern": "terraform test",
+        "source": "SKILL.md Verify: run the suite, do not describe it"
+      },
+      {
+        "id": "native-test-added",
+        "kind": "workspace_command",
+        "command": "git ls-files --others --exclude-standard | grep -q '[.]tftest[.]hcl$'",
+        "source": "SKILL.md Steps: where there is nothing, prefer native terraform test"
+      },
+      {
+        "id": "no-second-framework",
+        "kind": "workspace_command",
+        "command": "! find . \\( -name '*_test.go' -o -name go.mod -o -name conftest.py -o -name '*.rego' \\) -not -path './eval-check/*' | grep -q .",
+        "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency"
+      },
+      {
+        "id": "enabled-branch-covered",
+        "kind": "workspace_command",
+        "command": "grep -rhE 'enable_audit *= *true' --include='*.tftest.hcl' . | grep -q .",
+        "source": "SKILL.md Steps: cover each branch of the conditional"
+      },
+      {
+        "id": "disabled-branch-asserted",
+        "kind": "workspace_command",
+        "command": "grep -rhE '(== *false|! *output[.]audit_enabled|length[(][^)]*audit[^)]*[)] *== *0)' --include='*.tftest.hcl' . | grep -q .",
+        "source": "SKILL.md Steps: assert the plan omitting a given resource"
+      },
+      {
+        "id": "plan-only-tests",
+        "kind": "workspace_command",
+        "command": "! find . -name '*.tftest.hcl' -not -path './eval-check/*' -print0 | xargs -0 -r grep -lE 'command *= *apply' | grep -q .",
+        "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test"
+      },
+      {
+        "id": "audit-off-by-default",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; terraform apply -auto-approve -input=false -var name=x > /dev/null 2>&1 && [ \"$(terraform output -raw audit_enabled)\" = false ] ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "task prompt: enable_audit defaults to false"
+      },
+      {
+        "id": "audit-on-when-enabled",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; terraform apply -auto-approve -input=false -var name=x -var enable_audit=true > /dev/null 2>&1 && [ \"$(terraform output -raw audit_enabled)\" = true ] ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "task prompt: audit_enabled reports whether the record was created"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -check -recursive",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "command": "! find . -path ./.git -prune -o -path ./eval-check -prune -o \\( -name 'terraform.tfstate*' -o -name '*.tfplan' -o -name tfplan -o -name .terraform \\) -print | grep -q .",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree"
+      }
+    ],
+    "tt-04-pinned-old-terraform": [
+      {
+        "id": "check-passes",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; make check > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes"
+      },
+      {
+        "id": "check-actually-run",
+        "kind": "bash_regex",
+        "pattern": "make check|terraform (validate|plan|show)|scripts/",
+        "source": "SKILL.md Verify: run the suite, do not describe it"
+      },
+      {
+        "id": "no-native-test-below-1-6",
+        "kind": "workspace_command",
+        "command": "! find . -name '*.tftest.hcl' -not -path './eval-check/*' | grep -q .",
+        "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later"
+      },
+      {
+        "id": "ci-pin-and-floor-kept",
+        "kind": "workspace_command",
+        "command": "grep -q '^1[.]5[.]7$' .terraform-version && grep -q '>= 1[.]3[.]0' versions.tf",
+        "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one"
+      },
+      {
+        "id": "coverage-added",
+        "kind": "workspace_command",
+        "command": "{ git diff --name-only \"$EVAL_BASE_SHA\" -- Makefile; git ls-files --others --exclude-standard | grep -vE '^[.]terraform|tfstate|^eval-check'; } | grep -q .",
+        "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead"
+      },
+      {
+        "id": "check-fails-when-output-is-wrong",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; awk '/^output \"full_name\"/{f=1} f && /^[[:space:]]*value[[:space:]]*=/{print \"  value = \\\"wrong\\\"\"; f=0; next} {print}' outputs.tf > o.tmp && mv o.tmp outputs.tf && terraform fmt outputs.tf > /dev/null && ! make check > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point"
+      },
+      {
+        "id": "full-name-correct",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; terraform apply -auto-approve -input=false -var team=core -var name=api > /dev/null 2>&1 && [ \"$(terraform output -raw full_name)\" = core-api ] ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "task prompt: full_name joins team and name with a hyphen"
+      },
+      {
+        "id": "version-constraint-explained",
+        "kind": "final_regex",
+        "pattern": "(1\\.5|1\\.6|older (Terraform|version)|native (terraform )?test|\\.tftest)",
+        "source": "SKILL.md Steps: say why the framework was chosen"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -check -recursive",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "command": "! find . -path ./.git -prune -o -path ./eval-check -prune -o \\( -name 'terraform.tfstate*' -o -name '*.tfplan' -o -name tfplan -o -name .terraform \\) -print | grep -q .",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree"
+      }
+    ],
+    "tt-05-docs-only": [
+      {
+        "id": "suite-still-passes",
+        "kind": "workspace_command",
+        "command": "rm -rf eval-check; mkdir eval-check; tar --exclude=./eval-check --exclude=./.git -cf - . | tar -xf - -C eval-check; ( cd eval-check && terraform init -backend=false -input=false > /dev/null 2>&1 || exit 1; make test > /dev/null 2>&1 ); rc=$?; rm -rf eval-check; exit $rc",
+        "source": "SKILL.md Verify: the repository's suite still passes"
+      },
+      {
+        "id": "no-test-added",
+        "kind": "workspace_command",
+        "command": "[ -z \"$(git ls-files --others --exclude-standard | grep -vE '^[.]terraform|tfstate|^eval-check')\" ] && git diff --quiet \"$EVAL_BASE_SHA\" -- tests Makefile",
+        "source": "SKILL.md When NOT to use this: a change with no behavior change needs no test"
+      },
+      {
+        "id": "no-test-decision-stated",
+        "kind": "final_regex",
+        "pattern": "(no (new |additional )?tests?|(didn'?t|did not|do not|don'?t) (need|add|require)\\w* (a |any |new )?tests?|tests? (is|are|was|were) not (needed|required)|not needed|nothing to test)",
+        "source": "SKILL.md When NOT to use this: say a test is not needed, and why"
+      },
+      {
+        "id": "behavior-unchanged",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\" -- main.tf outputs.tf versions.tf tests && git show \"$EVAL_BASE_SHA:variables.tf\" | grep -v description > eval-a && grep -v description variables.tf > eval-b; cmp -s eval-a eval-b; rc=$?; rm -f eval-a eval-b; exit $rc",
+        "source": "task prompt: no behavior should change"
+      },
+      {
+        "id": "descriptions-rewritten",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'description += +\"(the name|days)\"' variables.tf",
+        "source": "task prompt: the variable descriptions are clearer"
+      },
+      {
+        "id": "typos-fixed",
+        "kind": "workspace_command",
+        "command": "! grep -qE 'smal |polcy|formating' README.md",
+        "source": "task prompt: the README typos are fixed"
+      },
+      {
+        "id": "fmt-clean",
+        "kind": "workspace_command",
+        "command": "terraform fmt -check -recursive",
+        "source": "SKILL.md Verify: run terraform fmt -check over the files added"
+      },
+      {
+        "id": "no-state-plan-or-cache-left",
+        "kind": "workspace_command",
+        "command": "! find . -path ./.git -prune -o -path ./eval-check -prune -o \\( -name 'terraform.tfstate*' -o -name '*.tfplan' -o -name tfplan -o -name .terraform \\) -print | grep -q .",
+        "source": "SKILL.md Verify: no state or plan file is left in the tree"
+      }
+    ]
+  }
+}
