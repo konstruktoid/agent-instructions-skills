@@ -1,0 +1,21 @@
+<task-notification>
+<task-id>bz7eklgwj</task-id>
+<tool-use-id>toolu_01BE2sHcXiKr2vNrHATZA3zi</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/bz7eklgwj.output</output-file>
+<status>completed</status>
+<summary>Background command "Clone to /var/tmp and start both eval runs" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bcbmxy7dx</task-id>
+<tool-use-id>toolu_015PhUsg4W4qRQyh5QhEPrv3</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/bcbmxy7dx.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for both eval runs to finish" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+harden the fixture and sign-commit these two files and rerun both suites
