@@ -1,0 +1,60 @@
+{
+  "skill": "github-repository-security",
+  "notes": [
+    "Five prompts should route to this skill and five are adjacent but out of scope, so both over-triggering and under-triggering are measurable.",
+    "Each probe runs with read-only tools in an empty directory. The routing decision is made from the description before any file is read, so the absence of a real repository does not affect it.",
+    "A probe is correct when the skill fired and was expected to, or did not fire and was not expected to."
+  ],
+  "prompts": [
+    {
+      "id": "grs-t01",
+      "expect": "trigger",
+      "prompt": "Turn on secret scanning and push protection for this repository."
+    },
+    {
+      "id": "grs-t02",
+      "expect": "trigger",
+      "prompt": "Add a ruleset that blocks force pushes to main and requires one approving review."
+    },
+    {
+      "id": "grs-t03",
+      "expect": "trigger",
+      "prompt": "Audit who has admin access to our repository, deploy keys included."
+    },
+    {
+      "id": "grs-t04",
+      "expect": "trigger",
+      "prompt": "We want to make this private repository public next week. What has to happen first?"
+    },
+    {
+      "id": "grs-t05",
+      "expect": "trigger",
+      "prompt": "Add a SECURITY.md and enable private vulnerability reporting on the repo."
+    },
+    {
+      "id": "grs-t06",
+      "expect": "no-trigger",
+      "prompt": "Pin every action in our CI workflow to a commit SHA."
+    },
+    {
+      "id": "grs-t07",
+      "expect": "no-trigger",
+      "prompt": "Require two-factor authentication for every member of our GitHub organization."
+    },
+    {
+      "id": "grs-t08",
+      "expect": "no-trigger",
+      "prompt": "Write a pull request description for the changes on this branch."
+    },
+    {
+      "id": "grs-t09",
+      "expect": "no-trigger",
+      "prompt": "Set up a protected branch for main in our GitLab project."
+    },
+    {
+      "id": "grs-t10",
+      "expect": "no-trigger",
+      "prompt": "Explain how git rebase differs from git merge."
+    }
+  ]
+}

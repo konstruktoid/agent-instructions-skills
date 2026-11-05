@@ -481,11 +481,12 @@ output, or that its `description` routes the right tasks to it. Two measurements
   skill's own Verify and Verification checklist sections. Every task runs twice against an
   identical fixture copy, once with the skill available and once without. The only difference
   between the two runs is a single-skill plugin passed with `--plugin-dir`, so a delta is
-  attributable to the skill. Seven of the ten skills have a suite.
-  `github-repository-security` and `github-organization-governance` have none, because a task
-  for either acts on a live GitHub organization rather than on a fixture directory, and
-  `terraform-testing` has trigger probes only, with no task suite yet;
-  `scripts/check_evals.py` reports each of them as unmeasured.
+  attributable to the skill. Nine of the ten skills have a suite.
+  `github-repository-security` and `github-organization-governance` act on GitHub settings
+  rather than on files, so their tasks run against `evals/gh_stub.py`, a stand-in `gh` that
+  serves fixture state and logs every call; neither has run yet. `terraform-testing` has trigger
+  probes only, with no task suite yet. `scripts/check_evals.py` reports each of the three as
+  unmeasured.
 - **Trigger evals.** `trigger-eval.json` holds 10 routing probes per skill, five in scope and
   five adjacent but out of scope, which measure the `description` field rather than the body.
 - **Agent-template evals.** A suite under `evals/agents/<template>/` measures a template rather
@@ -535,10 +536,9 @@ to every number in there.
 Seven of the ten skills define both evals and have results committed. The table records the
 latest stamp for each of those, what it measured, and the limitation that keeps that number
 from standing as a general claim about the skill. `github-repository-security` and
-`github-organization-governance` have neither eval yet: both act on live GitHub settings, so
-a task eval needs a fixture that stands in for an organization, and until that exists there is
-no measurement of what either skill changes. `terraform-testing`
-has trigger probes and no task eval yet; a task suite for it is a follow-up.
+`github-organization-governance` have both evals defined against a stand-in `gh`, and neither has
+run yet, so there is no measurement of what either skill changes. `terraform-testing` has trigger
+probes and no task eval yet; a task suite for it is a follow-up.
 
 `scripts/check_evals.py` holds the seven suites to the structure described here, and separates
 what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
