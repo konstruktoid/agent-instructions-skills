@@ -34,10 +34,10 @@ passes in the 2026-11-01 runs.
 
 `github-repository-security` and `github-organization-governance` have suites that run against
 `evals/gh_stub.py`, a stand-in `gh` serving each task's `github-state/` file, and neither has run
-yet. `terraform-testing` has a task suite that has not run, so only its routing has been measured.
-Its first trigger run, stamp `2026-11-04` at
-`4d9fe5a` with three passes per probe, routed all ten probes correctly, and the README-formatting
-probe `tt-t08` fired in one of three passes. Of the twelve agent templates,
+yet. `terraform-testing` has a five-task suite and a stamp, `2026-11-05` at `966b828`, where the
+skill scored 7 assertions better at 1.4x the cost and routed all ten probes correctly. Only `tt-03`
+(+4) and `tt-04` (+1) separate, `tt-01` scores full marks in both conditions, and the skill did not
+fire on `tt-05`. Of the twelve agent templates,
 `python-security-verifier`, `requirements-analyst` and `evidence-synthesizer` have a suite, and
 the last two were first run on 2026-10-26 at `52d4ed8`, where neither separated from its no-agent
 arm. The verifier's 2026-10-08 stamp re-ran the same

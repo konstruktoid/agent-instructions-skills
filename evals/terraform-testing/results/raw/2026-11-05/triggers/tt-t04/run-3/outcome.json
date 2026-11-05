@@ -1,0 +1,18 @@
+{
+  "id": "tt-t04",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-terraform-testing:terraform-testing"
+  ],
+  "cost_usd": 0.06709939999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:10:59.319635+00:00",
+    "seconds": 13.8
+  },
+  "aborted": false,
+  "rate_limited": false
+}

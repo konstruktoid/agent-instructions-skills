@@ -1,0 +1,16 @@
+{
+  "id": "tt-t07",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.05045959999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:11:45.773395+00:00",
+    "seconds": 14.4
+  },
+  "aborted": false,
+  "rate_limited": false
+}

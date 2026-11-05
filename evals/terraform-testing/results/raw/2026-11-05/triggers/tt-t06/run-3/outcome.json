@@ -1,0 +1,16 @@
+{
+  "id": "tt-t06",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.06169419999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:11:25.707803+00:00",
+    "seconds": 16.7
+  },
+  "aborted": false,
+  "rate_limited": false
+}

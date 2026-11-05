@@ -1,0 +1,51 @@
+diff --git a/Makefile b/Makefile
+index 0ca016a..b4b705a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -3,3 +3,4 @@ check:
+ 	terraform init -backend=false -input=false
+ 	terraform fmt -check -recursive
+ 	terraform validate
++	cd tests/full_name && terraform init -backend=false -input=false && terraform plan -input=false
+diff --git a/outputs.tf b/outputs.tf
+index c452a56..d6b0976 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -2,3 +2,8 @@ output "team" {
+   description = "Team that owns the resource."
+   value       = var.team
+ }
++
++output "full_name" {
++  description = "Team and name joined with a hyphen."
++  value       = "${var.team}-${var.name}"
++}
+diff --git a/tests/full_name/.terraform/modules/modules.json b/tests/full_name/.terraform/modules/modules.json
+new file mode 100644
+index 0000000..ac2d771
+--- /dev/null
++++ b/tests/full_name/.terraform/modules/modules.json
+@@ -0,0 +1 @@
++{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"subject","Source":"../..","Dir":"../.."}]}
+\ No newline at end of file
+diff --git a/tests/full_name/main.tf b/tests/full_name/main.tf
+new file mode 100644
+index 0000000..08d66f1
+--- /dev/null
++++ b/tests/full_name/main.tf
+@@ -0,0 +1,15 @@
++# Plan-time check (works on Terraform 1.5.7; `terraform test` needs 1.6+).
++module "subject" {
++  source = "../.."
++  team   = "platform"
++  name   = "db"
++}
++
++resource "terraform_data" "assert_full_name" {
++  lifecycle {
++    precondition {
++      condition     = module.subject.full_name == "platform-db"
++      error_message = "full_name should be team and name joined by a hyphen, got ${module.subject.full_name}."
++    }
++  }
++}

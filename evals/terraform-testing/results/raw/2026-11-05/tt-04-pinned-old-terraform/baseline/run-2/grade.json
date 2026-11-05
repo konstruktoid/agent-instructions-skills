@@ -1,0 +1,95 @@
+{
+  "task": "tt-04-pinned-old-terraform",
+  "condition": "baseline",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:08:50.897328+00:00",
+    "seconds": 30.5
+  },
+  "base_sha": "2c97744250d86f3adf30bcd770fe21b92ede0925",
+  "skills_used": [],
+  "num_turns": 11,
+  "cost_usd": 0.092836,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "check-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "check-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the suite, do not describe it",
+      "passed": true,
+      "evidence": "match: 'terraform validate'"
+    },
+    {
+      "id": "no-native-test-below-1-6",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: native terraform test only where CI's Terraform resolves to 1.6 or later",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "ci-pin-and-floor-kept",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: the Terraform version CI runs decides the framework, so the pin is not raised to fit one",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "coverage-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: use a plan-and-policy approach or Terratest instead",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "check-fails-when-output-is-wrong",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: the new check fails when the change under test is reverted, and CI runs only the entry point",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "full-name-correct",
+      "kind": "workspace_command",
+      "source": "task prompt: full_name joins team and name with a hyphen",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "version-constraint-explained",
+      "kind": "final_regex",
+      "source": "SKILL.md Steps: say why the framework was chosen",
+      "passed": true,
+      "evidence": "match: '1.5'"
+    },
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-state-plan-or-cache-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: no state or plan file is left in the tree",
+      "passed": false,
+      "evidence": "exit 1"
+    }
+  ],
+  "passed": 9,
+  "total": 10
+}

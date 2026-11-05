@@ -1,0 +1,54 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..9a96c20
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,3 @@
++.terraform/
++*.tfstate*
++.terraform.lock.hcl
+diff --git a/Makefile b/Makefile
+index 0ca016a..46a26e3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -3,3 +3,12 @@ check:
+ 	terraform init -backend=false -input=false
+ 	terraform fmt -check -recursive
+ 	terraform validate
++	$(MAKE) test
++
++# Works on Terraform 1.5.x (CI); `terraform test` needs 1.6+, so apply a
++# small wrapper config and assert on its outputs instead.
++.PHONY: test
++test:
++	cd tests/full_name && terraform init -backend=false -input=false
++	cd tests/full_name && terraform apply -auto-approve -input=false
++	@test "$$(cd tests/full_name && terraform output -raw full_name)" = "platform-db" || { echo "full_name mismatch"; exit 1; }
+diff --git a/outputs.tf b/outputs.tf
+index c452a56..83496ff 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -1,3 +1,8 @@
++output "full_name" {
++  description = "Team and name joined with a hyphen."
++  value       = "${var.team}-${var.name}"
++}
++
+ output "team" {
+   description = "Team that owns the resource."
+   value       = var.team
+diff --git a/tests/full_name/main.tf b/tests/full_name/main.tf
+new file mode 100644
+index 0000000..02f653f
+--- /dev/null
++++ b/tests/full_name/main.tf
+@@ -0,0 +1,9 @@
++module "under_test" {
++  source = "../.."
++  team   = "platform"
++  name   = "db"
++}
++
++output "full_name" {
++  value = module.under_test.full_name
++}

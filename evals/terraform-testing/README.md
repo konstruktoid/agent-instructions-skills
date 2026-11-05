@@ -25,7 +25,11 @@ source), one formatting, one Python test, and one explanation that needs no code
 
 The first trigger run, stamp `2026-11-04` at `4d9fe5a` on `sonnet` with three passes per probe,
 routed 10 of 10 probes correctly. `tt-t08`, the README formatting probe, fired in one of its three
-passes, so it is the probe nearest to misrouting. The task suite has not run.
+passes, so it is the probe nearest to misrouting. The task suite ran in the
+same stamp, `2026-11-05` at `966b828`, and the skill scored 7 assertions better over the five tasks
+at 1.4x the cost. `tt-03` (+4) and `tt-04` (+1) separate. `tt-01` scores full marks in both arms,
+`tt-02` and `tt-05` are marked no reliable difference, and the skill did not fire on `tt-05`, so
+that delta is not attributable to it.
 
 Run it with:
 
@@ -44,9 +48,9 @@ python3 evals/run_eval.py report   --skill terraform-testing
   the run. A reference solution written against each fixture passes every assertion, and the
   unchanged fixture fails the ones that measure the change.
 - `tt-02` is Terratest, and no grader runs `go test`, since each graded run would download Terratest.
-  The fixture ships a `test/go.mod` and no `go.sum`, so an agent has to run `go mod tidy` itself. I
-  ran the reference test with Go 1.27.3: it fails against the buggy module and passes against the
-  fixed one. The assertions read the test files and the module, and `gofmt-clean` exits 0 when
+  The fixture ships a `test/go.mod` and no `go.sum`, so an agent has to run `go mod tidy` itself.
+  The reference test was run with Go 1.27.3: it fails against the buggy module and passes against
+  the fixed one. The assertions read the test files and the module, and `gofmt-clean` exits 0 when
   `gofmt` is absent. `suite-actually-run` measures that the agent tried, not that the suite passed.
 - The first run, stamp `2026-11-05` at `5e0ec83`, found `tt-01` and `tt-04` at full marks in both
   arms and a `tt-02` prompt and a `tt-05` pattern that mismeasured. The second run left `tt-02` at

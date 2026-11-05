@@ -1,0 +1,104 @@
+{
+  "task": "tt-03-conditional-resource",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T12:08:33.237903+00:00",
+    "seconds": 16.6
+  },
+  "base_sha": "258e9eb20ca7e81e577409f0b10b286e66fba306",
+  "skills_used": [
+    "eval-terraform-testing:terraform-testing"
+  ],
+  "num_turns": 6,
+  "cost_usd": 0.09142230000000001,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "suite-passes",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run the repository's test entry point and confirm it passes",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "suite-actually-run",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: run the suite, do not describe it",
+      "passed": true,
+      "evidence": "match: 'terraform test'"
+    },
+    {
+      "id": "native-test-added",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: where there is nothing, prefer native terraform test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-second-framework",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: prefer native terraform test, which needs no extra language or dependency",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "enabled-branch-covered",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: cover each branch of the conditional",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "disabled-branch-asserted",
+      "kind": "workspace_command",
+      "source": "SKILL.md Steps: assert the plan omitting a given resource",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "plan-only-tests",
+      "kind": "workspace_command",
+      "source": "SKILL.md Tooling baseline: prefer command = plan for a unit-style test",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "audit-off-by-default",
+      "kind": "workspace_command",
+      "source": "task prompt: enable_audit defaults to false",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "audit-on-when-enabled",
+      "kind": "workspace_command",
+      "source": "task prompt: audit_enabled reports whether the record was created",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fmt-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: run terraform fmt -check over the files added",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-state-plan-or-cache-left",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: no state or plan file is left in the tree",
+      "passed": true,
+      "evidence": "exit 0"
+    }
+  ],
+  "passed": 11,
+  "total": 11
+}
