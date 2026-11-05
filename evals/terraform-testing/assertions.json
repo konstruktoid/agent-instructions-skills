@@ -3,7 +3,7 @@
   "notes": [
     "The first claim of the skill is that it discovers the repository's test approach and matches it, so the fixtures differ in what they already hold: a native terraform test suite (tt-01), a Terratest suite (tt-02), nothing (tt-03), nothing plus a Terraform version too old for native tests (tt-04), and a native suite with a change that needs no test (tt-05).",
     "Every fixture creates only terraform_data, which belongs to the built-in provider, so init, plan, apply and test run without registry access or credentials.",
-    "tt-02 needs Go and Terratest, neither of which a grader runs. Its assertions read the test files and the module, and gofmt-clean-if-available exits 0 when gofmt is absent, so it never fails for a reason the run had no control over.",
+    "tt-02 is a Terratest suite and no grader runs go test, since it would download Terratest for every graded run. Its assertions read the test files and the module, and gofmt-clean exits 0 when gofmt is absent, so it never fails for a reason the run had no control over.",
     "test-fails-without-the-validation restores variables.tf from the base commit and expects terraform test to fail, which assumes the validation block lives where the variable is declared.",
     "Assertion commands run under /bin/sh. Those that run terraform do so in a scratch copy named eval-check, so grading leaves no .terraform directory behind in the workspace."
   ],
@@ -116,8 +116,14 @@
       {
         "id": "existing-convention-followed",
         "kind": "workspace_command",
-        "command": "for f in $(git ls-files --others --exclude-standard -- test); do case \"$f\" in test/*_test.go) ;; *) exit 1 ;; esac; done",
-        "source": "SKILL.md Steps: match the layout and file naming that are there"
+        "command": "for f in $(git ls-files --others --exclude-standard -- test | grep -v 'go[.]sum$'); do case \"$f\" in test/unit/*_test.go) ;; *) exit 1 ;; esac; done",
+        "source": "SKILL.md Steps: place the test where the repository's convention puts it"
+      },
+      {
+        "id": "named-for-the-output",
+        "kind": "workspace_command",
+        "command": "test -f test/unit/endpoint_test.go",
+        "source": "SKILL.md Steps: a name that matches the surrounding files"
       },
       {
         "id": "no-second-framework",
@@ -126,22 +132,34 @@
         "source": "SKILL.md Steps: do not add a second framework alongside an existing one"
       },
       {
+        "id": "unit-tests-plan-only",
+        "kind": "workspace_command",
+        "command": "! grep -rqE 'InitAndApply|terraform[.]Apply|terraform[.]Destroy' test/unit",
+        "source": "SKILL.md Tooling baseline: use a plan-only helper such as terraform.InitAndPlan, which provisions nothing"
+      },
+      {
+        "id": "integration-tests-untouched",
+        "kind": "workspace_command",
+        "command": "git diff --quiet \"$EVAL_BASE_SHA\" -- test/integration && [ -z \"$(git ls-files --others --exclude-standard -- test/integration)\" ]",
+        "source": "SKILL.md Tooling baseline: reserve apply runs for an integration suite that has a target"
+      },
+      {
         "id": "asserts-the-endpoint-output",
         "kind": "workspace_command",
-        "command": "grep -rq endpoint test/",
+        "command": "grep -rq endpoint test/unit",
         "source": "SKILL.md Steps: assert the new output's value"
       },
       {
         "id": "asserts-host-port-form",
         "kind": "workspace_command",
-        "command": "grep -rqE '[a-z]:[0-9]{2,5}' test/",
+        "command": "grep -rqE '[a-z]:[0-9]{2,5}' test/unit",
         "source": "SKILL.md Steps: the test pins the value the bug got wrong"
       },
       {
-        "id": "apply-paired-with-destroy",
+        "id": "existing-test-not-gutted",
         "kind": "workspace_command",
-        "command": "for f in test/*_test.go; do if grep -qE 'InitAndApply|terraform[.]Apply' \"$f\"; then grep -q 'terraform[.]Destroy' \"$f\" || exit 1; fi; done",
-        "source": "SKILL.md Tooling baseline: a deferred terraform.Destroy so it tears down on every exit path"
+        "command": "grep -q service_name test/unit/service_name_test.go && grep -q 'svc-api' test/unit/service_name_test.go",
+        "source": "SKILL.md: never delete an assertion to get a green run"
       },
       {
         "id": "fix-works",
@@ -150,7 +168,7 @@
         "source": "task prompt: endpoint renders as host:port"
       },
       {
-        "id": "gofmt-clean-if-available",
+        "id": "gofmt-clean",
         "kind": "workspace_command",
         "command": "command -v gofmt > /dev/null 2>&1 || exit 0; test -z \"$(gofmt -l test)\"",
         "source": "SKILL.md: Go test files are held to the repository's Go tooling"

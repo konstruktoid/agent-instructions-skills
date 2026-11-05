@@ -2,7 +2,7 @@
   "skill": "terraform-testing",
   "notes": [
     "Each fixture is a small working Terraform module built only from terraform_data, so it initialises, plans, applies and tests offline.",
-    "The fixtures differ in the test approach they already hold, because the skill's first claim is that it discovers and matches it: native terraform test split into unit and integration directories (tt-01, tt-05), Terratest (tt-02), nothing (tt-03), and nothing with a CI Terraform of 1.5.7 that cannot run native tests (tt-04).",
+    "The fixtures differ in the test approach they already hold, because the skill's first claim is that it discovers and matches it: native terraform test split into unit and integration directories (tt-01, tt-05), Terratest split into unit and integration directories (tt-02), nothing (tt-03), and nothing with a CI Terraform of 1.5.7 that cannot run native tests (tt-04).",
     "tt-05 asks for a change that needs no test. It measures the skill's rule to say so rather than add one."
   ],
   "tasks": [
