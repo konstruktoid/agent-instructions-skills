@@ -1,0 +1,16 @@
+{
+  "id": "tsi-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.04690439999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-04T23:26:17.673718+00:00",
+    "seconds": 10.4
+  },
+  "aborted": false,
+  "rate_limited": false
+}

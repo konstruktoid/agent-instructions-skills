@@ -1,0 +1,626 @@
+[
+  {
+    "id": "tsi-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0846315,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:14.628294+00:00",
+          "seconds": 18.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.08729359999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:14.627184+00:00",
+          "seconds": 19.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0857438,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:14.621227+00:00",
+          "seconds": 19.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2576689
+  },
+  {
+    "id": "tsi-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0749283,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:14.620024+00:00",
+          "seconds": 13.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0756903,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:14.624478+00:00",
+          "seconds": 14.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0733323,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:28.557359+00:00",
+          "seconds": 13.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2239509
+  },
+  {
+    "id": "tsi-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.08407299999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:29.080186+00:00",
+          "seconds": 18.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0822756,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:33.133757+00:00",
+          "seconds": 17.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0845978,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:33.623011+00:00",
+          "seconds": 18.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2509464
+  },
+  {
+    "id": "tsi-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0747543,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:34.230068+00:00",
+          "seconds": 15.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0717262,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:42.511380+00:00",
+          "seconds": 11.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.07792589999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:47.257247+00:00",
+          "seconds": 14.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2244064
+  },
+  {
+    "id": "tsi-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.10857150000000002,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:50.042506+00:00",
+          "seconds": 27.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.09731399999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:50.884366+00:00",
+          "seconds": 25.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.1050382,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:51.655729+00:00",
+          "seconds": 27.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.3109237
+  },
+  {
+    "id": "tsi-t06",
+    "expect": "no-trigger",
+    "fired": true,
+    "fired_count": 2,
+    "runs": 3,
+    "correct": false,
+    "passes": [
+      {
+        "id": "tsi-t06",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.0768925,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:25:54.326100+00:00",
+          "seconds": 13.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.051015599999999994,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:02.194016+00:00",
+          "seconds": 10.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t06",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-terraform-secure-iac:terraform-secure-iac"
+        ],
+        "cost_usd": 0.068981,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:07.465319+00:00",
+          "seconds": 10.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.19688909999999998
+  },
+  {
+    "id": "tsi-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.047434300000000006,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:12.586978+00:00",
+          "seconds": 9.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.048635700000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:16.336964+00:00",
+          "seconds": 11.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0481943,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:17.547404+00:00",
+          "seconds": 10.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1442643
+  },
+  {
+    "id": "tsi-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.04690439999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:17.673718+00:00",
+          "seconds": 10.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.04664949999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:18.978896+00:00",
+          "seconds": 9.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.046095000000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:22.281486+00:00",
+          "seconds": 9.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1396489
+  },
+  {
+    "id": "tsi-t09",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.062032,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:27.430759+00:00",
+          "seconds": 16.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0621541,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:28.050050+00:00",
+          "seconds": 16.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0611556,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:28.230781+00:00",
+          "seconds": 14.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1853417
+  },
+  {
+    "id": "tsi-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "tsi-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0286086,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:28.722870+00:00",
+          "seconds": 8.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0278886,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:31.532391+00:00",
+          "seconds": 7.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "tsi-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.029238600000000003,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-04T23:26:36.823986+00:00",
+          "seconds": 8.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.0857358
+  }
+]

@@ -16,21 +16,21 @@ suites were measured on 2026-10-06 and 2026-10-07.
 Each stamp comes from a fresh clone of a committed revision with no modified files and no ancestor
 `CLAUDE.md`, and the checker reports no staleness.
 
-`terraform-secure-iac` was first run on 2026-10-26 at `aa09ae6` and re-measured on 2026-10-28
-at `6c6960f`, three runs per condition both times. The second run, from a fresh clone, gives
-18/18 against 18/18 on `tsi-01-remote-state`, 10/11 against 11/11 on `tsi-02-orders-database`,
-10/12 against 11/12 on `tsi-03-network-modules` and 14/14 against 14/14 on
-`tsi-04-ci-apply-role`, a net of 2 assertions. The first run's gaps of 1 on `tsi-01` and 3 on
-`tsi-03` did not repeat at that size, so read the skill's effect here as small. Only
-`tsi-03` separates the conditions without overlapping ranges. Two `tsi-04` graders failed the
-one run per condition that built the OIDC condition key from a variable; they now accept an
-interpolated key, and neither fails in the second run. All ten trigger probes routed correctly
-in all three passes after each description gained a clause naming the other terraform skill;
-the first run misrouted two probes, formatting HCL in a README and writing a `terraform test`
-file. `checkov` was not installed when the tasks ran, so `iam-checks-clean` was regraded in the
-finished workspaces after installing it, with the agents' output unchanged. No run could finish
-`terraform validate`, because the provider downloads in the harness sandbox and then fails to
-instantiate, so `validate-result-reported` measures whether the agent said so.
+`terraform-secure-iac` was first run on 2026-10-26 at `aa09ae6` and re-measured on 2026-10-28 at
+`6c6960f`, three runs per condition both times. The second run, from a fresh clone, gives 18/18
+against 18/18 on `tsi-01-remote-state`, 10/11 against 11/11 on `tsi-02-orders-database`, 10/12
+against 11/12 on `tsi-03-network-modules` and 14/14 against 14/14 on `tsi-04-ci-apply-role`, a net
+of 2 assertions. The first run's gaps of 1 on `tsi-01` and 3 on `tsi-03` did not repeat at that
+size, so read the skill's effect here as small. Only `tsi-03` separates the conditions without
+overlapping ranges. Two `tsi-04` graders failed the one run per condition that built the OIDC
+condition key from a variable; they now accept an interpolated key, and neither fails in the second
+run. All ten trigger probes routed correctly in all three passes after each description gained a
+clause naming the other terraform skill; the first run misrouted two probes, formatting HCL in a
+README and writing a `terraform test` file. `checkov` was not installed when the tasks ran, so
+`iam-checks-clean` was regraded in the finished workspaces after installing it, with the agents'
+output unchanged. Until 2026-11-01 no run could finish `terraform validate`, because the provider
+socket path exceeded the 108-byte limit; the sandbox now sets a short `TMPDIR`, and `validate`
+passes in the 2026-11-01 runs.
 
 `github-repository-security` and `github-organization-governance` have suites that run against
 `evals/gh_stub.py`, a stand-in `gh` serving each task's `github-state/` file, and neither has run

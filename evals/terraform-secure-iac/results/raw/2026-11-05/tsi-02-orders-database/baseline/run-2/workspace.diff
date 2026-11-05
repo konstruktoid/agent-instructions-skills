@@ -1,0 +1,73 @@
+diff --git a/main.tf b/main.tf
+index 1500571..5c546b4 100644
+--- a/main.tf
++++ b/main.tf
+@@ -14,3 +14,30 @@ resource "aws_db_subnet_group" "orders" {
+   name       = "orders"
+   subnet_ids = var.private_subnet_ids
+ }
++
++resource "aws_db_instance" "orders" {
++  identifier     = "orders"
++  engine         = "postgres"
++  engine_version = "16"
++  instance_class = "db.t4g.micro"
++
++  allocated_storage = 20
++  storage_type      = "gp3"
++  storage_encrypted = true
++
++  db_name  = "orders"
++  username = var.db_username
++  password = var.db_password
++
++  db_subnet_group_name   = aws_db_subnet_group.orders.name
++  vpc_security_group_ids = [aws_security_group.orders_db.id]
++  publicly_accessible    = false
++
++  backup_retention_period    = 7
++  deletion_protection        = true
++  auto_minor_version_upgrade = true
++  copy_tags_to_snapshot      = true
++
++  skip_final_snapshot       = false
++  final_snapshot_identifier = "orders-final"
++}
+diff --git a/outputs.tf b/outputs.tf
+index 856ecf0..c9c3682 100644
+--- a/outputs.tf
++++ b/outputs.tf
+@@ -1,3 +1,20 @@
+ output "db_security_group_id" {
+   value = aws_security_group.orders_db.id
+ }
++
++output "db_address" {
++  value = aws_db_instance.orders.address
++}
++
++output "db_port" {
++  value = aws_db_instance.orders.port
++}
++
++output "db_name" {
++  value = aws_db_instance.orders.db_name
++}
++
++output "db_username" {
++  value     = aws_db_instance.orders.username
++  sensitive = true
++}
+diff --git a/variables.tf b/variables.tf
+index 5a3c309..9ea3644 100644
+--- a/variables.tf
++++ b/variables.tf
+@@ -17,6 +17,6 @@ variable "db_username" {
+ }
+ 
+ variable "db_password" {
+-  type    = string
+-  default = "orders-dev-2024"
++  type      = string
++  sensitive = true
+ }
