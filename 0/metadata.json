@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M6NSFZDR8AAFAY2X4AK42R5W",
+  "session_id": "65fecde8-c9ee-4fa1-becf-0332d4010c0a",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-05T12:03:48.474883445Z",
+  "branch": "terraform-testing-task-suite",
+  "checkpoints_count": 4,
+  "save_step_count": 4,
+  "files_touched": [
+    "evals/terraform-testing/README.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "4f025809b04a",
+  "checkpoint_transcript_start": 440,
+  "transcript_lines_at_start": 440,
+  "compact_transcript_start": 66,
+  "token_usage": {
+    "input_tokens": 58,
+    "cache_creation_tokens": 154698,
+    "cache_read_tokens": 3567397,
+    "output_tokens": 20475,
+    "api_call_count": 25
+  },
+  "redaction": {
+    "replacements": 4,
+    "layers": {
+      "betterleaks": 4,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 4,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  },
+  "session_metrics": {
+    "turn_count": 13
+  }
+}

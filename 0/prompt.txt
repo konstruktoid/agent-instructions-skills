@@ -1,0 +1,41 @@
+<task-notification>
+<task-id>brnj5u613</task-id>
+<tool-use-id>toolu_01BNdmX2X753SoSGeWBs3SBB</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/brnj5u613.output</output-file>
+<status>completed</status>
+<summary>Background command "Fix README line, reclone, start both eval runs" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bqjdgzpjt</task-id>
+<tool-use-id>toolu_016veEKMAHY3mWS8waN8Apcq</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/bqjdgzpjt.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for both runs to finish" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bz2q17xh6</task-id>
+<tool-use-id>toolu_01EEk8moQ19eC4fWCF73QNhc</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/bz2q17xh6.output</output-file>
+<status>completed</status>
+<summary>Background command "Start both eval runs from the fresh clone" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>buqz3xwb1</task-id>
+<tool-use-id>toolu_01DxXWBgrwVwuhKpy2YSDGJ5</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/4eddc812-1378-46d4-a02c-396f96aa76dd/tasks/buqz3xwb1.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for both runs to finish" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+tt-02 hardened first
