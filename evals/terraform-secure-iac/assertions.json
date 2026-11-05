@@ -27,7 +27,7 @@
       {
         "id": "validate-actually-run",
         "kind": "bash_regex",
-        "pattern": "(^|[;&|(]\\s*)(\\w+=\\S*\\s+)*terraform(\\s+-\\S+)*\\s+validate\\b",
+        "pattern": "(^|[;&|(]\\s*)(env\\s+(-\\S+\\s+)*)?(\\w+=\\S*\\s+)*terraform(\\s+-\\S+)*\\s+validate\\b",
         "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
       },
       {
@@ -138,7 +138,7 @@
       {
         "id": "validate-actually-run",
         "kind": "bash_regex",
-        "pattern": "(^|[;&|(]\\s*)(\\w+=\\S*\\s+)*terraform(\\s+-\\S+)*\\s+validate\\b",
+        "pattern": "(^|[;&|(]\\s*)(env\\s+(-\\S+\\s+)*)?(\\w+=\\S*\\s+)*terraform(\\s+-\\S+)*\\s+validate\\b",
         "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
       },
       {
@@ -281,7 +281,7 @@
       {
         "id": "validate-actually-run",
         "kind": "bash_regex",
-        "pattern": "(^|[;&|(]\\s*)(\\w+=\\S*\\s+)*terraform(\\s+-\\S+)*\\s+validate\\b",
+        "pattern": "(^|[;&|(]\\s*)(env\\s+(-\\S+\\s+)*)?(\\w+=\\S*\\s+)*terraform(\\s+-\\S+)*\\s+validate\\b",
         "source": "SKILL.md Tooling baseline: run terraform validate after terraform init -backend=false yourself"
       },
       {
