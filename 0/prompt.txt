@@ -1,0 +1,21 @@
+run es-04 rerun
+
+---
+
+run a checkout outside
+
+---
+
+update the stale
+
+---
+
+whats the overall status?
+
+---
+
+run the full gate
+
+---
+
+commit with a signed commit
