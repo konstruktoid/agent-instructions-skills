@@ -1,0 +1,16 @@
+{
+  "id": "gog-t10",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0287686,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:35:35.365645+00:00",
+    "seconds": 8.2
+  },
+  "aborted": false,
+  "rate_limited": false
+}

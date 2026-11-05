@@ -1,0 +1,622 @@
+[
+  {
+    "id": "gog-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0727527,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.577912+00:00",
+          "seconds": 12.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.07087070000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.584522+00:00",
+          "seconds": 11.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0743256,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.585233+00:00",
+          "seconds": 13.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.217949
+  },
+  {
+    "id": "gog-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.07357499999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.581476+00:00",
+          "seconds": 12.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.071533,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.583399+00:00",
+          "seconds": 10.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.07108700000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:50.347510+00:00",
+          "seconds": 9.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.216195
+  },
+  {
+    "id": "gog-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0730328,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:50.799219+00:00",
+          "seconds": 12.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0717708,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:51.969483+00:00",
+          "seconds": 10.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0700388,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:52.436048+00:00",
+          "seconds": 9.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2148424
+  },
+  {
+    "id": "gog-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.07305590000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:53.029868+00:00",
+          "seconds": 11.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0740719,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:00.071257+00:00",
+          "seconds": 11.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0739893,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:01.660303+00:00",
+          "seconds": 12.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2211171
+  },
+  {
+    "id": "gog-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0722255,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:02.358226+00:00",
+          "seconds": 12.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0752562,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:02.886320+00:00",
+          "seconds": 13.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-organization-governance:github-organization-governance"
+        ],
+        "cost_usd": 0.0702275,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:04.716792+00:00",
+          "seconds": 9.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2177092
+  },
+  {
+    "id": "gog-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0480643,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:11.667511+00:00",
+          "seconds": 10.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.050277300000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:13.671460+00:00",
+          "seconds": 12.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.045248,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:14.396391+00:00",
+          "seconds": 9.5
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.14358959999999998
+  },
+  {
+    "id": "gog-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0481898,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:14.614329+00:00",
+          "seconds": 10.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0488258,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:15.906723+00:00",
+          "seconds": 10.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.048345799999999994,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:21.855870+00:00",
+          "seconds": 10.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1453614
+  },
+  {
+    "id": "gog-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0309426,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:23.860181+00:00",
+          "seconds": 9.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0315226,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:24.726403+00:00",
+          "seconds": 10.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0327526,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:26.144255+00:00",
+          "seconds": 10.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.09521779999999999
+  },
+  {
+    "id": "gog-t09",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.06667580000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:26.160116+00:00",
+          "seconds": 17.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0666485,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:32.021507+00:00",
+          "seconds": 17.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0548301,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:33.167003+00:00",
+          "seconds": 14.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1881544
+  },
+  {
+    "id": "gog-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "gog-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0287686,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:35.365645+00:00",
+          "seconds": 8.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.029878599999999998,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:36.500846+00:00",
+          "seconds": 10.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "gog-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0280786,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:43.127372+00:00",
+          "seconds": 7.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.08672579999999999
+  }
+]

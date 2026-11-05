@@ -1,0 +1,22 @@
+diff --git a/policies/actions-permissions.json b/policies/actions-permissions.json
+new file mode 100644
+index 0000000..8ed7a80
+--- /dev/null
++++ b/policies/actions-permissions.json
+@@ -0,0 +1,5 @@
++{
++  "enabled_repositories": "all",
++  "allowed_actions": "selected",
++  "sha_pinning_required": true
++}
+diff --git a/policies/selected-actions.json b/policies/selected-actions.json
+new file mode 100644
+index 0000000..3f19145
+--- /dev/null
++++ b/policies/selected-actions.json
+@@ -0,0 +1,5 @@
++{
++  "github_owned_allowed": true,
++  "verified_allowed": false,
++  "patterns_allowed": ["docker/*"]
++}

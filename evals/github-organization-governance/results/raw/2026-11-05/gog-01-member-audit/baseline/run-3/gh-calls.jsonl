@@ -1,0 +1,6 @@
+{"argv": ["api", "orgs/northwind"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?role=all", "--jq", ".[].login"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"role": "all"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?role=admin", "--jq", ".[].login"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"role": "admin"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?filter=2fa_disabled", "--jq", ".[].login"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"filter": "2fa_disabled"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/outside_collaborators", "--jq", ".[].login"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/outside_collaborators", "query": {}, "status": 0}
+{"argv": ["api", "orgs/northwind/invitations", "--jq", ".[]|[.login,.email,.role]|@tsv"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/invitations", "query": {}, "status": 1}

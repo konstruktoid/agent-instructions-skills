@@ -1,0 +1,69 @@
+{
+  "task": "grs-02-secret-scanning",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:25:51.954448+00:00",
+    "seconds": 13.3
+  },
+  "base_sha": "940f0b048bff35da4cdbb863e8c52fb2f5d3a637",
+  "skills_used": [
+    "eval-github-repository-security:github-repository-security"
+  ],
+  "num_turns": 6,
+  "cost_usd": 0.0990114,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "secret-scanning-enabled",
+      "kind": "workspace_command",
+      "source": "Prompt: turn on secret scanning",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "push-protection-enabled",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: secret scanning and push protection are on",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "setting-read-back",
+      "kind": "workspace_command",
+      "source": "SKILL.md Reading and writing settings: an accepted request is not an applied setting; read it back through a separate request",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "ignored-fields-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md Reading and writing settings: where a read shows the field unchanged, report that the setting needs the web interface rather than reporting success",
+      "passed": true,
+      "evidence": "match: 'Validity checks and non-provider patterns are still off'"
+    }
+  ],
+  "passed": 6,
+  "total": 6
+}

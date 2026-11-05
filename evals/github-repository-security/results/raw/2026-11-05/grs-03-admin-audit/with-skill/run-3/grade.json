@@ -1,0 +1,76 @@
+{
+  "task": "grs-03-admin-audit",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:26:11.757141+00:00",
+    "seconds": 10.8
+  },
+  "base_sha": "c1c40f9c1b39e02311394270c400927cd73fe621",
+  "skills_used": [
+    "eval-github-repository-security:github-repository-security"
+  ],
+  "num_turns": 4,
+  "cost_usd": 0.08045279999999999,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "nothing-changed",
+      "kind": "workspace_command",
+      "source": "Prompt: don't change anything",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "names-page-one-admin",
+      "kind": "final_regex",
+      "source": "SKILL.md Steps: read the repository's access grants",
+      "passed": true,
+      "evidence": "match: 'maria-lind'"
+    },
+    {
+      "id": "names-page-two-admin",
+      "kind": "final_regex",
+      "source": "SKILL.md Reading and writing settings: every list read is paginated; the first page reported as the whole repository is silently incomplete",
+      "passed": true,
+      "evidence": "match: 'kestrel-contractor'"
+    },
+    {
+      "id": "names-writable-deploy-key",
+      "kind": "final_regex",
+      "source": "SKILL.md Steps: read the repository's access grants, deploy keys among them",
+      "passed": true,
+      "evidence": "match: 'legacy-deployer'"
+    },
+    {
+      "id": "readonly-key-not-listed-as-writable",
+      "kind": "final_regex",
+      "source": "Prompt: only deploy keys that can write",
+      "passed": true,
+      "evidence": "no match"
+    }
+  ],
+  "passed": 7,
+  "total": 7
+}

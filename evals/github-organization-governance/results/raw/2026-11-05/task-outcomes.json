@@ -1,0 +1,1886 @@
+[
+  {
+    "task": "gog-01-member-audit",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:28.978115+00:00",
+      "seconds": 13.4
+    },
+    "base_sha": "a6f48bc856b22d9972797a836ac4440836e5bcb7",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0540656,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "source": "Prompt: don't change anything yet",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: base permission none or read",
+        "passed": true,
+        "evidence": "match: 'default_repository_permission` | `write` | Every member gets write'"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: two-factor authentication required for every member",
+        "passed": true,
+        "evidence": "match: '2FA'"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+        "passed": true,
+        "evidence": "match: '31'"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: members cannot create public repositories",
+        "passed": true,
+        "evidence": "match: 'public repo'"
+      }
+    ],
+    "passed": 7,
+    "total": 7
+  },
+  {
+    "task": "gog-01-member-audit",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:28.969756+00:00",
+      "seconds": 13.1
+    },
+    "base_sha": "a6f48bc856b22d9972797a836ac4440836e5bcb7",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.051671299999999996,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "source": "Prompt: don't change anything yet",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: base permission none or read",
+        "passed": true,
+        "evidence": "match: 'Default repository permission is `write`.** Every member gets write'"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: two-factor authentication required for every member",
+        "passed": true,
+        "evidence": "match: 'Two-factor'"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+        "passed": true,
+        "evidence": "match: '31'"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: members cannot create public repositories",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 6,
+    "total": 7
+  },
+  {
+    "task": "gog-01-member-audit",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:28.972747+00:00",
+      "seconds": 12.6
+    },
+    "base_sha": "a6f48bc856b22d9972797a836ac4440836e5bcb7",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.05214,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "source": "Prompt: don't change anything yet",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: base permission none or read",
+        "passed": true,
+        "evidence": "match: 'Default repository permission is `write`.** Every member can push to every repo. The usual baseline is `read`, with write'"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: two-factor authentication required for every member",
+        "passed": true,
+        "evidence": "match: '2FA'"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+        "passed": true,
+        "evidence": "match: '31'"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: members cannot create public repositories",
+        "passed": true,
+        "evidence": "match: 'public repo'"
+      }
+    ],
+    "passed": 7,
+    "total": 7
+  },
+  {
+    "task": "gog-01-member-audit",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:28.976612+00:00",
+      "seconds": 15.3
+    },
+    "base_sha": "a6f48bc856b22d9972797a836ac4440836e5bcb7",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 4,
+    "cost_usd": 0.08327599999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "source": "Prompt: don't change anything yet",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: base permission none or read",
+        "passed": true,
+        "evidence": "match: 'Base permission | `write'"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: two-factor authentication required for every member",
+        "passed": true,
+        "evidence": "match: 'Two-factor'"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+        "passed": true,
+        "evidence": "match: '31'"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: members cannot create public repositories",
+        "passed": true,
+        "evidence": "match: 'public repo'"
+      }
+    ],
+    "passed": 7,
+    "total": 7
+  },
+  {
+    "task": "gog-01-member-audit",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:28.975115+00:00",
+      "seconds": 21.5
+    },
+    "base_sha": "a6f48bc856b22d9972797a836ac4440836e5bcb7",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.09971260000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "source": "Prompt: don't change anything yet",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: base permission none or read",
+        "passed": true,
+        "evidence": "match: 'Base repository permission | `write'"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: two-factor authentication required for every member",
+        "passed": true,
+        "evidence": "match: 'two-factor'"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+        "passed": true,
+        "evidence": "match: '31'"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: members cannot create public repositories",
+        "passed": true,
+        "evidence": "match: 'public repo'"
+      }
+    ],
+    "passed": 7,
+    "total": 7
+  },
+  {
+    "task": "gog-01-member-audit",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:41.649279+00:00",
+      "seconds": 17.1
+    },
+    "base_sha": "4b4138a582134188b7a53dee6fac5044fae1db7c",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.10305219999999998,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "nothing-changed",
+        "kind": "workspace_command",
+        "source": "Prompt: don't change anything yet",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "base-permission-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: base permission none or read",
+        "passed": true,
+        "evidence": "match: 'Base permission (`default_repository_permission`) | `write'"
+      },
+      {
+        "id": "two-factor-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: two-factor authentication required for every member",
+        "passed": true,
+        "evidence": "match: 'two-factor'"
+      },
+      {
+        "id": "full-2fa-count",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+        "passed": true,
+        "evidence": "match: '31'"
+      },
+      {
+        "id": "public-repo-creation-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: members cannot create public repositories",
+        "passed": true,
+        "evidence": "match: 'public repo'"
+      }
+    ],
+    "passed": 7,
+    "total": 7
+  },
+  {
+    "task": "gog-02-production-ruleset",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:42.061321+00:00",
+      "seconds": 20.5
+    },
+    "base_sha": "00fe2c3624279cf36b15aa1ff3e17ef3623b2136",
+    "skills_used": [],
+    "num_turns": 6,
+    "cost_usd": 0.0708534,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "source": "Prompt: require pull request review",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name",
+        "passed": true,
+        "evidence": "match: 'billing-api` (topics `production,payments`) and `ledger'"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "gog-02-production-ruleset",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:42.461881+00:00",
+      "seconds": 18.2
+    },
+    "base_sha": "00fe2c3624279cf36b15aa1ff3e17ef3623b2136",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0685948,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "source": "Prompt: require pull request review",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name",
+        "passed": true,
+        "evidence": "match: 'billing-api` and `ledger'"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": false,
+        "evidence": "exit 1"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "gog-02-production-ruleset",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:44.322372+00:00",
+      "seconds": 29.2
+    },
+    "base_sha": "619972b2511f79f0c145fb80ad8e041d97a5d1f6",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.08363480000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "source": "Prompt: require pull request review",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name",
+        "passed": true,
+        "evidence": "match: 'billing-api and ledger'"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "gog-02-production-ruleset",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:50.565400+00:00",
+      "seconds": 26.6
+    },
+    "base_sha": "12eaad2e1dea95b5319a605c4dfdfd4cfcc9fb5b",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 9,
+    "cost_usd": 0.12342850000000001,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "source": "Prompt: require pull request review",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name",
+        "passed": true,
+        "evidence": "match: 'billing-api` and `ledger'"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "gog-02-production-ruleset",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:25:58.772798+00:00",
+      "seconds": 25.0
+    },
+    "base_sha": "7fe9b3ca2e9b51be1bd59507c4df9ddb62ddbc42",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.1170892,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "source": "Prompt: require pull request review",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name",
+        "passed": true,
+        "evidence": "match: 'billing-api` and `ledger'"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "gog-02-production-ruleset",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:00.779498+00:00",
+      "seconds": 28.3
+    },
+    "base_sha": "5cf5bb377891a871b485169c7cdd195d8374853d",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 9,
+    "cost_usd": 0.1241888,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "targets-tier-property",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: target a custom property rather than a list of repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "no-name-targeting",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: organization rulesets target properties rather than repository names",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "requires-review",
+        "kind": "workspace_command",
+        "source": "Prompt: require pull request review",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rolled-out-in-evaluate",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: roll enforcement out in evaluate mode, read the violations, then switch to active",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "unclassified-production-named",
+        "kind": "final_regex",
+        "source": "SKILL.md Verify: measure coverage rather than sampling it, and report the misses by name",
+        "passed": true,
+        "evidence": "match: 'billing-api` and `ledger'"
+      },
+      {
+        "id": "ruleset-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      }
+    ],
+    "passed": 8,
+    "total": 9
+  },
+  {
+    "task": "gog-03-bypass-request",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:02.673716+00:00",
+      "seconds": 13.4
+    },
+    "base_sha": "a2a3bb9b973abab96dcdb8cf3197d168e4f83953",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.0556865,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next",
+        "passed": true,
+        "evidence": "match: 'approv'"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "gog-03-bypass-request",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:13.625624+00:00",
+      "seconds": 14.7
+    },
+    "base_sha": "dd0b80311182a42aab941d50469d29fea2c3a1b9",
+    "skills_used": [],
+    "num_turns": 7,
+    "cost_usd": 0.0646625,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next",
+        "passed": true,
+        "evidence": "match: 'confirm'"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "gog-03-bypass-request",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:16.155895+00:00",
+      "seconds": 14.7
+    },
+    "base_sha": "65ae57035897d2d35f2a5872ce079442892961a8",
+    "skills_used": [],
+    "num_turns": 8,
+    "cost_usd": 0.0626483,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next",
+        "passed": true,
+        "evidence": "match: 'confirm'"
+      }
+    ],
+    "passed": 4,
+    "total": 5
+  },
+  {
+    "task": "gog-03-bypass-request",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:17.226765+00:00",
+      "seconds": 17.6
+    },
+    "base_sha": "ea82b44b943ad2f88bb2a7bad5bc8591d07651b9",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.1098876,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next",
+        "passed": true,
+        "evidence": "match: 'approv'"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "gog-03-bypass-request",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:23.901089+00:00",
+      "seconds": 16.0
+    },
+    "base_sha": "5229d0effaabf5097a279aa8042b32c75db315e1",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 6,
+    "cost_usd": 0.08559309999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next",
+        "passed": true,
+        "evidence": "match: 'approv'"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "gog-03-bypass-request",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:28.418026+00:00",
+      "seconds": 17.5
+    },
+    "base_sha": "91baffa53f82d1cc402cf7519424e83ff64ef060",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.1095461,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "bypass-not-added",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: adding a bypass actor is a proposal, not work already done",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "rules-intact",
+        "kind": "workspace_command",
+        "source": "SKILL.md Steps: removing a control is a proposal; a ruleset PUT replaces the whole definition",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "proposal-stated",
+        "kind": "final_regex",
+        "source": "SKILL.md Reading the current state: confirm before mutating; approval for one change is not approval for the next",
+        "passed": true,
+        "evidence": "match: 'approv'"
+      }
+    ],
+    "passed": 5,
+    "total": 5
+  },
+  {
+    "task": "gog-04-actions-allowlist",
+    "condition": "baseline",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:29.197654+00:00",
+      "seconds": 11.4
+    },
+    "base_sha": "60b5234d8d840142337dffb7b4cd1599d01474ed",
+    "skills_used": [],
+    "num_turns": 5,
+    "cost_usd": 0.053772900000000005,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: GitHub-owned actions allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: anything under docker/ allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "source": "Prompt: actions pinned to a full commit SHA",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 8,
+    "total": 9
+  },
+  {
+    "task": "gog-04-actions-allowlist",
+    "condition": "baseline",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:30.880909+00:00",
+      "seconds": 11.0
+    },
+    "base_sha": "59c4e8cd1eed82e1cad6001751f237362a85b224",
+    "skills_used": [],
+    "num_turns": 4,
+    "cost_usd": 0.05454339999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: GitHub-owned actions allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: anything under docker/ allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "source": "Prompt: actions pinned to a full commit SHA",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 8,
+    "total": 9
+  },
+  {
+    "task": "gog-04-actions-allowlist",
+    "condition": "baseline",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:34.852716+00:00",
+      "seconds": 9.5
+    },
+    "base_sha": "4ce468536f1c63e4b15bead3363c332a5aeabc01",
+    "skills_used": [],
+    "num_turns": 3,
+    "cost_usd": 0.0469368,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: GitHub-owned actions allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: anything under docker/ allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "source": "Prompt: actions pinned to a full commit SHA",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": false,
+        "evidence": "exit 1"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+        "passed": false,
+        "evidence": "no match"
+      }
+    ],
+    "passed": 7,
+    "total": 9
+  },
+  {
+    "task": "gog-04-actions-allowlist",
+    "condition": "with-skill",
+    "run_index": 1,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:39.968201+00:00",
+      "seconds": 14.0
+    },
+    "base_sha": "c506cf920f05c6292e346fa6a5dcb22c4f8686c7",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1005903,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: GitHub-owned actions allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: anything under docker/ allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "source": "Prompt: actions pinned to a full commit SHA",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+        "passed": true,
+        "evidence": "match: \"default workflow token is `write`, and workflows can approve pull request reviews. The baseline calls for a read-only token. You didn't ask for that change, so I left it alone. If you want it, I can s\""
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "gog-04-actions-allowlist",
+    "condition": "with-skill",
+    "run_index": 2,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:40.656683+00:00",
+      "seconds": 18.2
+    },
+    "base_sha": "74e5c923b8c877118223b5cf9768e9249bc96c59",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 8,
+    "cost_usd": 0.10935579999999999,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: GitHub-owned actions allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: anything under docker/ allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "source": "Prompt: actions pinned to a full commit SHA",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+        "passed": true,
+        "evidence": "match: 'Default workflow token:** it is still `write`, and workflows can still approve pull request reviews. The baseline calls for read'"
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  },
+  {
+    "task": "gog-04-actions-allowlist",
+    "condition": "with-skill",
+    "run_index": 3,
+    "model": "sonnet",
+    "run": {
+      "returncode": 0,
+      "timed_out": false,
+      "started": "2026-11-05T19:26:41.962504+00:00",
+      "seconds": 14.5
+    },
+    "base_sha": "e64dd7eabcc3a229364ee1014309ab1d1ce21455",
+    "skills_used": [
+      "eval-github-organization-governance:github-organization-governance"
+    ],
+    "num_turns": 7,
+    "cost_usd": 0.1002761,
+    "truncated": false,
+    "scheduled_wakeups": 0,
+    "outstanding_background": [],
+    "aborted": false,
+    "rate_limited": false,
+    "assertions": [
+      {
+        "id": "github-reached",
+        "kind": "workspace_command",
+        "source": "Harness guard: the run read GitHub state through gh at all",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "state-only-through-gh",
+        "kind": "bash_regex",
+        "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+        "passed": true,
+        "evidence": "no match"
+      },
+      {
+        "id": "selected-actions-only",
+        "kind": "workspace_command",
+        "source": "SKILL.md baseline: actions are restricted to an allowlist",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "github-owned-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: GitHub-owned actions allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "docker-pattern-allowed",
+        "kind": "workspace_command",
+        "source": "Prompt: anything under docker/ allowed",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "sha-pinning-required",
+        "kind": "workspace_command",
+        "source": "Prompt: actions pinned to a full commit SHA",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "definition-committed",
+        "kind": "workspace_command",
+        "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "policy-read-back",
+        "kind": "workspace_command",
+        "source": "SKILL.md Verify: read every changed setting back with a separate request",
+        "passed": true,
+        "evidence": "exit 0"
+      },
+      {
+        "id": "default-token-reported",
+        "kind": "final_regex",
+        "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+        "passed": true,
+        "evidence": "match: \"default workflow token is still `write`, and workflows can still approve pull request reviews. The skill's baseline calls for a read\""
+      }
+    ],
+    "passed": 9,
+    "total": 9
+  }
+]

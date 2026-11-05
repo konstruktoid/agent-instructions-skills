@@ -1,0 +1,3 @@
+{"argv": ["api", "repos/northwind/ingest", "--jq", "{private, visibility, default_branch, archived, security_and_analysis}"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "repos/northwind/ingest", "query": {}, "status": 0}
+{"argv": ["ruleset", "list", "--repo", "northwind/ingest", "--limit", "100"], "command": "ruleset", "status": 0, "subcommand": "list"}
+{"argv": ["api", "repos/northwind/ingest/collaborators?affiliation=direct", "--jq", ".[]|{login,role_name}"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "repos/northwind/ingest/collaborators", "query": {"affiliation": "direct"}, "status": 0}

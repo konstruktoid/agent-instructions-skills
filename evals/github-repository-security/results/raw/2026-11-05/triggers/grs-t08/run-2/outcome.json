@@ -1,0 +1,16 @@
+{
+  "id": "grs-t08",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.0457151,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:35:36.183966+00:00",
+    "seconds": 9.3
+  },
+  "aborted": false,
+  "rate_limited": false
+}

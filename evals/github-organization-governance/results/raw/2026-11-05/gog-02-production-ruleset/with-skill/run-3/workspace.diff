@@ -1,0 +1,29 @@
+diff --git a/rulesets/production-pull-request-review.json b/rulesets/production-pull-request-review.json
+new file mode 100644
+index 0000000..65de49d
+--- /dev/null
++++ b/rulesets/production-pull-request-review.json
+@@ -0,0 +1,23 @@
++{
++  "name": "production-pull-request-review",
++  "target": "branch",
++  "enforcement": "active",
++  "bypass_actors": [],
++  "conditions": {
++    "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] },
++    "repository_property": {
++      "include": [ { "name": "tier", "source_value": "custom", "property_values": ["production"] } ],
++      "exclude": []
++    }
++  },
++  "rules": [
++    { "type": "pull_request",
++      "parameters": {
++        "required_approving_review_count": 1,
++        "dismiss_stale_reviews_on_push": true,
++        "require_code_owner_review": false,
++        "require_last_push_approval": true,
++        "required_review_thread_resolution": true
++      } }
++  ]
++}
