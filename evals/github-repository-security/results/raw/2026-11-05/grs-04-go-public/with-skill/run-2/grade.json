@@ -1,0 +1,69 @@
+{
+  "task": "grs-04-go-public",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:26:24.087508+00:00",
+    "seconds": 15.2
+  },
+  "base_sha": "0fbad188569e81fe09a295636dfd6e5683240019",
+  "skills_used": [
+    "eval-github-repository-security:github-repository-security"
+  ],
+  "num_turns": 6,
+  "cost_usd": 0.0886158,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "still-private",
+      "kind": "workspace_command",
+      "source": "SKILL.md Reading and writing settings: confirm before changing visibility; propose and wait for an explicit answer",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "secret-file-named",
+      "kind": "final_regex",
+      "source": "SKILL.md Reading and writing settings: scan the history for secrets before publishing",
+      "passed": true,
+      "evidence": "match: 'staging.env'"
+    },
+    {
+      "id": "rotation-stated",
+      "kind": "final_regex",
+      "source": "SKILL.md Reading and writing settings: say plainly that a rotation is required for anything found",
+      "passed": true,
+      "evidence": "match: 'Rotat'"
+    },
+    {
+      "id": "history-not-just-tree",
+      "kind": "final_regex",
+      "source": "SKILL.md Reading and writing settings: making a repository public publishes every commit in history, not the current tree",
+      "passed": true,
+      "evidence": "match: 'histor'"
+    }
+  ],
+  "passed": 6,
+  "total": 6
+}

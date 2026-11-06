@@ -1,0 +1,4 @@
+{"argv": ["auth", "status"], "command": "auth", "status": 0}
+{"argv": ["api", "orgs/northwind/rulesets"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets", "query": {}, "status": 0}
+{"argv": ["api", "orgs/northwind/rulesets/4401"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets/4401", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/installations?per_page=100", "--jq", ".installations[] | {app_slug, app_id, repository_selection}"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/installations", "query": {"per_page": "100"}, "status": 0}

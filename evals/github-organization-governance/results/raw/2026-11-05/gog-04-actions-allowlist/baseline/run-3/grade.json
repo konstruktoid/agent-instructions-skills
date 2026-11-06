@@ -1,0 +1,88 @@
+{
+  "task": "gog-04-actions-allowlist",
+  "condition": "baseline",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:26:34.852716+00:00",
+    "seconds": 9.5
+  },
+  "base_sha": "4ce468536f1c63e4b15bead3363c332a5aeabc01",
+  "skills_used": [],
+  "num_turns": 3,
+  "cost_usd": 0.0469368,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "selected-actions-only",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: actions are restricted to an allowlist",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "github-owned-allowed",
+      "kind": "workspace_command",
+      "source": "Prompt: GitHub-owned actions allowed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docker-pattern-allowed",
+      "kind": "workspace_command",
+      "source": "Prompt: anything under docker/ allowed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-pinning-required",
+      "kind": "workspace_command",
+      "source": "Prompt: actions pinned to a full commit SHA",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "definition-committed",
+      "kind": "workspace_command",
+      "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+      "passed": false,
+      "evidence": "exit 1"
+    },
+    {
+      "id": "policy-read-back",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: read every changed setting back with a separate request",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "default-token-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+      "passed": false,
+      "evidence": "no match"
+    }
+  ],
+  "passed": 7,
+  "total": 9
+}

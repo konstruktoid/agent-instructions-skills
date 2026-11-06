@@ -1,0 +1,222 @@
+{
+  "default_repo": "northwind/ingest",
+  "ignored_fields": {},
+  "per_page": 30,
+  "resources": {
+    "orgs/northwind/rulesets": [],
+    "repos/northwind/ingest": {
+      "allow_auto_merge": false,
+      "archived": false,
+      "default_branch": "main",
+      "delete_branch_on_merge": false,
+      "full_name": "northwind/ingest",
+      "name": "ingest",
+      "owner": {
+        "login": "northwind",
+        "type": "Organization"
+      },
+      "private": true,
+      "security_and_analysis": {
+        "dependabot_security_updates": {
+          "status": "disabled"
+        },
+        "secret_scanning": {
+          "status": "disabled"
+        },
+        "secret_scanning_non_provider_patterns": {
+          "status": "disabled"
+        },
+        "secret_scanning_push_protection": {
+          "status": "disabled"
+        },
+        "secret_scanning_validity_checks": {
+          "status": "disabled"
+        }
+      },
+      "visibility": "private",
+      "web_commit_signoff_required": false
+    },
+    "repos/northwind/ingest/actions/permissions": {
+      "allowed_actions": "all",
+      "enabled": true
+    },
+    "repos/northwind/ingest/actions/permissions/workflow": {
+      "can_approve_pull_request_reviews": false,
+      "default_workflow_permissions": "read"
+    },
+    "repos/northwind/ingest/branches": [
+      {
+        "name": "main",
+        "protected": false
+      }
+    ],
+    "repos/northwind/ingest/branches/main/protection": {
+      "enforce_admins": true,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1
+      },
+      "required_status_checks": {
+        "contexts": [
+          "test"
+        ],
+        "strict": true
+      },
+      "restrictions": null
+    },
+    "repos/northwind/ingest/collaborators": [
+      {
+        "login": "maria-lind",
+        "role_name": "admin"
+      },
+      {
+        "login": "dev-01",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-02",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-03",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-04",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-05",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-06",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-07",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-08",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-09",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-10",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-11",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-12",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-13",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-14",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-15",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-16",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-17",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-18",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-19",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-20",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-21",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-22",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-23",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-24",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-25",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-26",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-27",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-28",
+        "role_name": "write"
+      },
+      {
+        "login": "dev-29",
+        "role_name": "write"
+      }
+    ],
+    "repos/northwind/ingest/commits/main/check-runs": {
+      "items": [
+        {
+          "app": {
+            "id": 15368,
+            "slug": "github-actions"
+          },
+          "conclusion": "success",
+          "name": "test",
+          "status": "completed"
+        },
+        {
+          "app": {
+            "id": 15368,
+            "slug": "github-actions"
+          },
+          "conclusion": "success",
+          "name": "lint",
+          "status": "completed"
+        }
+      ],
+      "list_key": "check_runs"
+    },
+    "repos/northwind/ingest/environments": {
+      "items": [],
+      "list_key": "environments"
+    },
+    "repos/northwind/ingest/keys": [],
+    "repos/northwind/ingest/rulesets": [],
+    "user": {
+      "login": "eval-admin"
+    }
+  },
+  "user": "eval-admin"
+}

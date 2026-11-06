@@ -1,0 +1,17 @@
+diff --git a/rulesets/default-branch-baseline.json b/rulesets/default-branch-baseline.json
+index f460022..dc1ce02 100644
+--- a/rulesets/default-branch-baseline.json
++++ b/rulesets/default-branch-baseline.json
+@@ -40,5 +40,11 @@
+       }
+     }
+   ],
+-  "bypass_actors": []
++  "bypass_actors": [
++    {
++      "actor_id": 9001,
++      "actor_type": "Integration",
++      "bypass_mode": "always"
++    }
++  ]
+ }

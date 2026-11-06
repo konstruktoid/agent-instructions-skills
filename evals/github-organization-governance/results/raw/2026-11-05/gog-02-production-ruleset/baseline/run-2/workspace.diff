@@ -1,0 +1,30 @@
+diff --git a/rulesets/production-default-branch-pr-review.json b/rulesets/production-default-branch-pr-review.json
+new file mode 100644
+index 0000000..0961f92
+--- /dev/null
++++ b/rulesets/production-default-branch-pr-review.json
+@@ -0,0 +1,24 @@
++{
++  "name": "production-default-branch-pr-review",
++  "target": "branch",
++  "enforcement": "active",
++  "conditions": {
++    "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] },
++    "repository_property": {
++      "include": [ { "name": "tier", "property_values": ["production"] } ],
++      "exclude": []
++    }
++  },
++  "rules": [
++    {
++      "type": "pull_request",
++      "parameters": {
++        "required_approving_review_count": 1,
++        "dismiss_stale_reviews_on_push": true,
++        "require_code_owner_review": false,
++        "require_last_push_approval": false,
++        "required_review_thread_resolution": false
++      }
++    }
++  ]
++}

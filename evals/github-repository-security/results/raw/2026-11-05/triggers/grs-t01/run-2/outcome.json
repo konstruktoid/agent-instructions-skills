@@ -1,0 +1,18 @@
+{
+  "id": "grs-t01",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-github-repository-security:github-repository-security"
+  ],
+  "cost_usd": 0.0759653,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:34:39.459915+00:00",
+    "seconds": 12.1
+  },
+  "aborted": false,
+  "rate_limited": false
+}

@@ -1,0 +1,76 @@
+{
+  "task": "gog-01-member-audit",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:25:41.649279+00:00",
+    "seconds": 17.1
+  },
+  "base_sha": "4b4138a582134188b7a53dee6fac5044fae1db7c",
+  "skills_used": [
+    "eval-github-organization-governance:github-organization-governance"
+  ],
+  "num_turns": 6,
+  "cost_usd": 0.10305219999999998,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "nothing-changed",
+      "kind": "workspace_command",
+      "source": "Prompt: don't change anything yet",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "base-permission-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md baseline: base permission none or read",
+      "passed": true,
+      "evidence": "match: 'Base permission (`default_repository_permission`) | `write'"
+    },
+    {
+      "id": "two-factor-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md baseline: two-factor authentication required for every member",
+      "passed": true,
+      "evidence": "match: 'two-factor'"
+    },
+    {
+      "id": "full-2fa-count",
+      "kind": "final_regex",
+      "source": "SKILL.md Reading the current state: every list read is paginated; a first page reported as the whole organization is silently incomplete",
+      "passed": true,
+      "evidence": "match: '31'"
+    },
+    {
+      "id": "public-repo-creation-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md baseline: members cannot create public repositories",
+      "passed": true,
+      "evidence": "match: 'public repo'"
+    }
+  ],
+  "passed": 7,
+  "total": 7
+}

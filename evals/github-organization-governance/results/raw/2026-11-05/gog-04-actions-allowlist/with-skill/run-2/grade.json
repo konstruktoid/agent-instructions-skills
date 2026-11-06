@@ -1,0 +1,90 @@
+{
+  "task": "gog-04-actions-allowlist",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:26:40.656683+00:00",
+    "seconds": 18.2
+  },
+  "base_sha": "74e5c923b8c877118223b5cf9768e9249bc96c59",
+  "skills_used": [
+    "eval-github-organization-governance:github-organization-governance"
+  ],
+  "num_turns": 8,
+  "cost_usd": 0.10935579999999999,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "selected-actions-only",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: actions are restricted to an allowlist",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "github-owned-allowed",
+      "kind": "workspace_command",
+      "source": "Prompt: GitHub-owned actions allowed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "docker-pattern-allowed",
+      "kind": "workspace_command",
+      "source": "Prompt: anything under docker/ allowed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "sha-pinning-required",
+      "kind": "workspace_command",
+      "source": "Prompt: actions pinned to a full commit SHA",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "definition-committed",
+      "kind": "workspace_command",
+      "source": "SKILL.md Reading the current state: keep the definition in a reviewable file",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "policy-read-back",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: read every changed setting back with a separate request",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "default-token-reported",
+      "kind": "final_regex",
+      "source": "SKILL.md baseline: the default workflow token read-only across the organization",
+      "passed": true,
+      "evidence": "match: 'Default workflow token:** it is still `write`, and workflows can still approve pull request reviews. The baseline calls for read'"
+    }
+  ],
+  "passed": 9,
+  "total": 9
+}

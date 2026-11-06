@@ -1,0 +1,624 @@
+[
+  {
+    "id": "grs-t01",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.07804059999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.456948+00:00",
+          "seconds": 13.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0759653,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.459915+00:00",
+          "seconds": 12.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t01",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0751973,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.460381+00:00",
+          "seconds": 13.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2292032
+  },
+  {
+    "id": "grs-t02",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.08202100000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.451911+00:00",
+          "seconds": 16.4
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.081329,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:39.458290+00:00",
+          "seconds": 15.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t02",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0797403,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:51.525160+00:00",
+          "seconds": 13.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2430903
+  },
+  {
+    "id": "grs-t03",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.07771600000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:52.422590+00:00",
+          "seconds": 11.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.07826620000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:52.505893+00:00",
+          "seconds": 12.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t03",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.08014850000000001,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:55.075840+00:00",
+          "seconds": 13.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.23613070000000003
+  },
+  {
+    "id": "grs-t04",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0936242,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:34:55.882013+00:00",
+          "seconds": 20.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.09047329999999999,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:03.697852+00:00",
+          "seconds": 18.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t04",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0820968,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:04.681457+00:00",
+          "seconds": 16.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2661943
+  },
+  {
+    "id": "grs-t05",
+    "expect": "trigger",
+    "fired": true,
+    "fired_count": 3,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0825966,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:05.130703+00:00",
+          "seconds": 13.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0942525,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:08.266350+00:00",
+          "seconds": 17.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t05",
+        "expect": "trigger",
+        "fired": true,
+        "correct": true,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.1003652,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:16.489577+00:00",
+          "seconds": 19.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.2772143
+  },
+  {
+    "id": "grs-t06",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 1,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0463243,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:18.978874+00:00",
+          "seconds": 10.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t06",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.050765700000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:20.877291+00:00",
+          "seconds": 12.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t06",
+        "expect": "no-trigger",
+        "fired": true,
+        "correct": false,
+        "skills_used": [
+          "eval-github-repository-security:github-repository-security"
+        ],
+        "cost_usd": 0.0820323,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:22.325419+00:00",
+          "seconds": 14.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1791223
+  },
+  {
+    "id": "grs-t07",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0284446,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:26.066519+00:00",
+          "seconds": 9.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0288646,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:29.576869+00:00",
+          "seconds": 8.7
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t07",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.027134600000000002,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:33.624754+00:00",
+          "seconds": 7.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.0844438
+  },
+  {
+    "id": "grs-t08",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.043837100000000004,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:35.081074+00:00",
+          "seconds": 9.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0457151,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:36.183966+00:00",
+          "seconds": 9.3
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t08",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0449271,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:37.157351+00:00",
+          "seconds": 9.8
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.1344793
+  },
+  {
+    "id": "grs-t09",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0429012,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:38.294955+00:00",
+          "seconds": 8.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0287026,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:41.558470+00:00",
+          "seconds": 7.9
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t09",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0468233,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:44.259937+00:00",
+          "seconds": 11.0
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.11842710000000001
+  },
+  {
+    "id": "grs-t10",
+    "expect": "no-trigger",
+    "fired": false,
+    "fired_count": 0,
+    "runs": 3,
+    "correct": true,
+    "passes": [
+      {
+        "id": "grs-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0280406,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:45.514213+00:00",
+          "seconds": 8.2
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0281906,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:46.935570+00:00",
+          "seconds": 8.1
+        },
+        "aborted": false,
+        "rate_limited": false
+      },
+      {
+        "id": "grs-t10",
+        "expect": "no-trigger",
+        "fired": false,
+        "correct": true,
+        "skills_used": [],
+        "cost_usd": 0.0285006,
+        "run": {
+          "returncode": 0,
+          "timed_out": false,
+          "started": "2026-11-05T19:35:47.175439+00:00",
+          "seconds": 8.6
+        },
+        "aborted": false,
+        "rate_limited": false
+      }
+    ],
+    "cost_usd": 0.0847318
+  }
+]

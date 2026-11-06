@@ -1,0 +1,111 @@
+{
+  "task": "grs-01-protect-main",
+  "condition": "with-skill",
+  "run_index": 3,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-05T19:25:39.065838+00:00",
+    "seconds": 20.6
+  },
+  "base_sha": "3be80be3439ef09960e89382636d483549890e15",
+  "skills_used": [
+    "eval-github-repository-security:github-repository-security"
+  ],
+  "num_turns": 8,
+  "cost_usd": 0.12451829999999998,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "github-reached",
+      "kind": "workspace_command",
+      "source": "Harness guard: the run read GitHub state through gh at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "state-only-through-gh",
+      "kind": "bash_regex",
+      "source": "Harness guard: GitHub state changed only through gh, never by editing the stub's files",
+      "passed": true,
+      "evidence": "no match"
+    },
+    {
+      "id": "ruleset-active-on-default",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: the default branch is protected in active mode",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pull-request-one-approval",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: at least one approving review",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "test-check-required",
+      "kind": "workspace_command",
+      "source": "Prompt: the test job has to pass before anything merges",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "check-bound-to-app",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: each required status check bound to the app that reports it with integration_id",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "force-push-and-deletion-blocked",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: force pushes blocked, deletion blocked",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "stale-approvals-dismissed",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: stale approvals dismissed on a new push",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "no-bypass-actors",
+      "kind": "workspace_command",
+      "source": "SKILL.md baseline: bypass is granted to a named role with a written procedure, or not at all",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "definition-committed",
+      "kind": "workspace_command",
+      "source": "SKILL.md Reading and writing settings: keep the definition where it can be reviewed",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "ruleset-read-back",
+      "kind": "workspace_command",
+      "source": "SKILL.md Verify: read every changed setting back with a separate request",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "ruleset-check-default",
+      "kind": "bash_regex",
+      "source": "SKILL.md Verify: check the ruleset against the branch it protects with --default",
+      "passed": true,
+      "evidence": "match: 'gh ruleset check --default'"
+    }
+  ],
+  "passed": 12,
+  "total": 12
+}

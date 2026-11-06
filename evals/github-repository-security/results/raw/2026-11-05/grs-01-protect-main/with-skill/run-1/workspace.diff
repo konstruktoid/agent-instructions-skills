@@ -1,0 +1,26 @@
+diff --git a/.github/rulesets/protect-main.json b/.github/rulesets/protect-main.json
+new file mode 100644
+index 0000000..8cbd173
+--- /dev/null
++++ b/.github/rulesets/protect-main.json
+@@ -0,0 +1,20 @@
++{
++  "name": "protect-main",
++  "target": "branch",
++  "enforcement": "active",
++  "conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
++  "bypass_actors": [],
++  "rules": [
++    { "type": "deletion" },
++    { "type": "non_fast_forward" },
++    { "type": "pull_request", "parameters": {
++        "required_approving_review_count": 1,
++        "dismiss_stale_reviews_on_push": true,
++        "require_code_owner_review": false,
++        "require_last_push_approval": true,
++        "required_review_thread_resolution": true } },
++    { "type": "required_status_checks", "parameters": {
++        "strict_required_status_checks_policy": false,
++        "required_status_checks": [ { "context": "test", "integration_id": 15368 } ] } }
++  ]
++}

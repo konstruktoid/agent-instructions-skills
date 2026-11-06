@@ -1,0 +1,2 @@
+{"argv": ["auth", "status"], "command": "auth", "status": 0}
+{"argv": ["repo", "view", "northwind/ingest", "--json", "visibility,url"], "command": "repo", "status": 0, "subcommand": "view"}

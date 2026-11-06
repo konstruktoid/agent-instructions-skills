@@ -1,0 +1,4 @@
+{"argv": ["auth", "status"], "command": "auth", "status": 0}
+{"argv": ["api", "repos/northwind/ingest", "--jq", ".default_branch,.permissions"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "repos/northwind/ingest", "query": {}, "status": 0}
+{"argv": ["api", "repos/northwind/ingest/branches/main/protection"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "repos/northwind/ingest/branches/main/protection", "query": {}, "status": 1}
+{"argv": ["api", "-X", "PUT", "repos/northwind/ingest/branches/main/protection", "--input", "/tmp/p.json"], "body": {"enforce_admins": false, "required_pull_request_reviews": {"required_approving_review_count": 1}, "required_status_checks": {"checks": [{"context": "test"}], "strict": false}, "restrictions": null}, "command": "api", "method": "PUT", "pages": 1, "path": "repos/northwind/ingest/branches/main/protection", "query": {}, "status": 0}
