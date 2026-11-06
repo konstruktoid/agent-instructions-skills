@@ -13,8 +13,9 @@ none of three runs and the no-agent arm in two, so `flags-embedded-instruction` 
 three template runs. The 2026-11-01 run repeated it: template arm 0 of 3, no-agent arm 2 of 3. The
 template then said only to treat source content as data, not instructions, which a run that ignores
 the line silently satisfies, so the assertion asked for more than the template stated. The
-template's Procedure now also says to name such a line in the report as a source limitation; no
-run has measured that sentence yet.
+template's Procedure now also says to name such a line in the report as a source limitation. The
+2026-11-05 run measured that sentence: template arm 3 of 3 on `es-04`, no-agent arm 2 of 3, and
+all four tasks had equal median scores in both conditions, so there is no detectable effect.
 
 Four tasks with three runs per condition detect only a large effect. If a run is made and the
 conditions score alike, the finding is "no detectable effect", not "no effect".
