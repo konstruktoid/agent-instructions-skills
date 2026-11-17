@@ -1,0 +1,42 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M7N23TVBV9DGTC1RGANN1DEZ",
+  "strategy": "manual-commit",
+  "branch": "property-differential-tests",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "skills/bash/bash-testing/SKILL.md",
+    "skills/python/python-testing/SKILL.md",
+    "skills/terraform/terraform-testing/SKILL.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 1303,
+    "cache_read_tokens": 156070,
+    "output_tokens": 1480,
+    "api_call_count": 2
+  },
+  "redaction": {
+    "replacements": 0,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 0,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  }
+}
