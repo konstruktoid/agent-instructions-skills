@@ -72,7 +72,8 @@ of imposing one project's structure on another.
    use a plan-and-policy approach or Terratest instead.
 4. Decide what the test should assert: the new output's value, the resource attribute the change
    sets, a `validation` block rejecting a bad input and accepting a good one, or the plan
-   containing or omitting a given action. Cover the failure path, not only the passing one. Never
+   containing or omitting a given action. For a refactor or a `moved` block, assert that the plan
+   against the same input is empty, or lists only the differences the change intends. Cover the failure path, not only the passing one. Never
    answer a flaky test by skipping it, adding a wait, or rerunning until it passes. Find the
    cause; if it cannot be found within the verify loop's bound, delete the test and say why in the
    report.

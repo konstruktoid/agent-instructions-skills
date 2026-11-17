@@ -111,6 +111,9 @@ Beyond the happy path, which is usually the least interesting case:
   run.
 - **Reruns.** Run the script twice and assert the second run is a success and changes nothing, for
   anything meant to be idempotent.
+- **Equivalence.** For a rewrite, run the old and new script on the same inputs and compare
+  output and exit status, after normalizing what does not matter and listing each intended
+  difference.
 
 Stub an external command by putting a directory first in `PATH` inside the test, with an
 executable of that name, rather than by editing the script for testability:

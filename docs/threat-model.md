@@ -80,12 +80,12 @@ enforces it at runtime, and a skill body remains free to do what it likes.
 
 All ten read `${CLAUDE_PLUGIN_ROOT}/instructions/` under a plugin install, which is outside the
 skill directory and inside the plugin root: `skills/ansible/ansible-verification-loop/SKILL.md:299`,
-`skills/bash/bash-secure-scripting/SKILL.md:331`, `skills/bash/bash-testing/SKILL.md:202`,
+`skills/bash/bash-secure-scripting/SKILL.md:331`, `skills/bash/bash-testing/SKILL.md:205`,
 `skills/github/github-actions-security/SKILL.md:346`,
 `skills/github/github-organization-governance/SKILL.md:282`,
 `skills/github/github-repository-security/SKILL.md:299`,
-`skills/python/python-secure-coding/SKILL.md:165`, `skills/python/python-testing/SKILL.md:145`,
-`skills/terraform/terraform-secure-iac/SKILL.md:188`, `skills/terraform/terraform-testing/SKILL.md:156`.
+`skills/python/python-secure-coding/SKILL.md:165`, `skills/python/python-testing/SKILL.md:150`,
+`skills/terraform/terraform-secure-iac/SKILL.md:188`, `skills/terraform/terraform-testing/SKILL.md:157`.
 
 #### `skills/ansible/ansible-verification-loop/SKILL.md`
 
@@ -117,9 +117,9 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 |---|---|
 | Trigger | `:3`, when a shell script's behavior changes and that change should be locked in, including a bug fix, a pinned exit code or output, or coverage of validation, cleanup, privilege, or a destructive path |
 | Tools implied | Read, Edit, Bash |
-| Shell | Yes. The repository's entry point, `make test`, the CI step, or `bats test/` (`:150`); the script directly against a scratch directory including one failure path (`:152`); `shellcheck` and `bash -n` (`:157`) |
+| Shell | Yes. The repository's entry point, `make test`, the CI step, or `bats test/` (`:153`); the script directly against a scratch directory including one failure path (`:155`); `shellcheck` and `bash -n` (`:160`) |
 | Reads | `test/`, `tests/`, `spec/`, `*.bats`, `*_test.sh`, `test_*.sh`, a `Makefile` or `justfile` test target, and the test step in `.github/workflows/*.yml` (`:51`); two or three existing tests near the code being changed (`:56`) |
-| Writes outside the repository root | Yes, unnamed: the scratch directory at `:152`. Path: UNKNOWN |
+| Writes outside the repository root | Yes, unnamed: the scratch directory at `:155`. Path: UNKNOWN |
 | Network egress | None instructed |
 | Reads content it did not author | Yes. Existing tests, `Makefile`/`justfile` contents, and the target repository's CI workflow files (`:51`) |
 
@@ -141,11 +141,11 @@ skill directory and inside the plugin root: `skills/ansible/ansible-verification
 |---|---|
 | Trigger | `:3`, when a Python change adds behavior, fixes a bug, changes a public interface, or touches security-relevant logic |
 | Tools implied | Read, Edit, Bash |
-| Shell | Yes. The repository's own entry point, a `tox` env, a Makefile target, or the command in `.github/workflows/*.yml`, through the package manager where one exists, for example `uv run pytest` (`:99`); the full suite (`:101`); coverage tooling only where already configured (`:103`) |
+| Shell | Yes. The repository's own entry point, a `tox` env, a Makefile target, or the command in `.github/workflows/*.yml`, through the package manager where one exists, for example `uv run pytest` (`:104`); the full suite (`:106`); coverage tooling only where already configured (`:108`) |
 | Reads | `pyproject.toml`, `pytest.ini`, `setup.cfg`, `tox.ini` (`:50`); two or three existing tests near the code being changed (`:52`) |
 | Writes outside the repository root | None instructed |
 | Network egress | None instructed |
-| Reads content it did not author | Yes. Existing tests, project configuration, and the target repository's CI workflow files (`:102`) |
+| Reads content it did not author | Yes. Existing tests, project configuration, and the target repository's CI workflow files (`:107`) |
 
 #### `skills/github/github-actions-security/SKILL.md`
 
