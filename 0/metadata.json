@@ -3,8 +3,8 @@
   "checkpoint_id": "01M7N85MNMHMYV37NNE1YT555H",
   "session_id": "c2cccea9-1d7e-4136-85a8-85123d4a2562",
   "strategy": "manual-commit",
-  "created_at": "2026-11-17T17:16:47.442532538Z",
-  "branch": "flaky-tests-rule",
+  "created_at": "2026-11-17T17:17:37.26211714Z",
+  "branch": "property-differential-tests",
   "checkpoints_count": 4,
   "files_touched": [
     "docs/threat-model.md"
@@ -12,15 +12,15 @@
   "agent": "Claude Code",
   "model": "claude-sonnet-5-5",
   "turn_id": "0ea2a43b8f9b",
-  "checkpoint_transcript_start": 441,
-  "transcript_lines_at_start": 441,
-  "compact_transcript_start": 46,
+  "checkpoint_transcript_start": 461,
+  "transcript_lines_at_start": 461,
+  "compact_transcript_start": 48,
   "token_usage": {
-    "input_tokens": 4,
-    "cache_creation_tokens": 2436,
-    "cache_read_tokens": 198728,
-    "output_tokens": 1387,
-    "api_call_count": 2
+    "input_tokens": 10,
+    "cache_creation_tokens": 3408,
+    "cache_read_tokens": 513253,
+    "output_tokens": 2184,
+    "api_call_count": 5
   },
   "redaction": {
     "replacements": 0,

@@ -2,7 +2,7 @@
   "cli_version": "0.12.2",
   "checkpoint_id": "01M7N85MNMHMYV37NNE1YT555H",
   "strategy": "manual-commit",
-  "branch": "flaky-tests-rule",
+  "branch": "property-differential-tests",
   "checkpoints_count": 4,
   "files_touched": [
     "docs/threat-model.md"
@@ -17,11 +17,11 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 4,
-    "cache_creation_tokens": 2436,
-    "cache_read_tokens": 198728,
-    "output_tokens": 1387,
-    "api_call_count": 2
+    "input_tokens": 10,
+    "cache_creation_tokens": 3408,
+    "cache_read_tokens": 513253,
+    "output_tokens": 2184,
+    "api_call_count": 5
   },
   "redaction": {
     "replacements": 0,
