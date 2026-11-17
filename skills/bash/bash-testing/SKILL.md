@@ -137,6 +137,10 @@ assumptions, no network access, no dependence on wall-clock time, and nothing wr
 temporary directory. Never test a destructive script against real paths; give it a scratch
 directory and assert on what is left.
 
+Never answer a flaky test by skipping it, adding a `sleep`, or rerunning until it passes. Find the
+cause: shared state, ordering, time, or a race. If the cause cannot be found within the verify
+loop's bound, delete the test and say why in the report, so the suite does not teach reruns.
+
 Keep the machine out of the test. A home-directory path, username, hostname, or real email address
 in a fixture or an expected value is both a test that passes on one machine and information the
 repository has no reason to publish.
@@ -187,6 +191,8 @@ which rules need a mechanism rather than prose alone, and where one belongs.
 - [ ] `shellcheck` and `bash -n` clean on the test files too
 - [ ] Tests are independent of ordering, network access, wall-clock time, and anything outside
       their own temporary directory
+- [ ] No flaky test was skipped, slept around, or rerun to green; each was fixed or deleted with
+      the reason reported
 - [ ] No home-directory path, username, hostname, or real email address in test code, fixtures, or
       committed output
 
