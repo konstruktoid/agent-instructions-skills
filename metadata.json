@@ -5,6 +5,7 @@
   "branch": "property-differential-tests",
   "checkpoints_count": 1,
   "files_touched": [
+    "docs/threat-model.md",
     "skills/bash/bash-testing/SKILL.md",
     "skills/python/python-testing/SKILL.md",
     "skills/terraform/terraform-testing/SKILL.md"
@@ -20,9 +21,9 @@
   ],
   "token_usage": {
     "input_tokens": 4,
-    "cache_creation_tokens": 1303,
-    "cache_read_tokens": 156070,
-    "output_tokens": 1480,
+    "cache_creation_tokens": 2537,
+    "cache_read_tokens": 159633,
+    "output_tokens": 814,
     "api_call_count": 2
   },
   "redaction": {
