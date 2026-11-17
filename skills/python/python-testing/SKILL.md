@@ -71,8 +71,8 @@ decide, write, verify.
      network or wall-clock time.
    - Never answer a flaky test by skipping it, adding a sleep, or rerunning until it passes. Find
      the cause: shared state, ordering, time, or a race. If the cause cannot be found within the
-     verify loop's bound, delete the test and say why in the report, so the suite does not teach
-     reruns.
+     verify loop's bound, stop and report the failure; delete the test only with the user's
+     approval and replacement coverage.
    - Keep the machine out of the test. A home-directory path, username, hostname, or real email
      address baked into a fixture, an expected value, or a recorded snapshot is both a test that
      only passes on one machine and information the repository has no reason to publish. Use
@@ -139,8 +139,8 @@ which rules need a mechanism rather than prose alone, and where one belongs.
 - [ ] `ruff check`, `ruff format --check`, and `ty check` clean on the test files too
 - [ ] No test weakened, skipped, or marked `xfail` to obtain a green run
 - [ ] Tests are independent of ordering, network access, and wall-clock time
-- [ ] No flaky test was skipped, slept around, or rerun to green; each was fixed or deleted with
-      the reason reported
+- [ ] No flaky test was skipped, slept around, or rerun to green; each was fixed, or the
+      failure was reported with the verify loop's output
 - [ ] No home-directory path, username, hostname, or real email address in test code, fixtures, or
       committed snapshots; anything machine-specific is generated or normalized
 

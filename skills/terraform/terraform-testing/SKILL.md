@@ -75,8 +75,8 @@ of imposing one project's structure on another.
    containing or omitting a given action. For a refactor or a `moved` block, assert that the plan
    against the same input is empty, or lists only the differences the change intends. Cover the failure path, not only the passing one. Never
    answer a flaky test by skipping it, adding a wait, or rerunning until it passes. Find the
-   cause; if it cannot be found within the verify loop's bound, delete the test and say why in the
-   report.
+   cause; if it cannot be found within the verify loop's bound, stop and report the failure, and
+   delete the test only with the user's approval and replacement coverage.
 5. Place the test where the repository's convention puts it, with a name that matches the
    surrounding files.
 6. Run the verify loop below until it passes or the bound is reached.
@@ -141,8 +141,8 @@ anything, is not an attempt.
 - [ ] The change's behavior is covered: new or changed outputs, resource attributes, and
       `validation` blocks each have an assertion
 - [ ] The failure path is covered, not only the passing one
-- [ ] No flaky test was skipped, waited around, or rerun to green; each was fixed or deleted with
-      the reason reported
+- [ ] No flaky test was skipped, waited around, or rerun to green; each was fixed, or the
+      failure was reported with the verify loop's output
 - [ ] The new test fails when the change under test is reverted
 - [ ] The test matches the repository's existing framework and file layout; no second framework
       was introduced
