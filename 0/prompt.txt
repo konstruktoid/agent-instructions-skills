@@ -1,5 +1,0 @@
-read https://claude.dev/blog/how-the-claude-code-team-thinks-about-verification/ and look for improvements to this repository
-
----
-
-create branches as you see fit and then close the gaps, signed commits with minimal messages

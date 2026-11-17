@@ -3,10 +3,11 @@
   "checkpoint_id": "01M7N21091BJM1GZ6HTD62MP4X",
   "session_id": "c2cccea9-1d7e-4136-85a8-85123d4a2562",
   "strategy": "manual-commit",
-  "created_at": "2026-11-17T15:29:24.382562728Z",
+  "created_at": "2026-11-17T15:30:07.681785739Z",
   "branch": "flaky-tests-rule",
   "checkpoints_count": 1,
   "files_touched": [
+    "docs/threat-model.md",
     "skills/bash/bash-testing/SKILL.md",
     "skills/python/python-testing/SKILL.md",
     "skills/terraform/terraform-testing/SKILL.md"
@@ -14,20 +15,15 @@
   "agent": "Claude Code",
   "model": "claude-sonnet-5-5",
   "turn_id": "740faeba5f95",
-  "compact_transcript_start": 0,
+  "checkpoint_transcript_start": 173,
+  "transcript_lines_at_start": 173,
+  "compact_transcript_start": 13,
   "token_usage": {
-    "input_tokens": 24,
-    "cache_creation_tokens": 45345,
-    "cache_read_tokens": 633173,
-    "output_tokens": 6816,
-    "api_call_count": 11,
-    "subagent_tokens": {
-      "input_tokens": 4,
-      "cache_creation_tokens": 11229,
-      "cache_read_tokens": 3768,
-      "output_tokens": 2679,
-      "api_call_count": 2
-    }
+    "input_tokens": 10,
+    "cache_creation_tokens": 3807,
+    "cache_read_tokens": 363090,
+    "output_tokens": 1717,
+    "api_call_count": 5
   },
   "redaction": {
     "replacements": 0,

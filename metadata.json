@@ -5,6 +5,7 @@
   "branch": "flaky-tests-rule",
   "checkpoints_count": 1,
   "files_touched": [
+    "docs/threat-model.md",
     "skills/bash/bash-testing/SKILL.md",
     "skills/python/python-testing/SKILL.md",
     "skills/terraform/terraform-testing/SKILL.md"
@@ -15,22 +16,15 @@
       "transcript": "/0/full.jsonl",
       "compact_transcript": "/0/transcript.jsonl",
       "content_hash": "/0/content_hash.txt",
-      "prompt": "/0/prompt.txt"
+      "prompt": ""
     }
   ],
   "token_usage": {
-    "input_tokens": 24,
-    "cache_creation_tokens": 45345,
-    "cache_read_tokens": 633173,
-    "output_tokens": 6816,
-    "api_call_count": 11,
-    "subagent_tokens": {
-      "input_tokens": 4,
-      "cache_creation_tokens": 11229,
-      "cache_read_tokens": 3768,
-      "output_tokens": 2679,
-      "api_call_count": 2
-    }
+    "input_tokens": 10,
+    "cache_creation_tokens": 3807,
+    "cache_read_tokens": 363090,
+    "output_tokens": 1717,
+    "api_call_count": 5
   },
   "redaction": {
     "replacements": 0,
