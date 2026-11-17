@@ -1,0 +1,19 @@
+push PRs, monitor them for 30 minutes or until there's a review comment
+
+---
+
+<task-notification>
+<task-id>b8ftwvzvl</task-id>
+<tool-use-id>toolu_01SF8uYdkLA2QPekYG2GbQnf</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/c2cccea9-1d7e-4136-85a8-85123d4a2562/tasks/b8ftwvzvl.output</output-file>
+<status>completed</status>
+<summary>Background command "Watch PRs for review activity up to 30 minutes" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+check for review comments or ci issues
+
+---
+
+separate fix commits
