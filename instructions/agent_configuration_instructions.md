@@ -182,6 +182,7 @@ rule it enforces, because a check that also blocks conforming work is worse than
 | Third-party actions and reusable workflows pinned by commit SHA (`skills/github/github-actions-security/SKILL.md`) | A hook rejecting a `uses:` reference to another repository that names anything but a full-length SHA, leaving same-repository and container references alone |
 | No home-directory path, username, hostname, or real email address in tests and fixtures (`skills/bash/bash-testing/SKILL.md`, `skills/python/python-testing/SKILL.md`) | A hook matching what a pattern can actually recognize, an absolute path under a home directory or an email address outside the reserved example domains, leaving the rest to prose because a search for a bare username or hostname would flag the runtime derivation `instructions/bash_coding_instructions.md` asks for |
 | No control weakened to make a check pass (`instructions/github_governance_instructions.md`) | A hook blocking a suppression that carries no code and no reason, or an edit that lowers a configured threshold, which requires the change to be argued rather than applied |
+| Run the repository's own gate before reporting a change done (`skills/python/python-testing/SKILL.md`, `skills/bash/bash-testing/SKILL.md`) | A `Stop` hook that runs the gate and exits 2 with the failing output on standard error, so the agent continues instead of stopping. It reads `stop_hook_active` from its input and lets the second stop through, because a gate that cannot pass would otherwise hold the session open forever |
 
 The first row is where the two halves of the rule need different treatment. An added skip marker
 with no reason is unambiguous and can be blocked. A removed assertion is not: both skills also say
@@ -336,6 +337,10 @@ reviews and edits, and a verifier that checks the fixer's result without trustin
   `model` passed with the invocation, `CLAUDE_CODE_SUBAGENT_MODEL_FORCE`, and a lower `effort` on
   the same model. A weaker verifier rubber-stamps a stronger fixer's work instead of catching what
   it missed.
+- Keep the checks out of the fixer's reach. The rubric, the test glob, and the verifier's own
+  definition come from the default branch or from the parent's brief, never from the working tree
+  under review. A diff that edits one of them is a finding to report, not evidence that the change
+  passes, since a check the change can rewrite proves nothing.
 - Have the verifier re-run every check the fixer's procedure requires, from its own clean context,
   rather than reading the fixer's reported result as evidence.
 - Treat a verifier finding as blocking, and a verifier run that reached `maxTurns` as unresolved
