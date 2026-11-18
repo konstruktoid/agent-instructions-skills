@@ -76,10 +76,15 @@ of imposing one project's structure on another.
    against the same input and prior state is empty, or lists only the differences the change
    intends. For a `moved` block, the old address must already exist in state before the plan
    runs, or the plan only proposes a creation and never exercises the move; leave seeding that
-   state to the repository's test setup. Cover the failure path, not only the passing one. Never
-   answer a flaky test by skipping it, adding a wait, or rerunning until it passes. Find the
-   cause; if it cannot be found within the verify loop's bound, stop and report the failure, and
-   delete the test only with the user's approval and replacement coverage.
+   state to the repository's test setup. Assert each move's source and destination through
+   `previous_address` on its entry in the plan JSON, since two identical resources swapped
+   between addresses also plan as no-ops. Give a no-op refactor a negative control: for a move,
+   remove the `moved` block but keep the address change and confirm the plan then destroys and
+   creates; for any other refactor, apply a behavior-changing mutation and confirm the test
+   fails. Cover the failure path, not only the passing one. Never answer a flaky test by skipping
+   it, adding a wait, or rerunning until it passes. Find the cause; if it cannot be found within
+   the verify loop's bound, stop and report the failure, and delete the test only with the user's
+   approval and replacement coverage.
 5. Place the test where the repository's convention puts it, with a name that matches the
    surrounding files.
 6. Run the verify loop below until it passes or the bound is reached.
@@ -147,6 +152,8 @@ anything, is not an attempt.
 - [ ] No flaky test was skipped, waited around, or rerun to green; each was fixed, or the
       failure was reported with the verify loop's output
 - [ ] The new test fails when the change under test is reverted
+- [ ] A no-op refactor test fails against a negative control, and each `moved` block's source and
+      destination are asserted
 - [ ] The test matches the repository's existing framework and file layout; no second framework
       was introduced
 - [ ] `.tftest.hcl` files pass `terraform fmt -check`; `tflint` is clean on the module roots
