@@ -72,19 +72,23 @@ of imposing one project's structure on another.
    use a plan-and-policy approach or Terratest instead.
 4. Decide what the test should assert: the new output's value, the resource attribute the change
    sets, a `validation` block rejecting a bad input and accepting a good one, or the plan
-   containing or omitting a given action. For a refactor or a `moved` block, assert that the plan
-   against the same input and prior state is empty, or lists only the differences the change
-   intends. For a `moved` block, the old address must already exist in state before the plan
-   runs, or the plan only proposes a creation and never exercises the move; leave seeding that
-   state to the repository's test setup. Assert each move's source and destination through
-   `previous_address` on its entry in the plan JSON, since two identical resources swapped
-   between addresses also plan as no-ops. Give a no-op refactor a negative control: for a move,
-   remove the `moved` block but keep the address change and confirm the plan then destroys and
-   creates; for any other refactor, apply a behavior-changing mutation and confirm the test
-   fails. Cover the failure path, not only the passing one. Never answer a flaky test by skipping
-   it, adding a wait, or rerunning until it passes. Find the cause; if it cannot be found within
-   the verify loop's bound, stop and report the failure, and delete the test only with the user's
-   approval and replacement coverage.
+   containing or omitting a given action. Cover the failure path, not only the passing one.
+   - For a refactor or a `moved` block, assert that the plan against the same input and prior
+     state is empty, or lists only the differences the change intends. The old address must
+     already exist in state before the plan runs, or the plan only proposes a creation and never
+     exercises the move; leave seeding that state to the repository's test setup.
+   - Assert each move's source and destination through `previous_address` on its entry in the
+     plan JSON, since two identical resources swapped between addresses also plan as no-ops. For
+     a module move the plan holds entries for the resources inside the module and none for the
+     module, so assert each resource instance's mapping.
+   - Give a no-op refactor a negative control. For a move, remove the `moved` block but keep the
+     address change and confirm the plan then destroys and creates. Where Terraform moves the
+     resource without the block, as when `count` is added and the resource becomes instance `0`,
+     change the destination instead. For any other refactor, apply a behavior-changing mutation.
+     The test must fail under the control.
+   - Never answer a flaky test by skipping it, adding a wait, or rerunning until it passes. Find
+     the cause; if it cannot be found within the verify loop's bound, stop and report the
+     failure, and delete the test only with the user's approval and replacement coverage.
 5. Place the test where the repository's convention puts it, with a name that matches the
    surrounding files.
 6. Run the verify loop below until it passes or the bound is reached.
