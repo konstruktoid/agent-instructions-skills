@@ -60,6 +60,11 @@ decide, write, verify.
    when the repository already has an answer.
    - Assert on behavior and public interfaces, not on internal call sequences, unless the call
      itself is the contract.
+   - For code that parses, encodes, or transforms input, state a property where the repository
+     already uses Hypothesis: a round trip, an invariant, idempotence, or equivalence with a
+     simple reference implementation. Do not add the library to a repository without it.
+   - For a rewrite or migration, run the old and new code on the same inputs, normalize the
+     differences that do not matter, and list each intended difference rather than ignoring it.
    - For a bug fix, write the test so it fails against the unfixed code. Confirm that it does
      before applying the fix, or by reverting the fix once.
    - Keep each test independent: no shared mutable state, no ordering assumptions, no reliance on
