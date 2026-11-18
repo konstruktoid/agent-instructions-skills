@@ -73,11 +73,13 @@ of imposing one project's structure on another.
 4. Decide what the test should assert: the new output's value, the resource attribute the change
    sets, a `validation` block rejecting a bad input and accepting a good one, or the plan
    containing or omitting a given action. For a refactor or a `moved` block, assert that the plan
-   against the same input is empty, or lists only the differences the change intends. Cover the
-   failure path, not only the passing one. Never answer a flaky test by skipping it, adding a
-   wait, or rerunning until it passes. Find the cause; if it cannot be found within the verify
-   loop's bound, stop and report the failure, and delete the test only with the user's approval
-   and replacement coverage.
+   against the same input and prior state is empty, or lists only the differences the change
+   intends. For a `moved` block, the old address must already exist in state before the plan
+   runs, or the plan only proposes a creation and never exercises the move; leave seeding that
+   state to the repository's test setup. Cover the failure path, not only the passing one. Never
+   answer a flaky test by skipping it, adding a wait, or rerunning until it passes. Find the
+   cause; if it cannot be found within the verify loop's bound, stop and report the failure, and
+   delete the test only with the user's approval and replacement coverage.
 5. Place the test where the repository's convention puts it, with a name that matches the
    surrounding files.
 6. Run the verify loop below until it passes or the bound is reached.
