@@ -149,7 +149,7 @@ from memory is stale by definition. Ask the source repository for both, in that 
 
 ```sh
 gh api repos/actions/checkout/releases/latest --jq .tag_name       # the current release
-gh api repos/actions/checkout/commits/v7.0.1 --jq .sha             # its commit SHA
+gh api repos/actions/checkout/commits/refs/tags/v7.0.1 --jq .sha   # its commit SHA
 ```
 
 `releases/latest` skips drafts and prereleases. Some repositories publish only tags, in which case
@@ -308,7 +308,7 @@ suppression to reach a clean run.
       until a run exercises it, and say which event would exercise it
 - [ ] `permissions: {}` at workflow level, with every job granting only the scopes its steps use
 - [ ] Every third-party action pinned to a full commit SHA that was resolved, not recalled, with a
-      version comment
+      version comment, and each new or changed SHA matched against that release tag
 - [ ] Each pinned version is the newest release that clears the cooldown, looked up during this
       change, or the reason for staying further behind is stated
 - [ ] No `${{ }}` interpolation of event data inside a `run:` block, a `script:` block, or a shell

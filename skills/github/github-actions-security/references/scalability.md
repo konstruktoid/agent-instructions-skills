@@ -88,7 +88,7 @@ Controls a workflow file cannot bypass, in rough order of value:
 | Control | Where | Effect |
 |---|---|---|
 | Default token permissions read-only | Org, repo | Protects every unreviewed workflow |
-| Allowed actions policy, with SHA pinning required | Enterprise, org | Makes pinning an invariant |
+| Allowed actions policy, with SHA pinning required | Enterprise, org | Makes pinning an invariant; does not check a commit's origin |
 | Fork pull request approval required | Org, repo | No fork code runs without a reviewer |
 | Rulesets: required reviews, required status checks | Org, repo | Prevents self-merge of a workflow change |
 | Required signed commits | Org, repo | Raises the cost of a pushed forgery |

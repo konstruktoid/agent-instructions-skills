@@ -531,7 +531,7 @@ ref is not a meaningful construct.
 
 **Recommendation.** Deprioritize until control 6 exists. Once there are tags and something is
 published, `gh attestation verify` becomes available to consumers, which
-`github-actions-security/references/supply-chain.md:187` already teaches them to run. Adopt it then,
+`github-actions-security/references/supply-chain.md:202` already teaches them to run. Adopt it then,
 and describe it in the release notes as what it is: proof of origin, not proof of safety.
 
 **Landed, 2026-10-20, not yet exercised.** `.github/workflows/release.yml` builds an archive of the
