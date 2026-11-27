@@ -1,0 +1,16 @@
+{
+  "id": "gog-t09",
+  "expect": "no-trigger",
+  "fired": false,
+  "correct": true,
+  "skills_used": [],
+  "cost_usd": 0.12276519999999999,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-26T23:14:32.885786+00:00",
+    "seconds": 17.0
+  },
+  "aborted": false,
+  "rate_limited": false
+}

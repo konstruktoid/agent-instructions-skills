@@ -38,7 +38,8 @@ edited the stub's files directly, grades as broken rather than as a skill differ
 
 ## Current state
 
-No stamp yet, so `scripts/check_evals.py` reports the skill as unmeasured. Run it with:
+`results/2026-11-05.md` is the only stamp: a net gain of 11 assertions over four tasks, and 10/10 probes
+routed correctly. Re-run with:
 
 ```sh
 python3 evals/run_eval.py tasks    --skill github-repository-security --model sonnet --runs 3 --parallel 5

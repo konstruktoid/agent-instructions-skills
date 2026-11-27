@@ -533,31 +533,27 @@ improvement, the results file says so. See [evals/README.md](evals/README.md) fo
 conditions are isolated, what an assertion may and may not be, and the limitations that apply
 to every number in there.
 
-Eight of the ten skills define both evals and have results committed. The table records the
-latest stamp for each of those, what it measured, and the limitation that keeps that number
-from standing as a general claim about the skill. `github-repository-security` and
-`github-organization-governance` have both evals defined against a stand-in `gh`, and neither has
-run yet, so there is no measurement of what either skill changes.
+All ten skills define both evals and have results committed. Each row below records the
+suite's latest full stamp as of 2026-11-27. `github-repository-security` and
+`github-organization-governance` run against a stand-in `gh`, so their numbers describe behaviour
+against that stub rather than against GitHub.
 
-`scripts/check_evals.py` holds the eight suites to the structure described here, and separates
-what an edit can fix from what only a re-run can. Every suite passes the structural checks, and
-every committed results file regenerates byte-identically from the artifacts under
-`results/raw/`, so no number in the table was written by hand. What the checker reports instead
-is staleness, and it reports none for these eight skills. Every latest stamp was measured on
-2026-10-06, 2026-10-07, 2026-10-24, 2026-10-25 or 2026-10-28 from a fresh clone of a committed
-revision outside the operator's home directory, with no modified files and no ancestor `CLAUDE.md`.
-The task and routing results in each row come from the same run. Runs that a usage limit cut short
-were discarded and re-run rather than graded.
+`scripts/check_evals.py` holds the suites to the structure described here, and separates what an
+edit can fix from what only a re-run can. Every committed results file regenerates byte-identically
+from the artifacts under `results/raw/`. The task and routing results in each row come from the
+same run. Runs that a usage limit cut short were discarded and re-run rather than graded.
 
 | Skill | Latest stamp | Task delta | Cost | Routing | Limitation |
 | --- | --- | --- | --- | --- | --- |
-| `ansible-verification-loop` | 2026-10-07 | +3 over 7 tasks | 1.4x | 10/10 | Three runs per condition. `avl-07-artifact-hygiene` (+2) and `avl-06-autofix-cosmetics` (+1) separate; the other five deltas are zero, and four of those five score full marks in both conditions, so they cannot discriminate. Measured at `de69b8c`; the skill is unchanged at `ad44bce`. |
-| `bash-secure-scripting` | 2026-10-25 | +6.5 over 4 tasks | 2.9x | 10/10 | Three runs per condition. One `bss-03-provision-user` run with the skill ended with background work outstanding and is excluded from its median. `bss-01-log-archive` (+1), `bss-03-provision-user` (+2.5) and `bss-04-workspace-cleanup` (+2) separate; `bss-02-deploy-notify` is marked *no reliable difference*. Measured at `9c1e137`. |
-| `bash-testing` | 2026-10-07 | +0 over 4 tasks | 1.4x | 10/10 | Every delta is marked *no reliable difference*, and `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. The skill shows no measurable task effect. Routing improved from 7/10 on 2026-08-14. |
-| `github-actions-security` | 2026-10-24 | +37 over 7 tasks | 2.4x | 10/10 | Three runs per condition, and every one of the seven deltas separates. Measured at `56262a6`, graded with `zizmor` 1.31.1 and the `actionlint` image that [Checks](#checks) pins; earlier stamps do not record which builds graded them. |
-| `python-secure-coding` | 2026-10-24 | +2 over 5 tasks | 1.4x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*: four of five tasks score identically in both conditions. Measured at `56262a6`. |
-| `python-testing` | 2026-10-07 | +1 over 5 tasks | 1.2x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*. `pt-02` and `pt-05` scored full marks in both conditions. The skill did not fire on `pt-03`. Measured at `de69b8c`. |
-| `terraform-secure-iac` | 2026-10-28 | +2 over 4 tasks | 1.8x | 10/10 | Three runs per condition. `tsi-03-network-modules` (+1) separates; the other three deltas are marked *no reliable difference*. `validate-actually-run` fails in the grader sandbox in both conditions, so it does not discriminate. Measured at `6c6960f`. |
+| `ansible-verification-loop` | 2026-11-01 | +5 over 7 tasks | 1.8x | 10/10 | Three runs per condition. `avl-07-artifact-hygiene` (+3) and `avl-06-autofix-cosmetics` (+1) separate; the other five deltas are marked *no reliable difference*, and `avl-01`, `avl-03` and `avl-04` score full marks in both conditions, so they cannot discriminate. The 2026-10-07 stamp gave +3. Measured at `cbbeb0d`. |
+| `bash-secure-scripting` | 2026-11-01 | +5 over 4 tasks | 2.3x | 10/10 | Three runs per condition. One `bss-03-provision-user` run with the skill ended with background work outstanding and is excluded from its median. `bss-01-log-archive` (+1), `bss-03-provision-user` (+3) and `bss-04-workspace-cleanup` (+2) separate; `bss-02-deploy-notify` (-1) is marked *no reliable difference*. The 2026-10-25 stamp gave +6.5. Measured at `cbbeb0d`. |
+| `bash-testing` | 2026-11-01 | -2 over 4 tasks | 1.4x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*, `bt-04-no-suite` (-2) included. `bt-02-bats-suite` scored full marks in every run of both conditions, so it cannot discriminate. The skill shows no measurable task effect. Routing improved from 7/10 on 2026-08-14. Measured at `cbbeb0d`. |
+| `github-actions-security` | 2026-11-26 | +18 over 7 tasks | 1.9x | 10/10 | Three runs per condition. `gas-01` (+5), `gas-03` (+4), `gas-04` (+1), `gas-05` (+4) and `gas-06` (+4) separate; `gas-02` and `gas-07` are marked *no reliable difference*. The 2026-10-24 stamp gave +37: baseline scores rose on six of the seven tasks, on the same model, and the cause is not established. Measured at `2b32dee`. `gas-08-imposter-pin`, run on 2026-11-27 at `159d056`, scored 7/7 in every run of both conditions, so it cannot discriminate. Two `gas-07` runs wrote outside their workspace. |
+| `github-organization-governance` | 2026-11-26 | +2 over 4 tasks | 1.6x | 10/10 | Three runs per condition, against the stub. `gog-02` (+1) and `gog-03` (+1) separate; `gog-01` and `gog-04` score full marks in both conditions. The 2026-11-05 stamp gave +4. Measured at `2b32dee`. |
+| `github-repository-security` | 2026-11-05 | +11 over 4 tasks | 2.0x | 10/10 | Three runs per condition, against the stub. `grs-01` (+9) separates; `grs-02` (+2) is marked *no reliable difference*, and `grs-03` and `grs-04` score full marks in both conditions. Measured at `fc9be01`. |
+| `python-secure-coding` | 2026-11-01 | +3 over 5 tasks | 1.5x | 10/10 | Three runs per condition. `psc-03-audit-search` (+1) separates; the other four deltas are marked *no reliable difference*, and `psc-01-report-export` scores full marks in both conditions. The 2026-10-24 stamp gave +2. Measured at `cbbeb0d`. |
+| `python-testing` | 2026-11-01 | +2 over 5 tasks | 1.3x | 10/10 | Three runs per condition, and every delta is marked *no reliable difference*. `pt-02` and `pt-05` scored full marks in both conditions. The skill did not fire on `pt-03`. The skill changed on 2026-11-17, so this stamp does not measure its current text. Measured at `cbbeb0d`. |
+| `terraform-secure-iac` | 2026-11-05 | +6 over 4 tasks | 1.9x | 9/10 | Three runs per condition. `tsi-01-remote-state` (+1), `tsi-03-network-modules` (+3) and `tsi-04-ci-apply-role` (+1) separate; `tsi-02-orders-database` (+1) is marked *no reliable difference*. The no-trigger probe `tsi-t06` fired in two of three passes. Measured at `3915ce1`. |
 | `terraform-testing` | 2026-11-05 | +7 over 5 tasks | 1.4x | 10/10 | Three runs per condition. `tt-03-conditional-resource` (+4) and `tt-04-pinned-old-terraform` (+1) separate; the other three deltas are marked *no reliable difference*, and `tt-01-native-suite` scores full marks in both conditions. The skill did not fire on `tt-05-docs-only`, so that delta is not attributable to it. `tt-02-terratest-suite` runs no `go test` in the grader. Measured at `966b828`. |
 
 Two limits cut across the whole table. A routing score carried from an earlier stamp than the task

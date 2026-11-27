@@ -1,0 +1,191 @@
+{
+  "default_repo": "octo-app/widget",
+  "user": "eval-dev",
+  "per_page": 30,
+  "ignored_fields": {},
+  "resources": {
+    "repos/octo-tools/setup-widget": {
+      "full_name": "octo-tools/setup-widget",
+      "default_branch": "main"
+    },
+    "repos/octo-tools/setup-widget/releases/latest": {
+      "tag_name": "v2.3.1",
+      "draft": false,
+      "prerelease": false,
+      "published_at": "2026-09-01T10:00:00Z",
+      "body": "Faster cache restore."
+    },
+    "repos/octo-tools/setup-widget/releases": [
+      {
+        "tag_name": "v2.3.1",
+        "draft": false,
+        "prerelease": false,
+        "published_at": "2026-09-01T10:00:00Z",
+        "body": "Faster cache restore."
+      },
+      {
+        "tag_name": "v2.2.0",
+        "draft": false,
+        "prerelease": false,
+        "published_at": "2026-09-01T10:00:00Z",
+        "body": "Faster cache restore."
+      }
+    ],
+    "repos/octo-tools/setup-widget/releases/tags/v2.3.1": {
+      "tag_name": "v2.3.1",
+      "draft": false,
+      "prerelease": false,
+      "published_at": "2026-09-01T10:00:00Z",
+      "body": "Faster cache restore."
+    },
+    "repos/octo-tools/setup-widget/tags": [
+      {
+        "name": "v2.3.1",
+        "commit": {
+          "sha": "34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14"
+        }
+      },
+      {
+        "name": "v2.2.0",
+        "commit": {
+          "sha": "0362966e32d4073d5afa7b96949bb64dcfa8880a"
+        }
+      }
+    ],
+    "repos/octo-tools/setup-widget/commits/ed582ab9dabbd733071ca2b9fdd40dcd8f7555b5": {
+      "sha": "ed582ab9dabbd733071ca2b9fdd40dcd8f7555b5",
+      "commit": {
+        "message": "fix: security patch for cache restore",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/compare/v2.3.1...ed582ab9dabbd733071ca2b9fdd40dcd8f7555b5": {
+      "status": "diverged",
+      "ahead_by": 1,
+      "behind_by": 0
+    },
+    "repos/octo-tools/setup-widget/compare/main...ed582ab9dabbd733071ca2b9fdd40dcd8f7555b5": {
+      "status": "diverged",
+      "ahead_by": 1,
+      "behind_by": 0
+    },
+    "repos/octo-tools/setup-widget/commits/v2.3.1": {
+      "sha": "34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14",
+      "commit": {
+        "message": "Release v2.3.1",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/commits/refs/tags/v2.3.1": {
+      "sha": "34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14",
+      "commit": {
+        "message": "Release v2.3.1",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/commits/34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14": {
+      "sha": "34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14",
+      "commit": {
+        "message": "Release v2.3.1",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/git/ref/tags/v2.3.1": {
+      "ref": "refs/tags/v2.3.1",
+      "object": {
+        "sha": "34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14",
+        "type": "commit"
+      }
+    },
+    "repos/octo-tools/setup-widget/git/refs/tags/v2.3.1": {
+      "ref": "refs/tags/v2.3.1",
+      "object": {
+        "sha": "34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14",
+        "type": "commit"
+      }
+    },
+    "repos/octo-tools/setup-widget/commits/v2.2.0": {
+      "sha": "0362966e32d4073d5afa7b96949bb64dcfa8880a",
+      "commit": {
+        "message": "Release v2.2.0",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/commits/refs/tags/v2.2.0": {
+      "sha": "0362966e32d4073d5afa7b96949bb64dcfa8880a",
+      "commit": {
+        "message": "Release v2.2.0",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/commits/0362966e32d4073d5afa7b96949bb64dcfa8880a": {
+      "sha": "0362966e32d4073d5afa7b96949bb64dcfa8880a",
+      "commit": {
+        "message": "Release v2.2.0",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/octo-tools/setup-widget/git/ref/tags/v2.2.0": {
+      "ref": "refs/tags/v2.2.0",
+      "object": {
+        "sha": "0362966e32d4073d5afa7b96949bb64dcfa8880a",
+        "type": "commit"
+      }
+    },
+    "repos/octo-tools/setup-widget/git/refs/tags/v2.2.0": {
+      "ref": "refs/tags/v2.2.0",
+      "object": {
+        "sha": "0362966e32d4073d5afa7b96949bb64dcfa8880a",
+        "type": "commit"
+      }
+    },
+    "repos/actions/checkout/releases/latest": {
+      "tag_name": "v7.0.1",
+      "draft": false,
+      "prerelease": false,
+      "published_at": "2026-09-01T10:00:00Z",
+      "body": "Faster cache restore."
+    },
+    "repos/actions/checkout/commits/v7.0.1": {
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "commit": {
+        "message": "Release v7.0.1",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/actions/checkout/commits/refs/tags/v7.0.1": {
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "commit": {
+        "message": "Release v7.0.1",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    },
+    "repos/actions/checkout/commits/3d3c42e5aac5ba805825da76410c181273ba90b1": {
+      "sha": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "commit": {
+        "message": "Release v7.0.1",
+        "author": {
+          "name": "octo-maintainer"
+        }
+      }
+    }
+  }
+}

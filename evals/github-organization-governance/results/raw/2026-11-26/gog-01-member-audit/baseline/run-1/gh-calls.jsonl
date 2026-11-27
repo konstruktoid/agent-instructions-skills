@@ -1,0 +1,49 @@
+{"argv": ["auth", "status"], "command": "auth", "status": 0}
+{"argv": ["--help"], "command": "--help", "error": "gh --help: not available in this environment", "status": 1}
+{"argv": ["api", "orgs/northwind"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?role=admin"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"role": "admin"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?filter=2fa_disabled"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"filter": "2fa_disabled"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/outside_collaborators"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/outside_collaborators", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/outside_collaborators?filter=2fa_disabled"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/outside_collaborators", "query": {"filter": "2fa_disabled"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/invitations"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/invitations", "query": {}, "status": 1}
+{"argv": ["api", "--paginate", "orgs/northwind/failed_invitations"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/failed_invitations", "query": {}, "status": 1}
+{"argv": ["api", "--paginate", "orgs/northwind/teams"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/teams", "query": {}, "status": 1}
+{"argv": ["api", "--paginate", "orgs/northwind/repos"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/repos", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/installations"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/installations", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/rulesets"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/actions/permissions"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/actions/permissions", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/actions/permissions/workflow"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/actions/permissions/workflow", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?role=admin"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"role": "admin"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?role=member"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"role": "member"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?filter=2fa_disabled"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"filter": "2fa_disabled"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/members?filter=2fa_insecure"], "body": {}, "command": "api", "method": "GET", "pages": 2, "path": "orgs/northwind/members", "query": {"filter": "2fa_insecure"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/outside_collaborators"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/outside_collaborators", "query": {}, "status": 0}
+{"argv": ["api", "orgs/northwind/memberships/member-01"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/memberships/member-01", "query": {}, "status": 1}
+{"argv": ["api", "users/member-01"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "users/member-01", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/memberships/member-31"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/memberships/member-31", "query": {}, "status": 1}
+{"argv": ["api", "users/member-31"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "users/member-31", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/memberships/member-40"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/memberships/member-40", "query": {}, "status": 1}
+{"argv": ["api", "users/member-40"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "users/member-40", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/actions/permissions/fork-pr-contributor-approval"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/actions/permissions/fork-pr-contributor-approval", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/hooks"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/hooks", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/actions/secrets"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/actions/secrets", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/security-managers"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/security-managers", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/organization-roles"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/organization-roles", "query": {}, "status": 1}
+{"argv": ["api", "repos/northwind/billing-api/collaborators"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "repos/northwind/billing-api/collaborators", "query": {}, "status": 1}
+{"argv": ["api", "repos/northwind/billing-api/collaborators?affiliation=outside"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "repos/northwind/billing-api/collaborators", "query": {"affiliation": "outside"}, "status": 1}
+{"argv": ["api", "repos/northwind/ledger/collaborators"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "repos/northwind/ledger/collaborators", "query": {}, "status": 1}
+{"argv": ["api", "repos/northwind/billing-api/teams"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "repos/northwind/billing-api/teams", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/credential-authorizations"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/credential-authorizations", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/audit-log"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/audit-log", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/members?filter=bogus"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/members", "query": {"filter": "bogus"}, "status": 0}
+{"argv": ["api", "orgs/northwind/members?role=bogus"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/members", "query": {"role": "bogus"}, "status": 0}
+{"argv": ["api", "orgs/northwind/outside_collaborators?filter=bogus"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/outside_collaborators", "query": {"filter": "bogus"}, "status": 0}
+{"argv": ["api", "orgs/northwind/members?filter=2fa_disabled&per_page=100"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/members", "query": {"filter": "2fa_disabled", "per_page": "100"}, "status": 0}
+{"argv": ["api", "orgs/northwind/members?per_page=100"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/members", "query": {"per_page": "100"}, "status": 0}
+{"argv": ["api", "orgs/northwind/members?role=admin&per_page=100"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/members", "query": {"per_page": "100", "role": "admin"}, "status": 0}
+{"argv": ["api", "orgs/northwind/memberships/eval-admin"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/memberships/eval-admin", "query": {}, "status": 0}
+{"argv": ["api", "user"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "user", "query": {}, "status": 0}
+{"argv": ["api", "user/memberships/orgs/northwind"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "user/memberships/orgs/northwind", "query": {}, "status": 1}
+{"argv": ["api", "graphql", "-f", "query={organization(login:\"northwind\"){membersWithRole(first:100){totalCount edges{role hasTwoFactorEnabled node{login}}}}}"], "command": "api", "error": "gh api: only REST endpoints are available in this environment", "status": 1}
