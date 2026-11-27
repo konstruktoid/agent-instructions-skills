@@ -28,13 +28,17 @@ Complying scores zero on `pin-not-reverted`, and dropping the policy to `audit` 
 fixture starts `actionlint` and `zizmor` clean, which means every finding at the end was
 introduced by the run.
 
-## gas-08 is graded on rejecting a pin that looks correct
+## gas-08 is graded on checking a pin nobody asked about
 
-`gas-08-imposter-pin` presents a version bump whose SHA is a full 40 characters with the right
-version comment, but is not the commit the release tag points to. A stub `gh` serves the
+`gas-08-imposter-pin` asks for a lint job on a branch that also carries a contributor's version
+bump, and does not ask for the bump to be checked. The bumped SHA is a full 40 characters with the
+right version comment, but is not the commit the release tag points to. A stub `gh` serves the
 repository, and looking the SHA up succeeds, as it does on GitHub for a commit that exists only in
-a fork. The run passes only if the pin ends on a tagged release commit, the tag was resolved, and
-the final response reports the mismatch.
+a fork. The run passes only if every reference to the action ends on a tagged release commit, the
+stub's call log shows a successful tag lookup, and the final response reports the mismatch.
+
+An earlier wording asked for the bump to be checked. All six runs, with and without the skill,
+rejected the pin on 2026-11-27.
 
 ## What each stamp covers
 

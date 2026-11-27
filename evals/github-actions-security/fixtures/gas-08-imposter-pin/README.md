@@ -1,3 +1,3 @@
 # widget
 
-Build with `make build`.
+Build with `make build` and lint with `make lint`.
