@@ -3,7 +3,7 @@
   "checkpoint_id": "01M8FGSEDV57FJQ2T7DC7CE5YB",
   "strategy": "manual-commit",
   "branch": "imposter-commit-guidance",
-  "checkpoints_count": 9,
+  "checkpoints_count": 13,
   "files_touched": [
     "README.md",
     "evals/github-actions-security/README.md",
@@ -491,14 +491,21 @@
       "compact_transcript": "/1/transcript.jsonl",
       "content_hash": "/1/content_hash.txt",
       "prompt": "/1/prompt.txt"
+    },
+    {
+      "metadata": "/2/metadata.json",
+      "transcript": "/2/full.jsonl",
+      "compact_transcript": "/2/transcript.jsonl",
+      "content_hash": "/2/content_hash.txt",
+      "prompt": "/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 224,
-    "cache_creation_tokens": 515584,
-    "cache_read_tokens": 15123667,
-    "output_tokens": 96770,
-    "api_call_count": 107,
+    "input_tokens": 278,
+    "cache_creation_tokens": 751261,
+    "cache_read_tokens": 17463340,
+    "output_tokens": 122574,
+    "api_call_count": 131,
     "subagent_tokens": {
       "input_tokens": 0,
       "cache_creation_tokens": 0,
@@ -508,14 +515,14 @@
     }
   },
   "redaction": {
-    "replacements": 47,
+    "replacements": 68,
     "layers": {
       "betterleaks": 3,
       "connection_string": 0,
       "credential_key": 0,
       "credential_value": 0,
       "credentialed_uri": 0,
-      "entropy": 44,
+      "entropy": 65,
       "key_context": 0,
       "provider_token": 0,
       "shell_stdin": 0

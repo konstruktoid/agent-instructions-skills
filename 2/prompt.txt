@@ -1,0 +1,13 @@
+read .claude/STATE.md
+
+---
+
+work through the open issues
+
+---
+
+lets commit after the sandbox work
+
+---
+
+ensure state is up-to-date

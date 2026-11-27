@@ -1,0 +1,44 @@
+{
+  "cli_version": "0.12.2",
+  "checkpoint_id": "01M8FGSEDV57FJQ2T7DC7CE5YB",
+  "session_id": "f38ba70a-0ac1-4d70-9dd3-2a476d7ea0c1",
+  "strategy": "manual-commit",
+  "created_at": "2026-11-27T22:07:40.904076628Z",
+  "branch": "imposter-commit-guidance",
+  "checkpoints_count": 4,
+  "save_step_count": 3,
+  "files_touched": [
+    "README.md",
+    "evals/github-actions-security/README.md",
+    "evals/github-organization-governance/README.md",
+    "evals/github-repository-security/README.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5-5",
+  "turn_id": "0309b2a20c37",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 54,
+    "cache_creation_tokens": 235677,
+    "cache_read_tokens": 2339673,
+    "output_tokens": 25804,
+    "api_call_count": 24
+  },
+  "redaction": {
+    "replacements": 21,
+    "layers": {
+      "betterleaks": 0,
+      "connection_string": 0,
+      "credential_key": 0,
+      "credential_value": 0,
+      "credentialed_uri": 0,
+      "entropy": 21,
+      "key_context": 0,
+      "provider_token": 0,
+      "shell_stdin": 0
+    }
+  },
+  "session_metrics": {
+    "turn_count": 4
+  }
+}
