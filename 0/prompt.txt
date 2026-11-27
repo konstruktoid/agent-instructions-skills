@@ -1,0 +1,39 @@
+read state file
+
+---
+
+please do
+
+---
+
+continue with the work
+
+---
+
+clean up and detail the next steps
+
+---
+
+nftables is a bug and then clean up the leftovers
+
+---
+
+commit, minimal commit message, and push
+
+---
+
+commit, minimal commit message, and push
+
+---
+
+do your recommendation
+
+---
+
+<task-notification>
+<task-id>bnrk271i1</task-id>
+<tool-use-id>toolu_01GS4e69haEVgGXMiQNxrgew</tool-use-id>
+<output-file>/tmp/claude-1000/-home-tsj-Code-Git-agent-instructions-skills/7c7e9c07-1026-4cfa-b996-a08917a43d0d/tasks/bnrk271i1.output</output-file>
+<status>completed</status>
+<summary>Background command "Wait for pull request checks to finish" completed (exit code 0)</summary>
+</task-notification>
