@@ -54,6 +54,7 @@ assertion is a result, not a harness error, and does not change the exit code.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import os
 import re
@@ -115,7 +116,8 @@ TRIGGER_TOOLS = "Skill,Read,Glob,Grep"
 # point, so it needs Bash and the file tools. `claude -p` cannot answer a permission
 # prompt, and a denied prompt is indistinguishable from a skill that did not act, so the
 # run still needs a permission mode that does not raise one. That makes the tool list,
-# rather than the permission mode, the thing that bounds what a fixture can reach. It is
+# rather than the permission mode, the thing that bounds which tools a run can call;
+# `sandboxed` bounds where those tools can write, since Bash alone reaches any path. It is
 # an allowlist for the same reason the graded workspace is a copy: the 2026-07-28
 # github-actions-security transcripts record runs reaching WebFetch, and single runs
 # reaching ToolSearch and ScheduleWakeup, none of which any task in any suite asks for.
@@ -316,6 +318,8 @@ def isolated_environment(home: Path) -> dict[str, str]:
         # rather than the workspace is the specific defect that was observed.
         "ANSIBLE_HOME": str(home / ".ansible"),
         "ANSIBLE_COLLECTIONS_PATH": str(home / ".ansible" / "collections"),
+        # Ansible expands `~` from passwd, not $HOME, so the target's shell expands $HOME instead.
+        "ANSIBLE_REMOTE_TMP": "$HOME/.ansible/tmp",
         # The autopsy's colliding ephemeral directory. A per-run HOME already separates
         # molecule's default location; setting it explicitly keeps the separation even if
         # that default changes.
@@ -357,11 +361,108 @@ def prepare_run_home(run_dir: Path) -> Path:
         tmp.unlink()
     if not tmp.exists():
         tmp.symlink_to(tempfile.mkdtemp(prefix="eval-tmp-"))
-    source = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / CREDENTIALS_FILE
+    source = credentials_source()
     link = home / ".claude" / CREDENTIALS_FILE
     if source.is_file() and not link.is_symlink():
         link.symlink_to(source)
     return home
+
+
+def credentials_source() -> Path:
+    """Return the caller's credentials file, which every run's private config directory links to."""
+    return Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude") / CREDENTIALS_FILE
+
+
+BWRAP = shutil.which("bwrap")
+
+# Hidden from every run: credential stores a fixture has no use for, and the caller's own Claude
+# Code directory, of which a run needs only the credentials file that `sandboxed` binds back.
+HIDDEN_HOME_PATHS = (".ssh", ".gnupg", ".aws", ".config/gh", ".claude")
+
+
+def hidden_tool_trees(path_variable: str) -> set[Path]:
+    """Return the trees under /tmp or this repository that the tools on `path_variable` need.
+
+    `sandboxed` hides both, yet the documented setup installs fixture tools under /tmp and runs
+    the harness from this repository's virtual environment. Each PATH entry inside either is
+    returned by its top-level directory there, as is every tree its executables resolve into,
+    since a `uv tool` entry point is a symlink into a separate tool directory.
+    """
+    roots = (Path("/tmp"), REPO_ROOT)  # noqa: S108
+
+    def tree(path: Path) -> Path | None:
+        for root in roots:
+            if path.is_relative_to(root) and path != root:
+                return root / path.relative_to(root).parts[0]
+        return None
+
+    trees: set[Path] = set()
+    for entry in filter(None, path_variable.split(os.pathsep)):
+        directory = Path(entry)
+        if tree(directory) is None or not directory.is_dir():
+            continue
+        candidates = [directory, *(child.resolve() for child in directory.iterdir())]
+        trees.update(found for found in map(tree, candidates) if found is not None)
+    return trees
+
+
+@functools.cache
+def require_sandbox() -> str:
+    """Return the bwrap path once a trivial sandbox has started, and stop the harness otherwise."""
+    if BWRAP is None:
+        message = "bwrap is not on PATH; every run and grader is confined by it, so none can start"
+        raise SystemExit(message)
+    # A fixed argument list naming only bwrap itself and /bin/true.
+    probe = subprocess.run(  # noqa: S603
+        [BWRAP, "--ro-bind", "/", "/", "--unshare-pid", "/bin/true"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if probe.returncode != 0:
+        message = f"bwrap cannot start a sandbox here: {probe.stderr.strip()}"
+        raise SystemExit(message)
+    return BWRAP
+
+
+def sandboxed(
+    argv: list[str], run_dir: Path, env: dict[str, str], readable: Sequence[Path] = ()
+) -> list[str]:
+    """Return `argv` wrapped so that the run directory is the only persistent place it can write.
+
+    The gas-07 runs of 2026-11-26 wrote beside the eval's own checkout, which the tool allowlist
+    cannot prevent because Bash reaches any path. The filesystem is read-only, and this
+    repository is replaced by an empty tree, so a run sees neither other runs nor the assertions
+    that grade it; `readable` and the harness's own tools are bound back read-only. The run gets
+    its own PID namespace, so a pattern kill cannot reach a sibling run. The network and the
+    Docker socket stay reachable, because tasks run linters that fetch and molecule needs
+    Docker, and Docker access is itself enough to escape any of this.
+    """
+    bwrap = require_sandbox()
+    # A fresh private tmpfs over /tmp, so a run sees no other run's temporary files.
+    args = [bwrap, "--ro-bind", "/", "/", "--dev", "/dev", "--proc", "/proc", "--tmpfs", "/tmp"]  # noqa: S108
+    hidden = [
+        path
+        for path in (
+            REPO_ROOT,
+            Path(f"/run/user/{os.getuid()}"),
+            *(Path.home() / relative for relative in HIDDEN_HOME_PATHS),
+        )
+        if path.is_dir()
+    ]
+    for path in hidden:
+        args += ["--tmpfs", str(path)]
+    shown = [REPO_ROOT / ".venv", GH_STUB, *readable, *hidden_tool_trees(env.get("PATH", ""))]
+    for path in shown:
+        if path.exists():
+            args += ["--ro-bind", str(path), str(path)]
+    # TMPDIR resolves outside the run directory, and the credentials file is written on refresh.
+    for path in (run_dir, (run_dir / "home" / "tmp").resolve(), credentials_source()):
+        if path.exists():
+            args += ["--bind", str(path), str(path)]
+    for path in hidden:
+        args += ["--remount-ro", str(path)]
+    return [*args, "--unshare-pid", "--die-with-parent", "--new-session", "--", *argv]
 
 
 # The Claude Code variables a run keeps from the caller's environment: those that choose the
@@ -502,6 +603,7 @@ class ClaudeCommand(NamedTuple):
 
     argv: list[str]
     prompt: str
+    readable: tuple[Path, ...] = ()
 
 
 def claude_command(
@@ -541,7 +643,7 @@ def claude_command(
     # to the full tool surface and letting it act without prompting are two decisions.
     if permissions.mode is not None:
         command += ["--permission-mode", permissions.mode]
-    return ClaudeCommand(command, prompt)
+    return ClaudeCommand(command, prompt, () if plugin_dir is None else (plugin_dir,))
 
 
 def scrub_rules() -> list[tuple[re.Pattern[str], str]]:
@@ -658,14 +760,15 @@ def invoke_claude(
 ) -> dict[str, Any]:
     """Run one `claude -p` subprocess, storing its stream, and return a run record."""
     started = datetime.now(tz=UTC)
+    env = run_environment(home)
     try:
         # The command is built by claude_command from checked-in eval data, and
         # runs with shell=False, so no shell metacharacter reaches an interpreter.
         completed = subprocess.run(  # noqa: S603
-            command.argv,
+            sandboxed(command.argv, home.parent, env, command.readable),
             input=command.prompt,
             cwd=cwd,
-            env=run_environment(home),
+            env=env,
             capture_output=True,
             encoding="utf-8",
             errors="replace",
@@ -1039,15 +1142,15 @@ def run_grader(command: str, workspace: Path, base_sha: str, home: Path) -> tupl
     """Run one assertion command in the finished workspace and return its exit code and output.
 
     Graders run under the same private HOME as the run they grade, so an assertion that
-    invokes ansible-lint or pytest sees the run's own caches rather than the user's.
+    invokes ansible-lint or pytest sees the run's own caches rather than the user's. They run
+    in the same sandbox as well, because pytest and molecule execute code the run wrote.
     """
     env = run_environment(home)
     env["EVAL_BASE_SHA"] = base_sha
     # The command comes from a checked-in assertions.json in this repository, and
     # a shell is what an assertion such as `! grep -r ...` is written against.
-    completed = subprocess.run(  # noqa: S602
-        command,
-        shell=True,
+    completed = subprocess.run(  # noqa: S603
+        sandboxed(["/bin/sh", "-c", command], home.parent, env),
         cwd=workspace,
         env=env,
         capture_output=True,

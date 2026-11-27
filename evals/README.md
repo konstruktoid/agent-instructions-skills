@@ -5,9 +5,20 @@ whether their `description` fields route the right tasks to them. A skill that i
 structurally correct is not necessarily a skill that does anything; this directory exists to
 tell the difference.
 
-## Current state, 2026-10-28
+## Current state, 2026-11-27
 
-Every latest stamp is current. `terraform-secure-iac` was re-measured on 2026-10-28 at `6c6960f`.
+`github-actions-security` was measured on 2026-11-26 at `2b32dee`, a net of 18 assertions over seven
+tasks at 1.9x the cost, against 37 on 2026-10-24. Baseline scores rose on six of the seven tasks on
+the same model, and the cause is not established. `gas-08-imposter-pin` was run on 2026-11-27 at
+`159d056` and scored 7/7 in every run of both conditions, so it is a regression check rather than
+evidence of an effect. `github-organization-governance` scored a net of 2 on 2026-11-26 at
+`2b32dee`, against 4 on 2026-11-05. All ten trigger probes of both suites routed correctly.
+`github-repository-security` has one stamp, 2026-11-05 at `fc9be01`, with a net of 11. The last two
+suites run against `evals/gh_stub.py`, a stand-in `gh` serving each task's `github-state/` file.
+
+The rest of this section describes the state on 2026-10-28, and later stamps of the other suites are
+not summarized here. At that date every latest stamp was current.
+`terraform-secure-iac` was re-measured on 2026-10-28 at `6c6960f`.
 `bash-secure-scripting` was re-measured on 2026-10-25 at `9c1e137`, after the harness change that
 sends the prompt on stdin. `github-actions-security`, `python-secure-coding`, `minimal-change`
 and the `python-security-verifier` suite were re-measured on 2026-10-24 at `56262a6`. Every run
@@ -32,9 +43,7 @@ output unchanged. Until 2026-11-01 no run could finish `terraform validate`, bec
 socket path exceeded the 108-byte limit; the sandbox now sets a short `TMPDIR`, and `validate`
 passes in the 2026-11-01 runs.
 
-`github-repository-security` and `github-organization-governance` have suites that run against
-`evals/gh_stub.py`, a stand-in `gh` serving each task's `github-state/` file, and neither has run
-yet. `terraform-testing` has a five-task suite and a stamp, `2026-11-05` at `966b828`, where the
+`terraform-testing` has a five-task suite and a stamp, `2026-11-05` at `966b828`, where the
 skill scored 7 assertions better at 1.4x the cost and routed all ten probes correctly. Only `tt-03`
 (+4) and `tt-04` (+1) separate, `tt-01` scores full marks in both conditions, and the skill did not
 fire on `tt-05`. Of the twelve agent templates,
@@ -49,13 +58,10 @@ therefore neither shown nor ruled out at the suite's present difficulty, and the
 whether the reasoning discipline changes anything.
 Its `discipline-ablation` comparison is implemented for that and has not been run.
 
-`scripts/check_evals.py --strict` still fails, on the unmeasured skills and templates alone.
+`scripts/check_evals.py --strict` still fails, on the unmeasured templates and the stale stamps.
 
-Open work, as of 2026-10-27:
+Open work, as of 2026-11-27:
 
-- A suite for each of the two skills without one. The two
-  bash skills, `bash-secure-scripting` and `bash-testing`, and `terraform-secure-iac` already have
-  suites, so they are not on this list.
 - Two `terraform-secure-iac` graders, `trust-audience-pinned` and `apply-trust-pinned-to-main`,
   miss a condition key built from a variable. Fixing them invalidates the 2026-10-26 stamp.
 - No eval measures the content-only gate. It has its own `--self-test`, which is not a measurement
@@ -130,6 +136,14 @@ run is therefore the tool list rather than the permission mode: `TASK_TOOLS` in
 attacker-shaped input by construction, since every one of them plants the flaw its eval
 measures, and the allowlist keeps a run that reads one from reaching the rest of the tool
 surface. Pass `--all-tools` to measure a task against every tool the CLI offers instead.
+
+Bash alone reaches any path, so the tool list does not bound where a run writes. Every run and
+every grading command therefore runs under `bwrap`, which the harness requires and checks before
+the first run. The filesystem is read-only except for the run's own directory and its `TMPDIR`.
+This repository is replaced by an empty tree, so a run sees neither other runs nor its
+assertions. `~/.ssh`, `~/.gnupg`, `~/.aws`, `~/.config/gh`, `/run/user/<uid>` and the caller's
+`~/.claude` are hidden, except for the credentials file. Each run has its own process namespace,
+so a pattern kill cannot reach a sibling run. The network and the Docker socket stay reachable.
 
 ## Agent-template suites
 
@@ -535,6 +549,17 @@ confirm, and a record is reviewed as the configuration it argues for.
 
 ## Limitations that apply to every result here
 
+- Stamps up to and including 2026-11-27 ran with no filesystem sandbox, so a run could read and
+  write whatever the operator can. In the 2026-11-26 `github-actions-security` stamp, runs in
+  both conditions of `gas-07` wrote scripts beside the checkout. The scrubbed transcripts show
+  those paths as `/home/user/other-checkout`. That finding came from a pattern search, not a full
+  audit, and the graders do not detect a run that touched another run's files. Every `molecule`
+  run also wrote to the operator's own `~/.ansible/tmp`, because Ansible expands that default
+  from the password database rather than `$HOME`; runs now set `ANSIBLE_REMOTE_TMP`.
+- The sandbox still leaves the rest of the filesystem readable, including other checkouts under
+  the operator's home. It leaves the credentials file writable, because a token refresh writes
+  it. It leaves the Docker socket reachable, because `molecule` needs it, and Docker access is
+  enough to escape the sandbox.
 - Everything under `results/2026-07-25.md` is one run per condition. Single-run variance is
   uncontrolled there, so a delta of one assertion is not a reliable signal; only larger
   differences are. `--runs N` exists to remove this limitation from later measurements, and the

