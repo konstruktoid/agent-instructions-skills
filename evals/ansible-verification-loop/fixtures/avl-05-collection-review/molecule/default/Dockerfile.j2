@@ -1,0 +1,5 @@
+FROM {{ item.image }}
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 systemd systemd-sysv \
+    && rm -rf /var/lib/apt/lists/*
+CMD ["/lib/systemd/systemd"]

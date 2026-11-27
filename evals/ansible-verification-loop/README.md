@@ -18,6 +18,14 @@ packages inside it. The 2026-07-25 run reached 1474 s and was still waiting on t
 when the process returned, which is how it ended up graded on a mid-loop status line. The
 raised ceiling gives the scenario room to finish inside the run instead.
 
+Until 2026-11-27 that scenario could not reach the role. In every 2026-11-01 run the provisioned
+`ansible-core` lacked `requests`, so molecule's Docker playbooks failed before `create`. Behind
+that, the image shipped no apt package list, no systemd and no capability to load a ruleset, so
+converge would have failed whatever the run changed. The fixture now builds a systemd image from
+`debian:bookworm`, runs it privileged, and refreshes apt in `prepare.yml`. Converge passes on the
+fixture as shipped, and idempotence fails on the role's planted always-changed tasks. No stamp
+measures avl-05 with a scenario that can pass.
+
 `avl-06-autofix-cosmetics` is the only task graded on something no linter reports. Every finding
 in its fixture is repairable by `ansible-lint --fix`, and that same run deletes the blank line
 after each flow-style value in `defaults/main.yml`, joining the following comment block to the

@@ -1,0 +1,8 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Refresh the package cache, which the debian image ships empty
+      ansible.builtin.apt:
+        update_cache: true
