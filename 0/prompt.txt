@@ -1,0 +1,21 @@
+read state file
+
+---
+
+please do
+
+---
+
+continue with the work
+
+---
+
+clean up and detail the next steps
+
+---
+
+nftables is a bug and then clean up the leftovers
+
+---
+
+commit, minimal commit message, and push
