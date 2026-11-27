@@ -153,9 +153,9 @@ exists: a check that reads what a grader command actually does has somewhere to 
 
 ### 4. Stop running graders from an unreviewed ref
 
-`evals/run_eval.py:1153` executes a string from `assertions.json` through `/bin/sh -c`. The comment at
-`:1150` justifies it by saying the command comes from a checked-in file in this repository, which is
-true of `main` and false of a pull request branch.
+`evals/run_eval.py:1153` executes a string from `assertions.json` through `/bin/sh -c`. The
+comment at `:1150` justifies it by saying the command comes from a checked-in file in this
+repository, which is true of `main` and false of a pull request branch.
 
 Three options, in descending order of what they actually buy:
 
@@ -532,7 +532,7 @@ ref is not a meaningful construct.
 
 **Recommendation.** Deprioritize until control 6 exists. Once there are tags and something is
 published, `gh attestation verify` becomes available to consumers, which
-`github-actions-security/references/supply-chain.md:230` already teaches them to run. Adopt it then,
+`github-actions-security/references/supply-chain.md:202` already teaches them to run. Adopt it then,
 and describe it in the release notes as what it is: proof of origin, not proof of safety.
 
 **Landed, 2026-10-20, not yet exercised.** `.github/workflows/release.yml` builds an archive of the

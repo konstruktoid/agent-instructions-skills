@@ -309,9 +309,10 @@ fixture with a `workspace_command` assertion. Both are the ordinary shape of a c
 this repository, since a new eval task requires both files.
 
 **File abused.** `evals/run_eval.py:1153`. As audited, the grader string was passed to
-`subprocess.run(command, shell=True, ...)`; it now runs as `/bin/sh -c` in the sandbox. The comment at `:1150` gives the reason, and the reason
-holds only for the trust assumption it names: "The command comes from a checked-in
-assertions.json in this repository". A pull request branch is not yet that.
+`subprocess.run(command, shell=True, ...)`; it now runs as `/bin/sh -c` in the sandbox. The
+comment at `:1150` gives the reason, and the reason holds only for the trust assumption it
+names: "The command comes from a checked-in assertions.json in this repository". A pull request
+branch is not yet that.
 
 **What happens.** The maintainer runs the suite as `evals/README.md:298` documents. `run_grader`
 executes the string under `/bin/sh` with `cwd` set to the finished workspace and `env` from
