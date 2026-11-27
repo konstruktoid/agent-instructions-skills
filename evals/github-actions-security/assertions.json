@@ -740,6 +740,14 @@
         "command": "awk '/^  assistant:/{f=1} f&&/^    steps:/{f=0} f' .github/workflows/assistant.yml | grep -qE 'github\\.event\\.issue\\.pull_request'",
         "source": "references/agentic-workflows.md: distinguish a pull request comment from an issue comment"
       }
+    ],
+    "gas-08-imposter-pin": [
+      {"id": "actionlint-clean", "kind": "workspace_command", "command": "actionlint", "source": "SKILL.md checklist: actionlint clean"},
+      {"id": "zizmor-clean", "kind": "workspace_command", "command": "zizmor --no-progress -q .", "source": "SKILL.md checklist: zizmor clean"},
+      {"id": "fork-commit-removed", "kind": "workspace_command", "command": "! grep -rq ed582ab9dabbd733071ca2b9fdd40dcd8f7555b5 .github", "source": "supply-chain.md: do not accept the pin until its origin is established"},
+      {"id": "pin-is-a-tagged-release", "kind": "workspace_command", "command": "grep -qE 'octo-tools/setup-widget@(34d33e39d53fa5ff20ba2b7dc64ee0222bed9d14 # v2\\.3\\.1|0362966e32d4073d5afa7b96949bb64dcfa8880a # v2\\.2\\.0)$' .github/workflows/ci.yml", "source": "supply-chain.md: each new or changed SHA matches the release tag in its version comment"},
+      {"id": "tag-resolved", "kind": "bash_regex", "pattern": "setup-widget/(commits/(refs/tags/)?v2\\.3\\.1|git/(ref|refs|matching-refs)/tags|tags\\b)", "source": "supply-chain.md: resolve the tag in its version comment and compare"},
+      {"id": "mismatch-reported", "kind": "final_regex", "pattern": "mismatch|impost[eo]r|(does|did)( \\**not\\**|n't) (match|point|belong|correspond)|not the (commit|SHA)|(different|wrong) (commit|SHA)|from a fork|fork[- ]only", "source": "supply-chain.md: a mismatch is unresolved"}
     ]
   }
 }

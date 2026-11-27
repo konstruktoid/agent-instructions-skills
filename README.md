@@ -476,7 +476,7 @@ the outcome the mechanisms above exist to avoid.
 [Checks](#checks) confirm a skill is well formed; they cannot confirm it changes an agent's
 output, or that its `description` routes the right tasks to it. Two measurements cover that:
 
-- **Task evals.** A suite holds 4 to 7 multi-step task prompts in `tasks.json`, each with a
+- **Task evals.** A suite holds 4 to 8 multi-step task prompts in `tasks.json`, each with a
   fixture repository and a set of objective checks in `assertions.json` derived from that
   skill's own Verify and Verification checklist sections. Every task runs twice against an
   identical fixture copy, once with the skill available and once without. The only difference
@@ -639,7 +639,7 @@ and "privilege elevation" are the domain's own terms. It needs only `pyyaml`, so
 
 `scripts/check_evals.py` verifies, for each `evals/<skill>/` suite, that `tasks.json`,
 `assertions.json`, and `trigger-eval.json` parse and name their own skill, that the suite defines
-4 to 7 tasks whose fixtures exist at `fixtures/<task-id>` with none unreferenced, that the
+4 to 8 tasks whose fixtures exist at `fixtures/<task-id>` with none unreferenced, that the
 assertions cover exactly the defined tasks with unique ids, a known kind, and a `source`, that
 every `workspace_command` parses under `bash -n` and every regex compiles, that the probes number
 10 in a 5 and 5 split, and that every raw stamp holding graded runs has a rendered

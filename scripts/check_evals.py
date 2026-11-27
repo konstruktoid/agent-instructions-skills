@@ -5,7 +5,7 @@ For every evals/<skill>/ suite, the structural rules are:
 
 - `tasks.json`, `assertions.json`, and `trigger-eval.json` parse, and each names the skill
   its directory is named after.
-- The suite defines 4 to 7 tasks, each with an id, a title, a prompt, and a fixture at
+- The suite defines 4 to 8 tasks, each with an id, a title, a prompt, and a fixture at
   `fixtures/<task-id>` that exists and is not empty. No fixture directory is unreferenced.
 - `assertions.json` covers exactly the tasks `tasks.json` defines. Every assertion carries a
   unique id, a known kind, and a `source` naming the line of the skill it comes from. Every
@@ -116,9 +116,9 @@ DISCIPLINE_HEADING = "## Reasoning discipline"
 
 SPEC_FILES = ("tasks.json", "assertions.json", "trigger-eval.json")
 
-# evals/README.md: "4 to 7 realistic multi-step task prompts".
+# evals/README.md: "4 to 8 realistic multi-step task prompts".
 MIN_TASKS = 4
-MAX_TASKS = 7
+MAX_TASKS = 8
 
 # evals/README.md: "10 routing probes, 5 in scope and 5 adjacent but out of scope".
 PROBE_COUNT = 10

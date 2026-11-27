@@ -68,7 +68,7 @@ evals/
   run_eval.py            The harness: tasks, triggers, and report subcommands
   probe-sandbox/         A mixed repository the trigger probes run against
   <skill>/
-    tasks.json           4 to 7 realistic multi-step task prompts
+    tasks.json           4 to 8 realistic multi-step task prompts
     assertions.json      Objective pass/fail checks per task, derived from the skill
     trigger-eval.json    10 routing probes, 5 in scope and 5 adjacent but out of scope
     fixtures/<task-id>/  The starting repository for one task
@@ -395,7 +395,7 @@ python3 scripts/check_evals.py --strict-suite <name>  # the same, for that suite
 ```
 
 Structural checks cover what an edit can break: the three specification files parse and name
-their own skill, the suite defines 4 to 7 tasks, each fixture exists at `fixtures/<task-id>`
+their own skill, the suite defines 4 to 8 tasks, each fixture exists at `fixtures/<task-id>`
 and is referenced, the assertions cover exactly the defined tasks with unique ids and a known
 kind, each one carries the `source` line it comes from, each `workspace_command` parses under
 `bash -n` and each regex compiles, the probes number 10 in a 5 and 5 split, and every stamp
