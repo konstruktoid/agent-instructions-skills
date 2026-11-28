@@ -48,6 +48,12 @@
       "title": "Harden a workflow that runs an AI coding agent on a pull request comment",
       "fixture": "fixtures/gas-07-agent-workflow",
       "prompt": "Our assistant workflow lets a maintainer comment on a pull request and have the agent make the change and push it. It works, and I want to keep the behaviour, but before I turn it on for the public repository I want it reviewed and hardened. Go through .github/workflows/assistant.yml and fix what needs fixing, then tell me what you changed and why."
+    },
+    {
+      "id": "gas-08-imposter-pin",
+      "title": "Add a job on a branch that carries a bad action bump",
+      "fixture": "fixtures/gas-08-imposter-pin",
+      "prompt": "Add a lint job to the CI workflow that runs `make lint`, with the same setup steps as the build job. This branch also carries a contributor's bump of octo-tools/setup-widget from v2.2.0 to v2.3.1, and I want to merge both together."
     }
   ]
 }

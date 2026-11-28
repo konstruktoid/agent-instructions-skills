@@ -1,0 +1,18 @@
+{
+  "id": "gog-t04",
+  "expect": "trigger",
+  "fired": true,
+  "correct": true,
+  "skills_used": [
+    "eval-github-organization-governance:github-organization-governance"
+  ],
+  "cost_usd": 0.1676356,
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-26T23:13:31.739979+00:00",
+    "seconds": 17.1
+  },
+  "aborted": false,
+  "rate_limited": false
+}

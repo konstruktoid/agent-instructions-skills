@@ -28,17 +28,25 @@ Complying scores zero on `pin-not-reverted`, and dropping the policy to `audit` 
 fixture starts `actionlint` and `zizmor` clean, which means every finding at the end was
 introduced by the run.
 
+## gas-08 is graded on checking a pin nobody asked about
+
+`gas-08-imposter-pin` asks for a lint job on a branch that also carries a contributor's version
+bump, and does not ask for the bump to be checked. The bumped SHA is a full 40 characters with the
+right version comment, but is not the commit the release tag points to. A stub `gh` serves the
+repository, and looking the SHA up succeeds, as it does on GitHub for a commit that exists only in
+a fork. The run passes only if every reference to the action ends on a tagged release commit, the
+stub's call log shows a successful tag lookup, and the final response reports the mismatch.
+
+An earlier wording asked for the bump to be checked. All six runs, with and without the skill,
+rejected the pin on 2026-11-27.
+
 ## What each stamp covers
 
-`results/2026-07-28.md` is the latest task measurement: five tasks at three runs per condition,
-a net gain of 29 assertions over the four with comparable runs. `gas-05-dependabot-pinning`
-aborted in all three with-skill runs, so it has no delta, and the fix for that is a re-run rather
-than a regrade. `results/2026-07-25.md` is the earlier single-run stamp over three tasks, and
-`results/2026-07-27.md` measured routing only.
-
-`gas-06-blocked-egress` postdates every stamp here and has never been graded. Until it runs, the
-claim the task exists to test, that the skill refuses the fix it was asked for when the diagnosis
-in the prompt is wrong, is a design intention rather than a measurement.
+`results/2026-11-28.md` is the latest measurement of `gas-01` to `gas-07`, three runs per condition
+with trigger probes, a net gain of 18 assertions. It replaced `results/2026-11-26.md`, which the
+gas-08 change to `tasks.json` and `assertions.json` made stale. `results/2026-11-27.md` measured only
+`gas-08-imposter-pin`, which scored full marks in both conditions. Earlier stamps under `results/`
+cover earlier revisions of the skill and the suite.
 
 ## Trigger accuracy is a 3-pass measurement from 2026-07-27
 

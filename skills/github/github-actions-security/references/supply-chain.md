@@ -33,7 +33,20 @@ repositories consumed it on their next run without changing a line.
   branch.
 - Verify the commit belongs to the repository named in `uses:`. A SHA from a fork can be reachable
   through the upstream repository's object store, so a reference that looks upstream can resolve to
-  fork code.
+  fork code, called an imposter commit.
+
+To check a pin, resolve the tag in its version comment and compare the result with the pinned SHA:
+
+```sh
+gh api repos/OWNER/REPO/commits/refs/tags/TAG --jq .sha
+```
+
+- A successful `repos/OWNER/REPO/commits/<sha>` lookup proves nothing, because it also returns
+  commits that exist only in a fork.
+- A mismatch is unresolved, not proof of an attack: a moving tag such as `v4` advances past older
+  pins. Check the full release tag, and do not accept the pin until its origin is established.
+- A match shows only that the upstream tag points at that commit now. It does not detect a tag that
+  an attacker moved.
 
 Actions published by GitHub itself (`actions/*`, `github/*`) carry lower risk than third-party ones,
 but the reasoning is the same and the pinning rule is not worth making conditional.
@@ -58,7 +71,7 @@ carrying the version already in the file forward:
 
 ```sh
 gh api repos/OWNER/REPO/releases/latest --jq .tag_name
-gh api repos/OWNER/REPO/commits/<tag> --jq .sha
+gh api repos/OWNER/REPO/commits/refs/tags/<tag> --jq .sha
 ```
 
 - Do not treat the version already in the workflow, or a version recalled from memory, as current.
@@ -151,6 +164,8 @@ every repository regardless of what a workflow file says:
 - **Require actions to be pinned to a full-length commit SHA.** Available since August 2025 as a
   checkbox alongside the allowed-actions policy. Workflows referencing an unpinned action fail
   validation. This is the control that makes SHA pinning an invariant rather than a review comment.
+  It checks the form of the reference, not its origin, so an imposter commit passes it, and passes an
+  allowlist entry for the repository it imitates.
 - Keep the policy in version control and apply it through the API, so changes are auditable and can
   be reverted quickly during an incident.
 
@@ -195,6 +210,7 @@ provenance file on each of the last five releases.
 
 - [ ] Every `uses:` reference pinned to a full 40-character SHA with a version comment
 - [ ] The SHA was resolved from the source repository, not written from memory
+- [ ] Each new or changed SHA matches the release tag in its version comment
 - [ ] Each version is the newest release that clears the cooldown, looked up during this change, or
       the reason for staying further behind is stated in a comment on the line
 - [ ] Release notes read for every version skipped by an upgrade, with major-version implications

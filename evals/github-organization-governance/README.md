@@ -39,7 +39,8 @@ edited the stub's files directly, grades as broken rather than as a skill differ
 
 ## Current state
 
-No stamp yet, so `scripts/check_evals.py` reports the skill as unmeasured. Run it with:
+`results/2026-11-26.md` is the latest stamp: a net gain of 2 assertions over four tasks, and 10/10 probes
+routed correctly. `results/2026-11-05.md` is the earlier one. Re-run with:
 
 ```sh
 python3 evals/run_eval.py tasks    --skill github-organization-governance --model sonnet --runs 3 --parallel 5

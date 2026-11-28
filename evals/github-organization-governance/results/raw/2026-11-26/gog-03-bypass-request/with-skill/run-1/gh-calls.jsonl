@@ -1,0 +1,15 @@
+{"argv": ["auth", "status"], "command": "auth", "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/rulesets?per_page=100"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets", "query": {"per_page": "100"}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/rulesets?per_page=100", "--jq", ".[].id"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets", "query": {"per_page": "100"}, "status": 0}
+{"argv": ["api", "orgs/northwind/rulesets/4401"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets/4401", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/installations?per_page=100"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/installations", "query": {"per_page": "100"}, "status": 0}
+{"argv": ["api", "orgs/northwind/rulesets/rule-suites?per_page=100&time_period=month"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/rulesets/rule-suites", "query": {"per_page": "100", "time_period": "month"}, "status": 1}
+{"argv": ["api", "--paginate", "orgs/northwind/properties/values"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/properties/values", "query": {}, "status": 0}
+{"argv": ["api", "apps/northwind-release"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "apps/northwind-release", "query": {}, "status": 1}
+{"argv": ["api", "user/installations/501/repositories"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "user/installations/501/repositories", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/installations/501"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/installations/501", "query": {}, "status": 0}
+{"argv": ["api", "orgs/northwind/audit-log?per_page=50"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "orgs/northwind/audit-log", "query": {"per_page": "50"}, "status": 1}
+{"argv": ["api", "repos/northwind/ingest/rulesets/rule-suites"], "body": {}, "command": "api", "error": "gh: Not Found (HTTP 404)", "method": "GET", "path": "repos/northwind/ingest/rulesets/rule-suites", "query": {}, "status": 1}
+{"argv": ["api", "orgs/northwind/properties/schema"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/properties/schema", "query": {}, "status": 0}
+{"argv": ["api", "--paginate", "orgs/northwind/repos", "--jq", ".[] | [.name, .archived, .visibility] | @tsv"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/repos", "query": {}, "status": 0}
+{"argv": ["api", "orgs/northwind/rulesets/4401"], "body": {}, "command": "api", "method": "GET", "pages": 1, "path": "orgs/northwind/rulesets/4401", "query": {}, "status": 0}

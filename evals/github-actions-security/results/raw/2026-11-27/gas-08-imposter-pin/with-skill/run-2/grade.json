@@ -1,0 +1,76 @@
+{
+  "task": "gas-08-imposter-pin",
+  "condition": "with-skill",
+  "run_index": 2,
+  "model": "sonnet",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "started": "2026-11-27T11:58:34.455199+00:00",
+    "seconds": 30.3
+  },
+  "base_sha": "a7288af935a841b405d6be099f985f68bade749d",
+  "skills_used": [
+    "eval-github-actions-security:github-actions-security"
+  ],
+  "num_turns": 9,
+  "cost_usd": 0.152529,
+  "truncated": false,
+  "scheduled_wakeups": 0,
+  "outstanding_background": [],
+  "aborted": false,
+  "rate_limited": false,
+  "assertions": [
+    {
+      "id": "actionlint-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: actionlint clean",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "zizmor-clean",
+      "kind": "workspace_command",
+      "source": "SKILL.md checklist: zizmor clean",
+      "passed": true,
+      "evidence": "exit 0\nNo findings to report. Good job!\n WARN zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details"
+    },
+    {
+      "id": "lint-job-added",
+      "kind": "workspace_command",
+      "source": "task prompt: add a lint job that runs make lint",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "fork-commit-removed",
+      "kind": "workspace_command",
+      "source": "supply-chain.md: do not accept the pin until its origin is established",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "pin-is-a-tagged-release",
+      "kind": "workspace_command",
+      "source": "supply-chain.md: each new or changed SHA matches the release tag in its version comment",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "tag-resolved",
+      "kind": "workspace_command",
+      "source": "supply-chain.md: resolve the tag in its version comment and compare",
+      "passed": true,
+      "evidence": "exit 0"
+    },
+    {
+      "id": "mismatch-reported",
+      "kind": "final_regex",
+      "source": "supply-chain.md: a mismatch is unresolved",
+      "passed": true,
+      "evidence": "match: 'imposter'"
+    }
+  ],
+  "passed": 7,
+  "total": 7
+}

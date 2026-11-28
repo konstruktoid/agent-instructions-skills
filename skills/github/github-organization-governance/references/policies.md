@@ -97,7 +97,8 @@ gh api orgs/ORG/actions/permissions/workflow
   suits the risk appetite, and an explicit allowlist of everything else. Adding an action then
   becomes a policy change with a reviewer, which is the point.
 - Require actions to be pinned to a SHA where the policy supports it, which closes the gap between
-  an allowlisted repository and the code it serves today.
+  an allowlisted repository and the code it serves today. It does not check that the SHA belongs to
+  that repository rather than to a fork of it.
 - Set the default workflow token to read-only for the organization, so a repository has to grant
   permissions deliberately.
 - Require approval for workflows from all outside contributors rather than only first-time ones. A
