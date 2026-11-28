@@ -21,6 +21,11 @@ Before making a server-side HTTP request to a URL or host derived from user inpu
 
 - Validate the destination against an allowlist.
 - Block requests to internal, link-local, and loopback address ranges.
+- Before that check, reduce an IPv6 address that embeds an IPv4 address to the IPv4 form: use
+  `ipv4_mapped` for `::ffff:0:0/96`, and the low 32 bits for the NAT64 prefix `64:ff9b::/96`. On
+  Python 3.14.4, `ipaddress` reports `64:ff9b::a9fe:a9fe`, the NAT64 form of the metadata address
+  `169.254.169.254`, as global, so an `is_global` test alone allows it. Refuse the local-use NAT64
+  range `64:ff9b:1::/48` outright.
 - Resolve and check the address that will actually be connected to, and disable or bound
   redirect following, so a permitted hostname cannot redirect into the internal network.
 
