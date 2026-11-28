@@ -13,6 +13,7 @@ before it is trusted.
 - Reviewing an instruction file for injection
 - Reviewing hooks, commands, and scripts
 - Reviewing MCP server configuration
+- Running git in a repository-controlled workspace
 - Publishing and installation
 - The data-access statement
 - Checklist
@@ -120,6 +121,28 @@ endpoint, what data reaches it, and whether the definition pins a version or fol
 reference. A definition pointing at a host the project does not control is a dependency on that
 host's security, and it belongs in the data-access statement.
 
+## Running git in a repository-controlled workspace
+
+Git reads configuration from the repository it runs in, and some settings name a program to run.
+`core.fsmonitor` runs during `git status`. `diff.external` and a `textconv` driver run during diffs,
+and a `clean` or `process` filter can run during `git status` or `git diff`. With
+`log.showSignature` set, `git log` runs the configured signature verification program. A bare
+repository nested in the tree carries its own `config` outside any `.git/` directory, so a rule
+that protects only `.git/` misses it. The
+[OWASP AI Agent Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html)
+describes these paths and the related advisories.
+
+- Run git inside the agent's sandbox in a workspace that is untrusted or that the agent can write
+  to, including git that an editor or agent host runs automatically.
+- Do not pre-approve any git command as read-only there, including `status`, `diff`, `log`, and
+  `show`.
+- Require approval before an agent's file tools write to `.git/`, to a `.git` file, or to a
+  `HEAD`, `config`, `hooks/`, `objects/`, or `refs/` path anywhere in the workspace.
+- As defense in depth, pass `--no-pager`, `--no-optional-locks`, `-c core.fsmonitor=false`,
+  `-c safe.bareRepository=explicit`, and `-c log.showSignature=false`, and add `--no-ext-diff`
+  and `--no-textconv` to a diff. Filter drivers and hooks stay enabled, so these options do not
+  replace the sandbox.
+
 ## Publishing and installation
 
 - Release from a tag, and make the tag protected and immutable. Consumers pinning to a default
@@ -153,5 +176,6 @@ rather than categories.
       lowers scrutiny
 - [ ] Every session hook's commands read, with credential reads and outbound connections justified
 - [ ] Every MCP server definition names a controlled endpoint, with the data it receives stated
+- [ ] Git in an untrusted or agent-writable workspace runs sandboxed, with no pre-approved git command
 - [ ] A data-access statement exists, naming paths and endpoints rather than categories
 - [ ] Consumers are told which tag to pin to, and the tag controls make that instruction real
