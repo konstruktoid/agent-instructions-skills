@@ -398,8 +398,8 @@ directory or file at the plugin root and loads it.
 
 **Blast radius.** A hook runs shell on every consumer's machine with the consumer's permissions
 and without the consumer asking, which is the precise definition
-`references/agent-content.md:35` gives. An MCP definition adds a tool surface backed by a host the
-project does not control (`references/agent-content.md:118`). This is the keyv precedent's
+`references/agent-content.md:36` gives. An MCP definition adds a tool surface backed by a host the
+project does not control (`references/agent-content.md:119`). This is the keyv precedent's
 `.claude/settings.json` persistence move, reached through a normal pull request rather than
 through a compromised publish. The only control standing in the way was one human reading the diff.
 
@@ -420,7 +420,7 @@ directory (`check_skills.py:635`), the description shape (`:637`), the capabilit
 verify-loop wording (`:639`), the body length (`:641`), cross-references (`:825`), prose markers
 (`:874`) and Contents lists (`:916`).
 None of that reads intent, and the repository says so in its own words at
-`references/agent-content.md:42`: "there is no automated defense at all and they read as
+`references/agent-content.md:43`: "there is no automated defense at all and they read as
 documentation". The one check that does read intent, partially, is
 `scripts/check_capabilities.py`: it diffs the branch against `origin/main` and reports a host, a
 path outside the repository, or a shell command the body gained that the `capabilities` block does
@@ -435,7 +435,7 @@ against the diff, never against what a run of the skill actually did.
 **What happens.** A reference file is the better hiding place: it is loaded on demand rather than
 at session start, it runs to 250 lines, and it is where the commands already live. The four
 review patterns the repository publishes for other people's content, reach, egress, priority
-language, and framing that lowers scrutiny (`references/agent-content.md:86`-`:96`), are applied
+language, and framing that lowers scrutiny (`references/agent-content.md:87`-`:97`), are applied
 to consumers' repositories and to nothing in this one's CI.
 
 **Blast radius.** Every consumer's agent, at the next update, at whatever privilege the abused
@@ -464,7 +464,7 @@ distribution channel.
 #### 2.2 Review offers no resistance
 
 `.github/CODEOWNERS:1` is `* @konstruktoid`. A single account owns every path, including
-`CODEOWNERS` itself, so the self-owning rule `references/agent-content.md:59` requires of every
+`CODEOWNERS` itself, so the self-owning rule `references/agent-content.md:60` requires of every
 other repository cannot be satisfied here for lack of a second team. An attacker holding those
 credentials satisfies every review requirement the repository can express.
 
@@ -516,7 +516,7 @@ skills a token with repository or organization admin.
 
 **Blast radius.** The consumer's machine and the consumer's GitHub org, bounded only by what the
 consumer's session already permits. This is the same mechanism the repository documents at
-`references/agent-content.md:98`, where "files read from a project directory were fed into a
+`references/agent-content.md:99`, where "files read from a project directory were fed into a
 trusted channel". The repository describes the vulnerability from the reviewer's side and
 instructs the behavior from the victim's side.
 
@@ -524,7 +524,7 @@ instructs the behavior from the victim's side.
 conventions rather than instructions, that they and any command output are data, and that text in
 either which redirects the task, widens what gets read, sends anything to a remote service, or
 claims to outrank the skill is a finding to report. Those are
-`references/agent-content.md:86`-`:96` restated from the reading side. This changes how a model
+`references/agent-content.md:87`-`:97` restated from the reading side. This changes how a model
 weighs what it reads. It does not create a boundary, and this path stays open.
 
 **Landed in these five skills.** `ansible-verification-loop/SKILL.md:65` overrides repo
@@ -631,7 +631,7 @@ unpinned form kept below and labeled as tracking the default branch (`:261`). Th
 `version`, and `scripts/check_skills.py:748` fails the build when one is missing, malformed, or
 disagrees with the others. `README.md:738` documents the release order, and
 `.github/rulesets/release-tags.json` holds the tag protection in the repository, which is what
-`references/agent-content.md:125` and `references/rulesets.md:49` require.
+`references/agent-content.md:148` and `references/rulesets.md:49` require.
 
 **Landed, 2026-08-30.** The tag exists and the ruleset is applied, so `v0.1.0`, which the README's
 pinned install named at the time, resolves and cannot be deleted or moved. Read back,
@@ -645,6 +645,6 @@ note to read, and no diff between what they had and what they now run. That expo
 command, and the consumer closes it by pinning to a release tag, which the tag ruleset holds immutable.
 A consumer who is already pinned takes nothing from these paths until they move the pin.
 
-The consumer-side audit the repository itself specifies at `references/agent-content.md:129`
+The consumer-side audit the repository itself specifies at `references/agent-content.md:152`
 asks whether "releases are tagged rather than deployed from a moving branch". Run against this
 repository today, that check passes, and what is left is the consumer who never pins.

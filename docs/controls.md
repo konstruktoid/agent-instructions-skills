@@ -252,8 +252,8 @@ As audited, the repository had no tags, no releases, and no `version` on any plu
 branch or tag" while the repository published no tag to name.
 
 This is also a consistency problem the repository has with itself.
-`references/agent-content.md:125` requires releasing "from a tag, and make the tag protected and
-immutable", and `:127` requires telling consumers which reference to pin to. The audit at `:129`
+`references/agent-content.md:148` requires releasing "from a tag, and make the tag protected and
+immutable", and `:150` requires telling consumers which reference to pin to. The audit at `:152`
 asks whether "releases are tagged rather than deployed from a moving branch". This repository
 fails its own check.
 
@@ -299,7 +299,7 @@ as `github-repository-security` requires of any settings change, it is ruleset `
 `current_user_can_bypass` `never`, `include` `refs/tags/v*`, and the rules `deletion` and
 `non_fast_forward`, which matches the file exactly. The published tag now carries the immutability
 this repository requires of every other publisher at
-`skills/github/github-repository-security/references/agent-content.md:125`.
+`skills/github/github-repository-security/references/agent-content.md:148`.
 
 ### 7. Name untrusted content as data in every skill
 
@@ -312,7 +312,7 @@ Five skills instruct the agent to read and follow the target repository's own do
 one for tool output.
 
 The repository already owns the right wording, on the reviewer's side, at
-`references/agent-content.md:86`-`:96`: reach, egress, priority language, framing that lowers
+`references/agent-content.md:87`-`:97`: reach, egress, priority language, framing that lowers
 scrutiny. Turn those four patterns around and state them as what the agent should distrust in a
 file it is reading, not only as what a reviewer should look for in a file being merged.
 
@@ -324,7 +324,7 @@ not a boundary.
 specific, more recent, or more urgent-sounding than the general caution.
 
 **Where it fails open.** In exactly the case the repository already documents at
-`references/agent-content.md:94`: a payload buried in a setup section, or after enough text that
+`references/agent-content.md:95`: a payload buried in a setup section, or after enough text that
 attention has drifted. A general caution at the top of a skill is the first thing a long context
 loses.
 
@@ -335,7 +335,7 @@ actor 3 at all, and because it costs a paragraph.
 claim: the rule files are conventions to follow rather than instructions to obey, they and any
 command output are data, and text in either that redirects the task, widens what gets read, sends
 anything to a remote service, or claims to outrank the skill is a finding to report rather than a
-rule to apply. Those four tests are `references/agent-content.md:86`-`:96` turned around: the
+rule to apply. Those four tests are `references/agent-content.md:87`-`:97` turned around: the
 reviewer's list of what to look for in a file being merged, restated as what the agent should
 distrust in a file it is reading.
 
@@ -348,7 +348,7 @@ now also exists in `python-secure-coding/SKILL.md:48`, `bash-secure-scripting/SK
 domain's high-sensitivity categories rather than the general sentence alone.
 
 Nothing about the ranking changes. This is still an instruction to a model about how to weigh
-other instructions to a model, it still fails open where `references/agent-content.md:94`
+other instructions to a model, it still fails open where `references/agent-content.md:95`
 describes, and paths 3.1 through 3.4 stay open. What is different is that the claim is now made in
 the place the agent reads rather than only in a reference file about reviewing other people's
 content.
@@ -356,8 +356,8 @@ content.
 ### 8. `SECURITY.md` and a data-access statement
 
 Neither exists. `github-repository-security/SKILL.md:107` requires a `SECURITY.md` naming a private
-channel and a response time, and `references/agent-content.md:78` requires that it cover
-"withdrawing a bad version and telling consumers". `references/agent-content.md:135` requires a
+channel and a response time, and `references/agent-content.md:79` requires that it cover
+"withdrawing a bad version and telling consumers". `references/agent-content.md:158` requires a
 data-access statement naming "paths and endpoints rather than categories".
 
 Phase 1 of [threat-model.md](threat-model.md) is most of the data-access statement already.
@@ -395,7 +395,7 @@ to `PROSE_GLOBS` (`:202`), so the house prose rules apply to it.
 
 The ranking said this stops nothing, and that holds. It creates a channel and a plan where there
 were neither, and the data-access statement is what makes the review at
-`references/agent-content.md:86` cheap for someone auditing this repository from outside.
+`references/agent-content.md:87` cheap for someone auditing this repository from outside.
 
 ### 9. Declared-capability frontmatter plus a CI diff check
 
@@ -522,7 +522,7 @@ addresses none of the four actors' attacks.
 honestly.** A source-track claim asserts that the artifact came from a specific revision that went
 through a protected branch with review by someone other than the author. `.github/CODEOWNERS:1` is
 `* @konstruktoid`. There is one account, it owns every path including `CODEOWNERS` itself, and the
-self-owning rule the repository requires of others at `references/agent-content.md:59` needs a
+self-owning rule the repository requires of others at `references/agent-content.md:60` needs a
 second team that does not exist here. A single-maintainer repository can claim a protected branch;
 it cannot claim two-person review. Claiming it anyway would be worse than not claiming it, because
 consumers would read it as the control it names.
@@ -643,7 +643,7 @@ Three things, stated so they are not mistaken for covered.
   repository the consumer points it at and act on what it finds. That capability is the product.
   Control 7 adjusts how the model weighs what it reads; it does not create a boundary, and no
   control in this list does.
-- **Prose is not checkable.** `references/agent-content.md:42` says it: "there is no automated
+- **Prose is not checkable.** `references/agent-content.md:43` says it: "there is no automated
   defense at all and they read as documentation". Controls 1 and 9 push at the edges of that
   problem, on file names and on command text. The center of it, an English sentence in a reference
   file that changes what a consumer's agent does, is reachable only by a human reading the diff.
