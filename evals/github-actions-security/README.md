@@ -42,8 +42,9 @@ rejected the pin on 2026-11-27.
 
 ## What each stamp covers
 
-`results/2026-11-26.md` is the latest measurement of `gas-01` to `gas-07`, three runs per condition
-with trigger probes, a net gain of 18 assertions. `results/2026-11-27.md` measured only
+`results/2026-11-28.md` is the latest measurement of `gas-01` to `gas-07`, three runs per condition
+with trigger probes, a net gain of 18 assertions. It replaced `results/2026-11-26.md`, which the
+gas-08 change to `tasks.json` and `assertions.json` made stale. `results/2026-11-27.md` measured only
 `gas-08-imposter-pin`, which scored full marks in both conditions. Earlier stamps under `results/`
 cover earlier revisions of the skill and the suite.
 
