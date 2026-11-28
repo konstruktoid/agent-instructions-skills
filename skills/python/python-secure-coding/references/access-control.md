@@ -26,6 +26,9 @@ Before making a server-side HTTP request to a URL or host derived from user inpu
   Python 3.14.4, `ipaddress` reports `64:ff9b::a9fe:a9fe`, the NAT64 form of the metadata address
   `169.254.169.254`, as global, so an `is_global` test alone allows it. Refuse the local-use NAT64
   range `64:ff9b:1::/48` outright.
+- A network can also run NAT64 under its own prefix (RFC 6052). Apply the same reduction to each
+  prefix the deployment configures, using the RFC's address layout for that prefix length, or refuse
+  those prefixes.
 - Resolve and check the address that will actually be connected to, and disable or bound
   redirect following, so a permitted hostname cannot redirect into the internal network.
 
